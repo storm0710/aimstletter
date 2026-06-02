@@ -25,11 +25,33 @@ jobs:
 
       - name: Generate GitHub issue body
         env:
+          PYTHONUTF8: "1"
           AZURE_OPENAI_ENDPOINT: ${{ vars.AZURE_OPENAI_ENDPOINT }}
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_DEPLOYMENT: ${{ vars.AZURE_OPENAI_DEPLOYMENT || 'gpt-5-mini' }}
           DIGEST_CHANNEL_LABEL: AI마스터
         run: aimstletter --dry-run --output-format github > digest.md
+
+      - name: Validate GitHub issue body format
+        run: |
+          echo "Generated digest preview:"
+          sed -n '1,80p' digest.md
+
+          python - <<'PY'
+          from pathlib import Path
+
+          text = Path("digest.md").read_text(encoding="utf-8")
+          required = [
+              "# AI마스터 주간 AI 업데이트",
+              "## 1.",
+              "- **유형:**",
+              "- **비즈니스 관점:**",
+              "## 이번 주 토론 제안",
+          ]
+          missing = [marker for marker in required if marker not in text]
+          if missing:
+              raise SystemExit(f"Digest Markdown format check failed. Missing: {missing}")
+          PY
 
       - name: Create weekly digest issue
         env:
