@@ -23,6 +23,12 @@ jobs:
       - name: Install package
         run: pip install -e .
 
+      - name: Show workflow commit
+        run: |
+          echo "GITHUB_SHA=${GITHUB_SHA}"
+          git rev-parse HEAD
+          git log --oneline -1
+
       - name: Generate GitHub issue body
         env:
           PYTHONUTF8: "1"
