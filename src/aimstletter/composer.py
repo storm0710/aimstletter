@@ -26,7 +26,7 @@ def compose_digest(
         return fallback
 
     try:
-        return _compose_with_openai(
+        generated = _compose_with_openai(
             items=items,
             channel_label=channel_label,
             openai_api_key=openai_api_key,
@@ -36,6 +36,9 @@ def compose_digest(
             azure_openai_deployment=azure_openai_deployment,
             output_format=output_format,
         )
+        if output_format == "github" and not _looks_like_github_digest(generated):
+            return fallback
+        return generated
     except Exception as exc:  # noqa: BLE001
         return f"{fallback}\n\n_참고: OpenAI 요약 생성 실패로 기본 요약을 사용했습니다: {exc}_"
 
@@ -166,6 +169,17 @@ def _format_instructions(output_format: str) -> str:
             "structure with clear headings, short paragraphs, and scannable bullets."
         )
     return f"{base} Return Slack mrkdwn only."
+
+
+def _looks_like_github_digest(text: str) -> bool:
+    required_markers = (
+        "# AI마스터 주간 AI 업데이트",
+        "## 1.",
+        "- **유형:**",
+        "- **비즈니스 관점:**",
+        "## 이번 주 토론 제안",
+    )
+    return all(marker in text for marker in required_markers)
 
 
 def _format_prompt(channel_label: str, output_format: str, source_block: str) -> str:
