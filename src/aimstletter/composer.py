@@ -134,11 +134,20 @@ def _compose_github_markdown(
         f"# {channel_label} 주간 AI 업데이트",
         "",
         f"- 기준일: {today} KST",
-        "- 목적: AI마스터 과정에서 AI로 비즈니스 모델을 개발할 때 참고할 만한 최신 동향과 논문 공유",
-        "- 활용법: 각 항목을 고객 문제, 반복 업무 자동화, 수익 모델 관점에서 토론해보면 좋습니다.",
+        "- 목적: DBA, 네트워크, 서버 운영 직군 멘티가 AI를 업무 스킬과 비즈니스 모델로 연결할 수 있도록 최신 동향과 논문 공유",
+        "- 구성: 상위 5개는 인프라/운영 직군 관련 AI 스킬, 하위 5개는 기타 AI 동향입니다.",
+        "",
+        "## 상위 5개: DBA/네트워크/서버 직군 관련 AI 스킬",
         "",
     ]
     for index, item in enumerate(items, start=1):
+        if index == 6:
+            lines.extend(
+                [
+                    "## 하위 5개: 기타 AI 동향 및 비즈니스 모델 참고",
+                    "",
+                ]
+            )
         structured = structured_items[index - 1] if structured_items and index <= len(structured_items) else {}
         summary = item.summary[:360].rstrip()
         if len(item.summary) > 360:
@@ -214,11 +223,15 @@ def _summarize_items_for_github(
             "Each array item must contain exactly these string keys: title, core, "
             "business_angle, mentoring_question. Write all values in Korean except product "
             "names where English is clearer. The title value must be a natural Korean title, "
-            "not the original English paper or article title. Do not invent facts."
+            "not the original English paper or article title. Prefer DBA, database, network, "
+            "server, cloud infrastructure, security operations, monitoring, incident response, "
+            "and automation angles when they are supported by the source. Do not invent facts."
         ),
         input=(
             "Summarize these AI trend and paper items for assistant mentors in an AI business "
-            "model development course. Keep each field concise.\n\n"
+            "model development course. The mentees are likely DBA, network, and server "
+            "operations practitioners, so connect each item to practical infra work when possible. "
+            "Keep each field concise.\n\n"
             f"{source_block}"
         ),
     )
@@ -318,8 +331,8 @@ def _format_prompt(channel_label: str, output_format: str, source_block: str) ->
             "Use exactly this structure:\n"
             f"# {channel_label} 주간 AI 업데이트\n\n"
             "- 기준일: use today's KST date\n"
-            "- 목적: AI마스터 과정에서 AI로 비즈니스 모델을 개발할 때 참고할 만한 최신 동향과 논문 공유\n"
-            "- 활용법: 각 항목을 고객 문제, 반복 업무 자동화, 수익 모델 관점에서 토론하도록 안내\n\n"
+            "- 목적: DBA, 네트워크, 서버 운영 직군 멘티가 AI를 업무 스킬과 비즈니스 모델로 연결할 수 있도록 최신 동향과 논문 공유\n"
+            "- 구성: 상위 5개는 인프라/운영 직군 관련 AI 스킬, 하위 5개는 기타 AI 동향\n\n"
             "For each source item, create a section like:\n"
             "## 1. Korean title or translated title\n\n"
             "- **유형:** 논문 or 동향\n"

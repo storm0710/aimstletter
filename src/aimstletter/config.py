@@ -24,7 +24,7 @@ class Settings:
     azure_openai_api_key: str | None = None
     azure_openai_deployment: str = "gpt-5-mini"
     lookback_days: int = 7
-    max_items: int = 8
+    max_items: int = 10
     channel_label: str = "AI마스터"
     feeds: tuple[FeedSource, ...] = field(default_factory=tuple)
 
@@ -53,7 +53,7 @@ class Settings:
                 "gpt-5-mini",
             ),
             lookback_days=int(os.getenv("DIGEST_LOOKBACK_DAYS", "7")),
-            max_items=int(os.getenv("DIGEST_MAX_ITEMS", "8")),
+            max_items=int(os.getenv("DIGEST_MAX_ITEMS", "10")),
             channel_label=_setting(
                 "DIGEST_CHANNEL_LABEL",
                 "digest_channel_label",
@@ -89,11 +89,48 @@ def _setting(
 
 DEFAULT_FEEDS = (
     FeedSource(
+        name="arXiv Database AI",
+        kind="paper",
+        url=(
+            "https://export.arxiv.org/api/query?"
+            "search_query=cat:cs.DB+AND+%28all:AI+OR+all:LLM+OR+all:agent%29"
+            "&sortBy=submittedDate&sortOrder=descending&max_results=15"
+        ),
+    ),
+    FeedSource(
+        name="arXiv Network AI",
+        kind="paper",
+        url=(
+            "https://export.arxiv.org/api/query?"
+            "search_query=cat:cs.NI+AND+%28all:AI+OR+all:LLM+OR+all:agent%29"
+            "&sortBy=submittedDate&sortOrder=descending&max_results=15"
+        ),
+    ),
+    FeedSource(
+        name="arXiv Distributed Systems AI",
+        kind="paper",
+        url=(
+            "https://export.arxiv.org/api/query?"
+            "search_query=cat:cs.DC+AND+%28all:AI+OR+all:LLM+OR+all:agent%29"
+            "&sortBy=submittedDate&sortOrder=descending&max_results=15"
+        ),
+    ),
+    FeedSource(
+        name="arXiv Security AI",
+        kind="paper",
+        url=(
+            "https://export.arxiv.org/api/query?"
+            "search_query=cat:cs.CR+AND+%28all:AI+OR+all:LLM+OR+all:agent%29"
+            "&sortBy=submittedDate&sortOrder=descending&max_results=15"
+        ),
+    ),
+    FeedSource(
         name="arXiv AI",
         kind="paper",
         url=(
             "https://export.arxiv.org/api/query?"
             "search_query=cat:cs.AI+OR+cat:cs.CL+OR+cat:cs.LG"
+            "+OR+cat:cs.DB+OR+cat:cs.DC+OR+cat:cs.NI+OR+cat:cs.CR"
             "&sortBy=submittedDate&sortOrder=descending&max_results=25"
         ),
     ),
@@ -123,4 +160,48 @@ SIGNAL_KEYWORDS = {
     "customer": 2,
     "market": 2,
     "paper": 1,
+}
+
+INFRA_KEYWORDS = {
+    "database": 6,
+    "databases": 6,
+    "sql": 6,
+    "query": 5,
+    "queries": 5,
+    "index": 4,
+    "transaction": 4,
+    "replication": 5,
+    "backup": 5,
+    "recovery": 5,
+    "data pipeline": 5,
+    "data pipelines": 5,
+    "observability": 6,
+    "monitoring": 6,
+    "incident": 6,
+    "root cause": 5,
+    "anomaly": 5,
+    "anomalies": 5,
+    "log": 4,
+    "logs": 4,
+    "server": 6,
+    "servers": 6,
+    "linux": 5,
+    "kubernetes": 6,
+    "container": 5,
+    "containers": 5,
+    "cloud": 4,
+    "network": 6,
+    "networks": 6,
+    "networking": 6,
+    "routing": 5,
+    "traffic": 5,
+    "latency": 5,
+    "throughput": 4,
+    "security": 4,
+    "access control": 5,
+    "configuration": 4,
+    "infrastructure": 6,
+    "devops": 6,
+    "sre": 6,
+    "operations": 5,
 }

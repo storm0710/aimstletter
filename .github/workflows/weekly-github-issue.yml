@@ -49,6 +49,8 @@ jobs:
           text = Path("digest.md").read_text(encoding="utf-8")
           required = [
               "# AI마스터 주간 AI 업데이트",
+              "## 상위 5개: DBA/네트워크/서버 직군 관련 AI 스킬",
+              "## 하위 5개: 기타 AI 동향 및 비즈니스 모델 참고",
               "## 1.",
               "- **유형:**",
               "- **비즈니스 관점:**",
