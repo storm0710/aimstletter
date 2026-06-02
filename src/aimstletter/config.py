@@ -26,6 +26,9 @@ class Settings:
     lookback_days: int = 7
     max_items: int = 10
     channel_label: str = "AI마스터"
+    naver_blog_id: str | None = None
+    naver_blog_username: str | None = None
+    naver_blog_api_password: str | None = None
     feeds: tuple[FeedSource, ...] = field(default_factory=tuple)
 
     @classmethod
@@ -59,6 +62,17 @@ class Settings:
                 "digest_channel_label",
                 secrets,
                 "AI마스터",
+            ),
+            naver_blog_id=_setting("NAVER_BLOG_ID", "naver_blog_id", secrets),
+            naver_blog_username=_setting(
+                "NAVER_BLOG_USERNAME",
+                "naver_blog_username",
+                secrets,
+            ),
+            naver_blog_api_password=_setting(
+                "NAVER_BLOG_API_PASSWORD",
+                "naver_blog_api_password",
+                secrets,
             ),
             feeds=DEFAULT_FEEDS,
         )

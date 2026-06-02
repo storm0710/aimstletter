@@ -70,3 +70,19 @@ jobs:
             --repo "${{ github.repository }}" \
             --title "$title" \
             --body-file digest.md
+
+      - name: Publish Naver Blog post
+        env:
+          NAVER_BLOG_ID: ${{ secrets.NAVER_BLOG_ID }}
+          NAVER_BLOG_USERNAME: ${{ secrets.NAVER_BLOG_USERNAME }}
+          NAVER_BLOG_API_PASSWORD: ${{ secrets.NAVER_BLOG_API_PASSWORD }}
+        run: |
+          if [ -z "$NAVER_BLOG_ID" ] || [ -z "$NAVER_BLOG_USERNAME" ] || [ -z "$NAVER_BLOG_API_PASSWORD" ]; then
+            echo "Naver Blog secrets are not configured. Skipping Naver Blog publishing."
+            exit 0
+          fi
+
+          title="AI마스터 주간 AI 업데이트 - $(TZ=Asia/Seoul date +'%Y-%m-%d')"
+          python -m aimstletter.naver_blog \
+            --title "$title" \
+            --body-file digest.md
