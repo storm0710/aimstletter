@@ -1,0 +1,29 @@
+name: Weekly AI digest
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 09:00 every Wednesday in Asia/Seoul.
+    - cron: "0 0 * * 3"
+
+jobs:
+  post-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        run: pip install -e .
+
+      - name: Post digest to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          AZURE_OPENAI_ENDPOINT: ${{ vars.AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ vars.AZURE_OPENAI_DEPLOYMENT || 'gpt-5-mini' }}
+          DIGEST_CHANNEL_LABEL: AI마스터
+        run: aimstletter
