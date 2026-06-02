@@ -1,0 +1,30 @@
+[project]
+name = "aimstletter"
+version = "0.1.0"
+description = "Weekly AI trend and paper digest for Slack."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "feedparser>=6.0.11",
+    "openai>=1.82.0",
+    "python-dateutil>=2.9.0.post0",
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "ruff>=0.11.0",
+]
+
+[project.scripts]
+aimstletter = "aimstletter.cli:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
