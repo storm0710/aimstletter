@@ -158,7 +158,7 @@ def _compose_github_markdown(
             [
                 f"## {index}. {title}",
                 "",
-                f"- **유형:** {hook}",
+                f"- **유형:** {hook} ({item.title})",
                 f"- **출처:** {item.source}",
                 f"- **핵심:** {core}",
                 f"- **비즈니스 관점:** {business_angle}",
@@ -213,7 +213,8 @@ def _summarize_items_for_github(
             "Return only a JSON array. Do not include Markdown. Do not include a preamble. "
             "Each array item must contain exactly these string keys: title, core, "
             "business_angle, mentoring_question. Write all values in Korean except product "
-            "names or paper titles where English is clearer. Do not invent facts."
+            "names where English is clearer. The title value must be a natural Korean title, "
+            "not the original English paper or article title. Do not invent facts."
         ),
         input=(
             "Summarize these AI trend and paper items for assistant mentors in an AI business "
