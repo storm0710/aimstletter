@@ -35,10 +35,11 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     assert "AI Master Times" in html
     assert "현장 AI 스킬 · 상위 5개" in html
     assert "Claude와 AI 도구 업데이트" in html
-    assert "https://cursor.com/changelog" in html
     assert "최신 업데이트" in html
     assert "키포인트" in html
     assert "tag" in html
+    assert "lead-image" not in html
+    assert "watch-links" not in html
 
 
 def test_safe_korean_field_rejects_untranslated_article_text() -> None:

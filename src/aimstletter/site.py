@@ -47,8 +47,6 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
     infra_items = _latest_first(ai_items[:5])
     other_items = _latest_first(ai_items[5:10])
     latest_tool_items = _latest_first(tool_items[:10])
-    hero = infra_items[0] if infra_items else None
-    tool_lead = latest_tool_items[0] if latest_tool_items else None
 
     return f"""<!doctype html>
 <html lang="ko">
@@ -108,23 +106,6 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
       color: var(--muted);
       font: 16px/1.6 Arial, "Noto Sans KR", sans-serif;
     }}
-    .hero-grid {{
-      display: grid;
-      grid-template-columns: minmax(0, 1.45fr) minmax(280px, .8fr);
-      gap: 24px;
-      border-bottom: 1px solid var(--rule);
-      padding: 24px 0;
-    }}
-    .lead-image {{
-      min-height: 240px;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.34)),
-        url("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1400&q=80");
-      background-size: cover;
-      background-position: center;
-      border: 1px solid var(--rule);
-      margin-bottom: 14px;
-    }}
     .kicker {{
       color: var(--accent);
       font: 800 12px/1.4 Arial, "Noto Sans KR", sans-serif;
@@ -132,32 +113,17 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
       text-transform: uppercase;
     }}
     h2, h3 {{ margin: 0; letter-spacing: 0; }}
-    .lead-title {{
-      font-size: clamp(30px, 5vw, 54px);
-      line-height: 1.02;
-      margin-top: 6px;
-    }}
     .summary {{
       color: #282828;
       font-size: 17px;
       line-height: 1.68;
       margin: 12px 0 0;
     }}
-    .brief {{
-      border-bottom: 1px solid var(--line);
-      padding: 0 0 14px;
-      margin-bottom: 14px;
-    }}
-    .brief h3 {{
-      font-size: 23px;
-      line-height: 1.18;
-      margin: 5px 0 8px;
-    }}
     .newspaper {{
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(320px, .72fr);
       gap: 24px;
-      padding-top: 22px;
+      padding-top: 28px;
     }}
     .column {{
       min-width: 0;
@@ -231,19 +197,6 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
       color: #333333;
       font: 14px/1.58 Arial, "Noto Sans KR", sans-serif;
     }}
-    .watch-links {{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 18px;
-      font: 700 13px/1.35 Arial, "Noto Sans KR", sans-serif;
-    }}
-    .watch-links a {{
-      border: 1px solid var(--rule);
-      padding: 9px 10px;
-      text-decoration: none;
-      background: #fffaf0;
-    }}
     footer {{
       border-top: 3px double var(--rule);
       margin-top: 28px;
@@ -252,7 +205,7 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
       font: 13px/1.5 Arial, "Noto Sans KR", sans-serif;
     }}
     @media (max-width: 840px) {{
-      .hero-grid, .newspaper {{
+      .newspaper {{
         grid-template-columns: 1fr;
       }}
       .column + .column {{
@@ -261,9 +214,6 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
       }}
       .topline {{
         flex-direction: column;
-      }}
-      .watch-links {{
-        grid-template-columns: 1fr;
       }}
     }}
   </style>
@@ -278,24 +228,6 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
       <h1>AI Master Times</h1>
       <p>데이터베이스 관리자, 네트워크, 서버 운영 직군이 AI를 업무 스킬과 비즈니스 모델로 연결할 수 있도록 매주 선별한 연구와 도구 업데이트입니다.</p>
     </header>
-
-    <section class="hero-grid" aria-label="이번 주 주요 기사">
-      <article>
-        <div class="lead-image" role="img" aria-label="데이터센터 서버 랙"></div>
-        <div class="kicker">이번 주 머리기사 · 인프라 AI</div>
-        {_render_lead(hero)}
-      </article>
-      <aside>
-        <div class="kicker">도구 업데이트</div>
-        {_render_tool_lead(tool_lead)}
-        <nav class="watch-links" aria-label="AI 도구 공식 업데이트">
-          <a href="https://www.anthropic.com/news">Claude</a>
-          <a href="https://openai.com/news/">OpenAI</a>
-          <a href="https://github.blog/changelog/label/copilot/">GitHub Copilot</a>
-          <a href="https://cursor.com/changelog">Cursor</a>
-        </nav>
-      </aside>
-    </section>
 
     <section class="newspaper" aria-label="주간 업데이트">
       <div class="column">
@@ -318,32 +250,6 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
 </body>
 </html>
 """
-
-
-def _render_lead(item: SiteItem | None) -> str:
-    if not item:
-        return '<h2 class="lead-title">이번 주 수집된 주요 항목이 없습니다.</h2>'
-    return (
-        f'<h2 class="lead-title"><a href="{escape(item.url)}">{escape(item.title)}</a></h2>'
-        f'<p class="summary">{escape(_clip(item.summary, 420))}</p>'
-        f"{_render_key_points(item)}"
-        f"{_render_tags(item)}"
-        f'<div class="meta">{escape(item.source)} · {_format_date(item.published)}</div>'
-    )
-
-
-def _render_tool_lead(item: SiteItem | None) -> str:
-    if not item:
-        return '<div class="brief"><h3>인공지능 도구 업데이트를 기다리는 중입니다.</h3></div>'
-    return (
-        '<div class="brief">'
-        f'<h3><a href="{escape(item.url)}">{escape(item.title)}</a></h3>'
-        f'<p>{escape(_clip(item.summary, 220))}</p>'
-        f"{_render_key_points(item)}"
-        f"{_render_tags(item)}"
-        f'<div class="meta">{escape(item.source)} · {_format_date(item.published)}</div>'
-        "</div>"
-    )
 
 
 def _render_articles(items: list[SiteItem]) -> str:
