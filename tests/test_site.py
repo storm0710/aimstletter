@@ -3,7 +3,13 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from aimstletter.fetchers import DigestItem
-from aimstletter.site import _fallback_korean_item, _safe_korean_field, render_homepage
+from aimstletter.site import (
+    SiteItem,
+    _fallback_korean_item,
+    _safe_korean_field,
+    _safe_tags,
+    render_homepage,
+)
 
 
 def test_render_homepage_contains_ai_and_tool_columns() -> None:
@@ -26,11 +32,13 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
 
     html = render_homepage([_fallback_korean_item(ai_item)] * 10, [_fallback_korean_item(tool_item)])
 
-    assert "인공지능 마스터 타임즈" in html
-    assert "현장 인공지능 스킬 · 상위 5개" in html
-    assert "클로드와 인공지능 도구 업데이트" in html
+    assert "AI Master Times" in html
+    assert "현장 AI 스킬 · 상위 5개" in html
+    assert "Claude와 AI 도구 업데이트" in html
     assert "https://cursor.com/changelog" in html
     assert "최신 업데이트" in html
+    assert "키포인트" in html
+    assert "tag" in html
 
 
 def test_safe_korean_field_rejects_untranslated_article_text() -> None:
@@ -49,3 +57,49 @@ def test_safe_korean_field_rejects_untranslated_article_text() -> None:
         )
         == "OpenAI, 가트너 엔터프라이즈 코딩 에이전트 분야 리더로 선정"
     )
+
+
+def test_render_homepage_orders_each_section_newest_first() -> None:
+    old_item = SiteItem(
+        title="오래된 항목",
+        url="https://example.com/old",
+        source="OpenAI 소식",
+        kind="동향",
+        published=datetime(2026, 6, 1, tzinfo=UTC),
+        summary="오래된 요약입니다.",
+        key_points=("기존 변경 사항입니다.",),
+        tags=("OpenAI",),
+    )
+    new_item = SiteItem(
+        title="최신 항목",
+        url="https://example.com/new",
+        source="OpenAI 소식",
+        kind="동향",
+        published=datetime(2026, 6, 5, tzinfo=UTC),
+        summary="최신 요약입니다.",
+        key_points=("최근 변경 사항입니다.",),
+        tags=("OpenAI", "AI 에이전트"),
+    )
+
+    html = render_homepage([old_item, new_item, old_item, old_item, old_item], [old_item, new_item])
+
+    assert html.index("최신 항목") < html.index("오래된 항목")
+    assert '<span class="tag">AI 에이전트</span>' in html
+
+
+def test_safe_tags_keeps_product_names_and_deduplicates() -> None:
+    original = DigestItem(
+        title="OpenAI and GitHub Copilot update",
+        url="https://example.com/tool",
+        source="OpenAI News",
+        kind="tool",
+        published=datetime(2026, 6, 5, tzinfo=UTC),
+        summary="Tool update.",
+    )
+
+    tags = _safe_tags(
+        {"tags": ["오픈에이아이", "AI 에이전트", "AI 에이전트", "깃허브 코파일럿"]},
+        original,
+    )
+
+    assert tags == ("OpenAI", "AI 에이전트", "GitHub Copilot")
