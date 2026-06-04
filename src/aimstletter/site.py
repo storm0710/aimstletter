@@ -367,8 +367,9 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             model=model,
             instructions=(
                 "Return only a JSON array. Each item must contain title and summary. "
-                "Write every visible expression in Korean. Product names must use Korean "
-                "transliterations such as 클로드, 오픈에이아이, 깃허브 코파일럿, 커서. Do not invent facts."
+                "Titles and summaries must be Korean sentences. Product names such as OpenAI, "
+                "Claude, Cursor, GitHub Copilot, Codex, and Gartner may stay in English, but "
+                "the rest of each title and summary must be Korean. Do not invent facts."
             ),
             input=(
                 f"Translate and rewrite these {context} items for a Korean newsletter site. "
@@ -379,6 +380,8 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             ),
         )
         localized = _parse_json_array(response.output_text)
+        if _has_untranslated_items(localized):
+            localized = _repair_korean_translation(client, model, source_block, context)
     except Exception:  # noqa: BLE001
         return [_fallback_korean_item(item) for item in items]
 
@@ -388,13 +391,66 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
     return [
         replace(
             item,
-            title=_clean_visible_korean(localized_item.get("title") or item.title),
-            summary=_clean_visible_korean(localized_item.get("summary") or item.summary),
+            title=_safe_korean_field(
+                localized_item.get("title"),
+                fallback=f"{_korean_source_name(item.source)}에서 확인한 최신 업데이트",
+            ),
+            summary=_safe_korean_field(
+                localized_item.get("summary"),
+                fallback="원문 요약을 한국어로 변환하지 못해 출처 링크에서 세부 내용을 확인해 주세요.",
+            ),
             source=_korean_source_name(item.source),
             kind=_korean_kind_name(item.kind),
         )
         for item, localized_item in zip(items, localized, strict=True)
     ]
+
+
+def _repair_korean_translation(
+    client: object,
+    model: str,
+    source_block: str,
+    context: str,
+) -> list[dict[str, str]]:
+    response = client.responses.create(
+        model=model,
+        instructions=(
+            "Return only a JSON array. Each item must contain title and summary. "
+            "Translate English article titles and summaries into Korean. Product names may "
+            "remain in English, but English clauses or English explanatory sentences are not allowed."
+        ),
+        input=(
+            f"The previous Korean localization for these {context} items contained untranslated "
+            "English. Rewrite them again. Examples: "
+            "'OpenAI named a Leader in enterprise coding agents by Gartner' should become "
+            "'OpenAI, 가트너 엔터프라이즈 코딩 에이전트 분야 리더로 선정'. "
+            "'OpenAI is named a leader...' should become a Korean sentence.\n\n"
+            f"{source_block}"
+        ),
+    )
+    return _parse_json_array(response.output_text)
+
+
+def _has_untranslated_items(items: list[dict[str, str]]) -> bool:
+    return any(
+        _looks_untranslated(item.get("title", "")) or _looks_untranslated(item.get("summary", ""))
+        for item in items
+    )
+
+
+def _safe_korean_field(value: str | None, fallback: str) -> str:
+    cleaned = _clean_visible_korean(value or "")
+    if not cleaned or _looks_untranslated(cleaned):
+        return fallback
+    return cleaned
+
+
+def _looks_untranslated(text: str) -> bool:
+    latin_letters = len(re.findall(r"[A-Za-z]", text))
+    hangul_letters = len(re.findall(r"[가-힣]", text))
+    if latin_letters < 18:
+        return False
+    return hangul_letters == 0 or latin_letters > hangul_letters * 2
 
 
 def _fallback_korean_item(item: DigestItem) -> DigestItem:
