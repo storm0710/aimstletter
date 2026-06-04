@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from aimstletter.fetchers import DigestItem
-from aimstletter.site import render_homepage
+from aimstletter.site import _fallback_korean_item, render_homepage
 
 
 def test_render_homepage_contains_ai_and_tool_columns() -> None:
@@ -24,10 +24,10 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
         summary="Claude updates improve coding and operational work.",
     )
 
-    html = render_homepage([ai_item] * 10, [tool_item])
+    html = render_homepage([_fallback_korean_item(ai_item)] * 10, [_fallback_korean_item(tool_item)])
 
-    assert "AI Master Times" in html
-    assert "현장 AI 스킬 · 상위 5개" in html
-    assert "Claude와 AI 툴 업데이트" in html
+    assert "인공지능 마스터 타임즈" in html
+    assert "현장 인공지능 스킬 · 상위 5개" in html
+    assert "클로드와 인공지능 도구 업데이트" in html
     assert "https://cursor.com/changelog" in html
-    assert "Database incident response with AI agents" in html
+    assert "최신 업데이트" in html

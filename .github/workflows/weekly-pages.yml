@@ -32,6 +32,9 @@ jobs:
         env:
           PYTHONUTF8: "1"
           DIGEST_CHANNEL_LABEL: AI마스터
+          AZURE_OPENAI_ENDPOINT: ${{ vars.AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ vars.AZURE_OPENAI_DEPLOYMENT || 'gpt-5-mini' }}
         run: aimstletter-site --output-dir public
 
       - name: Configure GitHub Pages
