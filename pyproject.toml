@@ -20,6 +20,7 @@ dev = [
 
 [project.scripts]
 aimstletter = "aimstletter.cli:main"
+aimstletter-site = "aimstletter.site:main"
 
 [tool.ruff]
 line-length = 100

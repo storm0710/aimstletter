@@ -8,6 +8,7 @@ import re
 
 from dateutil import parser as date_parser
 import feedparser
+import requests
 
 from aimstletter.config import FeedSource
 
@@ -29,7 +30,13 @@ def fetch_recent_items(feeds: tuple[FeedSource, ...], lookback_days: int) -> lis
     seen_urls: set[str] = set()
 
     for feed in feeds:
-        parsed = feedparser.parse(feed.url)
+        try:
+            response = requests.get(feed.url, timeout=20)
+            response.raise_for_status()
+        except requests.RequestException:
+            continue
+
+        parsed = feedparser.parse(response.content)
         for entry in parsed.entries:
             item = _entry_to_item(feed, entry)
             if not item or item.published < cutoff or item.url in seen_urls:

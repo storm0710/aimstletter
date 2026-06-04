@@ -30,6 +30,7 @@ class Settings:
     naver_blog_username: str | None = None
     naver_blog_api_password: str | None = None
     feeds: tuple[FeedSource, ...] = field(default_factory=tuple)
+    tool_feeds: tuple[FeedSource, ...] = field(default_factory=tuple)
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -75,6 +76,7 @@ class Settings:
                 secrets,
             ),
             feeds=DEFAULT_FEEDS,
+            tool_feeds=TOOL_UPDATE_FEEDS,
         )
 
 
@@ -152,6 +154,15 @@ DEFAULT_FEEDS = (
     FeedSource("VentureBeat AI", "https://venturebeat.com/category/ai/feed/"),
     FeedSource("Google AI Blog", "https://blog.google/technology/ai/rss/"),
     FeedSource("OpenAI News", "https://openai.com/news/rss.xml"),
+)
+
+TOOL_UPDATE_FEEDS = (
+    FeedSource("Anthropic News", "https://www.anthropic.com/news/rss.xml", "tool"),
+    FeedSource("OpenAI News", "https://openai.com/news/rss.xml", "tool"),
+    FeedSource("GitHub Copilot Changelog", "https://github.blog/changelog/label/copilot/feed/", "tool"),
+    FeedSource("GitHub Changelog", "https://github.blog/changelog/feed/", "tool"),
+    FeedSource("Google AI Blog", "https://blog.google/technology/ai/rss/", "tool"),
+    FeedSource("Microsoft AI Blog", "https://blogs.microsoft.com/ai/feed/", "tool"),
 )
 
 SIGNAL_KEYWORDS = {
