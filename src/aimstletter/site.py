@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta, timezone
+import hashlib
 from html import escape
 import json
 from pathlib import Path
@@ -23,6 +24,7 @@ class SiteItem:
     kind: str
     published: datetime
     summary: str
+    detail: str
     key_points: tuple[str, ...]
     tags: tuple[str, ...]
 
@@ -89,6 +91,7 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
 
     path = output_dir / "index.html"
     path.write_text(html, encoding="utf-8")
+    _write_secondary_pages(output_dir, ai_items, tool_items, _render_analytics(settings))
     return path
 
 
@@ -177,8 +180,8 @@ def render_homepage(
     }}
     .newspaper {{
       display: grid;
-      grid-template-columns: minmax(0, 1.45fr) minmax(340px, .65fr);
-      gap: 32px;
+      grid-template-columns: 230px minmax(340px, .75fr) minmax(500px, 1.2fr);
+      gap: 28px;
       padding-top: 0;
       margin-top: 28px;
       border-top: 1px solid var(--rule);
@@ -191,6 +194,25 @@ def render_homepage(
     .column + .column {{
       border-left: 1px solid var(--rule);
       padding-left: 24px;
+    }}
+    .toc-column {{
+      border-left: 0;
+      padding-left: 0;
+    }}
+    .toc-list {{
+      display: grid;
+      gap: 8px;
+      font: 700 14px/1.45 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .toc-list a {{
+      border-bottom: 1px solid var(--line);
+      padding: 7px 0;
+      text-decoration: none;
+    }}
+    .toc-note {{
+      color: var(--muted);
+      font: 13px/1.55 Arial, "Noto Sans KR", sans-serif;
+      margin: 12px 0 0;
     }}
     .section-title {{
       border-bottom: 2px solid var(--rule);
@@ -298,6 +320,14 @@ def render_homepage(
     </header>
 
     <section class="newspaper" aria-label="주간 업데이트">
+      <nav class="column toc-column" aria-label="상세 목차">
+        <h2 class="section-title">목차</h2>
+        <div class="toc-list">
+          <a href="work-skills/">업무 AI 스킬 업데이트 자세히 보기</a>
+          <a href="tools/">Claude와 AI 도구 업데이트 자세히 보기</a>
+        </div>
+        <p class="toc-note">각 게시판에서 항목을 클릭하면 번역된 상세 설명, 키포인트, 태그, 원문 링크를 확인할 수 있습니다.</p>
+      </nav>
       <div class="column">
         <h2 class="section-title">업무 AI 스킬 업데이트 · 상위 5개</h2>
         {_render_articles(infra_items)}
@@ -327,7 +357,7 @@ def _render_articles(items: list[SiteItem]) -> str:
         (
             '<article class="article">'
             f'<div class="kicker">{escape(item.kind)} · {escape(item.source)}</div>'
-            f'<h3><a href="{escape(item.url)}">{escape(item.title)}</a></h3>'
+            f'<h3><a href="{escape(_detail_href(item))}">{escape(item.title)}</a></h3>'
             f'<p>{escape(_clip(item.summary, 300))}</p>'
             f"{_render_key_points(item)}"
             f"{_render_tags(item)}"
@@ -345,7 +375,7 @@ def _render_tool_items(items: list[SiteItem]) -> str:
         (
             '<article class="tool-item">'
             f'<div class="kicker">{escape(item.source)}</div>'
-            f'<h3><a href="{escape(item.url)}">{escape(item.title)}</a></h3>'
+            f'<h3><a href="{escape(_detail_href(item))}">{escape(item.title)}</a></h3>'
             f'<p>{escape(_clip(item.summary, 210))}</p>'
             f"{_render_key_points(item)}"
             f"{_render_tags(item)}"
@@ -368,6 +398,219 @@ def _render_tags(item: SiteItem) -> str:
         return ""
     tags = "".join(f'<span class="tag">#{escape(tag)}</span>' for tag in item.tags[:5])
     return f'<div class="tags" aria-label="중요 키워드">{tags}</div>'
+
+
+def _write_secondary_pages(
+    output_dir: Path,
+    ai_items: list[SiteItem],
+    tool_items: list[SiteItem],
+    analytics_html: str,
+) -> None:
+    work_items = _latest_first(ai_items[:5])
+    other_items = _latest_first(ai_items[5:10])
+    tools = _latest_first(tool_items[:10])
+
+    (output_dir / "work-skills").mkdir(parents=True, exist_ok=True)
+    (output_dir / "tools").mkdir(parents=True, exist_ok=True)
+    (output_dir / "items").mkdir(parents=True, exist_ok=True)
+
+    (output_dir / "work-skills" / "index.html").write_text(
+        _render_board_page(
+            title="업무 AI 스킬 업데이트",
+            subtitle="DBA, 네트워크, 서버 운영자가 업무에 적용할 수 있는 AI 도구와 자동화 업데이트입니다.",
+            items=work_items,
+            analytics_html=analytics_html,
+            back_href="../",
+        ),
+        encoding="utf-8",
+    )
+    (output_dir / "tools" / "index.html").write_text(
+        _render_board_page(
+            title="Claude와 AI 도구 업데이트",
+            subtitle="Claude, OpenAI, GitHub Copilot, Cursor 등 주요 AI 도구의 최신 업데이트입니다.",
+            items=tools,
+            analytics_html=analytics_html,
+            back_href="../",
+        ),
+        encoding="utf-8",
+    )
+
+    for item in [*work_items, *other_items, *tools]:
+        (output_dir / "items" / f"{_item_slug(item)}.html").write_text(
+            _render_detail_page(item, analytics_html=analytics_html, back_href="../"),
+            encoding="utf-8",
+        )
+
+
+def _render_board_page(
+    title: str,
+    subtitle: str,
+    items: list[SiteItem],
+    analytics_html: str,
+    back_href: str,
+) -> str:
+    cards = "\n".join(
+        (
+            '<article class="board-row">'
+            f'<div class="kicker">{escape(item.kind)} · {escape(item.source)} · {_format_date(item.published)}</div>'
+            f'<h2><a href="../{escape(_detail_href(item))}">{escape(item.title)}</a></h2>'
+            f'<p>{escape(_clip(item.summary, 280))}</p>'
+            f"{_render_tags(item)}"
+            "</article>"
+        )
+        for item in items
+    )
+    return _render_plain_page(
+        title=title,
+        analytics_html=analytics_html,
+        body=f"""
+        <a class="back-link" href="{escape(back_href)}">← 첫 화면</a>
+        <header class="simple-header">
+          <h1>{escape(title)}</h1>
+          <p>{escape(subtitle)}</p>
+        </header>
+        <section class="board-list">{cards}</section>
+        """,
+    )
+
+
+def _render_detail_page(item: SiteItem, analytics_html: str, back_href: str) -> str:
+    detail_paragraphs = "".join(
+        f"<p>{escape(paragraph.strip())}</p>"
+        for paragraph in re.split(r"\n{2,}", item.detail)
+        if paragraph.strip()
+    )
+    return _render_plain_page(
+        title=item.title,
+        analytics_html=analytics_html,
+        body=f"""
+        <a class="back-link" href="{escape(back_href)}">← 첫 화면</a>
+        <article class="detail">
+          <div class="kicker">{escape(item.kind)} · {escape(item.source)} · {_format_date(item.published)}</div>
+          <h1>{escape(item.title)}</h1>
+          <p class="summary">{escape(item.summary)}</p>
+          <section>
+            <h2>상세 설명</h2>
+            {detail_paragraphs}
+          </section>
+          <section>
+            <h2>키포인트</h2>
+            {_render_key_points(item)}
+          </section>
+          {_render_tags(item)}
+          <p><a class="source-link" href="{escape(item.url)}">원문 보기</a></p>
+        </article>
+        """,
+    )
+
+
+def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
+    return f"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{escape(title)} · AI Master Times</title>
+  {analytics_html}
+  <style>
+    body {{
+      margin: 0;
+      background: #f7f3ea;
+      color: #111111;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+    }}
+    a {{ color: inherit; text-underline-offset: 3px; }}
+    .page {{
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 48px;
+    }}
+    .back-link {{
+      display: inline-block;
+      margin-bottom: 18px;
+      font: 700 14px/1.4 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .simple-header, .detail {{
+      border-top: 3px solid #222222;
+      padding-top: 18px;
+    }}
+    h1 {{
+      font-size: clamp(34px, 6vw, 64px);
+      line-height: 1.02;
+      margin: 0 0 12px;
+      letter-spacing: 0;
+    }}
+    h2 {{
+      border-bottom: 2px solid #222222;
+      font-size: 24px;
+      margin: 28px 0 12px;
+      padding-bottom: 8px;
+    }}
+    p {{
+      font-size: 17px;
+      line-height: 1.75;
+      margin: 10px 0;
+    }}
+    .board-list {{
+      display: grid;
+      gap: 0;
+      margin-top: 24px;
+      border-top: 1px solid #222222;
+    }}
+    .board-row {{
+      border-bottom: 1px solid #d8d2c4;
+      padding: 18px 0;
+    }}
+    .board-row h2 {{
+      border: 0;
+      margin: 4px 0 8px;
+      padding: 0;
+      font-size: 26px;
+    }}
+    .kicker {{
+      color: #8b1e16;
+      font: 800 12px/1.4 Arial, "Noto Sans KR", sans-serif;
+      text-transform: uppercase;
+    }}
+    .summary {{
+      font-size: 19px;
+    }}
+    .key-points {{
+      margin: 9px 0 0;
+      padding-left: 20px;
+      font: 15px/1.65 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .points-label {{
+      display: none;
+    }}
+    .tags {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }}
+    .tag {{
+      border: 1px solid #d8d2c4;
+      background: #fffaf0;
+      padding: 3px 7px;
+      font: 700 12px/1.3 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .source-link {{
+      display: inline-block;
+      border: 1px solid #222222;
+      padding: 9px 12px;
+      text-decoration: none;
+      font: 800 14px/1.3 Arial, "Noto Sans KR", sans-serif;
+    }}
+  </style>
+</head>
+<body>
+  <main class="page">
+    {body}
+  </main>
+</body>
+</html>
+"""
 
 
 def _render_analytics(settings: Settings) -> str:
@@ -436,9 +679,10 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
         response = client.responses.create(
             model=model,
             instructions=(
-                "Return only a JSON array. Each item must contain title, summary, key_points, and tags. "
+                "Return only a JSON array. Each item must contain title, summary, detail, key_points, and tags. "
                 "Titles and summaries must be Korean sentences. Product names such as OpenAI, "
                 "Claude, Cursor, GitHub Copilot, Codex, Gartner, Endava, AWS, and Azure must stay in English. "
+                "detail must be 2 to 4 Korean paragraphs that explain the item in more depth for a detail page. "
                 "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
                 "3 to 5 short Korean or product-name strings. Emphasize practical work skills, "
                 "automation patterns, operational usage, and concrete tool adoption. Do not invent facts."
@@ -473,6 +717,10 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
                 localized_item.get("summary"),
                 fallback="원문 요약을 한국어로 변환하지 못해 출처 링크에서 세부 내용을 확인해 주세요.",
             ),
+            detail=_safe_korean_field(
+                localized_item.get("detail"),
+                fallback="이 항목은 원문 링크에서 세부 내용을 확인한 뒤 업무 적용 가능성을 검토해 주세요.",
+            ),
             source=_korean_source_name(item.source),
             kind=_korean_kind_name(item.kind),
             published=item.published,
@@ -492,9 +740,10 @@ def _repair_korean_translation(
     response = client.responses.create(
         model=model,
         instructions=(
-            "Return only a JSON array. Each item must contain title, summary, key_points, and tags. "
+            "Return only a JSON array. Each item must contain title, summary, detail, key_points, and tags. "
             "Translate English article titles and summaries into Korean. Product names may "
             "remain in English, but English clauses or English explanatory sentences are not allowed. "
+            "detail must be 2 to 4 Korean paragraphs. "
             "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
             "3 to 5 short Korean or product-name strings."
         ),
@@ -548,6 +797,17 @@ def _safe_tags(localized_item: dict[str, object], original: DigestItem) -> tuple
     if tags:
         return tuple(list(dict.fromkeys(tags))[:5])
     return tuple(_fallback_tags(original)[:5])
+
+
+def _detail_href(item: SiteItem) -> str:
+    return f"items/{_item_slug(item)}.html"
+
+
+def _item_slug(item: SiteItem) -> str:
+    title_slug = re.sub(r"[^a-z0-9가-힣]+", "-", item.title.lower()).strip("-")
+    title_slug = title_slug[:48].strip("-") or "item"
+    digest = hashlib.sha1(item.url.encode("utf-8")).hexdigest()[:10]
+    return f"{title_slug}-{digest}"
 
 
 def _coerce_string_list(value: object) -> list[str]:
@@ -610,6 +870,11 @@ def _fallback_korean_item(item: DigestItem) -> SiteItem:
     return SiteItem(
         title=f"{_korean_source_name(item.source)}에서 확인한 최신 업데이트",
         summary="원문을 한국어로 자동 변환하려면 저장소 비밀값에 Azure OpenAI 또는 OpenAI 연결 키를 설정하세요.",
+        detail=(
+            "이 상세 페이지는 항목별 번역 설명을 보여주기 위한 공간입니다. "
+            "Azure OpenAI 또는 OpenAI 연결 키가 설정되면 원문 제목과 요약을 바탕으로 업무 적용 관점의 상세 설명이 자동 생성됩니다.\n\n"
+            "설정 전에는 원문 링크에서 세부 내용을 확인하고, 키포인트와 태그를 참고해 수업 토론 주제로 활용하세요."
+        ),
         source=_korean_source_name(item.source),
         kind=_korean_kind_name(item.kind),
         url=item.url,

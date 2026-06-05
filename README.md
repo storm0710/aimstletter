@@ -104,8 +104,11 @@ Slack 앱 설치 한도로 Incoming Webhook을 추가할 수 없다면 GitHub Is
 
 `Weekly AI magazine site` workflow는 매주 수요일 오전 9시 5분 KST에 `public/index.html`을 생성하고 GitHub Pages에 배포합니다. 화면은 두 영역으로 나뉩니다.
 
-- 왼쪽: DBA, 네트워크, 서버 운영 직군 관련 AI 스킬과 논문
+- 왼쪽 목차: 업무 AI 스킬 업데이트와 Claude/AI 도구 업데이트 게시판으로 이동
+- 가운데: DBA, 네트워크, 서버 운영 직군이 업무에 적용할 만한 AI 스킬 업데이트
 - 오른쪽: Claude, OpenAI, GitHub Copilot, Cursor 등 AI 도구 업데이트
+
+목차에서 게시판으로 들어가면 항목들이 목록형으로 보이고, 각 항목 제목을 누르면 번역된 상세 설명, 키포인트, 태그, 원문 링크가 있는 상세 페이지로 이동합니다.
 
 처음 한 번은 GitHub 저장소에서 아래 설정을 확인합니다.
 
