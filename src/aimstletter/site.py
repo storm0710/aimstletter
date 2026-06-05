@@ -27,6 +27,8 @@ class SiteItem:
     detail: str
     key_points: tuple[str, ...]
     tags: tuple[str, ...]
+    comparisons: tuple[str, ...] = ()
+    glossary: tuple[str, ...] = ()
 
 
 WORK_SKILL_KEYWORDS = {
@@ -525,6 +527,8 @@ def _render_detail_page(item: SiteItem, analytics_html: str, back_href: str) -> 
         for paragraph in re.split(r"\n{2,}", item.detail)
         if paragraph.strip()
     )
+    comparisons = _render_note_section("비교 설명", item.comparisons)
+    glossary = _render_note_section("용어 풀이", item.glossary)
     return _render_plain_page(
         title=item.title,
         analytics_html=analytics_html,
@@ -542,11 +546,25 @@ def _render_detail_page(item: SiteItem, analytics_html: str, back_href: str) -> 
             <h2>키포인트</h2>
             {_render_key_points(item)}
           </section>
+          {comparisons}
+          {glossary}
           {_render_tags(item)}
           <p><a class="source-link" href="{escape(item.url)}">원문 보기</a></p>
         </article>
         """,
     )
+
+
+def _render_note_section(title: str, notes: tuple[str, ...]) -> str:
+    if not notes:
+        return ""
+    items = "".join(f"<li>{escape(note)}</li>" for note in notes)
+    return f"""
+          <section>
+            <h2>{escape(title)}</h2>
+            <ol class="note-list">{items}</ol>
+          </section>
+    """
 
 
 def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
@@ -629,6 +647,16 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       margin: 9px 0 0;
       padding-left: 20px;
       font: 15px/1.65 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .note-list {{
+      margin: 9px 0 0;
+      padding-left: 22px;
+      color: #2b2b2b;
+      font: 15px/1.75 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .note-list li {{
+      border-bottom: 1px solid #e2dccf;
+      padding: 7px 0;
     }}
     .points-label {{
       display: none;
@@ -729,13 +757,21 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
         response = client.responses.create(
             model=model,
             instructions=(
-                "Return only a JSON array. Each item must contain title, summary, detail, key_points, and tags. "
+                "Return only a JSON array. Each item must contain title, summary, detail, key_points, tags, "
+                "comparisons, and glossary. "
                 "Titles and summaries must be Korean sentences. Product names such as OpenAI, "
-                "Claude, Cursor, GitHub Copilot, Codex, Gartner, Endava, AWS, and Azure must stay in English. "
+                "Claude, Cursor, GitHub Copilot, Codex, Gartner, Endava, Harness, Warp, AWS, and Azure "
+                "must stay in English. "
                 "detail must be 2 to 4 Korean paragraphs that explain the item in more depth for a detail page. "
                 "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
-                "3 to 5 short Korean or product-name strings. Emphasize practical work skills, "
-                "automation patterns, operational usage, and concrete tool adoption. Do not invent facts."
+                "3 to 5 short Korean or product-name strings. comparisons must be an array of 0 to 3 Korean "
+                "strings comparing the item with adjacent tools or approaches when useful. For Endava items, "
+                "compare it with Harness Engineering if relevant: Endava is a consulting/transformation "
+                "approach, while Harness is a DevOps/software delivery automation platform. glossary must be "
+                "an array of 0 to 5 Korean strings formatted like 'Warp: ...' explaining difficult product "
+                "names, acronyms, or jargon as footnote-style notes. Emphasize practical work skills, "
+                "automation patterns, operational usage, and concrete tool adoption. Do not invent unsupported "
+                "facts."
             ),
             input=(
                 f"Translate and rewrite these {context} items for a Korean newsletter site. "
@@ -743,7 +779,9 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
                 "Summaries must be one concise Korean sentence and must make clear what a DBA, "
                 "network engineer, server operator, or technical mentor can do with it at work. "
                 "Key points should explain: what changed, where it can be used in work, and what "
-                "to watch before adoption.\n\n"
+                "to watch before adoption. Add comparison notes when the item could be confused with "
+                "another tool or vendor, and add glossary notes for difficult words such as Warp, Harness, "
+                "Agent tasks REST API, CI/CD, SDK, or orchestration.\n\n"
                 f"{source_block}"
             ),
         )
@@ -776,6 +814,8 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             published=item.published,
             key_points=_safe_key_points(localized_item, item),
             tags=_safe_tags(localized_item, item),
+            comparisons=_safe_comparisons(localized_item, item),
+            glossary=_safe_glossary(localized_item, item),
         )
         for item, localized_item in zip(items, localized, strict=True)
     ]
@@ -790,12 +830,14 @@ def _repair_korean_translation(
     response = client.responses.create(
         model=model,
         instructions=(
-            "Return only a JSON array. Each item must contain title, summary, detail, key_points, and tags. "
+            "Return only a JSON array. Each item must contain title, summary, detail, key_points, tags, "
+            "comparisons, and glossary. "
             "Translate English article titles and summaries into Korean. Product names may "
             "remain in English, but English clauses or English explanatory sentences are not allowed. "
             "detail must be 2 to 4 Korean paragraphs. "
             "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
-            "3 to 5 short Korean or product-name strings."
+            "3 to 5 short Korean or product-name strings. comparisons must be 0 to 3 Korean strings. "
+            "glossary must be 0 to 5 Korean strings formatted like 'Warp: ...'."
         ),
         input=(
             f"The previous Korean localization for these {context} items contained untranslated "
@@ -847,6 +889,65 @@ def _safe_tags(localized_item: dict[str, object], original: DigestItem) -> tuple
     if tags:
         return tuple(list(dict.fromkeys(tags))[:5])
     return tuple(_fallback_tags(original)[:5])
+
+
+def _safe_comparisons(localized_item: dict[str, object], original: DigestItem) -> tuple[str, ...]:
+    notes = [
+        _clean_visible_korean(note)
+        for note in _coerce_string_list(localized_item.get("comparisons"))
+        if note and not _looks_untranslated(note)
+    ]
+    notes.extend(_fallback_comparisons(original))
+    return tuple(list(dict.fromkeys(notes))[:4])
+
+
+def _safe_glossary(localized_item: dict[str, object], original: DigestItem) -> tuple[str, ...]:
+    notes = [
+        _clean_visible_korean(note)
+        for note in _coerce_string_list(localized_item.get("glossary"))
+        if note and not _looks_untranslated(note)
+    ]
+    notes.extend(_fallback_glossary(original))
+    return tuple(list(dict.fromkeys(notes))[:6])
+
+
+def _fallback_comparisons(item: DigestItem) -> list[str]:
+    text = _item_text(item)
+    comparisons: list[str] = []
+    if "endava" in text:
+        comparisons.append(
+            "Endava는 특정 기능 하나라기보다 기업의 개발 문화와 전달 방식을 AI 중심으로 바꾸는 컨설팅·전환 접근에 가깝습니다."
+        )
+        comparisons.append(
+            "Harness Engineering은 CI/CD, 배포, 테스트, 관측 같은 소프트웨어 전달 파이프라인을 자동화하는 플랫폼 성격이 강해 실무 적용 지점이 더 직접적입니다."
+        )
+        comparisons.append(
+            "따라서 Endava는 '조직을 어떻게 AI 네이티브로 바꿀까'를 볼 때, Harness는 '배포·운영 자동화를 어떤 도구로 구현할까'를 볼 때 비교하면 좋습니다."
+        )
+    return comparisons
+
+
+def _fallback_glossary(item: DigestItem) -> list[str]:
+    text = _item_text(item)
+    glossary: list[str] = []
+    glossary_terms = (
+        ("warp", "Warp: 터미널과 개발 워크플로우에 AI 기능을 결합한 개발자 도구입니다."),
+        ("harness", "Harness: CI/CD, 배포, 테스트, 관측 등 소프트웨어 전달 과정을 자동화하는 DevOps 플랫폼입니다."),
+        ("endava", "Endava: 기업의 소프트웨어 개발과 디지털 전환을 지원하는 IT 서비스·컨설팅 회사입니다."),
+        ("agent tasks rest api", "Agent tasks REST API: AI 에이전트 작업을 프로그램 코드나 외부 시스템에서 호출·추적할 수 있게 하는 API 방식입니다."),
+        ("ci/cd", "CI/CD: 코드 변경을 자동으로 빌드·테스트·배포하는 지속적 통합과 지속적 배포 절차입니다."),
+        ("sdk", "SDK: 특정 플랫폼 기능을 애플리케이션에 쉽게 붙일 수 있도록 제공되는 개발 도구 모음입니다."),
+        ("orchestration", "오케스트레이션: 여러 작업, 도구, 서비스를 순서와 조건에 맞게 묶어 자동 실행하는 방식입니다."),
+        ("codex", "Codex: 코드 작성, 수정, 리뷰 같은 개발 작업을 돕는 OpenAI의 코딩 에이전트 계열 도구입니다."),
+    )
+    for keyword, note in glossary_terms:
+        if keyword in text:
+            glossary.append(note)
+    return glossary
+
+
+def _item_text(item: DigestItem) -> str:
+    return f"{item.title} {item.summary} {item.source} {item.kind}".lower()
 
 
 def _detail_href(item: SiteItem) -> str:
@@ -934,6 +1035,8 @@ def _fallback_korean_item(item: DigestItem) -> SiteItem:
             "출처 링크에서 세부 내용을 확인한 뒤 수업 토론 주제로 활용하세요.",
         ),
         tags=tuple(_fallback_tags(item)[:5]),
+        comparisons=tuple(_fallback_comparisons(item)),
+        glossary=tuple(_fallback_glossary(item)),
     )
 
 

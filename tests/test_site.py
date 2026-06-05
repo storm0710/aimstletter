@@ -10,6 +10,7 @@ from aimstletter.site import (
     _item_slug,
     _rank_work_skill_updates,
     _render_analytics,
+    _render_detail_page,
     _safe_korean_field,
     _safe_tags,
     render_homepage,
@@ -142,6 +143,46 @@ def test_item_slug_is_stable_and_uses_url_hash() -> None:
 
     assert slug.startswith("endava가-ai-에이전트를-중심으로")
     assert slug == _item_slug(item)
+
+
+def test_detail_page_includes_comparison_and_glossary_notes() -> None:
+    item = SiteItem(
+        title="Endava가 AI 에이전트를 중심으로 소프트웨어 전달을 재설계",
+        url="https://example.com/endava",
+        source="OpenAI 소식",
+        kind="동향",
+        published=datetime(2026, 6, 5, tzinfo=UTC),
+        summary="요약입니다.",
+        detail="상세입니다.",
+        key_points=("키포인트입니다.",),
+        tags=("Endava", "AI 에이전트"),
+        comparisons=("Endava는 조직 전환 접근이고 Harness는 전달 자동화 플랫폼입니다.",),
+        glossary=("Warp: AI 기능을 결합한 개발자 터미널 도구입니다.",),
+    )
+
+    html = _render_detail_page(item, analytics_html="", back_href="../")
+
+    assert "비교 설명" in html
+    assert "용어 풀이" in html
+    assert "Endava는 조직 전환 접근이고 Harness는 전달 자동화 플랫폼입니다." in html
+    assert "Warp: AI 기능을 결합한 개발자 터미널 도구입니다." in html
+
+
+def test_fallback_item_adds_endava_harness_comparison_and_glossary() -> None:
+    original = DigestItem(
+        title="Endava uses Codex while teams compare Harness Engineering",
+        url="https://example.com/endava-harness",
+        source="OpenAI News",
+        kind="tool",
+        published=datetime(2026, 6, 5, tzinfo=UTC),
+        summary="Endava explains AI-native delivery with Codex and workflow automation.",
+    )
+
+    item = _fallback_korean_item(original)
+
+    assert any("Harness Engineering" in note for note in item.comparisons)
+    assert any("Endava:" in note for note in item.glossary)
+    assert any("Codex:" in note for note in item.glossary)
 
 
 def test_rank_work_skill_updates_prefers_practical_tool_skills() -> None:
