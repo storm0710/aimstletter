@@ -6,6 +6,7 @@ from aimstletter.fetchers import DigestItem
 from aimstletter.site import (
     SiteItem,
     _fallback_korean_item,
+    _rank_work_skill_updates,
     _safe_korean_field,
     _safe_tags,
     render_homepage,
@@ -33,7 +34,7 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     html = render_homepage([_fallback_korean_item(ai_item)] * 10, [_fallback_korean_item(tool_item)])
 
     assert "AI Master Times" in html
-    assert "현장 AI 스킬 · 상위 5개" in html
+    assert "업무 AI 스킬 업데이트 · 상위 5개" in html
     assert "Claude와 AI 도구 업데이트" in html
     assert "최신 업데이트" in html
     assert "키포인트" in html
@@ -85,7 +86,7 @@ def test_render_homepage_orders_each_section_newest_first() -> None:
     html = render_homepage([old_item, new_item, old_item, old_item, old_item], [old_item, new_item])
 
     assert html.index("최신 항목") < html.index("오래된 항목")
-    assert '<span class="tag">AI 에이전트</span>' in html
+    assert '<span class="tag">#AI 에이전트</span>' in html
 
 
 def test_safe_tags_keeps_product_names_and_deduplicates() -> None:
@@ -104,3 +105,26 @@ def test_safe_tags_keeps_product_names_and_deduplicates() -> None:
     )
 
     assert tags == ("OpenAI", "AI 에이전트", "GitHub Copilot")
+
+
+def test_rank_work_skill_updates_prefers_practical_tool_skills() -> None:
+    story = DigestItem(
+        title="Meta scam story shows an AI security myth",
+        url="https://example.com/story",
+        source="MIT Technology Review AI",
+        kind="trend",
+        published=datetime(2026, 6, 5, tzinfo=UTC),
+        summary="A case story about a social media account incident.",
+    )
+    skill = DigestItem(
+        title="GitHub Copilot adds workflow automation for Actions failures",
+        url="https://example.com/skill",
+        source="GitHub Copilot Changelog",
+        kind="tool",
+        published=datetime(2026, 6, 4, tzinfo=UTC),
+        summary="Developers can automate incident fixes through GitHub Actions and agent workflows.",
+    )
+
+    ranked = _rank_work_skill_updates([story, skill], limit=1)
+
+    assert ranked[0].url == "https://example.com/skill"

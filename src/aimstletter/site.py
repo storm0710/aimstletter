@@ -27,12 +27,63 @@ class SiteItem:
     tags: tuple[str, ...]
 
 
+WORK_SKILL_KEYWORDS = {
+    "workflow": 8,
+    "workflows": 8,
+    "automation": 8,
+    "automate": 8,
+    "agent": 7,
+    "agents": 7,
+    "copilot": 7,
+    "codex": 7,
+    "api": 6,
+    "sdk": 6,
+    "github actions": 6,
+    "database": 6,
+    "query": 5,
+    "monitoring": 6,
+    "observability": 6,
+    "incident": 6,
+    "security": 5,
+    "deployment": 5,
+    "coding": 5,
+    "developer": 5,
+    "operations": 5,
+    "server": 5,
+    "network": 5,
+    "kubernetes": 5,
+    "cloud": 4,
+    "rag": 4,
+    "retrieval": 4,
+}
+
+GENERAL_STORY_KEYWORDS = {
+    "case": 3,
+    "story": 3,
+    "scam": 5,
+    "myth": 4,
+    "pope": 4,
+    "policy": 3,
+    "agenda": 3,
+    "health care": 2,
+}
+
+
 def build_site(output_dir: Path, settings: Settings) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    ai_items = rank_items(fetch_recent_items(settings.feeds, settings.lookback_days), 10)
+    source_items = _dedupe_items(
+        [
+            *fetch_recent_items(settings.feeds, settings.lookback_days),
+            *fetch_recent_items(settings.tool_feeds, 21),
+        ]
+    )
+    skill_items = _rank_work_skill_updates(source_items, 5)
+    skill_urls = {item.url for item in skill_items}
+    other_source_items = [item for item in source_items if item.url not in skill_urls]
+    ai_items = [*skill_items, *_latest_digest_items(rank_items(other_source_items, 12), 5)]
     tool_items = _rank_tool_updates(fetch_recent_items(settings.tool_feeds, 21), 10)
-    ai_items = _localize_items(ai_items, settings, "인프라/운영 AI 리서치")
+    ai_items = _localize_items(ai_items, settings, "DBA, 네트워크, 서버 운영자가 업무에 적용할 AI 스킬 업데이트")
     tool_items = _localize_items(tool_items, settings, "인공지능 도구 업데이트")
     html = render_homepage(ai_items, tool_items)
 
@@ -74,7 +125,7 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
     }}
     a {{ color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }}
     .page {{
-      width: min(1180px, calc(100% - 32px));
+      width: min(1420px, calc(100% - 32px));
       margin: 0 auto;
       padding: 18px 0 44px;
     }}
@@ -102,7 +153,7 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
     }}
     .masthead p {{
       margin: 12px auto 0;
-      max-width: 760px;
+      max-width: 860px;
       color: var(--muted);
       font: 16px/1.6 Arial, "Noto Sans KR", sans-serif;
     }}
@@ -121,8 +172,8 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
     }}
     .newspaper {{
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(320px, .72fr);
-      gap: 24px;
+      grid-template-columns: minmax(0, 1.45fr) minmax(340px, .65fr);
+      gap: 32px;
       padding-top: 28px;
     }}
     .column {{
@@ -231,7 +282,7 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
 
     <section class="newspaper" aria-label="주간 업데이트">
       <div class="column">
-        <h2 class="section-title">현장 AI 스킬 · 상위 5개</h2>
+        <h2 class="section-title">업무 AI 스킬 업데이트 · 상위 5개</h2>
         {_render_articles(infra_items)}
         <h2 class="section-title">기타 AI 동향 · 하위 5개</h2>
         {_render_articles(other_items)}
@@ -298,7 +349,7 @@ def _render_key_points(item: SiteItem) -> str:
 def _render_tags(item: SiteItem) -> str:
     if not item.tags:
         return ""
-    tags = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in item.tags[:5])
+    tags = "".join(f'<span class="tag">#{escape(tag)}</span>' for tag in item.tags[:5])
     return f'<div class="tags" aria-label="중요 키워드">{tags}</div>'
 
 
@@ -336,15 +387,16 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
                 "Titles and summaries must be Korean sentences. Product names such as OpenAI, "
                 "Claude, Cursor, GitHub Copilot, Codex, Gartner, Endava, AWS, and Azure must stay in English. "
                 "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
-                "3 to 5 short Korean or product-name strings. Do not invent facts."
+                "3 to 5 short Korean or product-name strings. Emphasize practical work skills, "
+                "automation patterns, operational usage, and concrete tool adoption. Do not invent facts."
             ),
             input=(
                 f"Translate and rewrite these {context} items for a Korean newsletter site. "
                 "Use natural Korean titles that preserve product and company names in English. "
-                "Summaries must be one concise Korean sentence and "
-                "must be useful for DBA, network, server, operations, or AI tool adoption readers "
-                "when supported by the source. Key points should explain what changed, why it matters, "
-                "and what readers should watch next.\n\n"
+                "Summaries must be one concise Korean sentence and must make clear what a DBA, "
+                "network engineer, server operator, or technical mentor can do with it at work. "
+                "Key points should explain: what changed, where it can be used in work, and what "
+                "to watch before adoption.\n\n"
                 f"{source_block}"
             ),
         )
@@ -589,6 +641,38 @@ def _rank_tool_updates(items: list[DigestItem], limit: int) -> list[DigestItem]:
         return (item.published, sum(1 for keyword in keywords if keyword in text))
 
     return sorted(items, key=score, reverse=True)[:limit]
+
+
+def _rank_work_skill_updates(items: list[DigestItem], limit: int) -> list[DigestItem]:
+    def score(item: DigestItem) -> tuple[int, datetime]:
+        text = f"{item.title} {item.summary} {item.source}".lower()
+        skill_score = 0
+        for keyword, weight in WORK_SKILL_KEYWORDS.items():
+            if keyword in text:
+                skill_score += weight
+        for keyword, penalty in GENERAL_STORY_KEYWORDS.items():
+            if keyword in text:
+                skill_score -= penalty
+        return (skill_score, item.published)
+
+    ranked = sorted(items, key=score, reverse=True)
+    practical = [item for item in ranked if score(item)[0] > 0]
+    return practical[:limit] if len(practical) >= limit else ranked[:limit]
+
+
+def _latest_digest_items(items: list[DigestItem], limit: int) -> list[DigestItem]:
+    return sorted(items, key=lambda item: item.published, reverse=True)[:limit]
+
+
+def _dedupe_items(items: list[DigestItem]) -> list[DigestItem]:
+    deduped: list[DigestItem] = []
+    seen_urls: set[str] = set()
+    for item in items:
+        if item.url in seen_urls:
+            continue
+        seen_urls.add(item.url)
+        deduped.append(item)
+    return deduped
 
 
 def _latest_first(items: list[SiteItem]) -> list[SiteItem]:
