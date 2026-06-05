@@ -179,10 +179,14 @@ def render_homepage(
       display: grid;
       grid-template-columns: minmax(0, 1.45fr) minmax(340px, .65fr);
       gap: 32px;
-      padding-top: 28px;
+      padding-top: 0;
+      margin-top: 28px;
+      border-top: 1px solid var(--rule);
+      align-items: start;
     }}
     .column {{
       min-width: 0;
+      padding-top: 22px;
     }}
     .column + .column {{
       border-left: 1px solid var(--rule);
@@ -193,10 +197,18 @@ def render_homepage(
       padding-bottom: 8px;
       margin-bottom: 14px;
       font-size: 24px;
+      line-height: 1.2;
+      min-height: 39px;
+      display: flex;
+      align-items: flex-start;
     }}
     .article {{
       border-bottom: 1px solid var(--line);
-      padding: 14px 0;
+      padding: 14px 0 16px;
+    }}
+    .section-title + .article,
+    .section-title + .tool-list .tool-item:first-child {{
+      padding-top: 0;
     }}
     .article h3 {{
       font-size: 22px;
@@ -238,11 +250,11 @@ def render_homepage(
     }}
     .tool-list {{
       display: grid;
-      gap: 12px;
+      gap: 0;
     }}
     .tool-item {{
       border-bottom: 1px solid var(--line);
-      padding-bottom: 12px;
+      padding: 14px 0 16px;
     }}
     .tool-item h3 {{
       font-size: 19px;

@@ -43,6 +43,8 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     assert "tag" in html
     assert "lead-image" not in html
     assert "watch-links" not in html
+    assert "border-top: 1px solid var(--rule);" in html
+    assert "min-height: 39px;" in html
 
 
 def test_safe_korean_field_rejects_untranslated_article_text() -> None:
