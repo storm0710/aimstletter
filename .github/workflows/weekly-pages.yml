@@ -35,6 +35,9 @@ jobs:
           AZURE_OPENAI_ENDPOINT: ${{ vars.AZURE_OPENAI_ENDPOINT }}
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_DEPLOYMENT: ${{ vars.AZURE_OPENAI_DEPLOYMENT || 'gpt-5-mini' }}
+          SITE_ANALYTICS_PROVIDER: ${{ vars.SITE_ANALYTICS_PROVIDER }}
+          SITE_ANALYTICS_ID: ${{ vars.SITE_ANALYTICS_ID }}
+          SITE_ANALYTICS_DOMAIN: ${{ vars.SITE_ANALYTICS_DOMAIN }}
         run: aimstletter-site --output-dir public
 
       - name: Configure GitHub Pages

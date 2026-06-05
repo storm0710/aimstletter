@@ -29,6 +29,9 @@ class Settings:
     naver_blog_id: str | None = None
     naver_blog_username: str | None = None
     naver_blog_api_password: str | None = None
+    site_analytics_provider: str | None = None
+    site_analytics_id: str | None = None
+    site_analytics_domain: str | None = None
     feeds: tuple[FeedSource, ...] = field(default_factory=tuple)
     tool_feeds: tuple[FeedSource, ...] = field(default_factory=tuple)
 
@@ -73,6 +76,21 @@ class Settings:
             naver_blog_api_password=_setting(
                 "NAVER_BLOG_API_PASSWORD",
                 "naver_blog_api_password",
+                secrets,
+            ),
+            site_analytics_provider=_setting(
+                "SITE_ANALYTICS_PROVIDER",
+                "site_analytics_provider",
+                secrets,
+            ),
+            site_analytics_id=_setting(
+                "SITE_ANALYTICS_ID",
+                "site_analytics_id",
+                secrets,
+            ),
+            site_analytics_domain=_setting(
+                "SITE_ANALYTICS_DOMAIN",
+                "site_analytics_domain",
                 secrets,
             ),
             feeds=DEFAULT_FEEDS,

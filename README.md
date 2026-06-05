@@ -65,6 +65,9 @@ Repository Variables에는 필요하면 아래 값을 등록합니다.
 
 - `AZURE_OPENAI_ENDPOINT`: Azure OpenAI endpoint
 - `AZURE_OPENAI_DEPLOYMENT`: Azure OpenAI deployment name, 기본값 `gpt-5-mini`
+- `SITE_ANALYTICS_PROVIDER`: 선택 사항, `ga4`, `goatcounter`, `plausible` 중 하나
+- `SITE_ANALYTICS_ID`: Google Analytics 측정 ID 또는 GoatCounter 사이트 코드
+- `SITE_ANALYTICS_DOMAIN`: Plausible을 사용할 때 사이트 도메인
 
 ## Slack Webhook 만들기
 
@@ -117,6 +120,16 @@ aimstletter-site --output-dir public
 ```
 
 생성된 파일은 `public/index.html`입니다.
+
+### 방문자 집계
+
+GitHub 저장소의 `Insights` → `Traffic`에서도 제한적인 방문/클론 통계를 볼 수 있지만, GitHub Pages 사이트 방문자를 더 자세히 보려면 분석 도구를 연결합니다. 현재 사이트 생성기는 아래 세 가지를 선택적으로 지원합니다.
+
+- Google Analytics 4: `SITE_ANALYTICS_PROVIDER=ga4`, `SITE_ANALYTICS_ID=G-...`
+- GoatCounter: `SITE_ANALYTICS_PROVIDER=goatcounter`, `SITE_ANALYTICS_ID=your-site-code`
+- Plausible: `SITE_ANALYTICS_PROVIDER=plausible`, `SITE_ANALYTICS_DOMAIN=your-domain`
+
+GitHub 저장소에서 `Settings` → `Secrets and variables` → `Actions` → `Variables`에 값을 넣고 `Weekly AI magazine site` workflow를 다시 실행하면 다음 배포 HTML에 방문자 분석 스크립트가 포함됩니다.
 
 ## Naver Blog 게시
 

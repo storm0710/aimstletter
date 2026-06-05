@@ -3,10 +3,12 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from aimstletter.fetchers import DigestItem
+from aimstletter.config import Settings
 from aimstletter.site import (
     SiteItem,
     _fallback_korean_item,
     _rank_work_skill_updates,
+    _render_analytics,
     _safe_korean_field,
     _safe_tags,
     render_homepage,
@@ -128,3 +130,25 @@ def test_rank_work_skill_updates_prefers_practical_tool_skills() -> None:
     ranked = _rank_work_skill_updates([story, skill], limit=1)
 
     assert ranked[0].url == "https://example.com/skill"
+
+
+def test_render_analytics_is_empty_without_provider() -> None:
+    assert _render_analytics(Settings()) == ""
+
+
+def test_render_analytics_supports_ga4() -> None:
+    html = _render_analytics(
+        Settings(site_analytics_provider="ga4", site_analytics_id="G-TEST123")
+    )
+
+    assert "googletagmanager.com/gtag/js?id=G-TEST123" in html
+    assert "gtag('config', 'G-TEST123')" in html
+
+
+def test_render_analytics_supports_goatcounter() -> None:
+    html = _render_analytics(
+        Settings(site_analytics_provider="goatcounter", site_analytics_id="aimstletter")
+    )
+
+    assert "https://aimstletter.goatcounter.com/count" in html
+    assert "gc.zgo.at/count.js" in html

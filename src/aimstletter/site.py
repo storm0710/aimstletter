@@ -85,14 +85,18 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     tool_items = _rank_tool_updates(fetch_recent_items(settings.tool_feeds, 21), 10)
     ai_items = _localize_items(ai_items, settings, "DBA, 네트워크, 서버 운영자가 업무에 적용할 AI 스킬 업데이트")
     tool_items = _localize_items(tool_items, settings, "인공지능 도구 업데이트")
-    html = render_homepage(ai_items, tool_items)
+    html = render_homepage(ai_items, tool_items, analytics_html=_render_analytics(settings))
 
     path = output_dir / "index.html"
     path.write_text(html, encoding="utf-8")
     return path
 
 
-def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str:
+def render_homepage(
+    ai_items: list[SiteItem],
+    tool_items: list[SiteItem],
+    analytics_html: str = "",
+) -> str:
     kst = timezone(timedelta(hours=9), name="KST")
     today = datetime.now(UTC).astimezone(kst).strftime("%Y년 %m월 %d일")
     infra_items = _latest_first(ai_items[:5])
@@ -106,6 +110,7 @@ def render_homepage(ai_items: list[SiteItem], tool_items: list[SiteItem]) -> str
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI Master Times</title>
   <meta name="description" content="인공지능 마스터 과정용 주간 인공지능 업데이트와 도구 출시 소식">
+  {analytics_html}
   <style>
     :root {{
       color-scheme: light;
@@ -351,6 +356,42 @@ def _render_tags(item: SiteItem) -> str:
         return ""
     tags = "".join(f'<span class="tag">#{escape(tag)}</span>' for tag in item.tags[:5])
     return f'<div class="tags" aria-label="중요 키워드">{tags}</div>'
+
+
+def _render_analytics(settings: Settings) -> str:
+    provider = (settings.site_analytics_provider or "").strip().lower()
+    analytics_id = (settings.site_analytics_id or "").strip()
+    domain = (settings.site_analytics_domain or "").strip()
+
+    if provider in {"ga4", "google", "google-analytics"} and analytics_id:
+        safe_id = escape(analytics_id, quote=True)
+        return textwrap.dedent(
+            f"""
+            <script async src="https://www.googletagmanager.com/gtag/js?id={safe_id}"></script>
+            <script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){{dataLayer.push(arguments);}}
+              gtag('js', new Date());
+              gtag('config', '{safe_id}');
+            </script>
+            """
+        ).strip()
+
+    if provider == "goatcounter" and analytics_id:
+        safe_id = escape(analytics_id, quote=True)
+        return (
+            f'<script data-goatcounter="https://{safe_id}.goatcounter.com/count" '
+            'async src="//gc.zgo.at/count.js"></script>'
+        )
+
+    if provider == "plausible" and domain:
+        safe_domain = escape(domain, quote=True)
+        return (
+            f'<script defer data-domain="{safe_domain}" '
+            'src="https://plausible.io/js/script.js"></script>'
+        )
+
+    return ""
 
 
 def _localize_items(items: list[DigestItem], settings: Settings, context: str) -> list[SiteItem]:
