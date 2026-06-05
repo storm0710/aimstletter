@@ -180,34 +180,61 @@ def render_homepage(
     }}
     .newspaper {{
       display: grid;
-      grid-template-columns: 230px minmax(340px, .75fr) minmax(500px, 1.2fr);
+      grid-template-columns: 230px minmax(0, 1fr);
       gap: 28px;
       padding-top: 0;
       margin-top: 28px;
       border-top: 1px solid var(--rule);
       align-items: start;
     }}
+    .content-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px;
+      min-width: 0;
+    }}
     .column {{
       min-width: 0;
       padding-top: 22px;
     }}
-    .column + .column {{
+    .content-grid .column + .column {{
       border-left: 1px solid var(--rule);
       padding-left: 24px;
     }}
     .toc-column {{
       border-left: 0;
       padding-left: 0;
+      position: sticky;
+      top: 18px;
     }}
     .toc-list {{
       display: grid;
-      gap: 8px;
+      gap: 10px;
       font: 700 14px/1.45 Arial, "Noto Sans KR", sans-serif;
     }}
     .toc-list a {{
-      border-bottom: 1px solid var(--line);
-      padding: 7px 0;
+      border: 1px solid var(--line);
+      background: #fffaf0;
+      display: grid;
+      gap: 3px;
+      padding: 10px 11px;
       text-decoration: none;
+    }}
+    .toc-list a:hover,
+    .toc-list a:focus-visible {{
+      border-color: var(--rule);
+      outline: 0;
+    }}
+    .toc-number {{
+      color: var(--accent);
+      font: 800 12px/1.3 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .toc-label {{
+      font-size: 15px;
+    }}
+    .toc-desc {{
+      color: var(--muted);
+      font: 12px/1.45 Arial, "Noto Sans KR", sans-serif;
     }}
     .toc-note {{
       color: var(--muted);
@@ -235,6 +262,11 @@ def render_homepage(
     .article h3 {{
       font-size: 22px;
       line-height: 1.22;
+    }}
+    .title-date {{
+      color: var(--muted);
+      font: 700 13px/1.35 Arial, "Noto Sans KR", sans-serif;
+      white-space: nowrap;
     }}
     .article p {{
       color: #303030;
@@ -295,12 +327,16 @@ def render_homepage(
       font: 13px/1.5 Arial, "Noto Sans KR", sans-serif;
     }}
     @media (max-width: 840px) {{
-      .newspaper {{
+      .newspaper,
+      .content-grid {{
         grid-template-columns: 1fr;
       }}
-      .column + .column {{
+      .content-grid .column + .column {{
         border-left: 0;
         padding-left: 0;
+      }}
+      .toc-column {{
+        position: static;
       }}
       .topline {{
         flex-direction: column;
@@ -323,23 +359,25 @@ def render_homepage(
       <nav class="column toc-column" aria-label="상세 목차">
         <h2 class="section-title">목차</h2>
         <div class="toc-list">
-          <a href="work-skills/">업무 AI 스킬 업데이트 자세히 보기</a>
-          <a href="tools/">Claude와 AI 도구 업데이트 자세히 보기</a>
+          <a href="work-skills/"><span class="toc-number">1.</span><span class="toc-label">업무 AI 스킬 업데이트</span><span class="toc-desc">DBA·네트워크·서버 업무 적용 사례</span></a>
+          <a href="tools/"><span class="toc-number">2.</span><span class="toc-label">Claude와 AI 도구 업데이트</span><span class="toc-desc">Claude·OpenAI·Copilot 최신 변경</span></a>
         </div>
-        <p class="toc-note">각 게시판에서 항목을 클릭하면 번역된 상세 설명, 키포인트, 태그, 원문 링크를 확인할 수 있습니다.</p>
+        <p class="toc-note">번호를 눌러 게시판으로 이동하고, 항목 제목을 클릭하면 번역된 상세 설명과 원문 링크를 확인할 수 있습니다.</p>
       </nav>
-      <div class="column">
-        <h2 class="section-title">업무 AI 스킬 업데이트 · 상위 5개</h2>
-        {_render_articles(infra_items)}
-        <h2 class="section-title">기타 AI 동향 · 하위 5개</h2>
-        {_render_articles(other_items)}
-      </div>
-      <aside class="column">
-        <h2 class="section-title">Claude와 AI 도구 업데이트</h2>
-        <div class="tool-list">
-          {_render_tool_items(latest_tool_items)}
+      <div class="content-grid">
+        <div class="column">
+          <h2 class="section-title">업무 AI 스킬 업데이트 · 상위 5개</h2>
+          {_render_articles(infra_items)}
+          <h2 class="section-title">기타 AI 동향 · 하위 5개</h2>
+          {_render_articles(other_items)}
         </div>
-      </aside>
+        <aside class="column">
+          <h2 class="section-title">Claude와 AI 도구 업데이트</h2>
+          <div class="tool-list">
+            {_render_tool_items(latest_tool_items)}
+          </div>
+        </aside>
+      </div>
     </section>
     <footer>
       자동 생성: 깃허브 액션 · 출처 링크를 눌러 원문을 확인하세요. 커서는 공식 변경 이력 링크를 고정 노출하고, 웹 피드가 안정적인 도구는 최신 글을 자동 수집합니다.
@@ -357,11 +395,11 @@ def _render_articles(items: list[SiteItem]) -> str:
         (
             '<article class="article">'
             f'<div class="kicker">{escape(item.kind)} · {escape(item.source)}</div>'
-            f'<h3><a href="{escape(_detail_href(item))}">{escape(item.title)}</a></h3>'
+            f'<h3><a href="{escape(_detail_href(item))}">{escape(item.title)} '
+            f'<span class="title-date">({_format_date(item.published)})</span></a></h3>'
             f'<p>{escape(_clip(item.summary, 300))}</p>'
             f"{_render_key_points(item)}"
             f"{_render_tags(item)}"
-            f'<div class="meta">{_format_date(item.published)}</div>'
             "</article>"
         )
         for item in items
@@ -375,11 +413,11 @@ def _render_tool_items(items: list[SiteItem]) -> str:
         (
             '<article class="tool-item">'
             f'<div class="kicker">{escape(item.source)}</div>'
-            f'<h3><a href="{escape(_detail_href(item))}">{escape(item.title)}</a></h3>'
+            f'<h3><a href="{escape(_detail_href(item))}">{escape(item.title)} '
+            f'<span class="title-date">({_format_date(item.published)})</span></a></h3>'
             f'<p>{escape(_clip(item.summary, 210))}</p>'
             f"{_render_key_points(item)}"
             f"{_render_tags(item)}"
-            f'<div class="meta">{_format_date(item.published)}</div>'
             "</article>"
         )
         for item in items
@@ -452,8 +490,9 @@ def _render_board_page(
     cards = "\n".join(
         (
             '<article class="board-row">'
-            f'<div class="kicker">{escape(item.kind)} · {escape(item.source)} · {_format_date(item.published)}</div>'
-            f'<h2><a href="../{escape(_detail_href(item))}">{escape(item.title)}</a></h2>'
+            f'<div class="kicker">{escape(item.kind)} · {escape(item.source)}</div>'
+            f'<h2><a href="../{escape(_detail_href(item))}">{escape(item.title)} '
+            f'<span class="title-date">({_format_date(item.published)})</span></a></h2>'
             f'<p>{escape(_clip(item.summary, 280))}</p>'
             f"{_render_tags(item)}"
             "</article>"
@@ -486,8 +525,8 @@ def _render_detail_page(item: SiteItem, analytics_html: str, back_href: str) -> 
         body=f"""
         <a class="back-link" href="{escape(back_href)}">← 첫 화면</a>
         <article class="detail">
-          <div class="kicker">{escape(item.kind)} · {escape(item.source)} · {_format_date(item.published)}</div>
-          <h1>{escape(item.title)}</h1>
+          <div class="kicker">{escape(item.kind)} · {escape(item.source)}</div>
+          <h1>{escape(item.title)} <span class="title-date">({_format_date(item.published)})</span></h1>
           <p class="summary">{escape(item.summary)}</p>
           <section>
             <h2>상세 설명</h2>
@@ -545,6 +584,11 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       font-size: 24px;
       margin: 28px 0 12px;
       padding-bottom: 8px;
+    }}
+    .title-date {{
+      color: #5b5b5b;
+      font: 700 15px/1.35 Arial, "Noto Sans KR", sans-serif;
+      white-space: nowrap;
     }}
     p {{
       font-size: 17px;

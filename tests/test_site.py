@@ -42,10 +42,15 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     assert "최신 업데이트" in html
     assert "키포인트" in html
     assert "tag" in html
-    assert "업무 AI 스킬 업데이트 자세히 보기" in html
+    assert '<span class="toc-number">1.</span>' in html
+    assert '<span class="toc-number">2.</span>' in html
+    assert "업무 AI 스킬 업데이트" in html
     assert 'href="work-skills/"' in html
     assert 'href="tools/"' in html
     assert 'href="items/' in html
+    assert 'class="content-grid"' in html
+    assert "grid-template-columns: repeat(2, minmax(0, 1fr));" in html
+    assert "(2026-06-04)" in html
     assert "lead-image" not in html
     assert "watch-links" not in html
     assert "border-top: 1px solid var(--rule);" in html
@@ -98,6 +103,7 @@ def test_render_homepage_orders_each_section_newest_first() -> None:
 
     assert html.index("최신 항목") < html.index("오래된 항목")
     assert '<span class="tag">#AI 에이전트</span>' in html
+    assert "최신 항목 <span class=\"title-date\">(2026-06-05)</span>" in html
 
 
 def test_safe_tags_keeps_product_names_and_deduplicates() -> None:
