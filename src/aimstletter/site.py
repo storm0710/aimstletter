@@ -253,6 +253,7 @@ def render_homepage(
     }}
     .article {{
       border-bottom: 1px solid var(--line);
+      min-height: 316px;
       padding: 14px 0 16px;
     }}
     .section-title + .article,
@@ -308,6 +309,7 @@ def render_homepage(
     }}
     .tool-item {{
       border-bottom: 1px solid var(--line);
+      min-height: 316px;
       padding: 14px 0 16px;
     }}
     .tool-item h3 {{
@@ -337,6 +339,10 @@ def render_homepage(
       }}
       .toc-column {{
         position: static;
+      }}
+      .article,
+      .tool-item {{
+        min-height: 0;
       }}
       .topline {{
         flex-direction: column;
