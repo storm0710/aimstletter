@@ -1,6 +1,13 @@
 name: Weekly AI magazine site
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/weekly-pages.yml"
+      - "src/**"
+      - "pyproject.toml"
   workflow_dispatch:
   schedule:
     # 09:05 every Wednesday in Asia/Seoul.
