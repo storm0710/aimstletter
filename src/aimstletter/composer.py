@@ -10,6 +10,9 @@ from openai import OpenAI
 from aimstletter.fetchers import DigestItem
 
 
+OPENAI_REQUEST_TIMEOUT_SECONDS = 60.0
+
+
 def compose_digest(
     items: list[DigestItem],
     channel_label: str,
@@ -374,9 +377,10 @@ def _make_client(
         return OpenAI(
             api_key=azure_openai_api_key,
             base_url=f"{endpoint}/openai/v1/",
+            timeout=OPENAI_REQUEST_TIMEOUT_SECONDS,
         ), azure_openai_deployment
 
     if not openai_api_key:
         raise ValueError("OPENAI_API_KEY is required when Azure OpenAI is not configured.")
 
-    return OpenAI(api_key=openai_api_key), openai_model
+    return OpenAI(api_key=openai_api_key, timeout=OPENAI_REQUEST_TIMEOUT_SECONDS), openai_model
