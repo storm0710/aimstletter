@@ -8,6 +8,7 @@ from html import escape
 import json
 from pathlib import Path
 import re
+import sys
 import textwrap
 
 from aimstletter.composer import _make_client
@@ -788,7 +789,8 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
         localized = _parse_json_array(response.output_text)
         if _has_untranslated_items(localized):
             localized = _repair_korean_translation(client, model, source_block, context)
-    except Exception:  # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001
+        print(f"OpenAI localization failed for {context}: {exc}", file=sys.stderr)
         return [_fallback_korean_item(item) for item in items]
 
     if len(localized) != len(items):
