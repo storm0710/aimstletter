@@ -755,38 +755,35 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             azure_openai_api_key=settings.azure_openai_api_key,
             azure_openai_deployment=settings.azure_openai_deployment,
         )
-        response = client.responses.create(
-            model=model,
-            instructions=(
-                "Return only a JSON array. Each item must contain title, summary, detail, key_points, tags, "
-                "comparisons, and glossary. "
-                "Titles and summaries must be Korean sentences. Product names such as OpenAI, "
-                "Claude, Cursor, GitHub Copilot, Codex, Gartner, Endava, Harness, Warp, AWS, and Azure "
-                "must stay in English. "
-                "detail must be 2 to 4 Korean paragraphs that explain the item in more depth for a detail page. "
-                "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
-                "3 to 5 short Korean or product-name strings. comparisons must be an array of 0 to 3 Korean "
-                "strings comparing the item with adjacent tools or approaches when useful. For Endava items, "
-                "compare it with Harness Engineering if relevant: Endava is a consulting/transformation "
-                "approach, while Harness is a DevOps/software delivery automation platform. glossary must be "
-                "an array of 0 to 5 Korean strings formatted like 'Warp: ...' explaining difficult product "
-                "names, acronyms, or jargon as footnote-style notes. Emphasize practical work skills, "
-                "automation patterns, operational usage, and concrete tool adoption. Do not invent unsupported "
-                "facts."
-            ),
-            input=(
-                f"Translate and rewrite these {context} items for a Korean newsletter site. "
-                "Use natural Korean titles that preserve product and company names in English. "
-                "Summaries must be one concise Korean sentence and must make clear what a DBA, "
-                "network engineer, server operator, or technical mentor can do with it at work. "
-                "Key points should explain: what changed, where it can be used in work, and what "
-                "to watch before adoption. Add comparison notes when the item could be confused with "
-                "another tool or vendor, and add glossary notes for difficult words such as Warp, Harness, "
-                "Agent tasks REST API, CI/CD, SDK, or orchestration.\n\n"
-                f"{source_block}"
-            ),
+        instructions = (
+            "Return only a JSON array. Each item must contain title, summary, detail, key_points, tags, "
+            "comparisons, and glossary. "
+            "Titles and summaries must be Korean sentences. Product names such as OpenAI, "
+            "Claude, Cursor, GitHub Copilot, Codex, Gartner, Endava, Harness, Warp, AWS, and Azure "
+            "must stay in English. "
+            "detail must be 2 to 4 Korean paragraphs that explain the item in more depth for a detail page. "
+            "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
+            "3 to 5 short Korean or product-name strings. comparisons must be an array of 0 to 3 Korean "
+            "strings comparing the item with adjacent tools or approaches when useful. For Endava items, "
+            "compare it with Harness Engineering if relevant: Endava is a consulting/transformation "
+            "approach, while Harness is a DevOps/software delivery automation platform. glossary must be "
+            "an array of 0 to 5 Korean strings formatted like 'Warp: ...' explaining difficult product "
+            "names, acronyms, or jargon as footnote-style notes. Emphasize practical work skills, "
+            "automation patterns, operational usage, and concrete tool adoption. Do not invent unsupported "
+            "facts."
         )
-        localized = _parse_json_array(response.output_text)
+        input_text = (
+            f"Translate and rewrite these {context} items for a Korean newsletter site. "
+            "Use natural Korean titles that preserve product and company names in English. "
+            "Summaries must be one concise Korean sentence and must make clear what a DBA, "
+            "network engineer, server operator, or technical mentor can do with it at work. "
+            "Key points should explain: what changed, where it can be used in work, and what "
+            "to watch before adoption. Add comparison notes when the item could be confused with "
+            "another tool or vendor, and add glossary notes for difficult words such as Warp, Harness, "
+            "Agent tasks REST API, CI/CD, SDK, or orchestration.\n\n"
+            f"{source_block}"
+        )
+        localized = _parse_json_array(_generate_openai_text(client, model, instructions, input_text))
         if _has_untranslated_items(localized):
             localized = _repair_korean_translation(client, model, source_block, context)
     except Exception as exc:  # noqa: BLE001
@@ -829,28 +826,49 @@ def _repair_korean_translation(
     source_block: str,
     context: str,
 ) -> list[dict[str, object]]:
-    response = client.responses.create(
-        model=model,
-        instructions=(
-            "Return only a JSON array. Each item must contain title, summary, detail, key_points, tags, "
-            "comparisons, and glossary. "
-            "Translate English article titles and summaries into Korean. Product names may "
-            "remain in English, but English clauses or English explanatory sentences are not allowed. "
-            "detail must be 2 to 4 Korean paragraphs. "
-            "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
-            "3 to 5 short Korean or product-name strings. comparisons must be 0 to 3 Korean strings. "
-            "glossary must be 0 to 5 Korean strings formatted like 'Warp: ...'."
-        ),
-        input=(
-            f"The previous Korean localization for these {context} items contained untranslated "
-            "English. Rewrite them again. Examples: "
-            "'OpenAI named a Leader in enterprise coding agents by Gartner' should become "
-            "'OpenAI, 가트너 엔터프라이즈 코딩 에이전트 분야 리더로 선정'. "
-            "'OpenAI is named a leader...' should become a Korean sentence.\n\n"
-            f"{source_block}"
-        ),
+    instructions = (
+        "Return only a JSON array. Each item must contain title, summary, detail, key_points, tags, "
+        "comparisons, and glossary. "
+        "Translate English article titles and summaries into Korean. Product names may "
+        "remain in English, but English clauses or English explanatory sentences are not allowed. "
+        "detail must be 2 to 4 Korean paragraphs. "
+        "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
+        "3 to 5 short Korean or product-name strings. comparisons must be 0 to 3 Korean strings. "
+        "glossary must be 0 to 5 Korean strings formatted like 'Warp: ...'."
     )
-    return _parse_json_array(response.output_text)
+    input_text = (
+        f"The previous Korean localization for these {context} items contained untranslated "
+        "English. Rewrite them again. Examples: "
+        "'OpenAI named a Leader in enterprise coding agents by Gartner' should become "
+        "'OpenAI, 가트너 엔터프라이즈 코딩 에이전트 분야 리더로 선정'. "
+        "'OpenAI is named a leader...' should become a Korean sentence.\n\n"
+        f"{source_block}"
+    )
+    return _parse_json_array(_generate_openai_text(client, model, instructions, input_text))
+
+
+def _generate_openai_text(client: object, model: str, instructions: str, input_text: str) -> str:
+    try:
+        response = client.responses.create(
+            model=model,
+            instructions=instructions,
+            input=input_text,
+        )
+        return response.output_text
+    except Exception as exc:  # noqa: BLE001
+        print(f"OpenAI Responses API failed, trying chat completions: {exc}", file=sys.stderr)
+
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": instructions},
+            {"role": "user", "content": input_text},
+        ],
+    )
+    content = response.choices[0].message.content
+    if not content:
+        raise ValueError("OpenAI chat completions returned an empty response.")
+    return content
 
 
 def _has_untranslated_items(items: list[dict[str, object]]) -> bool:
