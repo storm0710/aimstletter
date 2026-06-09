@@ -849,26 +849,26 @@ def _repair_korean_translation(
 
 def _generate_openai_text(client: object, model: str, instructions: str, input_text: str) -> str:
     try:
-        response = client.responses.create(
+        response = client.chat.completions.create(
             model=model,
-            instructions=instructions,
-            input=input_text,
+            messages=[
+                {"role": "system", "content": instructions},
+                {"role": "user", "content": input_text},
+            ],
         )
-        return response.output_text
+        content = response.choices[0].message.content
+        if not content:
+            raise ValueError("OpenAI chat completions returned an empty response.")
+        return content
     except Exception as exc:  # noqa: BLE001
-        print(f"OpenAI Responses API failed, trying chat completions: {exc}", file=sys.stderr)
+        print(f"OpenAI chat completions failed, trying Responses API: {exc}", file=sys.stderr)
 
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=model,
-        messages=[
-            {"role": "system", "content": instructions},
-            {"role": "user", "content": input_text},
-        ],
+        instructions=instructions,
+        input=input_text,
     )
-    content = response.choices[0].message.content
-    if not content:
-        raise ValueError("OpenAI chat completions returned an empty response.")
-    return content
+    return response.output_text
 
 
 def _has_untranslated_items(items: list[dict[str, object]]) -> bool:
