@@ -109,6 +109,13 @@ def render_homepage(
     infra_items = _latest_first(ai_items[:5])
     other_items = _latest_first(ai_items[5:10])
     latest_tool_items = _latest_first(tool_items[:10])
+    return _render_dashboard_homepage(
+        today=today,
+        infra_items=infra_items,
+        other_items=other_items,
+        latest_tool_items=latest_tool_items,
+        analytics_html=analytics_html,
+    )
 
     return f"""<!doctype html>
 <html lang="ko">
@@ -446,6 +453,640 @@ def _render_tags(item: SiteItem) -> str:
         return ""
     tags = "".join(f'<span class="tag">#{escape(tag)}</span>' for tag in item.tags[:5])
     return f'<div class="tags" aria-label="중요 키워드">{tags}</div>'
+
+
+def _render_dashboard_homepage(
+    today: str,
+    infra_items: list[SiteItem],
+    other_items: list[SiteItem],
+    latest_tool_items: list[SiteItem],
+    analytics_html: str,
+) -> str:
+    all_items = [*infra_items, *other_items, *latest_tool_items]
+    automation_count = _count_keyword_items(all_items, ("agent", "automation", "workflow", "copilot", "codex"))
+    ops_count = _count_keyword_items(all_items, ("database", "network", "server", "security", "kubernetes", "cloud"))
+    tool_count = len(latest_tool_items)
+    lead_item = (infra_items or other_items or latest_tool_items)[0] if all_items else None
+    lead_title = lead_item.title if lead_item else "이번 주 AI 업데이트"
+    lead_summary = lead_item.summary if lead_item else "표시할 업데이트가 없습니다."
+    radar_nodes = _render_radar_nodes(all_items[:6])
+    work_rows = _render_dashboard_rows([*infra_items, *other_items[:3]], "work")
+    tool_cards = _render_dashboard_tool_cards(latest_tool_items[:5])
+
+    return f"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Master Dashboard</title>
+  <meta name="description" content="AI Master 과정 주간 AI 업무 업데이트 대시보드">
+  {analytics_html}
+  <style>
+    :root {{
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --nav: #eaf1fb;
+      --ink: #101828;
+      --muted: #667085;
+      --line: #d9e2ef;
+      --soft: #f7faff;
+      --brand: #050b18;
+      --accent: #087443;
+      --warn: #b54708;
+      --danger: #b42318;
+      --blue: #175cd3;
+      --shadow: 0 12px 30px rgba(16, 24, 40, .08);
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, "Noto Sans KR", sans-serif;
+    }}
+    a {{ color: inherit; text-decoration: none; }}
+    .app-shell {{
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr);
+    }}
+    .sidebar {{
+      background: var(--nav);
+      border-right: 1px solid var(--line);
+      padding: 22px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      min-height: 100vh;
+    }}
+    .brand h1 {{
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }}
+    .brand p {{
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }}
+    .nav-list {{
+      display: grid;
+      gap: 8px;
+    }}
+    .nav-item {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 0 12px;
+      border-radius: 4px;
+      color: #344054;
+      font-size: 14px;
+      font-weight: 700;
+    }}
+    .nav-item.active {{
+      background: var(--brand);
+      color: #ffffff;
+    }}
+    .nav-icon {{
+      width: 17px;
+      height: 17px;
+      display: grid;
+      place-items: center;
+      border: 1px solid currentColor;
+      border-radius: 3px;
+      font-size: 10px;
+      line-height: 1;
+    }}
+    .sidebar-footer {{
+      margin-top: auto;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }}
+    .main {{
+      min-width: 0;
+    }}
+    .topbar {{
+      height: 56px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 24px;
+    }}
+    .topbar h2 {{
+      margin: 0;
+      font-size: 18px;
+      white-space: nowrap;
+    }}
+    .search {{
+      flex: 1;
+      max-width: 520px;
+      height: 34px;
+      border: 1px solid #edf1f7;
+      background: #f3f6fb;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 12px;
+    }}
+    .top-actions {{
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #344054;
+      font-size: 15px;
+    }}
+    .avatar {{
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #ffd8bf;
+      border: 1px solid #ffb088;
+    }}
+    .dashboard {{
+      padding: 26px;
+      display: grid;
+      gap: 24px;
+    }}
+    .hero-grid {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(280px, .85fr);
+      gap: 24px;
+    }}
+    .radar-panel,
+    .metric-card,
+    .table-panel,
+    .tool-panel {{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }}
+    .radar-panel {{
+      min-height: 388px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }}
+    .panel-title {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }}
+    .panel-title h3 {{
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0;
+    }}
+    .panel-title span {{
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }}
+    .radar-map {{
+      position: relative;
+      min-height: 316px;
+      background:
+        radial-gradient(circle at 48% 50%, rgba(255,255,255,.20), transparent 0 4px, rgba(255,255,255,.08) 5px 5px, transparent 6px),
+        linear-gradient(135deg, rgba(255,255,255,.18) 1px, transparent 1px),
+        linear-gradient(45deg, rgba(255,255,255,.10) 1px, transparent 1px),
+        #5d6672;
+      background-size: 48px 48px, 34px 34px, 42px 42px, auto;
+      border: 1px solid #4a5360;
+      overflow: hidden;
+    }}
+    .radar-map::before,
+    .radar-map::after {{
+      content: "";
+      position: absolute;
+      inset: 12% 8%;
+      border-top: 1px solid rgba(255,255,255,.22);
+      transform: rotate(-16deg);
+    }}
+    .radar-map::after {{
+      inset: 36% 4%;
+      transform: rotate(22deg);
+    }}
+    .radar-node {{
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #050b18;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      font-size: 11px;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(0,0,0,.24);
+    }}
+    .radar-node.hot {{
+      background: #008a4c;
+    }}
+    .lead-card {{
+      position: absolute;
+      left: 30px;
+      bottom: 28px;
+      width: min(520px, calc(100% - 60px));
+      background: rgba(255,255,255,.94);
+      border: 1px solid rgba(255,255,255,.85);
+      padding: 16px;
+    }}
+    .lead-card strong {{
+      display: block;
+      font-size: 18px;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }}
+    .lead-card p {{
+      margin: 0;
+      color: #344054;
+      font-size: 13px;
+      line-height: 1.55;
+    }}
+    .metrics {{
+      display: grid;
+      gap: 18px;
+    }}
+    .metric-card {{
+      padding: 20px;
+      border-left: 4px solid var(--accent);
+      min-height: 118px;
+    }}
+    .metric-card.warn {{ border-left-color: var(--warn); }}
+    .metric-card.blue {{ border-left-color: var(--blue); }}
+    .metric-label {{
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }}
+    .metric-value {{
+      margin-top: 8px;
+      font-size: 34px;
+      font-weight: 900;
+      line-height: 1;
+    }}
+    .metric-copy {{
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }}
+    .lower-grid {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(300px, .9fr);
+      gap: 24px;
+      align-items: start;
+    }}
+    .table-panel,
+    .tool-panel {{
+      padding: 18px;
+    }}
+    .tabs {{
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }}
+    .tab {{
+      min-height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      background: #f8fbff;
+      color: #344054;
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 800;
+    }}
+    .tab.active {{
+      background: var(--brand);
+      color: #ffffff;
+      border-color: var(--brand);
+    }}
+    .update-table {{
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }}
+    .update-table th {{
+      color: var(--muted);
+      font-size: 10px;
+      text-align: left;
+      text-transform: uppercase;
+      padding: 12px 8px;
+      border-bottom: 1px solid var(--line);
+    }}
+    .update-table td {{
+      padding: 14px 8px;
+      border-bottom: 1px solid #edf1f7;
+      vertical-align: top;
+      font-size: 13px;
+      line-height: 1.45;
+    }}
+    .update-title {{
+      display: block;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.35;
+      margin-bottom: 4px;
+    }}
+    .update-summary {{
+      color: var(--muted);
+      font-size: 12px;
+    }}
+    .status {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent);
+      font-weight: 800;
+      white-space: nowrap;
+    }}
+    .status::before {{
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }}
+    .badge {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 0 7px;
+      border: 1px solid #d0e4ff;
+      background: #eff6ff;
+      color: #175cd3;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }}
+    .action-btn {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      padding: 0 10px;
+      background: #050b18;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }}
+    .tool-stack {{
+      display: grid;
+      gap: 12px;
+    }}
+    .tool-card {{
+      border: 1px solid #edf1f7;
+      background: var(--soft);
+      padding: 14px;
+    }}
+    .tool-card h4 {{
+      margin: 6px 0 6px;
+      font-size: 15px;
+      line-height: 1.35;
+    }}
+    .tool-card p {{
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }}
+    @media (max-width: 980px) {{
+      .app-shell {{
+        grid-template-columns: 1fr;
+      }}
+      .sidebar {{
+        min-height: auto;
+        position: static;
+      }}
+      .nav-list {{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }}
+      .hero-grid,
+      .lower-grid {{
+        grid-template-columns: 1fr;
+      }}
+    }}
+    @media (max-width: 640px) {{
+      .topbar {{
+        height: auto;
+        padding: 14px 16px;
+        flex-wrap: wrap;
+      }}
+      .dashboard {{
+        padding: 16px;
+      }}
+      .nav-list {{
+        grid-template-columns: 1fr;
+      }}
+      .update-table,
+      .update-table tbody,
+      .update-table tr,
+      .update-table td {{
+        display: block;
+        width: 100%;
+      }}
+      .update-table thead {{
+        display: none;
+      }}
+    }}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="대시보드 내비게이션">
+      <div class="brand">
+        <h1>AI Master</h1>
+        <p>Weekly Ops Admin</p>
+      </div>
+      <nav class="nav-list">
+        <a class="nav-item active" href="#"><span class="nav-icon">D</span>Dashboard</a>
+        <a class="nav-item" href="work-skills/"><span class="nav-icon">W</span>Work Skills</a>
+        <a class="nav-item" href="tools/"><span class="nav-icon">T</span>AI Tools</a>
+        <a class="nav-item" href="#updates"><span class="nav-icon">R</span>Reports</a>
+      </nav>
+      <div class="sidebar-footer">
+        <strong>Admin User</strong><br>
+        AI Master Curator<br>
+        {escape(today)}
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <h2>Delivery Dashboard</h2>
+        <div class="search">Search feeds, tools, papers, or workflows...</div>
+        <div class="top-actions" aria-label="빠른 상태">
+          <span>!</span><span>?</span><span>*</span><span class="avatar"></span>
+        </div>
+      </header>
+      <section class="dashboard">
+        <div class="hero-grid">
+          <section class="radar-panel" aria-label="AI 업데이트 레이더">
+            <div class="panel-title">
+              <h3>Weekly AI Signal Radar</h3>
+              <span>{escape(today)}</span>
+            </div>
+            <div class="radar-map">
+              {radar_nodes}
+              <div class="lead-card">
+                <strong>{escape(_clip(lead_title, 90))}</strong>
+                <p>{escape(_clip(lead_summary, 170))}</p>
+              </div>
+            </div>
+          </section>
+          <aside class="metrics" aria-label="주간 지표">
+            <div class="metric-card">
+              <div class="metric-label">Work-ready signals</div>
+              <div class="metric-value">{len(infra_items)}</div>
+              <div class="metric-copy">DBA, 네트워크, 서버 운영에 바로 연결할 후보 업데이트입니다.</div>
+            </div>
+            <div class="metric-card warn">
+              <div class="metric-label">Automation signals</div>
+              <div class="metric-value">{automation_count}</div>
+              <div class="metric-copy">에이전트, 워크플로, 코딩 자동화와 관련된 항목입니다.</div>
+            </div>
+            <div class="metric-card blue">
+              <div class="metric-label">Tool updates</div>
+              <div class="metric-value">{tool_count}</div>
+              <div class="metric-copy">Claude, OpenAI, Copilot, Cursor 계열 도구 변경입니다.</div>
+            </div>
+          </aside>
+        </div>
+        <div class="lower-grid" id="updates">
+          <section class="table-panel">
+            <div class="panel-title">
+              <h3>Active Work Skill Updates</h3>
+              <div class="tabs">
+                <span class="tab active">All Updates</span>
+                <span class="tab">In Review</span>
+                <span class="tab">Operations</span>
+              </div>
+            </div>
+            <table class="update-table">
+              <thead>
+                <tr>
+                  <th style="width:42%">Update Name</th>
+                  <th style="width:19%">Status</th>
+                  <th style="width:23%">Signal</th>
+                  <th style="width:16%">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {work_rows}
+              </tbody>
+            </table>
+          </section>
+          <aside class="tool-panel">
+            <div class="panel-title">
+              <h3>AI Tool Dispatch</h3>
+              <span>{len(latest_tool_items)} items</span>
+            </div>
+            <div class="tool-stack">
+              {tool_cards}
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
+"""
+
+
+def _render_dashboard_rows(items: list[SiteItem], mode: str) -> str:
+    if not items:
+        return '<tr><td colspan="4">표시할 업데이트가 없습니다.</td></tr>'
+    rows = []
+    for item in items[:8]:
+        rows.append(
+            "<tr>"
+            f'<td><a class="update-title" href="{escape(_detail_href(item))}">{escape(_clip(item.title, 84))}</a>'
+            f'<span class="update-summary">{escape(_clip(item.summary, 96))}</span></td>'
+            f'<td><span class="status">{escape(_dashboard_status(item))}</span></td>'
+            f'<td><span class="badge">{escape(_dashboard_signal(item, mode))}</span></td>'
+            f'<td><a class="action-btn" href="{escape(_detail_href(item))}">Review</a></td>'
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
+def _render_dashboard_tool_cards(items: list[SiteItem]) -> str:
+    if not items:
+        return '<p class="update-summary">표시할 도구 업데이트가 없습니다.</p>'
+    return "\n".join(
+        (
+            '<article class="tool-card">'
+            f'<div class="kicker">{escape(item.source)} · {_format_date(item.published)}</div>'
+            f'<h4><a href="{escape(_detail_href(item))}">{escape(_clip(item.title, 78))}</a></h4>'
+            f'<p>{escape(_clip(item.summary, 110))}</p>'
+            "</article>"
+        )
+        for item in items
+    )
+
+
+def _render_radar_nodes(items: list[SiteItem]) -> str:
+    positions = ((22, 28), (55, 22), (72, 47), (38, 58), (18, 72), (64, 76))
+    nodes = []
+    for index, item in enumerate(items[:6]):
+        left, top = positions[index]
+        hot_class = " hot" if index in (1, 2) else ""
+        label = _dashboard_node_label(item)
+        nodes.append(
+            f'<a class="radar-node{hot_class}" href="{escape(_detail_href(item))}" '
+            f'style="left:{left}%;top:{top}%;" title="{escape(item.title)}">{escape(label)}</a>'
+        )
+    return "\n".join(nodes)
+
+
+def _dashboard_node_label(item: SiteItem) -> str:
+    for tag in item.tags:
+        cleaned = re.sub(r"[^A-Za-z0-9가-힣]", "", tag)
+        if cleaned:
+            return cleaned[:2].upper()
+    return item.source[:2].upper()
+
+
+def _dashboard_status(item: SiteItem) -> str:
+    text = f"{item.title} {item.summary} {' '.join(item.tags)}".lower()
+    if any(keyword in text for keyword in ("security", "risk", "incident", "보안")):
+        return "Watch"
+    if any(keyword in text for keyword in ("release", "update", "support", "add")):
+        return "New"
+    return "Review"
+
+
+def _dashboard_signal(item: SiteItem, mode: str) -> str:
+    if item.tags:
+        return item.tags[0]
+    return "AI 업데이트" if mode == "work" else "도구 변경"
+
+
+def _count_keyword_items(items: list[SiteItem], keywords: tuple[str, ...]) -> int:
+    count = 0
+    for item in items:
+        text = f"{item.title} {item.summary} {' '.join(item.tags)}".lower()
+        if any(keyword in text for keyword in keywords):
+            count += 1
+    return count
 
 
 def _write_secondary_pages(
