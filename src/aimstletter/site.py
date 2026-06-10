@@ -1084,20 +1084,44 @@ def _fallback_display_title(item: DigestItem) -> str:
 
 
 def _fallback_display_summary(item: DigestItem) -> str:
-    summary = _clean_plain_text(item.summary)
-    if summary:
-        return f"원문 요약: {_truncate_text(summary, 180)}"
-    return "원문 링크에서 세부 내용을 확인해 업무 적용 가능성을 검토하세요."
+    text = f"{item.title} {item.summary} {item.source}".lower()
+    topic = _fallback_korean_topic(text)
+    action = _fallback_korean_action(text)
+    source = _korean_source_name(item.source)
+    return f"{source}에 공개된 {topic} 관련 소식입니다. {action}"
+
+
+def _fallback_korean_topic(text: str) -> str:
+    topics = (
+        (("copilot", "github", "coding"), "개발 도구와 코딩 자동화"),
+        (("claude", "anthropic"), "Claude와 생성형 AI 도구"),
+        (("openai", "codex", "gpt"), "OpenAI 도구와 AI 에이전트"),
+        (("cursor", "warp"), "AI 개발 환경"),
+        (("database", "sql", "query"), "데이터베이스 업무 AI 활용"),
+        (("network", "latency", "traffic"), "네트워크 운영 AI 활용"),
+        (("security", "vulnerability", "risk"), "보안과 리스크 관리"),
+        (("server", "kubernetes", "cloud", "devops", "sre"), "서버 운영과 자동화"),
+        (("agent", "workflow", "automation"), "AI 에이전트와 업무 자동화"),
+        (("enterprise", "business", "customer"), "기업 업무 적용"),
+    )
+    for keywords, label in topics:
+        if any(keyword in text for keyword in keywords):
+            return label
+    return "AI 업데이트"
+
+
+def _fallback_korean_action(text: str) -> str:
+    if any(keyword in text for keyword in ("release", "launch", "add", "support", "update")):
+        return "새 기능이나 변경 사항이 업무 흐름에 어떤 영향을 주는지 확인해 보세요."
+    if any(keyword in text for keyword in ("paper", "arxiv", "research", "study", "benchmark")):
+        return "연구 결과가 실제 운영, 자동화, 의사결정 개선에 연결될 수 있는지 검토해 보세요."
+    if any(keyword in text for keyword in ("security", "risk", "vulnerability", "incident")):
+        return "도입 전 보안 영향과 운영 리스크를 함께 점검하는 것이 좋습니다."
+    return "출처 링크에서 세부 내용을 확인하고 수업 토론이나 업무 적용 아이디어로 활용하세요."
 
 
 def _clean_plain_text(text: str) -> str:
     return re.sub(r"\s+", " ", text or "").strip()
-
-
-def _truncate_text(text: str, limit: int) -> str:
-    if len(text) <= limit:
-        return text
-    return text[: limit - 1].rstrip() + "..."
 
 
 def _parse_json_array(text: str) -> list[dict[str, object]]:
