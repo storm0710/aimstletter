@@ -869,6 +869,8 @@ def _generate_openai_text(client: object, model: str, instructions: str, input_t
         return content
     except Exception as exc:  # noqa: BLE001
         print(f"OpenAI chat completions failed, trying Responses API: {exc}", file=sys.stderr)
+        if "timed out" in str(exc).lower():
+            raise
 
     response = client.responses.create(
         model=model,
