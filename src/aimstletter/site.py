@@ -632,8 +632,8 @@ def _render_dashboard_homepage(
       box-shadow: var(--shadow);
     }}
     .radar-panel {{
-      min-height: 388px;
-      padding: 18px;
+      min-height: 408px;
+      padding: 26px;
       position: relative;
       overflow: hidden;
     }}
@@ -656,65 +656,108 @@ def _render_dashboard_homepage(
     }}
     .radar-map {{
       position: relative;
-      min-height: 316px;
+      min-height: 326px;
       background:
-        radial-gradient(circle at 48% 50%, rgba(255,255,255,.20), transparent 0 4px, rgba(255,255,255,.08) 5px 5px, transparent 6px),
-        linear-gradient(135deg, rgba(255,255,255,.18) 1px, transparent 1px),
-        linear-gradient(45deg, rgba(255,255,255,.10) 1px, transparent 1px),
-        #5d6672;
-      background-size: 48px 48px, 34px 34px, 42px 42px, auto;
-      border: 1px solid #4a5360;
+        linear-gradient(rgba(16,24,40,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,24,40,.045) 1px, transparent 1px),
+        radial-gradient(circle at 22% 28%, rgba(23,92,211,.08), transparent 0 1px, transparent 2px),
+        radial-gradient(circle at 76% 64%, rgba(8,116,67,.08), transparent 0 1px, transparent 2px),
+        #fbfdff;
+      background-size: 34px 34px, 34px 34px, 100% 100%, 100% 100%, auto;
+      border: 1px solid #e4ebf5;
       overflow: hidden;
     }}
     .radar-map::before,
     .radar-map::after {{
       content: "";
       position: absolute;
-      inset: 12% 8%;
-      border-top: 1px solid rgba(255,255,255,.22);
-      transform: rotate(-16deg);
+      inset: 26px;
+      border: 1px solid rgba(16,24,40,.08);
+      pointer-events: none;
+      transform: none;
     }}
     .radar-map::after {{
-      inset: 36% 4%;
-      transform: rotate(22deg);
+      inset: 64px 92px 74px 72px;
+      border-color: rgba(23,92,211,.10);
     }}
     .radar-node {{
       position: absolute;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+      width: 26px;
+      height: 26px;
       display: grid;
       place-items: center;
-      background: #050b18;
-      color: #ffffff;
-      border: 2px solid #ffffff;
-      font-size: 11px;
+      background: #ffffff;
+      color: #344054;
+      border: 1px solid #ccd6e5;
+      font-size: 9px;
       font-weight: 900;
-      box-shadow: 0 8px 18px rgba(0,0,0,.24);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.72);
     }}
     .radar-node.hot {{
-      background: #008a4c;
+      background: #f3fbf6;
+      border-color: #8fd8b4;
+      color: #087443;
     }}
     .lead-card {{
       position: absolute;
-      left: 30px;
-      bottom: 28px;
-      width: min(520px, calc(100% - 60px));
-      background: rgba(255,255,255,.94);
-      border: 1px solid rgba(255,255,255,.85);
-      padding: 16px;
+      left: 52px;
+      right: 52px;
+      bottom: 42px;
+      width: auto;
+      background: rgba(255,255,255,.88);
+      border: 1px solid #e4ebf5;
+      padding: 22px;
     }}
     .lead-card strong {{
       display: block;
-      font-size: 18px;
-      line-height: 1.25;
-      margin-bottom: 8px;
+      font-size: 16px;
+      line-height: 1.32;
+      margin-bottom: 10px;
     }}
     .lead-card p {{
       margin: 0;
-      color: #344054;
-      font-size: 13px;
+      color: var(--muted);
+      font-size: 12px;
       line-height: 1.55;
+    }}
+    .telemetry-grid {{
+      position: absolute;
+      top: 46px;
+      right: 44px;
+      display: grid;
+      grid-template-columns: repeat(9, 10px);
+      grid-auto-rows: 10px;
+      gap: 7px;
+      opacity: .72;
+    }}
+    .telemetry-dot {{
+      border: 1px solid #d8e0ec;
+      background: #ffffff;
+    }}
+    .telemetry-dot.on {{
+      background: #101828;
+      border-color: #101828;
+    }}
+    .telemetry-line {{
+      position: absolute;
+      left: 48px;
+      right: 48px;
+      top: 48%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(16,24,40,.26), transparent);
+    }}
+    .telemetry-axis {{
+      position: absolute;
+      left: 48px;
+      bottom: 96px;
+      right: 48px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      color: #98a2b3;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
     }}
     .metrics {{
       display: grid;
@@ -940,10 +983,13 @@ def _render_dashboard_homepage(
         <div class="hero-grid">
           <section class="radar-panel" aria-label="AI 업데이트 레이더">
             <div class="panel-title">
-              <h3>Weekly AI Signal Radar</h3>
+              <h3>Turn signals into focus</h3>
               <span>{escape(today)}</span>
             </div>
             <div class="radar-map">
+              <div class="telemetry-grid" aria-hidden="true">{_render_telemetry_dots()}</div>
+              <div class="telemetry-line" aria-hidden="true"></div>
+              <div class="telemetry-axis" aria-hidden="true"><span>Input</span><span>Cluster</span><span>Rank</span><span>Review</span><span>Dispatch</span></div>
               {radar_nodes}
               <div class="lead-card">
                 <strong>{escape(_clip(lead_title, 90))}</strong>
@@ -1055,6 +1101,14 @@ def _render_radar_nodes(items: list[SiteItem]) -> str:
             f'style="left:{left}%;top:{top}%;" title="{escape(item.title)}">{escape(label)}</a>'
         )
     return "\n".join(nodes)
+
+
+def _render_telemetry_dots() -> str:
+    active = {2, 7, 14, 18, 25, 31, 38, 44, 51, 58, 66, 72}
+    return "".join(
+        f'<span class="telemetry-dot{" on" if index in active else ""}"></span>'
+        for index in range(81)
+    )
 
 
 def _dashboard_node_label(item: SiteItem) -> str:
