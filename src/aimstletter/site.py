@@ -455,6 +455,178 @@ def _render_tags(item: SiteItem) -> str:
     return f'<div class="tags" aria-label="중요 키워드">{tags}</div>'
 
 
+def _render_romer_homepage(
+    today: str,
+    infra_items: list[SiteItem],
+    other_items: list[SiteItem],
+    latest_tool_items: list[SiteItem],
+    analytics_html: str,
+) -> str:
+    all_items = [*infra_items, *other_items, *latest_tool_items]
+    automation_count = _count_keyword_items(
+        all_items, ("agent", "automation", "workflow", "copilot", "codex")
+    )
+    ops_count = _count_keyword_items(
+        all_items, ("database", "network", "server", "security", "kubernetes", "cloud")
+    )
+    lead_item = (infra_items or other_items or latest_tool_items)[0] if all_items else None
+    lead_title = lead_item.title if lead_item else "이번 주 AI 업데이트"
+    lead_summary = lead_item.summary if lead_item else "표시할 업데이트가 없습니다."
+    rows = _render_dashboard_rows([*infra_items, *other_items[:2]], "work")
+    tasks = _render_command_tasks(latest_tool_items[:4])
+    return f"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Master Command Dashboard</title>
+  <meta name="description" content="AI Master 주간 AI 업무 업데이트 command dashboard">
+  {analytics_html}
+  <style>
+    :root {{
+      color-scheme: dark;
+      --bg: #030507;
+      --panel: #080b10;
+      --panel-2: #0c1017;
+      --ink: #f4f7fb;
+      --muted: #8b94a7;
+      --line: rgba(177, 194, 224, .16);
+      --line-strong: rgba(210, 224, 250, .28);
+      --blue: #7aa7ff;
+      --lime: #b8ff72;
+      --orange: #ffb86b;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      background:
+        radial-gradient(circle at 50% 0, rgba(122,167,255,.12), transparent 0 34%),
+        var(--bg);
+      color: var(--ink);
+      font-family: Arial, "Noto Sans KR", sans-serif;
+    }}
+    a {{ color: inherit; text-decoration: none; }}
+    .site {{ width: min(1160px, calc(100% - 34px)); margin: 0 auto; padding: 16px 0 72px; }}
+    .nav {{
+      height: 46px; display: flex; align-items: center; gap: 24px;
+      border-bottom: 1px solid var(--line); color: #c3ccda; font-size: 12px; font-weight: 700;
+    }}
+    .logo {{ display: inline-flex; align-items: center; gap: 8px; margin-right: 24px; color: #fff; font-weight: 900; }}
+    .logo-mark {{ width: 14px; height: 14px; border-radius: 3px; background: linear-gradient(135deg, var(--lime), var(--blue)); }}
+    .nav-links {{ display: flex; align-items: center; gap: 18px; flex: 1; }}
+    .nav a.active {{ color: var(--blue); }}
+    .nav-actions {{ margin-left: auto; display: flex; align-items: center; gap: 14px; }}
+    .btn {{
+      min-height: 32px; display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid var(--line-strong); padding: 0 13px; font-size: 12px; font-weight: 900;
+    }}
+    .btn.primary {{ background: #fff; color: #05070b; border-color: #fff; }}
+    .hero {{ padding: 74px 0 28px; }}
+    .hero h1 {{ margin: 0; max-width: 720px; font-size: clamp(44px, 7vw, 78px); line-height: .91; letter-spacing: 0; }}
+    .hero p {{ max-width: 520px; margin: 18px 0 0; color: var(--muted); font-size: 14px; line-height: 1.45; }}
+    .hero-actions {{ display: flex; gap: 12px; margin-top: 28px; }}
+    .mockup-wrap {{
+      margin-top: 12px; display: grid; grid-template-columns: minmax(0, 1fr) 286px; gap: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
+      border: 1px solid var(--line); box-shadow: 0 30px 100px rgba(0,0,0,.5); padding: 14px;
+    }}
+    .command {{ display: grid; grid-template-columns: 150px minmax(0,1fr); min-height: 432px; border: 1px solid var(--line); background: #070a0f; }}
+    .command-side {{ border-right: 1px solid var(--line); padding: 16px 12px; color: var(--muted); font-size: 11px; }}
+    .command-side strong {{ display: block; color: #fff; margin-bottom: 14px; }}
+    .side-link {{ display: block; padding: 8px 7px; border: 1px solid transparent; }}
+    .side-link.active {{ color: #fff; background: rgba(122,167,255,.10); border-color: var(--line); }}
+    .command-main {{ padding: 16px; }}
+    .metric-strip {{ display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }}
+    .mini-metric {{ border: 1px solid var(--line); background: #090d14; padding: 11px; min-height: 72px; }}
+    .mini-metric span {{ color: var(--muted); display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; }}
+    .mini-metric strong {{ display: block; margin-top: 8px; color: #fff; font-size: 20px; }}
+    .mini-metric em {{ color: var(--lime); font-size: 10px; font-style: normal; }}
+    .signal-chart {{
+      margin-top: 16px; height: 154px; border: 1px solid var(--line);
+      background: linear-gradient(rgba(122,167,255,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(122,167,255,.06) 1px, transparent 1px), #05080d;
+      background-size: 40px 32px; position: relative; overflow: hidden;
+    }}
+    .signal-chart::before {{
+      content: ""; position: absolute; left: 16px; right: 16px; bottom: 36px; height: 80px;
+      background: linear-gradient(174deg, transparent 0 18%, rgba(122,167,255,.9) 19% 20%, transparent 21% 100%);
+    }}
+    .signal-chart::after {{
+      content: ""; position: absolute; right: 18px; bottom: 34px; width: 1px; height: 76px;
+      background: var(--blue); box-shadow: 0 0 18px rgba(122,167,255,.7);
+    }}
+    .command-grid {{ margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }}
+    .command-card {{ border: 1px solid var(--line); background: #090d14; padding: 12px; min-height: 84px; }}
+    .command-card h3 {{ margin: 0 0 7px; color: #fff; font-size: 13px; }}
+    .command-card p {{ margin: 0; color: var(--muted); font-size: 11px; line-height: 1.45; }}
+    .ops-panel {{ border: 1px solid var(--line); background: #070a0f; min-height: 432px; padding: 16px; }}
+    .ops-panel h2 {{ margin: 0 0 14px; color: #fff; font-size: 14px; }}
+    .task-list {{ display: grid; gap: 12px; }}
+    .task {{ border-bottom: 1px solid var(--line); padding-bottom: 12px; }}
+    .task strong {{ display: block; color: #fff; font-size: 12px; line-height: 1.4; }}
+    .task span {{ display: block; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.45; }}
+    .focus-line {{ text-align: center; margin: 26px auto 0; max-width: 650px; color: #fff; font-size: clamp(22px, 3vw, 34px); line-height: 1.03; font-weight: 900; }}
+    .data-section {{ margin-top: 42px; border-top: 1px solid var(--line); padding-top: 22px; }}
+    .section-head {{ display: flex; justify-content: space-between; gap: 18px; align-items: end; margin-bottom: 14px; }}
+    .section-head h2 {{ margin: 0; color: #fff; font-size: 18px; }}
+    .section-head p {{ margin: 0; color: var(--muted); font-size: 12px; }}
+    .update-table {{ width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--line); background: #070a0f; }}
+    .update-table th {{ color: var(--muted); font-size: 10px; text-align: left; text-transform: uppercase; padding: 12px 8px; border-bottom: 1px solid var(--line); }}
+    .update-table td {{ padding: 14px 8px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 13px; line-height: 1.45; }}
+    .update-title {{ display: block; color: #fff; font-size: 14px; font-weight: 900; line-height: 1.35; margin-bottom: 4px; }}
+    .update-summary {{ color: var(--muted); font-size: 12px; }}
+    .status {{ display: inline-flex; align-items: center; gap: 6px; color: var(--lime); font-weight: 800; white-space: nowrap; }}
+    .status::before {{ content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }}
+    .badge {{ display: inline-flex; align-items: center; min-height: 22px; padding: 0 7px; border: 1px solid rgba(122,167,255,.32); background: rgba(122,167,255,.08); color: var(--blue); font-size: 11px; font-weight: 800; }}
+    .action-btn {{ display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 0 10px; background: #fff; color: #05070b; font-size: 11px; font-weight: 900; text-transform: uppercase; }}
+    @media (max-width: 960px) {{ .mockup-wrap, .command {{ grid-template-columns: 1fr; }} .command-side {{ border-right: 0; border-bottom: 1px solid var(--line); }} .metric-strip, .command-grid {{ grid-template-columns: 1fr 1fr; }} .nav-links {{ display: none; }} }}
+    @media (max-width: 640px) {{ .hero {{ padding-top: 46px; }} .mockup-wrap {{ padding: 10px; }} .metric-strip, .command-grid {{ grid-template-columns: 1fr; }} .update-table, .update-table tbody, .update-table tr, .update-table td {{ display: block; width: 100%; }} .update-table thead {{ display: none; }} }}
+  </style>
+</head>
+<body>
+  <main class="site">
+    <header class="nav">
+      <a class="logo" href="#"><span class="logo-mark"></span><span>AIMST</span></a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="active" href="#">Platform</a><a href="work-skills/">Dashboards</a><a href="tools/">Automation</a><a href="#updates">Reports</a><a href="tools/">Resources</a><a href="#updates">Contact</a>
+      </nav>
+      <div class="nav-actions"><a href="#updates">Login</a><a class="btn primary" href="tools/">Start here</a></div>
+    </header>
+    <section class="hero">
+      <h1>The command dashboard for focused AI teams</h1>
+      <p>Turn scattered AI signals, tool releases, and operating notes into one calm weekly command center for practical teams.</p>
+      <div class="hero-actions"><a class="btn primary" href="#updates">Get started</a><a class="btn" href="tools/">Book a demo</a></div>
+    </section>
+    <section class="mockup-wrap" aria-label="AI command dashboard preview">
+      <div class="command">
+        <aside class="command-side"><strong>AI OPS</strong><span class="side-link active">Overview</span><span class="side-link">Signals</span><span class="side-link">Operations</span><span class="side-link">AI Tools</span><span class="side-link">Models</span><span class="side-link">Reports</span><span class="side-link">Automations</span></aside>
+        <div class="command-main">
+          <div class="metric-strip">
+            <div class="mini-metric"><span>Work signals</span><strong>{len(infra_items)}</strong><em>active</em></div>
+            <div class="mini-metric"><span>Automation</span><strong>{automation_count}</strong><em>agent-ready</em></div>
+            <div class="mini-metric"><span>Ops layer</span><strong>{ops_count}</strong><em>tracked</em></div>
+            <div class="mini-metric"><span>AI tools</span><strong>{len(latest_tool_items)}</strong><em>fresh</em></div>
+          </div>
+          <div class="signal-chart" aria-hidden="true"></div>
+          <div class="command-grid">
+            <div class="command-card"><h3>{escape(_clip(lead_title, 72))}</h3><p>{escape(_clip(lead_summary, 150))}</p></div>
+            <div class="command-card"><h3>Target workflow</h3><p>Prioritize database, network, server, and tool updates that can become training or operating routines.</p></div>
+          </div>
+        </div>
+      </div>
+      <aside class="ops-panel"><h2>Team briefing</h2><div class="task-list">{tasks}</div></aside>
+    </section>
+    <p class="focus-line">Operating rhythm, simplified. The architecture of a focused AI team.</p>
+    <section class="data-section" id="updates">
+      <div class="section-head"><h2>Weekly signal queue</h2><p>{escape(today)} · automatically collected from trusted feeds</p></div>
+      <table class="update-table"><thead><tr><th style="width:42%">Update Name</th><th style="width:19%">Status</th><th style="width:23%">Signal</th><th style="width:16%">Action</th></tr></thead><tbody>{rows}</tbody></table>
+    </section>
+  </main>
+</body>
+</html>
+"""
+
+
 def _render_dashboard_homepage(
     today: str,
     infra_items: list[SiteItem],
@@ -462,6 +634,8 @@ def _render_dashboard_homepage(
     latest_tool_items: list[SiteItem],
     analytics_html: str,
 ) -> str:
+    return _render_romer_homepage(today, infra_items, other_items, latest_tool_items, analytics_html)
+
     all_items = [*infra_items, *other_items, *latest_tool_items]
     automation_count = _count_keyword_items(all_items, ("agent", "automation", "workflow", "copilot", "codex"))
     ops_count = _count_keyword_items(all_items, ("database", "network", "server", "security", "kubernetes", "cloud"))
@@ -1072,6 +1246,20 @@ def _render_dashboard_rows(items: list[SiteItem], mode: str) -> str:
             "</tr>"
         )
     return "\n".join(rows)
+
+
+def _render_command_tasks(items: list[SiteItem]) -> str:
+    if not items:
+        return '<article class="task"><strong>No tool updates</strong><span>새 도구 업데이트가 없습니다.</span></article>'
+    return "\n".join(
+        (
+            '<article class="task">'
+            f'<strong><a href="{escape(_detail_href(item))}">{escape(_clip(item.title, 72))}</a></strong>'
+            f'<span>{escape(_clip(item.summary, 120))}</span>'
+            "</article>"
+        )
+        for item in items
+    )
 
 
 def _render_dashboard_tool_cards(items: list[SiteItem]) -> str:
