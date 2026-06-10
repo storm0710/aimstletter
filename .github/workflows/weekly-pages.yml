@@ -39,8 +39,7 @@ jobs:
       - name: Build AI magazine site
         env:
           PYTHONUTF8: "1"
-          DIGEST_CHANNEL_LABEL: AI마스터
-          AIMSTLETTER_REQUIRE_OPENAI_LOCALIZATION: "1"
+          DIGEST_CHANNEL_LABEL: AIMST Letter
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
           AZURE_OPENAI_ENDPOINT: ${{ vars.AZURE_OPENAI_ENDPOINT }}

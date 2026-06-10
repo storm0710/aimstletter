@@ -370,6 +370,9 @@ def _make_client(
     azure_openai_api_key: str | None,
     azure_openai_deployment: str,
 ) -> tuple[OpenAI, str]:
+    if openai_api_key:
+        return OpenAI(api_key=openai_api_key, timeout=OPENAI_REQUEST_TIMEOUT_SECONDS), openai_model
+
     if azure_openai_api_key:
         if not azure_openai_endpoint:
             raise ValueError("AZURE_OPENAI_ENDPOINT is required when AZURE_OPENAI_API_KEY is set.")
@@ -380,7 +383,4 @@ def _make_client(
             timeout=OPENAI_REQUEST_TIMEOUT_SECONDS,
         ), azure_openai_deployment
 
-    if not openai_api_key:
-        raise ValueError("OPENAI_API_KEY is required when Azure OpenAI is not configured.")
-
-    return OpenAI(api_key=openai_api_key, timeout=OPENAI_REQUEST_TIMEOUT_SECONDS), openai_model
+    raise ValueError("OPENAI_API_KEY is required when Azure OpenAI is not configured.")
