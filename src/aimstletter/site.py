@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta, timezone
 import hashlib
 from html import escape
 import json
+import os
 from pathlib import Path
 import re
 import sys
@@ -788,9 +789,15 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             localized = _repair_korean_translation(client, model, source_block, context)
     except Exception as exc:  # noqa: BLE001
         print(f"OpenAI localization failed for {context}: {exc}", file=sys.stderr)
+        if _require_openai_localization():
+            raise
         return [_fallback_korean_item(item) for item in items]
 
     if len(localized) != len(items):
+        if _require_openai_localization():
+            raise ValueError(
+                f"OpenAI returned {len(localized)} localized items for {len(items)} source items."
+            )
         return [_fallback_korean_item(item) for item in items]
 
     return [
@@ -869,6 +876,10 @@ def _generate_openai_text(client: object, model: str, instructions: str, input_t
         input=input_text,
     )
     return response.output_text
+
+
+def _require_openai_localization() -> bool:
+    return os.getenv("AIMSTLETTER_REQUIRE_OPENAI_LOCALIZATION") == "1"
 
 
 def _has_untranslated_items(items: list[dict[str, object]]) -> bool:
