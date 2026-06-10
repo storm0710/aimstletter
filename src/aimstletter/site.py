@@ -1051,26 +1051,53 @@ def _looks_untranslated(text: str) -> bool:
 
 
 def _fallback_korean_item(item: DigestItem) -> SiteItem:
+    title = _fallback_display_title(item)
+    summary = _fallback_display_summary(item)
     return SiteItem(
-        title=f"{_korean_source_name(item.source)}에서 확인한 최신 업데이트",
-        summary="원문을 한국어로 자동 변환하려면 저장소 비밀값에 Azure OpenAI 또는 OpenAI 연결 키를 설정하세요.",
+        title=title,
+        summary=summary,
         detail=(
-            "이 상세 페이지는 항목별 번역 설명을 보여주기 위한 공간입니다. "
-            "Azure OpenAI 또는 OpenAI 연결 키가 설정되면 원문 제목과 요약을 바탕으로 업무 적용 관점의 상세 설명이 자동 생성됩니다.\n\n"
-            "설정 전에는 원문 링크에서 세부 내용을 확인하고, 키포인트와 태그를 참고해 수업 토론 주제로 활용하세요."
+            f"{summary}\n\n"
+            "현재 자동 한국어 재작성 단계가 지연되어 원문 기반의 간단한 안내로 표시합니다. "
+            "출처 링크에서 발표 원문을 확인한 뒤 업무 적용 가능성, 도입 조건, 운영 리스크를 함께 검토하세요."
         ),
         source=_korean_source_name(item.source),
         kind=_korean_kind_name(item.kind),
         url=item.url,
         published=item.published,
         key_points=(
-            "원문 내용을 한국어로 자동 요약하려면 모델 연결 설정이 필요합니다.",
-            "출처 링크에서 세부 내용을 확인한 뒤 수업 토론 주제로 활용하세요.",
+            "원문 제목과 요약을 기준으로 선별된 항목입니다.",
+            "출처 링크에서 세부 변경 사항과 적용 조건을 확인하세요.",
         ),
         tags=tuple(_fallback_tags(item)[:5]),
         comparisons=tuple(_fallback_comparisons(item)),
         glossary=tuple(_fallback_glossary(item)),
     )
+
+
+def _fallback_display_title(item: DigestItem) -> str:
+    title = _clean_plain_text(item.title)
+    source = _korean_source_name(item.source)
+    if title:
+        return f"{source}: {title}"
+    return f"{source}에서 확인한 최신 업데이트"
+
+
+def _fallback_display_summary(item: DigestItem) -> str:
+    summary = _clean_plain_text(item.summary)
+    if summary:
+        return f"원문 요약: {_truncate_text(summary, 180)}"
+    return "원문 링크에서 세부 내용을 확인해 업무 적용 가능성을 검토하세요."
+
+
+def _clean_plain_text(text: str) -> str:
+    return re.sub(r"\s+", " ", text or "").strip()
+
+
+def _truncate_text(text: str, limit: int) -> str:
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip() + "..."
 
 
 def _parse_json_array(text: str) -> list[dict[str, object]]:
