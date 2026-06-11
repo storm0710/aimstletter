@@ -639,17 +639,33 @@ def _render_editorial_homepage(
     }}
     .insight-grid {{
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
+      grid-template-columns: minmax(300px, .92fr) minmax(360px, 1.08fr);
+      gap: 28px;
+      align-items: start;
+    }}
+    .insight-list {{
+      display: grid;
+      gap: 0;
+      border-top: 1px solid var(--line);
     }}
     .insight-card {{
-      border: 1px solid var(--line);
-      background: var(--panel);
-      min-height: 230px;
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      min-height: 112px;
+      padding: 22px 0;
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr);
+      gap: 14px;
+      text-align: left;
+      cursor: pointer;
+      color: var(--ink);
+      font: inherit;
+    }}
+    .insight-card:hover,
+    .insight-card.is-active {{
+      background: #fbfbf8;
     }}
     .card-icon {{
       width: 22px;
@@ -659,25 +675,72 @@ def _render_editorial_homepage(
       display: grid;
       place-items: center;
       font-size: 11px;
-      margin-bottom: 26px;
+      margin-top: 1px;
+      flex: 0 0 auto;
     }}
-    .insight-card h3 {{
-      margin: 0 0 10px;
+    .card-title {{
+      display: block;
+      margin: 0 0 6px;
       font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
-      font-size: 22px;
+      font-size: 18px;
       letter-spacing: 0;
+      font-weight: 700;
     }}
     .insight-card p {{
       margin: 0;
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.58;
+      font-size: 12px;
+      line-height: 1.52;
     }}
-    .mini-link {{
-      margin-top: 26px;
+    .insight-detail {{
+      min-height: 520px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(rgba(0,0,0,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,.028) 1px, transparent 1px),
+        #f7f7f4;
+      background-size: 32px 32px;
+      padding: 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: sticky;
+      top: 24px;
+    }}
+    .detail-number {{
+      width: 26px;
+      height: 26px;
+      border: 1px solid #111;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      margin-bottom: 42px;
+      background: #fff;
+    }}
+    .insight-detail h3 {{
+      margin: 0 0 16px;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(30px, 4vw, 54px);
+      line-height: .98;
+      letter-spacing: 0;
+    }}
+    .insight-detail p {{
+      margin: 0;
+      color: #565656;
+      font-size: 14px;
+      line-height: 1.68;
+      max-width: 620px;
+    }}
+    .mini-link,
+    .detail-link {{
       color: #111;
       font-size: 12px;
       font-weight: 800;
+    }}
+    .detail-link {{
+      margin-top: 42px;
+      align-self: flex-start;
     }}
     .footer {{
       border-top: 1px solid var(--line);
@@ -695,6 +758,7 @@ def _render_editorial_homepage(
       .insight-grid {{
         grid-template-columns: 1fr;
       }}
+      .insight-detail {{ position: static; min-height: 360px; }}
       .date {{ text-align: left; }}
       .insight-card {{ min-height: 210px; }}
       .footer {{ align-items: flex-start; flex-direction: column; gap: 12px; padding: 22px 0; }}
@@ -1559,20 +1623,67 @@ def _render_command_tasks(items: list[SiteItem]) -> str:
 
 def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     labels = _smart_insight_blueprint()
-    cards = []
+    entries = []
     for index, (title, fallback) in enumerate(labels):
         item = items[index] if index < len(items) else None
         body = _smart_insight_body(index, item, fallback)
         href = _detail_href(item) if item else "#"
+        entries.append((index + 1, title, body, href))
+
+    if not entries:
+        return ""
+
+    cards = []
+    for number, title, body, href in entries:
+        active_class = " is-active" if number == 1 else ""
         cards.append(
-            '<article class="insight-card">'
-            f'<div><div class="card-icon">{index + 1}</div>'
-            f'<h3>{escape(title)}</h3>'
-            f'<p>{escape(body)}</p></div>'
-            f'<a class="mini-link" href="{escape(href)}">Read full signal</a>'
-            '</article>'
+            f'<button class="insight-card{active_class}" type="button" '
+            f'data-insight-card data-number="{number}" '
+            f'data-title="{escape(title, quote=True)}" '
+            f'data-body="{escape(body, quote=True)}" '
+            f'data-href="{escape(href, quote=True)}">'
+            f'<span class="card-icon">{number}</span>'
+            f'<span><span class="card-title">{escape(title)}</span><p>{escape(body)}</p></span>'
+            '</button>'
         )
-    return "\n".join(cards)
+
+    first_number, first_title, first_body, first_href = entries[0]
+    return (
+        '<div class="insight-list">'
+        + "\n".join(cards)
+        + "</div>"
+        + '<article class="insight-detail" aria-live="polite">'
+        + "<div>"
+        + f'<div class="detail-number" data-insight-number>{first_number}</div>'
+        + f'<h3 data-insight-title>{escape(first_title)}</h3>'
+        + f'<p data-insight-body>{escape(first_body)}</p>'
+        + "</div>"
+        + f'<a class="detail-link" data-insight-link href="{escape(first_href)}">Read full signal -></a>'
+        + "</article>"
+        + """
+<script>
+(() => {
+  const buttons = document.querySelectorAll('[data-insight-card]');
+  const number = document.querySelector('[data-insight-number]');
+  const title = document.querySelector('[data-insight-title]');
+  const body = document.querySelector('[data-insight-body]');
+  const link = document.querySelector('[data-insight-link]');
+  if (!buttons.length || !number || !title || !body || !link) return;
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      buttons.forEach((item) => item.classList.remove('is-active'));
+      button.classList.add('is-active');
+      number.textContent = button.dataset.number || '';
+      title.textContent = button.dataset.title || '';
+      body.textContent = button.dataset.body || '';
+      link.href = button.dataset.href || '#';
+    });
+  });
+})();
+</script>
+"""
+    )
 
 
 def _smart_insight_blueprint() -> tuple[tuple[str, str], ...]:
