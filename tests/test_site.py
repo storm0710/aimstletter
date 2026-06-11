@@ -43,9 +43,14 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     assert "AI Talent Lab" in html
     assert "Smart Insights" in html
     assert "Harness Engineering" in html
+    assert "Codex" in html
+    assert "Antigravity" in html
+    assert "Claude Code" in html
     assert "topic-badge" in html
-    assert 'href="work-skills/"' in html
-    assert 'href="tools/"' in html
+    assert 'href="#ai-tools"' in html
+    assert "상세 목록" not in html
+    assert '<a href="#insights" data-smart-insights-link>Smart Insights</a>' not in html
+    assert '<a href="work-skills/">Archive</a>' not in html
     assert "lead-image" not in html
     assert "watch-links" not in html
 

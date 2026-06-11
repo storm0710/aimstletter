@@ -999,6 +999,74 @@ def _render_editorial_homepage(
       from {{ transform: translateX(0); }}
       to {{ transform: translateX(-50%); }}
     }}
+    .tool-directory {{
+      padding: 46px 0 56px;
+      border-bottom: 1px solid var(--line);
+    }}
+    .tool-directory-header {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 24px;
+    }}
+    .tool-directory h2 {{
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(26px, 3vw, 42px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }}
+    .tool-directory-header p {{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }}
+    .tool-list-grid {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+    }}
+    .ai-tool-card {{
+      min-height: 178px;
+      padding: 18px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }}
+    .ai-tool-card h3 {{
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(20px, 2vw, 28px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }}
+    .ai-tool-card p {{
+      margin: 8px 0 0;
+      color: #565656;
+      font-size: 13px;
+      line-height: 1.58;
+    }}
+    .tool-meta-row {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }}
+    .tool-chip {{
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 4px 7px;
+      color: #111;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.25;
+    }}
     .insights {{
       padding: 64px 0 90px;
     }}
@@ -1304,9 +1372,11 @@ def _render_editorial_homepage(
       .criteria-card {{ margin-top: 24px; }}
       .criteria-card ul {{ grid-template-columns: 1fr; }}
       .intro-row,
+      .tool-directory-header,
       .insight-grid {{
         grid-template-columns: 1fr;
       }}
+      .tool-list-grid {{ grid-template-columns: 1fr; }}
       .insight-list,
       .insight-grid.has-selection,
       .insight-grid.has-selection .insight-list {{ grid-template-columns: 1fr; }}
@@ -1335,12 +1405,9 @@ def _render_editorial_homepage(
       <a class="brand" href="./">AI MASTER TIMES</a>
       <nav class="nav-links" aria-label="Primary">
         <a href="#insights">업무 AI</a>
-        <a href="tools/">AI 도구</a>
-        <a href="work-skills/">상세 목록</a>
-        <a href="#insights" data-smart-insights-link>Smart Insights</a>
+        <a href="#ai-tools">AI 도구</a>
       </nav>
       <div class="nav-actions">
-        <a href="work-skills/">Archive</a>
         <a class="button" href="#insights">Read This Week</a>
       </div>
     </header>
@@ -1372,6 +1439,16 @@ def _render_editorial_homepage(
     </section>
     <section class="logo-roll" aria-label="Source roll">
       <div class="logo-track">{logo_roll}{logo_roll}</div>
+    </section>
+    <section class="tool-directory" id="ai-tools" aria-label="AI 활용 도구 목록">
+      <div class="tool-directory-header">
+        <div>
+          <div class="section-kicker">AI 도구</div>
+          <h2>실습과 업무에 바로 연결할 수 있는 AI 활용 도구입니다.</h2>
+        </div>
+        <p>코딩, 앱 제작, 문서 정리, 디자인, 자동화처럼 실제 결과물을 만드는 도구를 중심으로 정리했습니다.</p>
+      </div>
+      {_render_ai_tool_directory()}
     </section>
     <section class="insights" id="insights">
       <div class="insights-header">
@@ -2957,6 +3034,84 @@ def _render_logo_roll() -> str:
         "Linear",
     )
     return "".join(f"<span>{escape(name)}</span>" for name in names)
+
+
+def _render_ai_tool_directory() -> str:
+    tools = (
+        (
+            "Codex",
+            "코드 작성, 수정, 리뷰, 테스트 보조에 쓰는 AI 코딩 에이전트입니다.",
+            ("코딩", "리뷰", "자동화"),
+        ),
+        (
+            "Antigravity",
+            "아이디어를 앱 화면과 기능 흐름으로 빠르게 실험해 볼 때 참고할 수 있는 AI 개발 도구입니다.",
+            ("앱 제작", "프로토타입", "실험"),
+        ),
+        (
+            "Claude Code",
+            "터미널과 코드베이스 안에서 Claude를 활용해 기능 구현과 리팩터링을 진행하는 도구입니다.",
+            ("코딩", "리팩터링", "터미널"),
+        ),
+        (
+            "Cursor",
+            "에디터 안에서 코드 이해, 생성, 수정, 대화형 개발을 함께 수행하는 AI 코드 편집기입니다.",
+            ("IDE", "코드 생성", "맥락 이해"),
+        ),
+        (
+            "GitHub Copilot",
+            "IDE와 GitHub 작업 흐름에서 코드 추천, PR 보조, 이슈 처리 자동화에 활용하는 도구입니다.",
+            ("IDE", "PR", "협업"),
+        ),
+        (
+            "Gemini CLI",
+            "터미널에서 Gemini를 호출해 코드 탐색, 명령 보조, 문서 요약에 활용할 수 있는 도구입니다.",
+            ("터미널", "검색", "요약"),
+        ),
+        (
+            "Windsurf",
+            "프로젝트 맥락을 읽고 여러 파일을 함께 수정하는 AI 개발 환경입니다.",
+            ("개발환경", "멀티파일", "에이전트"),
+        ),
+        (
+            "Replit",
+            "브라우저에서 코드 작성, 실행, 배포까지 이어서 실습용 앱을 빠르게 만들 수 있는 플랫폼입니다.",
+            ("웹 IDE", "실습", "배포"),
+        ),
+        (
+            "Lovable",
+            "자연어 설명으로 웹 앱 초안과 UI 흐름을 빠르게 만들어 보는 제품 제작 도구입니다.",
+            ("웹앱", "UI", "프로토타입"),
+        ),
+        (
+            "Bolt",
+            "프론트엔드 앱과 간단한 풀스택 프로토타입을 브라우저에서 빠르게 생성하는 도구입니다.",
+            ("프론트엔드", "풀스택", "프로토타입"),
+        ),
+        (
+            "v0",
+            "UI 컴포넌트와 화면 초안을 빠르게 만들고 코드로 이어가기 좋은 디자인·개발 보조 도구입니다.",
+            ("UI", "컴포넌트", "디자인"),
+        ),
+        (
+            "Figma Make",
+            "디자인 아이디어를 인터랙션이 있는 화면 초안으로 발전시키는 데 활용할 수 있는 도구입니다.",
+            ("디자인", "화면", "인터랙션"),
+        ),
+    )
+    cards = []
+    for name, summary, chips in tools:
+        chip_html = "".join(f'<span class="tool-chip">{escape(chip)}</span>' for chip in chips)
+        cards.append(
+            '<article class="ai-tool-card">'
+            "<div>"
+            f"<h3>{escape(name)}</h3>"
+            f"<p>{escape(summary)}</p>"
+            "</div>"
+            f'<div class="tool-meta-row">{chip_html}</div>'
+            "</article>"
+        )
+    return f'<div class="tool-list-grid">{"".join(cards)}</div>'
 
 
 def _render_dashboard_tool_cards(items: list[SiteItem]) -> str:
