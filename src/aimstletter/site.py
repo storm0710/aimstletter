@@ -733,7 +733,7 @@ def _render_editorial_homepage(
       <div class="insights-header">
         <div class="section-kicker">Smart Insights</div>
         <h2>이번 주 AI 업데이트를 업무 관점으로 정리했습니다.</h2>
-        <p>홀수 카드는 에이전트 운영과 엔지니어링 트렌드, 짝수 카드는 AI 프론트엔드와 디자인 도구를 간략히 정리했습니다.</p>
+        <p>홀수 카드는 에이전트 운영과 엔지니어링 트렌드, 짝수 카드는 AI 제품 제작에 필요한 프론트·디자인·백엔드·데이터 도구를 함께 정리했습니다.</p>
       </div>
       <div class="insight-grid">
         {insight_cards}
@@ -1582,32 +1582,32 @@ def _smart_insight_blueprint() -> tuple[tuple[str, str], ...]:
             "모델이 제안하고 하네스가 검증·실행하는 구조입니다. 권한, 스키마, 로그, 재시도 정책을 분리해 에이전트 작업을 운영 가능한 흐름으로 만듭니다.",
         ),
         (
-            "Stitch by Google",
-            "stitch.withgoogle.com은 자연어와 이미지 프롬프트로 웹·모바일 UI를 빠르게 생성하고 반복하는 AI 디자인 캔버스입니다.",
+            "AI Product Builder Stack",
+            "Stitch, v0, Lovable, Bolt 같은 도구는 화면과 프론트엔드 초안을 빠르게 만들고, Supabase·Neon·Convex 같은 백엔드 도구는 인증, 데이터, API를 붙이는 출발점이 됩니다.",
         ),
         (
             "Agent Harness",
             "에이전트가 직접 시스템을 만지는 대신, 하네스가 도구 호출을 검증하고 결과를 다시 모델에 주입하는 안전한 실행 계층입니다.",
         ),
         (
-            "DESIGN.md / getdesign.md",
-            "getdesign.md는 AI 코딩 에이전트가 읽을 수 있는 DESIGN.md 레퍼런스를 모아, 브랜드 스타일과 UI 규칙을 코드 생성에 연결합니다.",
+            "Design System to Backend",
+            "DESIGN.md와 getdesign.md는 UI 규칙을 에이전트가 읽게 해주고, Prisma·Drizzle·tRPC·GraphQL 같은 도구는 화면 뒤의 데이터 모델과 API 계약을 안정적으로 연결합니다.",
         ),
         (
             "AI Software Delivery",
             "Harness 같은 플랫폼은 테스트 자동화, 배포, 보안, 비용 최적화에 AI 에이전트를 붙여 SDLC 운영을 자동화하는 방향으로 진화하고 있습니다.",
         ),
         (
-            "v0 · Lovable · Bolt · Replit",
-            "AI 앱 빌더들은 프롬프트에서 화면, 컴포넌트, 배포 흐름까지 빠르게 만들며 프로토타입과 내부 도구 제작 시간을 줄입니다.",
+            "Workflow and Data Layer",
+            "LangGraph, Inngest, Temporal, n8n 같은 워크플로 도구와 pgvector, Pinecone, Weaviate 같은 벡터 저장소는 AI 기능을 백엔드 프로세스로 운영하는 데 필요합니다.",
         ),
         (
             "Production Agent Guardrails",
             "운영 환경의 에이전트는 평가, 롤백, 감사 로그, 제한된 권한, 사람 승인 단계를 포함해야 안정적으로 확장됩니다.",
         ),
         (
-            "Figma Make · Cursor UI Flow",
-            "Figma Make, Cursor, screenshot-to-code 흐름은 디자인 시안과 프론트엔드 구현 사이의 왕복 시간을 줄이는 도구군입니다.",
+            "Deployable AI App Path",
+            "Figma Make, Cursor, Replit, Vercel, Fly.io, Render를 함께 보면 디자인 시안, 코드 생성, API 서버, 배포까지 이어지는 AI 앱 제작 경로를 잡을 수 있습니다.",
         ),
     )
 
@@ -1627,7 +1627,20 @@ def _editorial_intro_copy(lead_summary: str) -> str:
 
 
 def _render_logo_roll() -> str:
-    names = ("OpenAI", "Claude", "GitHub", "arXiv", "Cursor", "Copilot", "Security", "DBA")
+    names = (
+        "OpenAI",
+        "Claude",
+        "Stitch",
+        "getdesign.md",
+        "Supabase",
+        "Neon",
+        "LangGraph",
+        "Temporal",
+        "Harness",
+        "Cursor",
+        "Vercel",
+        "Pinecone",
+    )
     return "".join(f"<span>{escape(name)}</span>" for name in names)
 
 
