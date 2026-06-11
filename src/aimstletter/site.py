@@ -465,7 +465,7 @@ def _render_editorial_homepage(
     all_items = [*infra_items, *other_items, *latest_tool_items]
     lead_item = (infra_items or other_items or latest_tool_items)[0] if all_items else None
     lead_summary = lead_item.summary if lead_item else "이번 주 AI 업무 업데이트를 선별해 보여줍니다."
-    insight_cards = _render_smart_insight_cards(all_items[:4])
+    insight_cards = _render_smart_insight_cards(all_items[:8])
     logo_roll = _render_logo_roll()
     return f"""<!doctype html>
 <html lang="ko">
@@ -733,7 +733,7 @@ def _render_editorial_homepage(
       <div class="insights-header">
         <div class="section-kicker">Smart Insights</div>
         <h2>이번 주 AI 업데이트를 업무 관점으로 정리했습니다.</h2>
-        <p>기존 수집 정보는 유지하면서, 중요한 항목을 네 개의 에디토리얼 카드로 압축해 빠르게 읽을 수 있게 구성했습니다.</p>
+        <p>홀수 카드는 에이전트 운영과 엔지니어링 트렌드, 짝수 카드는 AI 프론트엔드와 디자인 도구를 간략히 정리했습니다.</p>
       </div>
       <div class="insight-grid">
         {insight_cards}
@@ -1558,16 +1558,11 @@ def _render_command_tasks(items: list[SiteItem]) -> str:
 
 
 def _render_smart_insight_cards(items: list[SiteItem]) -> str:
-    labels = (
-        ("업무 AI 스킬 업데이트", "DBA, 네트워크, 서버 운영 직군이 업무에 적용할 AI 신호를 선별했습니다."),
-        ("Claude와 AI 도구 업데이트", "Claude, OpenAI, GitHub Copilot, Cursor 등 주요 도구 변화를 정리했습니다."),
-        ("인프라 적용 관점", "데이터베이스, 네트워크, 서버 운영 관점에서 적용 조건과 리스크를 분리합니다."),
-        ("수업 토론 포인트", "출처 링크를 바탕으로 실무 적용 아이디어와 토론 질문을 이어갈 수 있게 정리합니다."),
-    )
+    labels = _smart_insight_blueprint()
     cards = []
     for index, (title, fallback) in enumerate(labels):
         item = items[index] if index < len(items) else None
-        body = _clip(item.summary, 150) if item else fallback
+        body = _smart_insight_body(index, item, fallback)
         href = _detail_href(item) if item else "#"
         cards.append(
             '<article class="insight-card">'
@@ -1578,6 +1573,49 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             '</article>'
         )
     return "\n".join(cards)
+
+
+def _smart_insight_blueprint() -> tuple[tuple[str, str], ...]:
+    return (
+        (
+            "Harness Engineering",
+            "모델이 제안하고 하네스가 검증·실행하는 구조입니다. 권한, 스키마, 로그, 재시도 정책을 분리해 에이전트 작업을 운영 가능한 흐름으로 만듭니다.",
+        ),
+        (
+            "Stitch by Google",
+            "stitch.withgoogle.com은 자연어와 이미지 프롬프트로 웹·모바일 UI를 빠르게 생성하고 반복하는 AI 디자인 캔버스입니다.",
+        ),
+        (
+            "Agent Harness",
+            "에이전트가 직접 시스템을 만지는 대신, 하네스가 도구 호출을 검증하고 결과를 다시 모델에 주입하는 안전한 실행 계층입니다.",
+        ),
+        (
+            "DESIGN.md / getdesign.md",
+            "getdesign.md는 AI 코딩 에이전트가 읽을 수 있는 DESIGN.md 레퍼런스를 모아, 브랜드 스타일과 UI 규칙을 코드 생성에 연결합니다.",
+        ),
+        (
+            "AI Software Delivery",
+            "Harness 같은 플랫폼은 테스트 자동화, 배포, 보안, 비용 최적화에 AI 에이전트를 붙여 SDLC 운영을 자동화하는 방향으로 진화하고 있습니다.",
+        ),
+        (
+            "v0 · Lovable · Bolt · Replit",
+            "AI 앱 빌더들은 프롬프트에서 화면, 컴포넌트, 배포 흐름까지 빠르게 만들며 프로토타입과 내부 도구 제작 시간을 줄입니다.",
+        ),
+        (
+            "Production Agent Guardrails",
+            "운영 환경의 에이전트는 평가, 롤백, 감사 로그, 제한된 권한, 사람 승인 단계를 포함해야 안정적으로 확장됩니다.",
+        ),
+        (
+            "Figma Make · Cursor UI Flow",
+            "Figma Make, Cursor, screenshot-to-code 흐름은 디자인 시안과 프론트엔드 구현 사이의 왕복 시간을 줄이는 도구군입니다.",
+        ),
+    )
+
+
+def _smart_insight_body(index: int, item: SiteItem | None, fallback: str) -> str:
+    if index % 2 == 0 and item:
+        return f"{fallback} 이번 주 관련 신호: {_clip(item.summary, 110)}"
+    return fallback
 
 
 def _editorial_intro_copy(lead_summary: str) -> str:
