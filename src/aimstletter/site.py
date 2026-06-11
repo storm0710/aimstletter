@@ -465,7 +465,7 @@ def _render_editorial_homepage(
     all_items = [*infra_items, *other_items, *latest_tool_items]
     lead_item = (infra_items or other_items or latest_tool_items)[0] if all_items else None
     lead_summary = lead_item.summary if lead_item else "이번 주 AI 업무 업데이트를 선별해 보여줍니다."
-    insight_cards = _render_smart_insight_cards(all_items[:8])
+    insight_cards = _render_smart_insight_cards(all_items)
     logo_roll = _render_logo_roll()
     return f"""<!doctype html>
 <html lang="ko">
@@ -1609,6 +1609,30 @@ def _smart_insight_blueprint() -> tuple[tuple[str, str], ...]:
             "Deployable AI App Path",
             "Figma Make, Cursor, Replit, Vercel, Fly.io, Render를 함께 보면 디자인 시안, 코드 생성, API 서버, 배포까지 이어지는 AI 앱 제작 경로를 잡을 수 있습니다.",
         ),
+        (
+            "Model Gateway and Routing",
+            "OpenRouter, LiteLLM, Portkey 같은 게이트웨이는 여러 모델 API를 한 인터페이스로 묶고 비용, 장애 대응, 모델 교체를 운영 레벨에서 관리하게 해줍니다.",
+        ),
+        (
+            "AI Evaluation Stack",
+            "LangSmith, Braintrust, OpenAI Evals, Ragas 같은 평가 도구는 프롬프트와 RAG 품질을 배포 전후로 비교하고 회귀를 잡는 데 필요합니다.",
+        ),
+        (
+            "RAG and Knowledge Backend",
+            "LlamaIndex, LangChain, pgvector, Qdrant, Weaviate는 문서 검색, 임베딩, 벡터 저장, 근거 추적을 AI 서비스의 백엔드 기능으로 만듭니다.",
+        ),
+        (
+            "Observability and Incident AI",
+            "Datadog, Grafana, Sentry, Harness Incident Agent 같은 도구는 AI 기능의 오류, 지연, 비용, 장애 원인을 운영자가 추적하게 해줍니다.",
+        ),
+        (
+            "Secure Secrets and Policy",
+            "Doppler, Infisical, Vault, OPA, Cedar 같은 도구는 API 키, 권한, 정책 결정을 분리해 에이전트와 백엔드가 안전하게 동작하게 합니다.",
+        ),
+        (
+            "Team Knowledge Workflow",
+            "Notion, Linear, GitHub Issues, Slack, Teams를 AI 워크플로와 연결하면 요구사항, 작업 상태, 릴리즈 노트를 자동으로 정리할 수 있습니다.",
+        ),
     )
 
 
@@ -1640,6 +1664,13 @@ def _render_logo_roll() -> str:
         "Cursor",
         "Vercel",
         "Pinecone",
+        "LiteLLM",
+        "LangSmith",
+        "Braintrust",
+        "Qdrant",
+        "Datadog",
+        "Infisical",
+        "Linear",
     )
     return "".join(f"<span>{escape(name)}</span>" for name in names)
 
