@@ -546,7 +546,8 @@ def _render_archive_nav(entries: list[dict[str, object]]) -> str:
                 current_class = ' class="is-current"' if first else ""
                 first = False
                 links.append(
-                    f'<a{current_class} href="{escape(str(entry["href"]))}">'
+                    f'<a{current_class} data-archive-link '
+                    f'href="{escape(str(entry["href"]))}">'
                     f'{month:02d}월 {int(entry["week"])}째주</a>'
                 )
             months.append(f'<div class="archive-month">{"".join(links)}</div>')
@@ -558,7 +559,8 @@ def _render_archive_nav(entries: list[dict[str, object]]) -> str:
         )
     return (
         '<aside class="archive-nav" aria-label="주간 아카이브">'
-        '<div class="archive-search">검색어를 입력하세요...</div>'
+        '<input class="archive-search" data-archive-search type="search" '
+        'placeholder="검색어를 입력하세요..." aria-label="Archive 검색">'
         '<div class="archive-panel">'
         '<div class="archive-title">Archive</div>'
         + "".join(years)
@@ -614,7 +616,7 @@ def _render_editorial_homepage(
       margin: 0 auto;
       min-height: 100vh;
       --archive-width: 228px;
-      --archive-gap: 30px;
+      --archive-gap: 128px;
     }}
     .page-shell {{
       position: relative;
@@ -631,8 +633,8 @@ def _render_editorial_homepage(
     }}
     .archive-search {{
       height: 38px;
-      display: flex;
-      align-items: center;
+      width: 100%;
+      display: block;
       padding: 0 12px;
       border: 1px solid var(--line);
       border-radius: 6px;
@@ -640,6 +642,11 @@ def _render_editorial_homepage(
       background: rgba(255,255,255,.78);
       font-size: 12px;
       margin-bottom: 10px;
+      outline: 0;
+    }}
+    .archive-search:focus {{
+      border-color: #2f7fc0;
+      box-shadow: 0 0 0 2px rgba(47,127,192,.12);
     }}
     .archive-panel {{
       border: 1px solid var(--line);
@@ -719,13 +726,13 @@ def _render_editorial_homepage(
     }}
     @media (min-width: 1100px) {{
       .page-shell {{
-        width: min(960px, calc(100% - var(--archive-width) - 64px));
+        width: min(960px, calc(100% - var(--archive-width) - var(--archive-gap) - 34px));
         margin-left: calc(var(--archive-width) + var(--archive-gap));
         margin-right: 32px;
       }}
       .archive-nav {{
         position: absolute;
-        left: calc((var(--archive-width) + 16px) * -1);
+        left: calc((var(--archive-width) + var(--archive-gap)) * -1);
         top: 76px;
         margin: 0;
         overflow: visible;
@@ -755,6 +762,13 @@ def _render_editorial_homepage(
       .archive-nav.is-resizing .archive-resize::after {{
         background: #2f7fc0;
       }}
+    }}
+    .archive-insight-mode .hero,
+    .archive-insight-mode .logo-roll {{
+      display: none;
+    }}
+    .archive-insight-mode .insights {{
+      padding-top: 64px;
     }}
     .nav {{
       height: 58px;
@@ -1371,6 +1385,78 @@ def _render_editorial_homepage(
         const width = setWidth(currentWidth + (event.key === "ArrowRight" ? step : -step));
         window.localStorage.setItem(storageKey, String(width));
       }});
+
+      const search = document.querySelector("[data-archive-search]");
+      const archiveLinks = Array.from(document.querySelectorAll("[data-archive-link]"));
+      const insightCards = Array.from(document.querySelectorAll("[data-insight-card]"));
+      const insightDetail = document.querySelector(".insight-detail");
+      const insights = document.querySelector("#insights");
+      const normalize = (value) => (value || "").toLowerCase().replace(/\\s+/g, " ").trim();
+
+      const showArchiveInsights = (scroll = true) => {{
+        shell.classList.add("archive-insight-mode");
+        if (scroll && insights) {{
+          insights.scrollIntoView({{ block: "start" }});
+        }}
+      }};
+
+      const cardMatches = (card, query) => {{
+        const text = normalize([
+          card.dataset.number,
+          card.dataset.title,
+          card.dataset.category,
+          card.dataset.subcategory,
+          card.dataset.body,
+          card.dataset.detail,
+          card.dataset.meta,
+          card.dataset.points,
+          card.dataset.tags,
+          card.textContent,
+        ].join(" "));
+        return !query || text.includes(query);
+      }};
+
+      const selectFirstVisibleCard = () => {{
+        const firstVisible = insightCards.find((card) => !card.hidden);
+        if (insightDetail) insightDetail.hidden = !firstVisible;
+        if (firstVisible) firstVisible.click();
+      }};
+
+      archiveLinks.forEach((link) => {{
+        link.addEventListener("click", (event) => {{
+          const target = new URL(link.href, window.location.href);
+          if (target.origin === window.location.origin && target.pathname === window.location.pathname) {{
+            event.preventDefault();
+            window.history.pushState(null, "", "#insights");
+            showArchiveInsights();
+            selectFirstVisibleCard();
+          }} else {{
+            window.sessionStorage.setItem("aimstletter.archiveInsightsOnly", "1");
+          }}
+        }});
+      }});
+
+      if (search) {{
+        search.addEventListener("input", () => {{
+          const query = normalize(search.value);
+          archiveLinks.forEach((link) => {{
+            link.hidden = Boolean(query) && !normalize(link.textContent).includes(query);
+          }});
+          insightCards.forEach((card) => {{
+            card.hidden = !cardMatches(card, query);
+          }});
+          if (query) showArchiveInsights(false);
+          selectFirstVisibleCard();
+        }});
+      }}
+
+      if (
+        window.location.hash === "#insights" ||
+        window.sessionStorage.getItem("aimstletter.archiveInsightsOnly") === "1"
+      ) {{
+        window.sessionStorage.removeItem("aimstletter.archiveInsightsOnly");
+        showArchiveInsights(false);
+      }}
     }})();
   </script>
 </body>
