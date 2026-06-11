@@ -472,8 +472,8 @@ def _render_editorial_homepage(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Master Editorial</title>
-  <meta name="description" content="AI Master 주간 AI 업데이트를 위한 미니멀 에디토리얼 페이지">
+  <title>AI Master Times</title>
+  <meta name="description" content="AI Master Times 주간 AI 업무 업데이트">
   {analytics_html}
   <style>
     :root {{
@@ -704,25 +704,25 @@ def _render_editorial_homepage(
 <body>
   <main class="page">
     <header class="nav">
-      <a class="brand" href="#">Learn</a>
+      <a class="brand" href="#">AI MASTER TIMES</a>
       <nav class="nav-links" aria-label="Primary">
-        <a href="#courses">Courses</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#resources">Resources</a>
-        <a href="#pricing">Pricing</a>
+        <a href="#insights">업무 AI</a>
+        <a href="tools/">AI 도구</a>
+        <a href="work-skills/">상세 목록</a>
+        <a href="#insights">Smart Insights</a>
       </nav>
       <div class="nav-actions">
-        <a href="#updates">Sign in</a>
-        <a class="button" href="#insights">Get Started</a>
+        <a href="work-skills/">Archive</a>
+        <a class="button" href="#insights">Read This Week</a>
       </div>
     </header>
     <section class="hero" aria-label="Hero">
-      <h1>Master the Art of Minimalist AI Operations in the Modern Era</h1>
+      <h1>AI MASTER TIMES</h1>
       <figure class="hero-image">
         <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80" alt="Minimal editorial workspace with calm architectural light">
       </figure>
       <div class="intro-row">
-        <p class="intro-copy">{escape(_clip(lead_summary, 260))}</p>
+        <p class="intro-copy">{escape(_editorial_intro_copy(lead_summary))}</p>
         <div class="date">{escape(today)} · curated weekly for AI Master teams</div>
       </div>
     </section>
@@ -732,17 +732,17 @@ def _render_editorial_homepage(
     <section class="insights" id="insights">
       <div class="insights-header">
         <div class="section-kicker">Smart Insights</div>
-        <h2>Structured clarity for fast-moving AI work.</h2>
-        <p>Four focused blocks turn weekly signals into operating judgment, tool awareness, and better team conversations.</p>
+        <h2>이번 주 AI 업데이트를 업무 관점으로 정리했습니다.</h2>
+        <p>기존 수집 정보는 유지하면서, 중요한 항목을 네 개의 에디토리얼 카드로 압축해 빠르게 읽을 수 있게 구성했습니다.</p>
       </div>
       <div class="insight-grid">
         {insight_cards}
       </div>
     </section>
     <footer class="footer">
-      <strong>Learn</strong>
-      <span>Privacy Policy · Terms of Service · Contact · About</span>
-      <span>© AI Master Editorial</span>
+      <strong>AI MASTER TIMES</strong>
+      <span>Work Skills · AI Tools · Weekly Briefing · Source Links</span>
+      <span>© AI Master Times</span>
     </footer>
   </main>
 </body>
@@ -1559,10 +1559,10 @@ def _render_command_tasks(items: list[SiteItem]) -> str:
 
 def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     labels = (
-        ("Focus Tracking", "업무에 바로 연결되는 AI 신호를 선별해 팀의 주간 초점을 정리합니다."),
-        ("Cognitive Load", "도구 변화와 연구 업데이트를 구조화해 학습 부담을 낮춥니다."),
-        ("Structural Integrity", "DBA, 네트워크, 서버 운영 관점에서 적용 조건과 리스크를 분리합니다."),
-        ("User Perspective", "수업 토론과 실무 적용 아이디어로 이어질 질문을 남깁니다."),
+        ("업무 AI 스킬 업데이트", "DBA, 네트워크, 서버 운영 직군이 업무에 적용할 AI 신호를 선별했습니다."),
+        ("Claude와 AI 도구 업데이트", "Claude, OpenAI, GitHub Copilot, Cursor 등 주요 도구 변화를 정리했습니다."),
+        ("인프라 적용 관점", "데이터베이스, 네트워크, 서버 운영 관점에서 적용 조건과 리스크를 분리합니다."),
+        ("수업 토론 포인트", "출처 링크를 바탕으로 실무 적용 아이디어와 토론 질문을 이어갈 수 있게 정리합니다."),
     )
     cards = []
     for index, (title, fallback) in enumerate(labels):
@@ -1578,6 +1578,14 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             '</article>'
         )
     return "\n".join(cards)
+
+
+def _editorial_intro_copy(lead_summary: str) -> str:
+    summary = _clip(_clean_plain_text(lead_summary), 220)
+    return (
+        "AI Master Times는 매주 수집한 논문, 업무 AI 스킬, Claude와 AI 도구 업데이트를 "
+        f"업무 적용 관점으로 재구성합니다. 이번 주 대표 신호: {summary}"
+    )
 
 
 def _render_logo_roll() -> str:
