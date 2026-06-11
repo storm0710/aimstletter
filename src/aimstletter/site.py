@@ -854,6 +854,24 @@ def _render_editorial_homepage(
       font-weight: 700;
       margin-bottom: 18px;
     }}
+    .detail-criteria {{
+      margin: 24px 0 0;
+      border-top: 1px solid rgba(0,0,0,.12);
+      padding-top: 12px;
+      color: #444;
+      font-size: 13px;
+      line-height: 1.55;
+      max-width: 620px;
+    }}
+    .detail-source {{
+      display: inline-block;
+      margin-top: 10px;
+      color: #111;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }}
     .detail-points {{
       display: grid;
       gap: 8px;
@@ -1800,21 +1818,22 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     for index, (title, fallback) in enumerate(labels):
         item = items[index] if index < len(items) else None
         body = _smart_insight_body(index, item, fallback)
-        detail = item.detail if item else fallback
+        detail, points = _smart_insight_detail(index, item, fallback)
         meta = (
             f"{item.source} · {item.kind} · {_format_date(item.published)}"
             if item
             else "AI Master Times"
         )
-        points = item.key_points if item else ()
         tags = item.tags if item else ()
-        entries.append((index + 1, title, body, detail, meta, points, tags))
+        criteria = "선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다."
+        source_url = item.url if item else ""
+        entries.append((index + 1, title, body, detail, meta, points, tags, criteria, source_url))
 
     if not entries:
         return ""
 
     cards = []
-    for number, title, body, detail, meta, points, tags in entries:
+    for number, title, body, detail, meta, points, tags, criteria, source_url in entries:
         cards.append(
             '<button class="insight-card" type="button" '
             f'data-insight-card data-number="{number}" '
@@ -1823,13 +1842,25 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             f'data-detail="{escape(_clip(detail, 700), quote=True)}" '
             f'data-meta="{escape(meta, quote=True)}" '
             f'data-points="{escape(json.dumps(list(points[:4]), ensure_ascii=False), quote=True)}" '
-            f'data-tags="{escape(json.dumps(list(tags[:6]), ensure_ascii=False), quote=True)}">'
+            f'data-tags="{escape(json.dumps(list(tags[:6]), ensure_ascii=False), quote=True)}" '
+            f'data-criteria="{escape(criteria, quote=True)}" '
+            f'data-source="{escape(source_url, quote=True)}">'
             f'<span class="card-icon">{number}</span>'
             f'<span><span class="card-title">{escape(title)}</span><p>{escape(body)}</p></span>'
             '</button>'
         )
 
-    first_number, first_title, first_body, first_detail, first_meta, first_points, first_tags = entries[0]
+    (
+        first_number,
+        first_title,
+        first_body,
+        first_detail,
+        first_meta,
+        first_points,
+        first_tags,
+        first_criteria,
+        first_source_url,
+    ) = entries[0]
     return (
         '<div class="insight-list">'
         + "\n".join(cards)
@@ -1844,6 +1875,10 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + '<ul class="detail-points" data-insight-points>'
         + "".join(f"<li>{escape(point)}</li>" for point in first_points[:4])
         + "</ul>"
+        + f'<p class="detail-criteria" data-insight-criteria>{escape(first_criteria)}</p>'
+        + f'<a class="detail-source" data-insight-source href="{escape(first_source_url or "#")}"'
+        + (" hidden" if not first_source_url else "")
+        + f'>{escape(first_source_url)}</a>'
         + "</div>"
         + '<div class="detail-tags" data-insight-tags>'
         + "".join(f'<span class="detail-tag">#{escape(tag)}</span>' for tag in first_tags[:6])
@@ -1860,8 +1895,10 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const meta = document.querySelector('[data-insight-meta]');
   const points = document.querySelector('[data-insight-points]');
   const tags = document.querySelector('[data-insight-tags]');
+  const criteria = document.querySelector('[data-insight-criteria]');
+  const source = document.querySelector('[data-insight-source]');
   const grid = document.querySelector('[data-insight-grid]');
-  if (!buttons.length || !number || !title || !body || !detail || !meta || !points || !tags || !grid) return;
+  if (!buttons.length || !number || !title || !body || !detail || !meta || !points || !tags || !criteria || !source || !grid) return;
 
   buttons.forEach((button) => {
     button.addEventListener('click', () => {
@@ -1873,6 +1910,11 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
       body.textContent = button.dataset.body || '';
       detail.textContent = button.dataset.detail || '';
       meta.textContent = button.dataset.meta || '';
+      criteria.textContent = button.dataset.criteria || '';
+      const sourceUrl = button.dataset.source || '';
+      source.textContent = sourceUrl;
+      source.hidden = !sourceUrl;
+      if (sourceUrl && source instanceof HTMLAnchorElement) source.href = sourceUrl;
 
       let pointItems = [];
       let tagItems = [];
@@ -1959,9 +2001,35 @@ def _smart_insight_blueprint() -> tuple[tuple[str, str], ...]:
 
 
 def _smart_insight_body(index: int, item: SiteItem | None, fallback: str) -> str:
+    if index == 0:
+        return (
+            "AI 실행을 업무에 붙이기 위한 운영 계층입니다. 모델 호출, 도구 사용, 권한, "
+            "검증, 기록을 한 흐름으로 묶어 안전하게 반복 실행하도록 설계합니다."
+        )
     if index % 2 == 0 and item:
         return f"{fallback} 이번 주 관련 신호: {_clip(item.summary, 110)}"
     return fallback
+
+
+def _smart_insight_detail(
+    index: int,
+    item: SiteItem | None,
+    fallback: str,
+) -> tuple[str, tuple[str, ...]]:
+    if index == 0:
+        return (
+            "하네스 엔지니어링은 AI 모델의 답변을 실제 업무 실행으로 연결하기 위한 운영 설계입니다. "
+            "프롬프트만 잘 쓰는 것을 넘어, 모델이 어떤 도구를 호출하고 어떤 조건에서 실행되며 "
+            "어떤 로그와 검증을 남기는지까지 관리합니다.",
+            (
+                "1. 하네스 엔지니어링이란? 모델, 도구, 데이터, 권한, 검증 로직을 묶어 AI 작업을 반복 가능한 실행 흐름으로 만드는 방식입니다.",
+                "2. 프롬프트 엔지니어링과의 차이점: 프롬프트 엔지니어링이 모델 입력을 다듬는 일이라면, 하네스 엔지니어링은 실행 환경과 통제 장치를 설계하는 일입니다.",
+                "3. 주요 구성 요소: 입력 스키마, 도구 호출 규칙, 권한 경계, 평가 기준, 감사 로그, 실패 시 재시도와 롤백 정책입니다.",
+            ),
+        )
+    if item:
+        return item.detail, item.key_points
+    return fallback, ()
 
 
 def _editorial_intro_copy(lead_summary: str) -> str:
