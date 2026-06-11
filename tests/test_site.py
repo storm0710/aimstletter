@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 
 from aimstletter.fetchers import DigestItem
 from aimstletter.config import Settings
@@ -227,3 +228,10 @@ def test_render_analytics_supports_goatcounter() -> None:
 
     assert "https://aimstletter.goatcounter.com/count" in html
     assert "gc.zgo.at/count.js" in html
+
+
+def test_committed_pages_root_redirect_exists() -> None:
+    html = Path("public/index.html").read_text(encoding="utf-8")
+
+    assert "archive/2026/06/week-2/" in html
+    assert "window.location.replace" in html
