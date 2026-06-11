@@ -1067,6 +1067,23 @@ def _render_editorial_homepage(
       font-weight: 800;
       line-height: 1.25;
     }}
+    .tool-action {{
+      display: inline-block;
+      margin-top: 12px;
+      border: 1px solid #222;
+      padding: 7px 9px;
+      color: #111;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.3;
+      text-decoration: none;
+    }}
+    .tool-action:hover,
+    .tool-action:focus-visible {{
+      background: #111;
+      color: #fff;
+      outline: 0;
+    }}
     .insights {{
       padding: 64px 0 90px;
     }}
@@ -3032,65 +3049,77 @@ def _render_ai_tool_directory() -> str:
             "Codex",
             "코드 작성, 수정, 리뷰, 테스트 보조에 쓰는 AI 코딩 에이전트입니다.",
             ("코딩", "리뷰", "자동화"),
+            "https://developers.openai.com/codex/cli",
         ),
         (
             "Antigravity",
             "아이디어를 앱 화면과 기능 흐름으로 빠르게 실험해 볼 때 참고할 수 있는 AI 개발 도구입니다.",
             ("앱 제작", "프로토타입", "실험"),
+            "https://antigravity.google/",
         ),
         (
             "Claude Code",
             "터미널과 코드베이스 안에서 Claude를 활용해 기능 구현과 리팩터링을 진행하는 도구입니다.",
             ("코딩", "리팩터링", "터미널"),
+            "https://code.claude.com/docs/en/desktop-quickstart",
         ),
         (
             "Cursor",
             "에디터 안에서 코드 이해, 생성, 수정, 대화형 개발을 함께 수행하는 AI 코드 편집기입니다.",
             ("IDE", "코드 생성", "맥락 이해"),
+            "https://cursor.com/download",
         ),
         (
             "GitHub Copilot",
             "IDE와 GitHub 작업 흐름에서 코드 추천, PR 보조, 이슈 처리 자동화에 활용하는 도구입니다.",
             ("IDE", "PR", "협업"),
+            "https://github.com/features/copilot",
         ),
         (
             "Gemini CLI",
             "터미널에서 Gemini를 호출해 코드 탐색, 명령 보조, 문서 요약에 활용할 수 있는 도구입니다.",
             ("터미널", "검색", "요약"),
+            "https://github.com/google-gemini/gemini-cli",
         ),
         (
             "Windsurf",
             "프로젝트 맥락을 읽고 여러 파일을 함께 수정하는 AI 개발 환경입니다.",
             ("개발환경", "멀티파일", "에이전트"),
+            "https://devin.ai/download/",
         ),
         (
             "Replit",
             "브라우저에서 코드 작성, 실행, 배포까지 이어서 실습용 앱을 빠르게 만들 수 있는 플랫폼입니다.",
             ("웹 IDE", "실습", "배포"),
+            "https://replit.com/desktop",
         ),
         (
             "Lovable",
             "자연어 설명으로 웹 앱 초안과 UI 흐름을 빠르게 만들어 보는 제품 제작 도구입니다.",
             ("웹앱", "UI", "프로토타입"),
+            "https://lovable.dev/",
         ),
         (
             "Bolt",
             "프론트엔드 앱과 간단한 풀스택 프로토타입을 브라우저에서 빠르게 생성하는 도구입니다.",
             ("프론트엔드", "풀스택", "프로토타입"),
+            "https://bolt.new/",
         ),
         (
             "v0",
             "UI 컴포넌트와 화면 초안을 빠르게 만들고 코드로 이어가기 좋은 디자인·개발 보조 도구입니다.",
             ("UI", "컴포넌트", "디자인"),
+            "https://v0.app/",
         ),
         (
             "Figma Make",
             "디자인 아이디어를 인터랙션이 있는 화면 초안으로 발전시키는 데 활용할 수 있는 도구입니다.",
             ("디자인", "화면", "인터랙션"),
+            "https://www.figma.com/make/",
         ),
     )
     cards = []
-    for name, summary, chips in tools:
+    for name, summary, chips, url in tools:
         chip_html = "".join(f'<span class="tool-chip">{escape(chip)}</span>' for chip in chips)
         cards.append(
             '<article class="ai-tool-card">'
@@ -3098,7 +3127,11 @@ def _render_ai_tool_directory() -> str:
             f"<h3>{escape(name)}</h3>"
             f"<p>{escape(summary)}</p>"
             "</div>"
+            "<div>"
             f'<div class="tool-meta-row">{chip_html}</div>'
+            f'<a class="tool-action" href="{escape(url, quote=True)}" '
+            'target="_blank" rel="noopener noreferrer">공식 다운로드/시작</a>'
+            "</div>"
             "</article>"
         )
     return f'<div class="tool-list-grid">{"".join(cards)}</div>'
@@ -3435,6 +3468,21 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       padding: 4px 7px;
       color: #111111;
       font: 800 11px/1.25 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .tool-action {{
+      display: inline-block;
+      margin-top: 12px;
+      border: 1px solid #222222;
+      padding: 7px 9px;
+      color: #111111;
+      font: 800 12px/1.3 Arial, "Noto Sans KR", sans-serif;
+      text-decoration: none;
+    }}
+    .tool-action:hover,
+    .tool-action:focus-visible {{
+      background: #111111;
+      color: #ffffff;
+      outline: 0;
     }}
     .key-points {{
       margin: 9px 0 0;

@@ -257,6 +257,11 @@ def test_committed_ai_tools_page_exists() -> None:
     assert "<h3>Codex</h3>" in html
     assert "<h3>Antigravity</h3>" in html
     assert "<h3>Claude Code</h3>" in html
+    assert 'class="tool-action"' in html
+    assert "https://developers.openai.com/codex/cli" in html
+    assert "https://code.claude.com/docs/en/desktop-quickstart" in html
+    assert "https://cursor.com/download" in html
+    assert 'target="_blank" rel="noopener noreferrer"' in html
     assert "�" not in html
 
 
