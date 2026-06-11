@@ -576,7 +576,8 @@ def _render_editorial_homepage(
     }}
     .talent-card {{
       background: rgba(255,255,255,.72);
-      border: 1px solid rgba(0,0,0,.08);
+      border: 1px solid var(--line);
+      border-radius: 32px;
       padding: clamp(18px, 2.2vw, 26px);
       display: flex;
       flex-direction: column;
@@ -613,7 +614,7 @@ def _render_editorial_homepage(
       letter-spacing: 0;
     }}
     .criteria-card {{
-      border: 1px solid #111;
+      border: 1px solid var(--line);
       border-radius: 32px;
       background: rgba(255,255,255,.8);
       padding: clamp(20px, 2.8vw, 34px);
