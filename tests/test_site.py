@@ -235,3 +235,16 @@ def test_committed_pages_root_redirect_exists() -> None:
 
     assert "archive/2026/06/week-2/" in html
     assert "window.location.replace" in html
+
+
+def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
+    week_2 = Path("public/archive/2026/06/week-2/index.html").read_text(encoding="utf-8")
+    week_1 = Path("public/archive/2026/06/week-1/index.html").read_text(encoding="utf-8")
+
+    assert 'href="archive/2026/06/week-1/"' in week_2
+    assert 'href="archive/2026/06/week-2/"' in week_1
+    assert "06월 1째주" in week_1
+    assert '<a class="brand" href="./">AI MASTER TIMES</a>' in week_2
+    assert "button.insertAdjacentElement('afterend', detailPanel)" in week_2
+    assert ".insight-grid.has-selection .insight-detail { display: flex; }" in week_2
+    assert "smartInsightLinks.forEach" in week_2

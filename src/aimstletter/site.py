@@ -1260,7 +1260,17 @@ def _render_editorial_homepage(
       .insight-list,
       .insight-grid.has-selection,
       .insight-grid.has-selection .insight-list {{ grid-template-columns: 1fr; }}
-      .insight-detail {{ position: static; min-height: 360px; }}
+      .insight-grid.has-selection {{ display: block; }}
+      .insight-grid.has-selection .insight-list {{ display: block; }}
+      .insight-detail {{
+        position: static;
+        min-height: 360px;
+        margin: 14px 0 22px 36px;
+        padding: 24px;
+        width: calc(100% - 36px);
+      }}
+      .insight-grid.has-selection .insight-detail {{ display: flex; }}
+      .insight-detail h3 {{ font-size: clamp(30px, 12vw, 44px); }}
       .date {{ text-align: left; }}
       .insight-card {{ min-height: 210px; }}
       .insight-grid.has-selection .insight-card {{ min-height: 112px; }}
@@ -1272,12 +1282,12 @@ def _render_editorial_homepage(
   <main class="page page-shell">
     {archive_html}
     <header class="nav">
-      <a class="brand" href="#">AI MASTER TIMES</a>
+      <a class="brand" href="./">AI MASTER TIMES</a>
       <nav class="nav-links" aria-label="Primary">
         <a href="#insights">업무 AI</a>
         <a href="tools/">AI 도구</a>
         <a href="work-skills/">상세 목록</a>
-        <a href="#insights">Smart Insights</a>
+        <a href="#insights" data-smart-insights-link>Smart Insights</a>
       </nav>
       <div class="nav-actions">
         <a href="work-skills/">Archive</a>
@@ -1388,6 +1398,7 @@ def _render_editorial_homepage(
 
       const search = document.querySelector("[data-archive-search]");
       const archiveLinks = Array.from(document.querySelectorAll("[data-archive-link]"));
+      const smartInsightLinks = Array.from(document.querySelectorAll('a[href="#insights"]'));
       const insightCards = Array.from(document.querySelectorAll("[data-insight-card]"));
       const insightDetail = document.querySelector(".insight-detail");
       const insights = document.querySelector("#insights");
@@ -1433,6 +1444,16 @@ def _render_editorial_homepage(
           }} else {{
             window.sessionStorage.setItem("aimstletter.archiveInsightsOnly", "1");
           }}
+        }});
+      }});
+
+      smartInsightLinks.forEach((link) => {{
+        link.addEventListener("click", (event) => {{
+          event.preventDefault();
+          shell.classList.remove("archive-insight-mode");
+          window.history.pushState(null, "", "#insights");
+          if (insights) insights.scrollIntoView({{ block: "start" }});
+          selectFirstVisibleCard();
         }});
       }});
 
@@ -2428,13 +2449,25 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const criteria = document.querySelector('[data-insight-criteria]');
   const source = document.querySelector('[data-insight-source]');
   const grid = document.querySelector('[data-insight-grid]');
-  if (!buttons.length || !number || !title || !category || !subcategory || !body || !detail || !meta || !points || !tags || !criteria || !source || !grid) return;
+  const detailPanel = document.querySelector('.insight-detail');
+  const insightList = document.querySelector('.insight-list');
+  const mobileQuery = window.matchMedia('(max-width: 760px)');
+  if (!buttons.length || !number || !title || !category || !subcategory || !body || !detail || !meta || !points || !tags || !criteria || !source || !grid || !detailPanel || !insightList) return;
+
+  const placeDetailPanel = (button) => {
+    if (mobileQuery.matches) {
+      button.insertAdjacentElement('afterend', detailPanel);
+    } else {
+      grid.appendChild(detailPanel);
+    }
+  };
 
   buttons.forEach((button) => {
     button.addEventListener('click', () => {
       grid.classList.add('has-selection');
       buttons.forEach((item) => item.classList.remove('is-active'));
       button.classList.add('is-active');
+      placeDetailPanel(button);
       number.textContent = button.dataset.number || '';
       title.textContent = button.dataset.title || '';
       category.textContent = button.dataset.category || '';
@@ -2465,6 +2498,17 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         return tag;
       }));
     });
+  });
+
+  mobileQuery.addEventListener('change', () => {
+    const active = document.querySelector('[data-insight-card].is-active');
+    if (active instanceof HTMLElement) {
+      placeDetailPanel(active);
+    } else if (!mobileQuery.matches) {
+      grid.appendChild(detailPanel);
+    } else {
+      insightList.appendChild(detailPanel);
+    }
   });
 })();
 </script>
