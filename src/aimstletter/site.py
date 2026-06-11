@@ -553,8 +553,11 @@ def _render_archive_nav(entries: list[dict[str, object]]) -> str:
         years.append(f'<div class="archive-year">{year}년</div>{"".join(months)}')
     return (
         '<aside class="archive-nav" aria-label="주간 아카이브">'
+        '<div class="archive-search">검색어를 입력하세요...</div>'
+        '<div class="archive-panel">'
         '<div class="archive-title">Archive</div>'
         + "".join(years)
+        + "</div>"
         + "</aside>"
     )
 
@@ -608,47 +611,83 @@ def _render_editorial_homepage(
       position: relative;
     }}
     .archive-nav {{
-      position: absolute;
-      left: max(-190px, calc((100vw - 1180px) / -2 + 18px));
-      top: 118px;
-      width: 156px;
+      position: static;
+      width: 228px;
       color: #111;
       font-size: 14px;
-      line-height: 1.25;
+      line-height: 1.35;
+      margin: 18px 0 18px;
+    }}
+    .archive-search {{
+      height: 38px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: #8a8a8a;
+      background: rgba(255,255,255,.78);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }}
+    .archive-panel {{
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.78);
+      min-height: 360px;
     }}
     .archive-title {{
       display: flex;
-      gap: 10px;
-      align-items: baseline;
-      margin-bottom: 10px;
-      font-size: 24px;
+      gap: 8px;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      font-weight: 800;
     }}
     .archive-title::before {{
       content: "";
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
+      width: 10px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid #777;
       background: #111;
       flex: 0 0 auto;
-      transform: translateY(-3px);
     }}
     .archive-year {{
-      margin-left: 32px;
-      font-size: 24px;
+      padding: 12px 12px 6px;
+      color: #555;
+      font-size: 13px;
     }}
     .archive-month {{
-      margin-left: 46px;
       display: grid;
-      gap: 3px;
-      font-size: 20px;
+      gap: 0;
+      font-size: 13px;
     }}
     .archive-month a {{
       display: block;
+      padding: 11px 12px 11px 26px;
       color: #111;
       text-decoration: none;
+      border-top: 1px solid rgba(0,0,0,.05);
     }}
     .archive-month a.is-current {{
+      background: #2f7fc0;
+      color: #fff;
       font-weight: 800;
+    }}
+    @media (min-width: 1100px) {{
+      .page-shell {{
+        width: min(1040px, calc(100% - 318px));
+        margin-left: 286px;
+        margin-right: 32px;
+      }}
+      .archive-nav {{
+        position: absolute;
+        left: -260px;
+        top: 76px;
+        margin: 0;
+      }}
     }}
     .nav {{
       height: 58px;
@@ -713,19 +752,19 @@ def _render_editorial_homepage(
       margin-top: 42px;
       overflow: hidden;
       border-radius: 20px;
-      min-height: clamp(150px, 18vw, 220px);
+      min-height: clamp(142px, 17vw, 204px);
       background:
         linear-gradient(rgba(0,0,0,.028) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0,0,0,.024) 1px, transparent 1px),
         #f7f7f4;
       background-size: 34px 34px;
       border: 1px solid var(--line);
-      padding: clamp(22px, 3vw, 34px);
+      padding: clamp(20px, 2.6vw, 30px);
     }}
     .talent-card {{
       display: flex;
-      align-items: baseline;
-      gap: clamp(18px, 3vw, 36px);
+      align-items: center;
+      gap: clamp(16px, 2.8vw, 32px);
       min-width: 0;
     }}
     .talent-logo {{
@@ -733,7 +772,7 @@ def _render_editorial_homepage(
       gap: 6px;
       align-items: baseline;
       font-family: Arial, "Noto Sans KR", sans-serif;
-      font-size: clamp(18px, 2vw, 24px);
+      font-size: clamp(17px, 1.7vw, 22px);
       font-weight: 900;
       letter-spacing: -.01em;
     }}
@@ -743,7 +782,7 @@ def _render_editorial_homepage(
       margin: 0;
       color: #4f5f9a;
       font-family: Arial, "Noto Sans KR", sans-serif;
-      font-size: clamp(30px, 4.5vw, 58px);
+      font-size: clamp(28px, 4vw, 50px);
       line-height: .98;
       font-weight: 900;
       letter-spacing: 0;
@@ -753,20 +792,20 @@ def _render_editorial_homepage(
       margin: 0;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(19px, 2.8vw, 34px);
+      font-size: clamp(18px, 2.2vw, 28px);
       line-height: 1.22;
       font-weight: 900;
       letter-spacing: 0;
       white-space: nowrap;
     }}
     .criteria-card {{
-      margin-top: clamp(22px, 2.6vw, 30px);
+      margin-top: clamp(18px, 2.2vw, 26px);
     }}
     .criteria-card h2 {{
-      margin: 0 0 16px;
+      margin: 0 0 12px;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(20px, 2.4vw, 32px);
+      font-size: clamp(16px, 1.55vw, 21px);
       line-height: 1.18;
       letter-spacing: 0;
       font-weight: 800;
@@ -776,12 +815,12 @@ def _render_editorial_homepage(
       padding-left: 1.05em;
       display: grid;
       grid-template-columns: repeat(2, minmax(260px, 1fr));
-      column-gap: clamp(26px, 5vw, 70px);
-      row-gap: 8px;
+      column-gap: clamp(24px, 4vw, 58px);
+      row-gap: 7px;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(16px, 2vw, 25px);
-      line-height: 1.25;
+      font-size: clamp(13px, 1.35vw, 18px);
+      line-height: 1.32;
       letter-spacing: 0;
       font-weight: 500;
     }}
@@ -1109,9 +1148,10 @@ def _render_editorial_homepage(
     @media (max-width: 760px) {{
       .nav-links {{ display: none; }}
       .archive-nav {{ position: static; width: auto; padding: 20px 0 0; }}
-      .archive-title {{ font-size: 18px; }}
-      .archive-year {{ margin-left: 24px; font-size: 18px; }}
-      .archive-month {{ margin-left: 36px; font-size: 15px; }}
+      .archive-panel {{ min-height: auto; }}
+      .archive-title {{ font-size: 14px; }}
+      .archive-year {{ padding: 10px 12px 5px; font-size: 13px; }}
+      .archive-month {{ font-size: 13px; }}
       .hero {{ min-height: auto; padding-top: 48px; }}
       .hero-image {{ border-radius: 14px; padding: 20px; }}
       .talent-card {{ align-items: flex-start; flex-direction: column; gap: 10px; }}
@@ -2039,6 +2079,26 @@ def _smart_insight_subcategory(index: int) -> str:
     return labels[index] if index < len(labels) else "기타"
 
 
+def _smart_insight_source_url(index: int) -> str:
+    urls = (
+        "https://www.anthropic.com/research/building-effective-agents",
+        "https://stitch.withgoogle.com/",
+        "https://www.anthropic.com/engineering/writing-tools-for-agents",
+        "https://www.prisma.io/docs/orm",
+        "https://developer.harness.io/docs/continuous-delivery/",
+        "https://docs.langchain.com/langgraph-platform/",
+        "https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview",
+        "https://vercel.com/docs",
+        "https://docs.litellm.ai/docs/simple_proxy",
+        "https://developers.openai.com/api/docs/guides/evals",
+        "https://docs.llamaindex.ai/",
+        "https://opentelemetry.io/docs/",
+        "https://developer.hashicorp.com/vault/docs",
+        "https://docs.github.com/en/issues",
+    )
+    return urls[index] if index < len(urls) else ""
+
+
 def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     labels = _smart_insight_blueprint()
     entries = []
@@ -2053,7 +2113,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         )
         tags = item.tags if item else ()
         criteria = "선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다."
-        source_url = item.url if item else ""
+        source_url = _smart_insight_source_url(index)
         category = _smart_insight_category(index)
         subcategory = _smart_insight_subcategory(index)
         entries.append((index + 1, title, body, detail, meta, points, tags, criteria, source_url, category, subcategory))
@@ -2119,7 +2179,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + "".join(f"<li>{escape(point)}</li>" for point in first_points[:4])
         + "</ul>"
         + f'<p class="detail-criteria" data-insight-criteria>{escape(first_criteria)}</p>'
-        + f'<a class="detail-source" data-insight-source href="{escape(first_source_url or "#")}"'
+        + f'<a class="detail-source" data-insight-source href="{escape(first_source_url or "#")}" target="_blank" rel="noopener noreferrer"'
         + (" hidden" if not first_source_url else "")
         + f'>{escape(first_source_url)}</a>'
         + "</div>"
@@ -2632,7 +2692,7 @@ def _render_detail_page(item: SiteItem, analytics_html: str, back_href: str) -> 
           {comparisons}
           {glossary}
           {_render_tags(item)}
-          <p><a class="source-link" href="{escape(item.url)}">원문 보기</a></p>
+          <p><a class="source-link" href="{escape(item.url)}" target="_blank" rel="noopener noreferrer">원문 보기</a></p>
         </article>
         """,
     )
