@@ -550,7 +550,12 @@ def _render_archive_nav(entries: list[dict[str, object]]) -> str:
                     f'{month:02d}월 {int(entry["week"])}째주</a>'
                 )
             months.append(f'<div class="archive-month">{"".join(links)}</div>')
-        years.append(f'<div class="archive-year">{year}년</div>{"".join(months)}')
+        years.append(
+            f'<details class="archive-year-group" open>'
+            f'<summary class="archive-year">{year}년</summary>'
+            f'{"".join(months)}'
+            f'</details>'
+        )
     return (
         '<aside class="archive-nav" aria-label="주간 아카이브">'
         '<div class="archive-search">검색어를 입력하세요...</div>'
@@ -558,6 +563,8 @@ def _render_archive_nav(entries: list[dict[str, object]]) -> str:
         '<div class="archive-title">Archive</div>'
         + "".join(years)
         + "</div>"
+        + '<div class="archive-resize" role="separator" aria-orientation="vertical" '
+        + 'aria-label="Archive 너비 조절" tabindex="0"></div>'
         + "</aside>"
     )
 
@@ -603,16 +610,20 @@ def _render_editorial_homepage(
     }}
     a {{ color: inherit; text-decoration: none; }}
     .page {{
-      width: min(1320px, calc(100% - 12px));
+      width: min(1180px, calc(100% - 34px));
       margin: 0 auto;
       min-height: 100vh;
+      --archive-width: 228px;
+      --archive-gap: 30px;
     }}
     .page-shell {{
       position: relative;
     }}
     .archive-nav {{
       position: static;
-      width: 228px;
+      width: var(--archive-width);
+      min-width: 180px;
+      max-width: 380px;
       color: #111;
       font-size: 14px;
       line-height: 1.35;
@@ -655,9 +666,36 @@ def _render_editorial_homepage(
       flex: 0 0 auto;
     }}
     .archive-year {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
       padding: 12px 12px 6px;
       color: #555;
       font-size: 13px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }}
+    .archive-year::-webkit-details-marker {{
+      display: none;
+    }}
+    .archive-year::after {{
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-right: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
+      color: #777;
+      margin-left: 8px;
+      transform: rotate(0deg);
+      transition: transform .16s ease;
+    }}
+    .archive-year-group:not([open]) .archive-year::after {{
+      transform: rotate(-45deg);
+    }}
+    .archive-year-group[open] .archive-year::after {{
+      transform: rotate(45deg);
     }}
     .archive-month {{
       display: grid;
@@ -676,17 +714,46 @@ def _render_editorial_homepage(
       color: #fff;
       font-weight: 800;
     }}
+    .archive-resize {{
+      display: none;
+    }}
     @media (min-width: 1100px) {{
       .page-shell {{
-        width: min(1200px, calc(100% - 292px));
-        margin-left: 260px;
+        width: min(960px, calc(100% - var(--archive-width) - 64px));
+        margin-left: calc(var(--archive-width) + var(--archive-gap));
         margin-right: 32px;
       }}
       .archive-nav {{
         position: absolute;
-        left: -244px;
+        left: calc((var(--archive-width) + 16px) * -1);
         top: 76px;
         margin: 0;
+        overflow: visible;
+      }}
+      .archive-resize {{
+        position: absolute;
+        top: 0;
+        right: -10px;
+        display: block;
+        width: 12px;
+        height: 100%;
+        cursor: col-resize;
+        touch-action: none;
+      }}
+      .archive-resize::after {{
+        content: "";
+        position: absolute;
+        top: 48px;
+        right: 4px;
+        width: 2px;
+        height: calc(100% - 48px);
+        border-radius: 2px;
+        background: transparent;
+      }}
+      .archive-resize:hover::after,
+      .archive-resize:focus-visible::after,
+      .archive-nav.is-resizing .archive-resize::after {{
+        background: #2f7fc0;
       }}
     }}
     .nav {{
@@ -1248,6 +1315,64 @@ def _render_editorial_homepage(
       <span>© AI Master Times</span>
     </footer>
   </main>
+  <script>
+    (() => {{
+      const shell = document.querySelector(".page-shell");
+      const archive = document.querySelector(".archive-nav");
+      const handle = document.querySelector(".archive-resize");
+      if (!shell || !archive || !handle) return;
+
+      const storageKey = "aimstletter.archiveWidth";
+      const minWidth = 180;
+      const maxWidth = 380;
+
+      const setWidth = (value) => {{
+        const width = Math.max(minWidth, Math.min(maxWidth, Math.round(value)));
+        shell.style.setProperty("--archive-width", `${{width}}px`);
+        handle.setAttribute("aria-valuenow", String(width));
+        return width;
+      }};
+
+      const savedWidth = Number(window.localStorage.getItem(storageKey));
+      if (Number.isFinite(savedWidth) && savedWidth > 0) {{
+        setWidth(savedWidth);
+      }}
+
+      const startResize = (event) => {{
+        if (!window.matchMedia("(min-width: 1100px)").matches) return;
+        event.preventDefault();
+        archive.classList.add("is-resizing");
+        const startX = event.clientX;
+        const startWidth = archive.getBoundingClientRect().width;
+
+        const onMove = (moveEvent) => {{
+          const width = setWidth(startWidth + moveEvent.clientX - startX);
+          window.localStorage.setItem(storageKey, String(width));
+        }};
+
+        const onUp = () => {{
+          archive.classList.remove("is-resizing");
+          window.removeEventListener("pointermove", onMove);
+          window.removeEventListener("pointerup", onUp);
+        }};
+
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp);
+      }};
+
+      handle.setAttribute("aria-valuemin", String(minWidth));
+      handle.setAttribute("aria-valuemax", String(maxWidth));
+      handle.addEventListener("pointerdown", startResize);
+      handle.addEventListener("keydown", (event) => {{
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        const step = event.shiftKey ? 24 : 12;
+        const currentWidth = archive.getBoundingClientRect().width;
+        const width = setWidth(currentWidth + (event.key === "ArrowRight" ? step : -step));
+        window.localStorage.setItem(storageKey, String(width));
+      }});
+    }})();
+  </script>
 </body>
 </html>
 """
