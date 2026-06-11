@@ -230,11 +230,13 @@ def test_render_analytics_supports_goatcounter() -> None:
     assert "gc.zgo.at/count.js" in html
 
 
-def test_committed_pages_root_redirect_exists() -> None:
+def test_committed_pages_root_homepage_exists() -> None:
     html = Path("public/index.html").read_text(encoding="utf-8")
 
+    assert "AI MASTER TIMES" in html
     assert "archive/2026/06/week-2/" in html
-    assert "window.location.replace" in html
+    assert "당신의 AI 역량을 성장시켜보세요" in html
+    assert "�" not in html
 
 
 def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
@@ -244,6 +246,10 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert 'href="archive/2026/06/week-1/"' in week_2
     assert 'href="archive/2026/06/week-2/"' in week_1
     assert "06월 1째주" in week_1
+    assert "당신의 AI 역량을 성장시켜보세요" in week_2
+    assert "업무 AI" in week_2
+    assert "�" not in week_1
+    assert "�" not in week_2
     assert '<a class="brand" href="./">AI MASTER TIMES</a>' in week_2
     assert "button.insertAdjacentElement('afterend', detailPanel)" in week_2
     assert ".insight-grid.has-selection .insight-detail { display: flex; }" in week_2
