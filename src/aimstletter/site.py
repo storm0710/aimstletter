@@ -455,6 +455,301 @@ def _render_tags(item: SiteItem) -> str:
     return f'<div class="tags" aria-label="중요 키워드">{tags}</div>'
 
 
+def _render_editorial_homepage(
+    today: str,
+    infra_items: list[SiteItem],
+    other_items: list[SiteItem],
+    latest_tool_items: list[SiteItem],
+    analytics_html: str,
+) -> str:
+    all_items = [*infra_items, *other_items, *latest_tool_items]
+    lead_item = (infra_items or other_items or latest_tool_items)[0] if all_items else None
+    lead_summary = lead_item.summary if lead_item else "이번 주 AI 업무 업데이트를 선별해 보여줍니다."
+    insight_cards = _render_smart_insight_cards(all_items[:4])
+    logo_roll = _render_logo_roll()
+    return f"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Master Editorial</title>
+  <meta name="description" content="AI Master 주간 AI 업데이트를 위한 미니멀 에디토리얼 페이지">
+  {analytics_html}
+  <style>
+    :root {{
+      color-scheme: light;
+      --bg: #ffffff;
+      --ink: #111111;
+      --muted: #767676;
+      --line: #e8e8e4;
+      --soft: #f6f6f3;
+      --panel: #ffffff;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, "Noto Sans KR", sans-serif;
+    }}
+    a {{ color: inherit; text-decoration: none; }}
+    .page {{
+      width: min(1180px, calc(100% - 34px));
+      margin: 0 auto;
+      min-height: 100vh;
+    }}
+    .nav {{
+      height: 58px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      color: #555;
+    }}
+    .brand {{
+      font-weight: 900;
+      margin-right: auto;
+      color: var(--ink);
+    }}
+    .nav-links {{
+      display: flex;
+      gap: 26px;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }}
+    .nav-actions {{
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }}
+    .button {{
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 14px;
+      background: #050505;
+      color: #fff;
+      border-radius: 5px;
+      font-weight: 800;
+      font-size: 12px;
+    }}
+    .hero {{
+      min-height: 720px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 70px 0 0;
+    }}
+    .hero h1 {{
+      max-width: 720px;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(38px, 5.8vw, 78px);
+      line-height: .98;
+      font-weight: 700;
+      letter-spacing: 0;
+    }}
+    .hero-image {{
+      align-self: end;
+      margin-top: 64px;
+      overflow: hidden;
+      border-radius: 20px;
+      height: clamp(260px, 34vw, 430px);
+      background: var(--soft);
+      border: 1px solid var(--line);
+    }}
+    .hero-image img {{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transform: scale(1.02);
+      transition: transform .7s ease;
+      filter: saturate(.82) contrast(.96) brightness(1.04);
+    }}
+    .hero-image:hover img {{
+      transform: scale(1.07);
+    }}
+    .intro-row {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(240px, 420px);
+      gap: 32px;
+      align-items: end;
+      padding: 34px 0 36px;
+      border-bottom: 1px solid var(--line);
+    }}
+    .intro-copy {{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+      max-width: 620px;
+    }}
+    .date {{
+      color: #9a9a9a;
+      font-size: 12px;
+      text-align: right;
+    }}
+    .logo-roll {{
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      padding: 24px 0;
+    }}
+    .logo-track {{
+      display: flex;
+      width: max-content;
+      gap: 54px;
+      animation: roll 24s linear infinite;
+      color: #2f2f2f;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 15px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }}
+    @keyframes roll {{
+      from {{ transform: translateX(0); }}
+      to {{ transform: translateX(-50%); }}
+    }}
+    .insights {{
+      padding: 64px 0 90px;
+    }}
+    .section-kicker {{
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }}
+    .insights h2 {{
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(26px, 3vw, 44px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }}
+    .insights-header {{
+      max-width: 620px;
+      margin-bottom: 34px;
+    }}
+    .insights-header p {{
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }}
+    .insight-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }}
+    .insight-card {{
+      border: 1px solid var(--line);
+      background: var(--panel);
+      min-height: 230px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }}
+    .card-icon {{
+      width: 22px;
+      height: 22px;
+      border: 1px solid #111;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      margin-bottom: 26px;
+    }}
+    .insight-card h3 {{
+      margin: 0 0 10px;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: 22px;
+      letter-spacing: 0;
+    }}
+    .insight-card p {{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.58;
+    }}
+    .mini-link {{
+      margin-top: 26px;
+      color: #111;
+      font-size: 12px;
+      font-weight: 800;
+    }}
+    .footer {{
+      border-top: 1px solid var(--line);
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+    }}
+    @media (max-width: 760px) {{
+      .nav-links {{ display: none; }}
+      .hero {{ min-height: auto; padding-top: 48px; }}
+      .intro-row,
+      .insight-grid {{
+        grid-template-columns: 1fr;
+      }}
+      .date {{ text-align: left; }}
+      .insight-card {{ min-height: 210px; }}
+      .footer {{ align-items: flex-start; flex-direction: column; gap: 12px; padding: 22px 0; }}
+    }}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="nav">
+      <a class="brand" href="#">Learn</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#courses">Courses</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#resources">Resources</a>
+        <a href="#pricing">Pricing</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="#updates">Sign in</a>
+        <a class="button" href="#insights">Get Started</a>
+      </div>
+    </header>
+    <section class="hero" aria-label="Hero">
+      <h1>Master the Art of Minimalist AI Operations in the Modern Era</h1>
+      <figure class="hero-image">
+        <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80" alt="Minimal editorial workspace with calm architectural light">
+      </figure>
+      <div class="intro-row">
+        <p class="intro-copy">{escape(_clip(lead_summary, 260))}</p>
+        <div class="date">{escape(today)} · curated weekly for AI Master teams</div>
+      </div>
+    </section>
+    <section class="logo-roll" aria-label="Source roll">
+      <div class="logo-track">{logo_roll}{logo_roll}</div>
+    </section>
+    <section class="insights" id="insights">
+      <div class="insights-header">
+        <div class="section-kicker">Smart Insights</div>
+        <h2>Structured clarity for fast-moving AI work.</h2>
+        <p>Four focused blocks turn weekly signals into operating judgment, tool awareness, and better team conversations.</p>
+      </div>
+      <div class="insight-grid">
+        {insight_cards}
+      </div>
+    </section>
+    <footer class="footer">
+      <strong>Learn</strong>
+      <span>Privacy Policy · Terms of Service · Contact · About</span>
+      <span>© AI Master Editorial</span>
+    </footer>
+  </main>
+</body>
+</html>
+"""
+
+
 def _render_romer_homepage(
     today: str,
     infra_items: list[SiteItem],
@@ -634,7 +929,7 @@ def _render_dashboard_homepage(
     latest_tool_items: list[SiteItem],
     analytics_html: str,
 ) -> str:
-    return _render_romer_homepage(today, infra_items, other_items, latest_tool_items, analytics_html)
+    return _render_editorial_homepage(today, infra_items, other_items, latest_tool_items, analytics_html)
 
     all_items = [*infra_items, *other_items, *latest_tool_items]
     automation_count = _count_keyword_items(all_items, ("agent", "automation", "workflow", "copilot", "codex"))
@@ -1260,6 +1555,34 @@ def _render_command_tasks(items: list[SiteItem]) -> str:
         )
         for item in items
     )
+
+
+def _render_smart_insight_cards(items: list[SiteItem]) -> str:
+    labels = (
+        ("Focus Tracking", "업무에 바로 연결되는 AI 신호를 선별해 팀의 주간 초점을 정리합니다."),
+        ("Cognitive Load", "도구 변화와 연구 업데이트를 구조화해 학습 부담을 낮춥니다."),
+        ("Structural Integrity", "DBA, 네트워크, 서버 운영 관점에서 적용 조건과 리스크를 분리합니다."),
+        ("User Perspective", "수업 토론과 실무 적용 아이디어로 이어질 질문을 남깁니다."),
+    )
+    cards = []
+    for index, (title, fallback) in enumerate(labels):
+        item = items[index] if index < len(items) else None
+        body = _clip(item.summary, 150) if item else fallback
+        href = _detail_href(item) if item else "#"
+        cards.append(
+            '<article class="insight-card">'
+            f'<div><div class="card-icon">{index + 1}</div>'
+            f'<h3>{escape(title)}</h3>'
+            f'<p>{escape(body)}</p></div>'
+            f'<a class="mini-link" href="{escape(href)}">Read full signal</a>'
+            '</article>'
+        )
+    return "\n".join(cards)
+
+
+def _render_logo_roll() -> str:
+    names = ("OpenAI", "Claude", "GitHub", "arXiv", "Cursor", "Copilot", "Security", "DBA")
+    return "".join(f"<span>{escape(name)}</span>" for name in names)
 
 
 def _render_dashboard_tool_cards(items: list[SiteItem]) -> str:
