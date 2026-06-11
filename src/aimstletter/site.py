@@ -759,12 +759,55 @@ def _render_editorial_homepage(
       line-height: .98;
       letter-spacing: 0;
     }}
-    .insight-detail p {{
+    .detail-meta {{
+      margin-bottom: 16px;
+      color: #777;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }}
+    .detail-summary,
+    .detail-copy {{
       margin: 0;
       color: #565656;
       font-size: 14px;
       line-height: 1.68;
       max-width: 620px;
+    }}
+    .detail-summary {{
+      color: #222;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }}
+    .detail-points {{
+      display: grid;
+      gap: 8px;
+      margin: 26px 0 0;
+      padding: 0;
+      list-style: none;
+      max-width: 620px;
+    }}
+    .detail-points li {{
+      border-top: 1px solid rgba(0,0,0,.12);
+      padding-top: 8px;
+      color: #444;
+      font-size: 13px;
+      line-height: 1.55;
+    }}
+    .detail-tags {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 34px;
+    }}
+    .detail-tag {{
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 6px 8px;
+      color: #111;
+      font-size: 11px;
+      font-weight: 800;
     }}
     .mini-link,
     .detail-link {{
@@ -1665,26 +1708,36 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     for index, (title, fallback) in enumerate(labels):
         item = items[index] if index < len(items) else None
         body = _smart_insight_body(index, item, fallback)
-        href = _detail_href(item) if item else "#"
-        entries.append((index + 1, title, body, href))
+        detail = item.detail if item else fallback
+        meta = (
+            f"{item.source} · {item.kind} · {_format_date(item.published)}"
+            if item
+            else "AI Master Times"
+        )
+        points = item.key_points if item else ()
+        tags = item.tags if item else ()
+        entries.append((index + 1, title, body, detail, meta, points, tags))
 
     if not entries:
         return ""
 
     cards = []
-    for number, title, body, href in entries:
+    for number, title, body, detail, meta, points, tags in entries:
         cards.append(
             '<button class="insight-card" type="button" '
             f'data-insight-card data-number="{number}" '
             f'data-title="{escape(title, quote=True)}" '
             f'data-body="{escape(body, quote=True)}" '
-            f'data-href="{escape(href, quote=True)}">'
+            f'data-detail="{escape(_clip(detail, 700), quote=True)}" '
+            f'data-meta="{escape(meta, quote=True)}" '
+            f'data-points="{escape(json.dumps(list(points[:4]), ensure_ascii=False), quote=True)}" '
+            f'data-tags="{escape(json.dumps(list(tags[:6]), ensure_ascii=False), quote=True)}">'
             f'<span class="card-icon">{number}</span>'
             f'<span><span class="card-title">{escape(title)}</span><p>{escape(body)}</p></span>'
             '</button>'
         )
 
-    first_number, first_title, first_body, first_href = entries[0]
+    first_number, first_title, first_body, first_detail, first_meta, first_points, first_tags = entries[0]
     return (
         '<div class="insight-list">'
         + "\n".join(cards)
@@ -1692,10 +1745,17 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + '<article class="insight-detail" aria-live="polite">'
         + "<div>"
         + f'<div class="detail-number" data-insight-number>{first_number}</div>'
+        + f'<div class="detail-meta" data-insight-meta>{escape(first_meta)}</div>'
         + f'<h3 data-insight-title>{escape(first_title)}</h3>'
-        + f'<p data-insight-body>{escape(first_body)}</p>'
+        + f'<p class="detail-summary" data-insight-body>{escape(first_body)}</p>'
+        + f'<p class="detail-copy" data-insight-detail>{escape(_clip(first_detail, 700))}</p>'
+        + '<ul class="detail-points" data-insight-points>'
+        + "".join(f"<li>{escape(point)}</li>" for point in first_points[:4])
+        + "</ul>"
         + "</div>"
-        + f'<a class="detail-link" data-insight-link href="{escape(first_href)}">Read full signal -></a>'
+        + '<div class="detail-tags" data-insight-tags>'
+        + "".join(f'<span class="detail-tag">#{escape(tag)}</span>' for tag in first_tags[:6])
+        + "</div>"
         + "</article>"
         + """
 <script>
@@ -1704,9 +1764,12 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const number = document.querySelector('[data-insight-number]');
   const title = document.querySelector('[data-insight-title]');
   const body = document.querySelector('[data-insight-body]');
-  const link = document.querySelector('[data-insight-link]');
+  const detail = document.querySelector('[data-insight-detail]');
+  const meta = document.querySelector('[data-insight-meta]');
+  const points = document.querySelector('[data-insight-points]');
+  const tags = document.querySelector('[data-insight-tags]');
   const grid = document.querySelector('[data-insight-grid]');
-  if (!buttons.length || !number || !title || !body || !link || !grid) return;
+  if (!buttons.length || !number || !title || !body || !detail || !meta || !points || !tags || !grid) return;
 
   buttons.forEach((button) => {
     button.addEventListener('click', () => {
@@ -1716,7 +1779,24 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
       number.textContent = button.dataset.number || '';
       title.textContent = button.dataset.title || '';
       body.textContent = button.dataset.body || '';
-      link.href = button.dataset.href || '#';
+      detail.textContent = button.dataset.detail || '';
+      meta.textContent = button.dataset.meta || '';
+
+      let pointItems = [];
+      let tagItems = [];
+      try { pointItems = JSON.parse(button.dataset.points || '[]'); } catch (error) { pointItems = []; }
+      try { tagItems = JSON.parse(button.dataset.tags || '[]'); } catch (error) { tagItems = []; }
+      points.replaceChildren(...pointItems.map((item) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        return li;
+      }));
+      tags.replaceChildren(...tagItems.map((item) => {
+        const tag = document.createElement('span');
+        tag.className = 'detail-tag';
+        tag.textContent = `#${item}`;
+        return tag;
+      }));
     });
   });
 })();
