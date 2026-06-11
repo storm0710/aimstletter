@@ -34,47 +34,83 @@
       position: relative;
     }
     .archive-nav {
-      position: absolute;
-      left: max(-190px, calc((100vw - 1180px) / -2 + 18px));
-      top: 118px;
-      width: 156px;
+      position: static;
+      width: 228px;
       color: #111;
       font-size: 14px;
-      line-height: 1.25;
+      line-height: 1.35;
+      margin: 18px 0 18px;
+    }
+    .archive-search {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: #8a8a8a;
+      background: rgba(255,255,255,.78);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .archive-panel {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.78);
+      min-height: 360px;
     }
     .archive-title {
       display: flex;
-      gap: 10px;
-      align-items: baseline;
-      margin-bottom: 10px;
-      font-size: 24px;
+      gap: 8px;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      font-weight: 800;
     }
     .archive-title::before {
       content: "";
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
+      width: 10px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid #777;
       background: #111;
       flex: 0 0 auto;
-      transform: translateY(-3px);
     }
     .archive-year {
-      margin-left: 32px;
-      font-size: 24px;
+      padding: 12px 12px 6px;
+      color: #555;
+      font-size: 13px;
     }
     .archive-month {
-      margin-left: 46px;
       display: grid;
-      gap: 3px;
-      font-size: 20px;
+      gap: 0;
+      font-size: 13px;
     }
     .archive-month a {
       display: block;
+      padding: 11px 12px 11px 26px;
       color: #111;
       text-decoration: none;
+      border-top: 1px solid rgba(0,0,0,.05);
     }
     .archive-month a.is-current {
+      background: #2f7fc0;
+      color: #fff;
       font-weight: 800;
+    }
+    @media (min-width: 1100px) {
+      .page-shell {
+        width: min(1040px, calc(100% - 318px));
+        margin-left: 286px;
+        margin-right: 32px;
+      }
+      .archive-nav {
+        position: absolute;
+        left: -260px;
+        top: 76px;
+        margin: 0;
+      }
     }
     .nav {
       height: 58px;
@@ -139,19 +175,16 @@
       margin-top: 42px;
       overflow: hidden;
       border-radius: 20px;
-      min-height: clamp(150px, 18vw, 220px);
+      min-height: clamp(170px, 19vw, 230px);
       background:
         linear-gradient(rgba(0,0,0,.028) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0,0,0,.024) 1px, transparent 1px),
         #f7f7f4;
       background-size: 34px 34px;
       border: 1px solid var(--line);
-      padding: clamp(22px, 3vw, 34px);
+      padding: clamp(20px, 2.8vw, 34px);
     }
     .talent-card {
-      display: flex;
-      align-items: baseline;
-      gap: clamp(18px, 3vw, 36px);
       min-width: 0;
     }
     .talent-logo {
@@ -159,40 +192,55 @@
       gap: 6px;
       align-items: baseline;
       font-family: Arial, "Noto Sans KR", sans-serif;
-      font-size: clamp(18px, 2vw, 24px);
+      font-size: clamp(18px, 1.9vw, 26px);
       font-weight: 900;
       letter-spacing: -.01em;
     }
     .talent-logo .sk { color: #e21424; }
     .talent-logo .ax { color: #ff8200; }
+    .talent-headline {
+      display: flex;
+      align-items: baseline;
+      gap: clamp(14px, 2.3vw, 30px);
+      margin-top: 4px;
+      min-width: 0;
+    }
     .talent-title {
       margin: 0;
       color: #4f5f9a;
       font-family: Arial, "Noto Sans KR", sans-serif;
-      font-size: clamp(30px, 4.5vw, 58px);
+      font-size: clamp(36px, 5vw, 66px);
       line-height: .98;
       font-weight: 900;
       letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .talent-dash {
+      color: #111;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      font-size: clamp(28px, 4vw, 52px);
+      line-height: 1;
+      font-weight: 900;
       white-space: nowrap;
     }
     .talent-copy {
       margin: 0;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(19px, 2.8vw, 34px);
+      font-size: clamp(20px, 2.8vw, 36px);
       line-height: 1.22;
       font-weight: 900;
       letter-spacing: 0;
       white-space: nowrap;
     }
     .criteria-card {
-      margin-top: clamp(22px, 2.6vw, 30px);
+      margin-top: clamp(24px, 2.8vw, 34px);
     }
     .criteria-card h2 {
-      margin: 0 0 16px;
+      margin: 0 0 12px;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(20px, 2.4vw, 32px);
+      font-size: clamp(16px, 1.55vw, 21px);
       line-height: 1.18;
       letter-spacing: 0;
       font-weight: 800;
@@ -202,12 +250,12 @@
       padding-left: 1.05em;
       display: grid;
       grid-template-columns: repeat(2, minmax(260px, 1fr));
-      column-gap: clamp(26px, 5vw, 70px);
-      row-gap: 8px;
+      column-gap: clamp(24px, 4vw, 58px);
+      row-gap: 7px;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(16px, 2vw, 25px);
-      line-height: 1.25;
+      font-size: clamp(13px, 1.35vw, 18px);
+      line-height: 1.32;
       letter-spacing: 0;
       font-weight: 500;
     }
@@ -535,12 +583,14 @@
     @media (max-width: 760px) {
       .nav-links { display: none; }
       .archive-nav { position: static; width: auto; padding: 20px 0 0; }
-      .archive-title { font-size: 18px; }
-      .archive-year { margin-left: 24px; font-size: 18px; }
-      .archive-month { margin-left: 36px; font-size: 15px; }
+      .archive-panel { min-height: auto; }
+      .archive-title { font-size: 14px; }
+      .archive-year { padding: 10px 12px 5px; font-size: 13px; }
+      .archive-month { font-size: 13px; }
       .hero { min-height: auto; padding-top: 48px; }
       .hero-image { border-radius: 14px; padding: 20px; }
-      .talent-card { align-items: flex-start; flex-direction: column; gap: 10px; }
+      .talent-headline { flex-wrap: wrap; gap: 6px 12px; }
+      .talent-dash { display: none; }
       .talent-title,
       .talent-copy { white-space: normal; }
       .criteria-card { margin-top: 24px; }
@@ -562,7 +612,7 @@
 </head>
 <body>
   <main class="page page-shell">
-    <aside class="archive-nav" aria-label="주간 아카이브"><div class="archive-title">Archive</div><div class="archive-year">2026년</div><div class="archive-month"><a class="is-current" href="archive/2026/06/week-2/">06월 2째주</a></div></aside>
+    <aside class="archive-nav" aria-label="주간 아카이브"><div class="archive-search">검색어를 입력하세요...</div><div class="archive-panel"><div class="archive-title">Archive</div><div class="archive-year">2026년</div><div class="archive-month"><a class="is-current" href="archive/2026/06/week-2/">06월 2째주</a></div></div></aside>
     <header class="nav">
       <a class="brand" href="#">AI MASTER TIMES</a>
       <nav class="nav-links" aria-label="Primary">
@@ -581,9 +631,10 @@
       <section class="hero-image" aria-label="AI Talent Lab pass criteria">
         <div class="talent-card">
           <div class="talent-logo"><span class="sk">SK</span><span class="ax">AX</span></div>
-          <div>
+          <div class="talent-headline">
             <div class="talent-title">AI Talent Lab</div>
-            <p class="talent-copy">당신의 AI 역량을<br>성장시켜보세요</p>
+            <div class="talent-dash">-</div>
+            <p class="talent-copy">당신의 AI 역량을 성장시켜보세요</p>
           </div>
         </div>
         <div class="criteria-card">
@@ -611,20 +662,20 @@
         <p>홀수 카드는 에이전트 운영과 엔지니어링 트렌드, 짝수 카드는 AI 제품 제작에 필요한 프론트·디자인·백엔드·데이터 도구를 함께 정리했습니다.</p>
       </div>
       <div class="insight-grid" data-insight-grid>
-        <div class="insight-list"><button class="insight-card" type="button" data-insight-card data-number="1" data-title="Harness Engineering" data-category="기술" data-subcategory="AI 인프라" data-body="AI 실행을 업무에 붙이기 위한 운영 계층입니다. 모델 호출, 도구 사용, 권한, 검증, 기록을 한 흐름으로 묶어 안전하게 반복 실행하도록 설계합니다." data-detail="하네스 엔지니어링은 AI 모델의 답변을 실제 업무 실행으로 연결하기 위한 운영 설계입니다. 프롬프트만 잘 쓰는 것을 넘어, 모델이 어떤 도구를 호출하고 어떤 조건에서 실행되며 어떤 로그와 검증을 남기는지까지 관리합니다." data-meta="arXiv 데이터베이스 AI · 논문 · 2026-06-10" data-points="[&quot;1. 하네스 엔지니어링이란? 모델, 도구, 데이터, 권한, 검증 로직을 묶어 AI 작업을 반복 가능한 실행 흐름으로 만드는 방식입니다.&quot;, &quot;2. 프롬프트 엔지니어링과의 차이점: 프롬프트 엔지니어링이 모델 입력을 다듬는 일이라면, 하네스 엔지니어링은 실행 환경과 통제 장치를 설계하는 일입니다.&quot;, &quot;3. 주요 구성 요소: 입력 스키마, 도구 호출 규칙, 권한 경계, 평가 기준, 감사 로그, 실패 시 재시도와 롤백 정책입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;데이터베이스&quot;, &quot;네트워크&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://arxiv.org/abs/2606.11560v1"><span class="card-icon">1</span><span><span class="card-heading"><span class="card-title">Harness Engineering</span><span class="topic-badge">기술</span><span class="topic-badge sub">AI 인프라</span></span><p>AI 실행을 업무에 붙이기 위한 운영 계층입니다. 모델 호출, 도구 사용, 권한, 검증, 기록을 한 흐름으로 묶어 안전하게 반복 실행하도록 설계합니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="2" data-title="AI Product Builder Stack" data-category="기술" data-subcategory="풀스택" data-body="AI 제품을 빠르게 만들기 위한 프론트, 디자인, 백엔드 도구 묶음입니다. 화면 초안에서 인증, 데이터, 배포까지 이어지는 제작 경로를 잡습니다." data-detail="AI Product Builder Stack은 AI 제품을 만들 때 필요한 디자인, 프론트엔드, 백엔드, 배포 도구를 하나의 제작 흐름으로 보는 관점입니다." data-meta="arXiv 네트워크 AI · 논문 · 2026-06-08" data-points="[&quot;1. 무엇인가? Stitch, v0, Lovable, Bolt 같은 화면 제작 도구와 Supabase, Neon, Convex 같은 백엔드 도구를 함께 묶은 제작 스택입니다.&quot;, &quot;2. 단순 디자인 도구와의 차이점: 화면 시안에서 끝나지 않고 인증, 데이터, API, 배포까지 이어지는 실제 제품 경로를 만듭니다.&quot;, &quot;3. 주요 구성 요소: UI 생성, 컴포넌트 코드, 데이터베이스, 인증, 서버 함수, 배포 플랫폼, 모니터링입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;네트워크&quot;, &quot;코딩 자동화&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://arxiv.org/abs/2606.09122v1"><span class="card-icon">2</span><span><span class="card-heading"><span class="card-title">AI Product Builder Stack</span><span class="topic-badge">기술</span><span class="topic-badge sub">풀스택</span></span><p>AI 제품을 빠르게 만들기 위한 프론트, 디자인, 백엔드 도구 묶음입니다. 화면 초안에서 인증, 데이터, 배포까지 이어지는 제작 경로를 잡습니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="3" data-title="Agent Harness" data-category="기술" data-subcategory="AI 인프라" data-body="에이전트가 직접 시스템을 만지는 대신, 실행 계층이 도구 호출을 검증하고 결과를 다시 모델에 주입하는 안전한 구조입니다." data-detail="Agent Harness는 에이전트가 시스템을 직접 제어하지 않고, 정해진 실행 계층을 통해 도구를 안전하게 호출하도록 만드는 구조입니다." data-meta="arXiv 네트워크 AI · 논문 · 2026-06-05" data-points="[&quot;1. 무엇인가? 모델의 판단과 실제 도구 실행 사이에 검증, 권한, 결과 처리 계층을 두는 방식입니다.&quot;, &quot;2. 일반 에이전트 호출과의 차이점: 모델이 바로 실행하지 않고 하네스가 입력, 도구, 결과를 통제합니다.&quot;, &quot;3. 주요 구성 요소: 도구 목록, 호출 스키마, 실행 제한, 결과 검증, 에러 처리, 사람 승인 단계입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;네트워크&quot;, &quot;서버 운영&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://arxiv.org/abs/2606.07150v1"><span class="card-icon">3</span><span><span class="card-heading"><span class="card-title">Agent Harness</span><span class="topic-badge">기술</span><span class="topic-badge sub">AI 인프라</span></span><p>에이전트가 직접 시스템을 만지는 대신, 실행 계층이 도구 호출을 검증하고 결과를 다시 모델에 주입하는 안전한 구조입니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="4" data-title="Design System to Backend" data-category="기술" data-subcategory="프론트엔드" data-body="디자인 규칙과 데이터/API 계약을 함께 관리하는 방식입니다. UI가 예쁘게 보이는 수준을 넘어 실제 백엔드 구조와 연결되게 만듭니다." data-detail="Design System to Backend는 디자인 규칙과 백엔드 계약을 함께 관리해, AI가 만든 화면이 실제 서비스 구조와 맞물리게 하는 방식입니다." data-meta="OpenAI 소식 · 동향 · 2026-06-04" data-points="[&quot;1. 무엇인가? DESIGN.md, getdesign.md, 컴포넌트 규칙, 데이터 모델, API 계약을 연결하는 작업 방식입니다.&quot;, &quot;2. 단순 UI 제작과의 차이점: 보기 좋은 화면이 아니라 데이터가 흐르고 유지보수 가능한 제품 구조를 목표로 합니다.&quot;, &quot;3. 주요 구성 요소: 디자인 토큰, 컴포넌트 규칙, 스키마, API 타입, 폼 검증, 에러 상태입니다.&quot;]" data-tags="[&quot;OpenAI&quot;, &quot;AI 에이전트&quot;, &quot;엔터프라이즈&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://openai.com/index/endava-frontiers"><span class="card-icon">4</span><span><span class="card-heading"><span class="card-title">Design System to Backend</span><span class="topic-badge">기술</span><span class="topic-badge sub">프론트엔드</span></span><p>디자인 규칙과 데이터/API 계약을 함께 관리하는 방식입니다. UI가 예쁘게 보이는 수준을 넘어 실제 백엔드 구조와 연결되게 만듭니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="5" data-title="AI Software Delivery" data-category="동향" data-subcategory="SDLC" data-body="개발, 테스트, 보안, 배포, 운영을 AI와 연결하는 전달 체계입니다. 코드 생성 이후의 실제 출시와 운영 품질을 다룹니다." data-detail="AI Software Delivery는 AI를 코드 작성 보조에만 쓰지 않고 테스트, 배포, 보안, 운영까지 포함한 소프트웨어 전달 과정에 적용하는 관점입니다." data-meta="OpenAI 소식 · 도구 업데이트 · 2026-05-27" data-points="[&quot;1. 무엇인가? 개발부터 운영까지의 SDLC에 AI 기반 자동화와 검증을 붙이는 방식입니다.&quot;, &quot;2. 코드 생성과의 차이점: 코드를 만드는 것보다 릴리즈 가능성, 품질, 보안, 운영 안정성을 더 중요하게 봅니다.&quot;, &quot;3. 주요 구성 요소: CI/CD, 테스트 자동화, 보안 스캔, 배포 승인, 롤백, 비용 관리입니다.&quot;]" data-tags="[&quot;OpenAI&quot;, &quot;AI 에이전트&quot;, &quot;코딩 자동화&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://openai.com/index/warp"><span class="card-icon">5</span><span><span class="card-heading"><span class="card-title">AI Software Delivery</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">SDLC</span></span><p>개발, 테스트, 보안, 배포, 운영을 AI와 연결하는 전달 체계입니다. 코드 생성 이후의 실제 출시와 운영 품질을 다룹니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="6" data-title="Workflow and Data Layer" data-category="기술" data-subcategory="백엔드" data-body="AI 기능을 단발성 호출이 아니라 백엔드 프로세스로 운영하기 위한 워크플로와 데이터 계층입니다. 상태, 재시도, 검색, 저장을 담당합니다." data-detail="Workflow and Data Layer는 AI 기능을 일회성 응답이 아니라 상태를 가진 백엔드 프로세스로 운영하기 위한 기반입니다." data-meta="arXiv AI · 논문 · 2026-06-11" data-points="[&quot;1. 무엇인가? LangGraph, Inngest, Temporal, n8n 같은 워크플로와 벡터 저장소, 데이터베이스를 연결하는 계층입니다.&quot;, &quot;2. 단순 API 호출과의 차이점: 긴 작업, 재시도, 상태 저장, 검색, 후속 처리를 안정적으로 다룹니다.&quot;, &quot;3. 주요 구성 요소: 작업 큐, 상태 머신, 스케줄러, 벡터 DB, 이벤트 로그, 재처리 정책입니다.&quot;]" data-tags="[&quot;네트워크&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://arxiv.org/abs/2606.12395v1"><span class="card-icon">6</span><span><span class="card-heading"><span class="card-title">Workflow and Data Layer</span><span class="topic-badge">기술</span><span class="topic-badge sub">백엔드</span></span><p>AI 기능을 단발성 호출이 아니라 백엔드 프로세스로 운영하기 위한 워크플로와 데이터 계층입니다. 상태, 재시도, 검색, 저장을 담당합니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="7" data-title="Production Agent Guardrails" data-category="동향" data-subcategory="운영" data-body="운영 환경의 에이전트가 통제 가능한 범위 안에서 일하도록 만드는 안전장치입니다. 권한, 로그, 평가, 사람 승인 단계를 포함합니다." data-detail="Production Agent Guardrails는 운영 환경에서 에이전트가 예측 가능한 범위 안에서만 행동하도록 제한하고 검증하는 안전 체계입니다." data-meta="arXiv 데이터베이스 AI · 논문 · 2026-06-11" data-points="[&quot;1. 무엇인가? 에이전트의 행동 범위와 실패 대응을 미리 정하는 운영 안전장치입니다.&quot;, &quot;2. 실험용 에이전트와의 차이점: 데모가 아니라 실제 업무 영향, 권한, 감사, 복구 가능성을 기준으로 설계합니다.&quot;, &quot;3. 주요 구성 요소: 권한 경계, 정책 검사, 감사 로그, 평가 기준, 승인 절차, 롤백 경로입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;데이터베이스&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://arxiv.org/abs/2606.12387v1"><span class="card-icon">7</span><span><span class="card-heading"><span class="card-title">Production Agent Guardrails</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">운영</span></span><p>운영 환경의 에이전트가 통제 가능한 범위 안에서 일하도록 만드는 안전장치입니다. 권한, 로그, 평가, 사람 승인 단계를 포함합니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="8" data-title="Deployable AI App Path" data-category="동향" data-subcategory="배포" data-body="아이디어를 실제 배포 가능한 AI 앱으로 만드는 제작 경로입니다. 디자인, 코드, 서버, 호스팅을 한 흐름으로 연결합니다." data-detail="Deployable AI App Path는 AI 앱을 아이디어에서 실제 배포까지 가져가기 위한 제작 경로입니다." data-meta="arXiv AI · 논문 · 2026-06-11" data-points="[&quot;1. 무엇인가? 디자인, 코드 생성, 백엔드 구성, 호스팅, 운영 확인을 하나의 흐름으로 연결하는 방식입니다.&quot;, &quot;2. 프로토타입과의 차이점: 보여주기용 화면이 아니라 사용자 접속, 데이터 저장, 장애 대응이 가능한 앱을 목표로 합니다.&quot;, &quot;3. 주요 구성 요소: Figma Make, Cursor, Replit, Vercel, Fly.io, Render, 데이터베이스, 인증입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://arxiv.org/abs/2606.12384v1"><span class="card-icon">8</span><span><span class="card-heading"><span class="card-title">Deployable AI App Path</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">배포</span></span><p>아이디어를 실제 배포 가능한 AI 앱으로 만드는 제작 경로입니다. 디자인, 코드, 서버, 호스팅을 한 흐름으로 연결합니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="9" data-title="Model Gateway and Routing" data-category="기술" data-subcategory="백엔드" data-body="여러 모델 API를 하나의 운영 인터페이스로 묶는 계층입니다. 비용, 장애 대응, 모델 교체, 라우팅 정책을 관리합니다." data-detail="Model Gateway and Routing은 여러 AI 모델을 하나의 진입점으로 묶고, 요청 성격에 따라 모델과 비용 정책을 바꾸는 운영 계층입니다." data-meta="arXiv 보안 AI · 논문 · 2026-06-11" data-points="[&quot;1. 무엇인가? OpenRouter, LiteLLM, Portkey처럼 모델 호출을 표준화하고 라우팅하는 계층입니다.&quot;, &quot;2. 직접 모델 호출과의 차이점: 특정 모델 하나에 묶이지 않고 비용, 장애, 품질 기준에 따라 전환할 수 있습니다.&quot;, &quot;3. 주요 구성 요소: 모델 라우팅, fallback, 비용 한도, 응답 로그, 키 관리, 사용량 추적입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;보안&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://arxiv.org/abs/2606.12341v1"><span class="card-icon">9</span><span><span class="card-heading"><span class="card-title">Model Gateway and Routing</span><span class="topic-badge">기술</span><span class="topic-badge sub">백엔드</span></span><p>여러 모델 API를 하나의 운영 인터페이스로 묶는 계층입니다. 비용, 장애 대응, 모델 교체, 라우팅 정책을 관리합니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="10" data-title="AI Evaluation Stack" data-category="기술" data-subcategory="품질평가" data-body="AI 기능의 품질을 배포 전후로 비교하는 평가 체계입니다. 프롬프트, RAG, 에이전트 응답의 회귀를 잡는 데 필요합니다." data-detail="AI Evaluation Stack은 AI 기능의 답변 품질을 감각이 아니라 테스트와 지표로 관리하기 위한 체계입니다." data-meta="arXiv 보안 AI · 논문 · 2026-06-11" data-points="[&quot;1. 무엇인가? LangSmith, Braintrust, OpenAI Evals, Ragas 같은 도구로 프롬프트와 RAG 품질을 평가하는 방식입니다.&quot;, &quot;2. 수동 확인과의 차이점: 몇 개 샘플을 눈으로 보는 대신 기준 데이터와 회귀 테스트로 품질 변화를 추적합니다.&quot;, &quot;3. 주요 구성 요소: 평가 데이터셋, 채점 기준, 회귀 테스트, 실험 비교, 실패 사례 분석입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;네트워크&quot;, &quot;보안&quot;, &quot;엔터프라이즈&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://arxiv.org/abs/2606.12320v1"><span class="card-icon">10</span><span><span class="card-heading"><span class="card-title">AI Evaluation Stack</span><span class="topic-badge">기술</span><span class="topic-badge sub">품질평가</span></span><p>AI 기능의 품질을 배포 전후로 비교하는 평가 체계입니다. 프롬프트, RAG, 에이전트 응답의 회귀를 잡는 데 필요합니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="11" data-title="RAG and Knowledge Backend" data-category="기술" data-subcategory="백엔드" data-body="사내 문서와 지식을 AI가 근거로 사용할 수 있게 만드는 백엔드입니다. 검색, 임베딩, 벡터 저장, 출처 추적을 담당합니다." data-detail="RAG and Knowledge Backend는 사내 문서와 지식을 AI가 근거로 사용할 수 있도록 검색 가능한 백엔드로 만드는 구조입니다." data-meta="OpenAI 소식 · 도구 업데이트 · 2026-06-11" data-points="[&quot;1. 무엇인가? 문서 수집, 임베딩, 벡터 검색, 근거 반환을 담당하는 지식 백엔드입니다.&quot;, &quot;2. 일반 검색과의 차이점: 키워드 매칭을 넘어 의미 기반 검색과 답변 근거 추적을 함께 제공합니다.&quot;, &quot;3. 주요 구성 요소: LlamaIndex, LangChain, pgvector, Qdrant, Weaviate, 문서 파이프라인입니다.&quot;]" data-tags="[&quot;OpenAI&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://openai.com/index/using-codex-to-simulate-black-holes"><span class="card-icon">11</span><span><span class="card-heading"><span class="card-title">RAG and Knowledge Backend</span><span class="topic-badge">기술</span><span class="topic-badge sub">백엔드</span></span><p>사내 문서와 지식을 AI가 근거로 사용할 수 있게 만드는 백엔드입니다. 검색, 임베딩, 벡터 저장, 출처 추적을 담당합니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="12" data-title="Observability and Incident AI" data-category="동향" data-subcategory="관측" data-body="AI 기능의 오류, 지연, 비용, 장애 원인을 추적하는 운영 관측 체계입니다. 문제가 났을 때 원인을 빠르게 좁히는 데 필요합니다." data-detail="Observability and Incident AI는 AI 기능의 오류, 지연, 비용, 품질 문제를 운영자가 추적하고 대응하도록 돕는 관측 체계입니다." data-meta="GitHub 변경 이력 · 도구 업데이트 · 2026-06-11" data-points="[&quot;1. 무엇인가? AI 호출과 앱 운영 지표를 로그, 메트릭, 트레이스로 연결하는 방식입니다.&quot;, &quot;2. 일반 모니터링과의 차이점: 서버 상태뿐 아니라 모델 응답, 토큰 비용, 프롬프트 실패, 검색 실패까지 봅니다.&quot;, &quot;3. 주요 구성 요소: Datadog, Grafana, Sentry, 호출 로그, 비용 대시보드, 장애 분류입니다.&quot;]" data-tags="[&quot;GitHub 변경 이력&quot;, &quot;도구 업데이트&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://github.blog/changelog/2026-06-10-list-view-and-create-discussions-in-github-cli"><span class="card-icon">12</span><span><span class="card-heading"><span class="card-title">Observability and Incident AI</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">관측</span></span><p>AI 기능의 오류, 지연, 비용, 장애 원인을 추적하는 운영 관측 체계입니다. 문제가 났을 때 원인을 빠르게 좁히는 데 필요합니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="13" data-title="Secure Secrets and Policy" data-category="기술" data-subcategory="보안" data-body="AI 시스템의 키, 권한, 정책 결정을 분리해 관리하는 보안 계층입니다. 에이전트와 백엔드가 필요한 만큼만 접근하게 만듭니다." data-detail="Secure Secrets and Policy는 AI 앱과 에이전트가 사용하는 키, 권한, 정책 판단을 안전하게 분리해 관리하는 보안 계층입니다." data-meta="GitHub 변경 이력 · 도구 업데이트 · 2026-06-11" data-points="[&quot;1. 무엇인가? API 키, 시크릿, 접근 권한, 정책 결정을 코드와 분리해 관리하는 방식입니다.&quot;, &quot;2. 환경변수 관리와의 차이점: 값을 숨기는 것뿐 아니라 누가, 언제, 어떤 조건에서 접근 가능한지까지 통제합니다.&quot;, &quot;3. 주요 구성 요소: Doppler, Infisical, Vault, OPA, Cedar, 권한 정책, 감사 로그입니다.&quot;]" data-tags="[&quot;GitHub 변경 이력&quot;, &quot;도구 업데이트&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://github.blog/changelog/2026-06-10-manage-sub-issues-types-and-dependencies-from-github-cli"><span class="card-icon">13</span><span><span class="card-heading"><span class="card-title">Secure Secrets and Policy</span><span class="topic-badge">기술</span><span class="topic-badge sub">보안</span></span><p>AI 시스템의 키, 권한, 정책 결정을 분리해 관리하는 보안 계층입니다. 에이전트와 백엔드가 필요한 만큼만 접근하게 만듭니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="14" data-title="Team Knowledge Workflow" data-category="동향" data-subcategory="조직지식" data-body="팀의 요구사항, 이슈, 릴리즈 노트, 대화 기록을 AI 워크플로와 연결하는 방식입니다. 지식이 흩어지지 않게 정리합니다." data-detail="Team Knowledge Workflow는 팀의 대화, 이슈, 문서, 릴리즈 기록을 AI가 다시 사용할 수 있는 지식 흐름으로 정리하는 방식입니다." data-meta="GitHub Copilot 변경 이력 · 도구 업데이트 · 2026-06-11" data-points="[&quot;1. 무엇인가? Notion, Linear, GitHub Issues, Slack, Teams의 정보를 AI 워크플로와 연결하는 작업 방식입니다.&quot;, &quot;2. 일반 문서화와의 차이점: 사람이 나중에 찾아보는 문서가 아니라 AI가 작업 맥락으로 재사용할 수 있는 지식 구조를 만듭니다.&quot;, &quot;3. 주요 구성 요소: 요구사항 정리, 이슈 요약, 릴리즈 노트, 회의/대화 요약, 작업 상태 동기화입니다.&quot;]" data-tags="[&quot;GitHub Copilot&quot;, &quot;AI 에이전트&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://github.blog/changelog/2026-06-10-copilot-chat-now-sees-your-agent-sessions"><span class="card-icon">14</span><span><span class="card-heading"><span class="card-title">Team Knowledge Workflow</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">조직지식</span></span><p>팀의 요구사항, 이슈, 릴리즈 노트, 대화 기록을 AI 워크플로와 연결하는 방식입니다. 지식이 흩어지지 않게 정리합니다.</p></span></button></div><article class="insight-detail" aria-live="polite"><div><div class="detail-number" data-insight-number>1</div><div class="detail-meta" data-insight-meta>arXiv 데이터베이스 AI · 논문 · 2026-06-10</div><div class="detail-title-row"><h3 data-insight-title>Harness Engineering</h3><span class="topic-badge" data-insight-category>기술</span><span class="topic-badge sub" data-insight-subcategory>AI 인프라</span></div><p class="detail-summary" data-insight-body>AI 실행을 업무에 붙이기 위한 운영 계층입니다. 모델 호출, 도구 사용, 권한, 검증, 기록을 한 흐름으로 묶어 안전하게 반복 실행하도록 설계합니다.</p><p class="detail-copy" data-insight-detail>하네스 엔지니어링은 AI 모델의 답변을 실제 업무 실행으로 연결하기 위한 운영 설계입니다. 프롬프트만 잘 쓰는 것을 넘어, 모델이 어떤 도구를 호출하고 어떤 조건에서 실행되며 어떤 로그와 검증을 남기는지까지 관리합니다.</p><ul class="detail-points" data-insight-points><li>1. 하네스 엔지니어링이란? 모델, 도구, 데이터, 권한, 검증 로직을 묶어 AI 작업을 반복 가능한 실행 흐름으로 만드는 방식입니다.</li><li>2. 프롬프트 엔지니어링과의 차이점: 프롬프트 엔지니어링이 모델 입력을 다듬는 일이라면, 하네스 엔지니어링은 실행 환경과 통제 장치를 설계하는 일입니다.</li><li>3. 주요 구성 요소: 입력 스키마, 도구 호출 규칙, 권한 경계, 평가 기준, 감사 로그, 실패 시 재시도와 롤백 정책입니다.</li></ul><p class="detail-criteria" data-insight-criteria>선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다.</p><a class="detail-source" data-insight-source href="https://arxiv.org/abs/2606.11560v1">https://arxiv.org/abs/2606.11560v1</a></div><div class="detail-tags" data-insight-tags><span class="detail-tag">#AI 에이전트</span><span class="detail-tag">#데이터베이스</span><span class="detail-tag">#네트워크</span></div></article>
+        <div class="insight-list"><button class="insight-card" type="button" data-insight-card data-number="1" data-title="Harness Engineering" data-category="기술" data-subcategory="AI 인프라" data-body="AI 실행을 업무에 붙이기 위한 운영 계층입니다. 모델 호출, 도구 사용, 권한, 검증, 기록을 한 흐름으로 묶어 안전하게 반복 실행하도록 설계합니다." data-detail="하네스 엔지니어링은 AI 모델의 답변을 실제 업무 실행으로 연결하기 위한 운영 설계입니다. 프롬프트만 잘 쓰는 것을 넘어, 모델이 어떤 도구를 호출하고 어떤 조건에서 실행되며 어떤 로그와 검증을 남기는지까지 관리합니다." data-meta="arXiv 데이터베이스 AI · 논문 · 2026-06-10" data-points="[&quot;1. 하네스 엔지니어링이란? 모델, 도구, 데이터, 권한, 검증 로직을 묶어 AI 작업을 반복 가능한 실행 흐름으로 만드는 방식입니다.&quot;, &quot;2. 프롬프트 엔지니어링과의 차이점: 프롬프트 엔지니어링이 모델 입력을 다듬는 일이라면, 하네스 엔지니어링은 실행 환경과 통제 장치를 설계하는 일입니다.&quot;, &quot;3. 주요 구성 요소: 입력 스키마, 도구 호출 규칙, 권한 경계, 평가 기준, 감사 로그, 실패 시 재시도와 롤백 정책입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;데이터베이스&quot;, &quot;네트워크&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://www.anthropic.com/research/building-effective-agents"><span class="card-icon">1</span><span><span class="card-heading"><span class="card-title">Harness Engineering</span><span class="topic-badge">기술</span><span class="topic-badge sub">AI 인프라</span></span><p>AI 실행을 업무에 붙이기 위한 운영 계층입니다. 모델 호출, 도구 사용, 권한, 검증, 기록을 한 흐름으로 묶어 안전하게 반복 실행하도록 설계합니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="2" data-title="AI Product Builder Stack" data-category="기술" data-subcategory="풀스택" data-body="AI 제품을 빠르게 만들기 위한 프론트, 디자인, 백엔드 도구 묶음입니다. 화면 초안에서 인증, 데이터, 배포까지 이어지는 제작 경로를 잡습니다." data-detail="AI Product Builder Stack은 AI 제품을 만들 때 필요한 디자인, 프론트엔드, 백엔드, 배포 도구를 하나의 제작 흐름으로 보는 관점입니다." data-meta="arXiv 네트워크 AI · 논문 · 2026-06-08" data-points="[&quot;1. 무엇인가? Stitch, v0, Lovable, Bolt 같은 화면 제작 도구와 Supabase, Neon, Convex 같은 백엔드 도구를 함께 묶은 제작 스택입니다.&quot;, &quot;2. 단순 디자인 도구와의 차이점: 화면 시안에서 끝나지 않고 인증, 데이터, API, 배포까지 이어지는 실제 제품 경로를 만듭니다.&quot;, &quot;3. 주요 구성 요소: UI 생성, 컴포넌트 코드, 데이터베이스, 인증, 서버 함수, 배포 플랫폼, 모니터링입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;네트워크&quot;, &quot;코딩 자동화&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://stitch.withgoogle.com/"><span class="card-icon">2</span><span><span class="card-heading"><span class="card-title">AI Product Builder Stack</span><span class="topic-badge">기술</span><span class="topic-badge sub">풀스택</span></span><p>AI 제품을 빠르게 만들기 위한 프론트, 디자인, 백엔드 도구 묶음입니다. 화면 초안에서 인증, 데이터, 배포까지 이어지는 제작 경로를 잡습니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="3" data-title="Agent Harness" data-category="기술" data-subcategory="AI 인프라" data-body="에이전트가 직접 시스템을 만지는 대신, 실행 계층이 도구 호출을 검증하고 결과를 다시 모델에 주입하는 안전한 구조입니다." data-detail="Agent Harness는 에이전트가 시스템을 직접 제어하지 않고, 정해진 실행 계층을 통해 도구를 안전하게 호출하도록 만드는 구조입니다." data-meta="arXiv 네트워크 AI · 논문 · 2026-06-05" data-points="[&quot;1. 무엇인가? 모델의 판단과 실제 도구 실행 사이에 검증, 권한, 결과 처리 계층을 두는 방식입니다.&quot;, &quot;2. 일반 에이전트 호출과의 차이점: 모델이 바로 실행하지 않고 하네스가 입력, 도구, 결과를 통제합니다.&quot;, &quot;3. 주요 구성 요소: 도구 목록, 호출 스키마, 실행 제한, 결과 검증, 에러 처리, 사람 승인 단계입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;네트워크&quot;, &quot;서버 운영&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://www.anthropic.com/engineering/writing-tools-for-agents"><span class="card-icon">3</span><span><span class="card-heading"><span class="card-title">Agent Harness</span><span class="topic-badge">기술</span><span class="topic-badge sub">AI 인프라</span></span><p>에이전트가 직접 시스템을 만지는 대신, 실행 계층이 도구 호출을 검증하고 결과를 다시 모델에 주입하는 안전한 구조입니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="4" data-title="Design System to Backend" data-category="기술" data-subcategory="프론트엔드" data-body="디자인 규칙과 데이터/API 계약을 함께 관리하는 방식입니다. UI가 예쁘게 보이는 수준을 넘어 실제 백엔드 구조와 연결되게 만듭니다." data-detail="Design System to Backend는 디자인 규칙과 백엔드 계약을 함께 관리해, AI가 만든 화면이 실제 서비스 구조와 맞물리게 하는 방식입니다." data-meta="OpenAI 소식 · 동향 · 2026-06-04" data-points="[&quot;1. 무엇인가? DESIGN.md, getdesign.md, 컴포넌트 규칙, 데이터 모델, API 계약을 연결하는 작업 방식입니다.&quot;, &quot;2. 단순 UI 제작과의 차이점: 보기 좋은 화면이 아니라 데이터가 흐르고 유지보수 가능한 제품 구조를 목표로 합니다.&quot;, &quot;3. 주요 구성 요소: 디자인 토큰, 컴포넌트 규칙, 스키마, API 타입, 폼 검증, 에러 상태입니다.&quot;]" data-tags="[&quot;OpenAI&quot;, &quot;AI 에이전트&quot;, &quot;엔터프라이즈&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://www.prisma.io/docs/orm"><span class="card-icon">4</span><span><span class="card-heading"><span class="card-title">Design System to Backend</span><span class="topic-badge">기술</span><span class="topic-badge sub">프론트엔드</span></span><p>디자인 규칙과 데이터/API 계약을 함께 관리하는 방식입니다. UI가 예쁘게 보이는 수준을 넘어 실제 백엔드 구조와 연결되게 만듭니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="5" data-title="AI Software Delivery" data-category="동향" data-subcategory="SDLC" data-body="개발, 테스트, 보안, 배포, 운영을 AI와 연결하는 전달 체계입니다. 코드 생성 이후의 실제 출시와 운영 품질을 다룹니다." data-detail="AI Software Delivery는 AI를 코드 작성 보조에만 쓰지 않고 테스트, 배포, 보안, 운영까지 포함한 소프트웨어 전달 과정에 적용하는 관점입니다." data-meta="OpenAI 소식 · 도구 업데이트 · 2026-05-27" data-points="[&quot;1. 무엇인가? 개발부터 운영까지의 SDLC에 AI 기반 자동화와 검증을 붙이는 방식입니다.&quot;, &quot;2. 코드 생성과의 차이점: 코드를 만드는 것보다 릴리즈 가능성, 품질, 보안, 운영 안정성을 더 중요하게 봅니다.&quot;, &quot;3. 주요 구성 요소: CI/CD, 테스트 자동화, 보안 스캔, 배포 승인, 롤백, 비용 관리입니다.&quot;]" data-tags="[&quot;OpenAI&quot;, &quot;AI 에이전트&quot;, &quot;코딩 자동화&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://developer.harness.io/docs/continuous-delivery/"><span class="card-icon">5</span><span><span class="card-heading"><span class="card-title">AI Software Delivery</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">SDLC</span></span><p>개발, 테스트, 보안, 배포, 운영을 AI와 연결하는 전달 체계입니다. 코드 생성 이후의 실제 출시와 운영 품질을 다룹니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="6" data-title="Workflow and Data Layer" data-category="기술" data-subcategory="백엔드" data-body="AI 기능을 단발성 호출이 아니라 백엔드 프로세스로 운영하기 위한 워크플로와 데이터 계층입니다. 상태, 재시도, 검색, 저장을 담당합니다." data-detail="Workflow and Data Layer는 AI 기능을 일회성 응답이 아니라 상태를 가진 백엔드 프로세스로 운영하기 위한 기반입니다." data-meta="arXiv AI · 논문 · 2026-06-11" data-points="[&quot;1. 무엇인가? LangGraph, Inngest, Temporal, n8n 같은 워크플로와 벡터 저장소, 데이터베이스를 연결하는 계층입니다.&quot;, &quot;2. 단순 API 호출과의 차이점: 긴 작업, 재시도, 상태 저장, 검색, 후속 처리를 안정적으로 다룹니다.&quot;, &quot;3. 주요 구성 요소: 작업 큐, 상태 머신, 스케줄러, 벡터 DB, 이벤트 로그, 재처리 정책입니다.&quot;]" data-tags="[&quot;네트워크&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://docs.langchain.com/langgraph-platform/"><span class="card-icon">6</span><span><span class="card-heading"><span class="card-title">Workflow and Data Layer</span><span class="topic-badge">기술</span><span class="topic-badge sub">백엔드</span></span><p>AI 기능을 단발성 호출이 아니라 백엔드 프로세스로 운영하기 위한 워크플로와 데이터 계층입니다. 상태, 재시도, 검색, 저장을 담당합니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="7" data-title="Production Agent Guardrails" data-category="동향" data-subcategory="운영" data-body="운영 환경의 에이전트가 통제 가능한 범위 안에서 일하도록 만드는 안전장치입니다. 권한, 로그, 평가, 사람 승인 단계를 포함합니다." data-detail="Production Agent Guardrails는 운영 환경에서 에이전트가 예측 가능한 범위 안에서만 행동하도록 제한하고 검증하는 안전 체계입니다." data-meta="arXiv 데이터베이스 AI · 논문 · 2026-06-11" data-points="[&quot;1. 무엇인가? 에이전트의 행동 범위와 실패 대응을 미리 정하는 운영 안전장치입니다.&quot;, &quot;2. 실험용 에이전트와의 차이점: 데모가 아니라 실제 업무 영향, 권한, 감사, 복구 가능성을 기준으로 설계합니다.&quot;, &quot;3. 주요 구성 요소: 권한 경계, 정책 검사, 감사 로그, 평가 기준, 승인 절차, 롤백 경로입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;데이터베이스&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview"><span class="card-icon">7</span><span><span class="card-heading"><span class="card-title">Production Agent Guardrails</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">운영</span></span><p>운영 환경의 에이전트가 통제 가능한 범위 안에서 일하도록 만드는 안전장치입니다. 권한, 로그, 평가, 사람 승인 단계를 포함합니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="8" data-title="Deployable AI App Path" data-category="동향" data-subcategory="배포" data-body="아이디어를 실제 배포 가능한 AI 앱으로 만드는 제작 경로입니다. 디자인, 코드, 서버, 호스팅을 한 흐름으로 연결합니다." data-detail="Deployable AI App Path는 AI 앱을 아이디어에서 실제 배포까지 가져가기 위한 제작 경로입니다." data-meta="arXiv AI · 논문 · 2026-06-11" data-points="[&quot;1. 무엇인가? 디자인, 코드 생성, 백엔드 구성, 호스팅, 운영 확인을 하나의 흐름으로 연결하는 방식입니다.&quot;, &quot;2. 프로토타입과의 차이점: 보여주기용 화면이 아니라 사용자 접속, 데이터 저장, 장애 대응이 가능한 앱을 목표로 합니다.&quot;, &quot;3. 주요 구성 요소: Figma Make, Cursor, Replit, Vercel, Fly.io, Render, 데이터베이스, 인증입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://vercel.com/docs"><span class="card-icon">8</span><span><span class="card-heading"><span class="card-title">Deployable AI App Path</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">배포</span></span><p>아이디어를 실제 배포 가능한 AI 앱으로 만드는 제작 경로입니다. 디자인, 코드, 서버, 호스팅을 한 흐름으로 연결합니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="9" data-title="Model Gateway and Routing" data-category="기술" data-subcategory="백엔드" data-body="여러 모델 API를 하나의 운영 인터페이스로 묶는 계층입니다. 비용, 장애 대응, 모델 교체, 라우팅 정책을 관리합니다." data-detail="Model Gateway and Routing은 여러 AI 모델을 하나의 진입점으로 묶고, 요청 성격에 따라 모델과 비용 정책을 바꾸는 운영 계층입니다." data-meta="arXiv 보안 AI · 논문 · 2026-06-11" data-points="[&quot;1. 무엇인가? OpenRouter, LiteLLM, Portkey처럼 모델 호출을 표준화하고 라우팅하는 계층입니다.&quot;, &quot;2. 직접 모델 호출과의 차이점: 특정 모델 하나에 묶이지 않고 비용, 장애, 품질 기준에 따라 전환할 수 있습니다.&quot;, &quot;3. 주요 구성 요소: 모델 라우팅, fallback, 비용 한도, 응답 로그, 키 관리, 사용량 추적입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;보안&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://docs.litellm.ai/docs/simple_proxy"><span class="card-icon">9</span><span><span class="card-heading"><span class="card-title">Model Gateway and Routing</span><span class="topic-badge">기술</span><span class="topic-badge sub">백엔드</span></span><p>여러 모델 API를 하나의 운영 인터페이스로 묶는 계층입니다. 비용, 장애 대응, 모델 교체, 라우팅 정책을 관리합니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="10" data-title="AI Evaluation Stack" data-category="기술" data-subcategory="품질평가" data-body="AI 기능의 품질을 배포 전후로 비교하는 평가 체계입니다. 프롬프트, RAG, 에이전트 응답의 회귀를 잡는 데 필요합니다." data-detail="AI Evaluation Stack은 AI 기능의 답변 품질을 감각이 아니라 테스트와 지표로 관리하기 위한 체계입니다." data-meta="arXiv 보안 AI · 논문 · 2026-06-11" data-points="[&quot;1. 무엇인가? LangSmith, Braintrust, OpenAI Evals, Ragas 같은 도구로 프롬프트와 RAG 품질을 평가하는 방식입니다.&quot;, &quot;2. 수동 확인과의 차이점: 몇 개 샘플을 눈으로 보는 대신 기준 데이터와 회귀 테스트로 품질 변화를 추적합니다.&quot;, &quot;3. 주요 구성 요소: 평가 데이터셋, 채점 기준, 회귀 테스트, 실험 비교, 실패 사례 분석입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;네트워크&quot;, &quot;보안&quot;, &quot;엔터프라이즈&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://developers.openai.com/api/docs/guides/evals"><span class="card-icon">10</span><span><span class="card-heading"><span class="card-title">AI Evaluation Stack</span><span class="topic-badge">기술</span><span class="topic-badge sub">품질평가</span></span><p>AI 기능의 품질을 배포 전후로 비교하는 평가 체계입니다. 프롬프트, RAG, 에이전트 응답의 회귀를 잡는 데 필요합니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="11" data-title="RAG and Knowledge Backend" data-category="기술" data-subcategory="백엔드" data-body="사내 문서와 지식을 AI가 근거로 사용할 수 있게 만드는 백엔드입니다. 검색, 임베딩, 벡터 저장, 출처 추적을 담당합니다." data-detail="RAG and Knowledge Backend는 사내 문서와 지식을 AI가 근거로 사용할 수 있도록 검색 가능한 백엔드로 만드는 구조입니다." data-meta="OpenAI 소식 · 도구 업데이트 · 2026-06-11" data-points="[&quot;1. 무엇인가? 문서 수집, 임베딩, 벡터 검색, 근거 반환을 담당하는 지식 백엔드입니다.&quot;, &quot;2. 일반 검색과의 차이점: 키워드 매칭을 넘어 의미 기반 검색과 답변 근거 추적을 함께 제공합니다.&quot;, &quot;3. 주요 구성 요소: LlamaIndex, LangChain, pgvector, Qdrant, Weaviate, 문서 파이프라인입니다.&quot;]" data-tags="[&quot;OpenAI&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://docs.llamaindex.ai/"><span class="card-icon">11</span><span><span class="card-heading"><span class="card-title">RAG and Knowledge Backend</span><span class="topic-badge">기술</span><span class="topic-badge sub">백엔드</span></span><p>사내 문서와 지식을 AI가 근거로 사용할 수 있게 만드는 백엔드입니다. 검색, 임베딩, 벡터 저장, 출처 추적을 담당합니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="12" data-title="Observability and Incident AI" data-category="동향" data-subcategory="관측" data-body="AI 기능의 오류, 지연, 비용, 장애 원인을 추적하는 운영 관측 체계입니다. 문제가 났을 때 원인을 빠르게 좁히는 데 필요합니다." data-detail="Observability and Incident AI는 AI 기능의 오류, 지연, 비용, 품질 문제를 운영자가 추적하고 대응하도록 돕는 관측 체계입니다." data-meta="GitHub 변경 이력 · 도구 업데이트 · 2026-06-11" data-points="[&quot;1. 무엇인가? AI 호출과 앱 운영 지표를 로그, 메트릭, 트레이스로 연결하는 방식입니다.&quot;, &quot;2. 일반 모니터링과의 차이점: 서버 상태뿐 아니라 모델 응답, 토큰 비용, 프롬프트 실패, 검색 실패까지 봅니다.&quot;, &quot;3. 주요 구성 요소: Datadog, Grafana, Sentry, 호출 로그, 비용 대시보드, 장애 분류입니다.&quot;]" data-tags="[&quot;GitHub 변경 이력&quot;, &quot;도구 업데이트&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://opentelemetry.io/docs/"><span class="card-icon">12</span><span><span class="card-heading"><span class="card-title">Observability and Incident AI</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">관측</span></span><p>AI 기능의 오류, 지연, 비용, 장애 원인을 추적하는 운영 관측 체계입니다. 문제가 났을 때 원인을 빠르게 좁히는 데 필요합니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="13" data-title="Secure Secrets and Policy" data-category="기술" data-subcategory="보안" data-body="AI 시스템의 키, 권한, 정책 결정을 분리해 관리하는 보안 계층입니다. 에이전트와 백엔드가 필요한 만큼만 접근하게 만듭니다." data-detail="Secure Secrets and Policy는 AI 앱과 에이전트가 사용하는 키, 권한, 정책 판단을 안전하게 분리해 관리하는 보안 계층입니다." data-meta="GitHub 변경 이력 · 도구 업데이트 · 2026-06-11" data-points="[&quot;1. 무엇인가? API 키, 시크릿, 접근 권한, 정책 결정을 코드와 분리해 관리하는 방식입니다.&quot;, &quot;2. 환경변수 관리와의 차이점: 값을 숨기는 것뿐 아니라 누가, 언제, 어떤 조건에서 접근 가능한지까지 통제합니다.&quot;, &quot;3. 주요 구성 요소: Doppler, Infisical, Vault, OPA, Cedar, 권한 정책, 감사 로그입니다.&quot;]" data-tags="[&quot;GitHub 변경 이력&quot;, &quot;도구 업데이트&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://developer.hashicorp.com/vault/docs"><span class="card-icon">13</span><span><span class="card-heading"><span class="card-title">Secure Secrets and Policy</span><span class="topic-badge">기술</span><span class="topic-badge sub">보안</span></span><p>AI 시스템의 키, 권한, 정책 결정을 분리해 관리하는 보안 계층입니다. 에이전트와 백엔드가 필요한 만큼만 접근하게 만듭니다.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="14" data-title="Team Knowledge Workflow" data-category="동향" data-subcategory="조직지식" data-body="팀의 요구사항, 이슈, 릴리즈 노트, 대화 기록을 AI 워크플로와 연결하는 방식입니다. 지식이 흩어지지 않게 정리합니다." data-detail="Team Knowledge Workflow는 팀의 대화, 이슈, 문서, 릴리즈 기록을 AI가 다시 사용할 수 있는 지식 흐름으로 정리하는 방식입니다." data-meta="GitHub Copilot 변경 이력 · 도구 업데이트 · 2026-06-11" data-points="[&quot;1. 무엇인가? Notion, Linear, GitHub Issues, Slack, Teams의 정보를 AI 워크플로와 연결하는 작업 방식입니다.&quot;, &quot;2. 일반 문서화와의 차이점: 사람이 나중에 찾아보는 문서가 아니라 AI가 작업 맥락으로 재사용할 수 있는 지식 구조를 만듭니다.&quot;, &quot;3. 주요 구성 요소: 요구사항 정리, 이슈 요약, 릴리즈 노트, 회의/대화 요약, 작업 상태 동기화입니다.&quot;]" data-tags="[&quot;GitHub Copilot&quot;, &quot;AI 에이전트&quot;]" data-criteria="선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다." data-source="https://docs.github.com/en/issues"><span class="card-icon">14</span><span><span class="card-heading"><span class="card-title">Team Knowledge Workflow</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">조직지식</span></span><p>팀의 요구사항, 이슈, 릴리즈 노트, 대화 기록을 AI 워크플로와 연결하는 방식입니다. 지식이 흩어지지 않게 정리합니다.</p></span></button></div><article class="insight-detail" aria-live="polite"><div><div class="detail-number" data-insight-number>1</div><div class="detail-meta" data-insight-meta>arXiv 데이터베이스 AI · 논문 · 2026-06-10</div><div class="detail-title-row"><h3 data-insight-title>Harness Engineering</h3><span class="topic-badge" data-insight-category>기술</span><span class="topic-badge sub" data-insight-subcategory>AI 인프라</span></div><p class="detail-summary" data-insight-body>AI 실행을 업무에 붙이기 위한 운영 계층입니다. 모델 호출, 도구 사용, 권한, 검증, 기록을 한 흐름으로 묶어 안전하게 반복 실행하도록 설계합니다.</p><p class="detail-copy" data-insight-detail>하네스 엔지니어링은 AI 모델의 답변을 실제 업무 실행으로 연결하기 위한 운영 설계입니다. 프롬프트만 잘 쓰는 것을 넘어, 모델이 어떤 도구를 호출하고 어떤 조건에서 실행되며 어떤 로그와 검증을 남기는지까지 관리합니다.</p><ul class="detail-points" data-insight-points><li>1. 하네스 엔지니어링이란? 모델, 도구, 데이터, 권한, 검증 로직을 묶어 AI 작업을 반복 가능한 실행 흐름으로 만드는 방식입니다.</li><li>2. 프롬프트 엔지니어링과의 차이점: 프롬프트 엔지니어링이 모델 입력을 다듬는 일이라면, 하네스 엔지니어링은 실행 환경과 통제 장치를 설계하는 일입니다.</li><li>3. 주요 구성 요소: 입력 스키마, 도구 호출 규칙, 권한 경계, 평가 기준, 감사 로그, 실패 시 재시도와 롤백 정책입니다.</li></ul><p class="detail-criteria" data-insight-criteria>선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다.</p><a class="detail-source" data-insight-source href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/research/building-effective-agents</a></div><div class="detail-tags" data-insight-tags><span class="detail-tag">#AI 에이전트</span><span class="detail-tag">#데이터베이스</span><span class="detail-tag">#네트워크</span></div></article>
 <script>
 (() => {
   const buttons = document.querySelectorAll('[data-insight-card]');
