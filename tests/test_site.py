@@ -43,11 +43,10 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     assert "AI Talent Lab" in html
     assert "Smart Insights" in html
     assert "Harness Engineering" in html
-    assert "Codex" in html
-    assert "Antigravity" in html
-    assert "Claude Code" in html
     assert "topic-badge" in html
-    assert 'href="#ai-tools"' in html
+    assert 'href="ai-tools/"' in html
+    assert '<section class="tool-directory"' not in html
+    assert "<h3>Codex</h3>" not in html
     assert "상세 목록" not in html
     assert '<a href="#insights" data-smart-insights-link>Smart Insights</a>' not in html
     assert '<a href="work-skills/">Archive</a>' not in html
@@ -241,9 +240,23 @@ def test_committed_pages_root_homepage_exists() -> None:
     html = Path("public/index.html").read_text(encoding="utf-8")
 
     assert "AI MASTER TIMES" in html
+    assert 'href="ai-tools/"' in html
+    assert '<section class="tool-directory"' not in html
+    assert "<h3>Codex</h3>" not in html
     assert "archive/2026/06/week-2/" in html
     assert html.index("06월 1째주") < html.index("06월 2째주")
     assert "당신의 AI 역량을 성장시켜보세요" in html
+    assert "�" not in html
+
+
+def test_committed_ai_tools_page_exists() -> None:
+    html = Path("public/ai-tools/index.html").read_text(encoding="utf-8")
+
+    assert "AI 활용 도구" in html
+    assert "tool-list-grid" in html
+    assert "<h3>Codex</h3>" in html
+    assert "<h3>Antigravity</h3>" in html
+    assert "<h3>Claude Code</h3>" in html
     assert "�" not in html
 
 

@@ -1405,7 +1405,7 @@ def _render_editorial_homepage(
       <a class="brand" href="./">AI MASTER TIMES</a>
       <nav class="nav-links" aria-label="Primary">
         <a href="#insights">업무 AI</a>
-        <a href="#ai-tools">AI 도구</a>
+        <a href="ai-tools/">AI 도구</a>
       </nav>
       <div class="nav-actions">
         <a class="button" href="#insights">Read This Week</a>
@@ -1439,16 +1439,6 @@ def _render_editorial_homepage(
     </section>
     <section class="logo-roll" aria-label="Source roll">
       <div class="logo-track">{logo_roll}{logo_roll}</div>
-    </section>
-    <section class="tool-directory" id="ai-tools" aria-label="AI 활용 도구 목록">
-      <div class="tool-directory-header">
-        <div>
-          <div class="section-kicker">AI 도구</div>
-          <h2>실습과 업무에 바로 연결할 수 있는 AI 활용 도구입니다.</h2>
-        </div>
-        <p>코딩, 앱 제작, 문서 정리, 디자인, 자동화처럼 실제 결과물을 만드는 도구를 중심으로 정리했습니다.</p>
-      </div>
-      {_render_ai_tool_directory()}
     </section>
     <section class="insights" id="insights">
       <div class="insights-header">
@@ -3195,6 +3185,7 @@ def _write_secondary_pages(
 
     (output_dir / "work-skills").mkdir(parents=True, exist_ok=True)
     (output_dir / "tools").mkdir(parents=True, exist_ok=True)
+    (output_dir / "ai-tools").mkdir(parents=True, exist_ok=True)
     (output_dir / "items").mkdir(parents=True, exist_ok=True)
 
     (output_dir / "work-skills" / "index.html").write_text(
@@ -3215,6 +3206,10 @@ def _write_secondary_pages(
             analytics_html=analytics_html,
             back_href="../",
         ),
+        encoding="utf-8",
+    )
+    (output_dir / "ai-tools" / "index.html").write_text(
+        _render_ai_tools_page(analytics_html=analytics_html, back_href="../"),
         encoding="utf-8",
     )
 
@@ -3254,6 +3249,22 @@ def _render_board_page(
           <p>{escape(subtitle)}</p>
         </header>
         <section class="board-list">{cards}</section>
+        """,
+    )
+
+
+def _render_ai_tools_page(analytics_html: str, back_href: str) -> str:
+    return _render_plain_page(
+        title="AI 활용 도구",
+        analytics_html=analytics_html,
+        body=f"""
+        <a class="back-link" href="{escape(back_href)}">← 첫 화면</a>
+        <header class="simple-header tool-page-header">
+          <div class="kicker">AI 도구</div>
+          <h1>AI 활용 도구</h1>
+          <p>코딩, 앱 제작, 문서 정리, 디자인, 자동화처럼 실제 결과물을 만드는 데 활용할 수 있는 도구 목록입니다.</p>
+        </header>
+        {_render_ai_tool_directory()}
         """,
     )
 
@@ -3380,6 +3391,51 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
     .summary {{
       font-size: 19px;
     }}
+    .tool-page-header {{
+      margin-bottom: 28px;
+    }}
+    .tool-list-grid {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid #222222;
+      border-left: 1px solid #d8d2c4;
+      margin-top: 26px;
+    }}
+    .ai-tool-card {{
+      min-height: 178px;
+      padding: 18px;
+      border-right: 1px solid #d8d2c4;
+      border-bottom: 1px solid #d8d2c4;
+      background: #fffaf0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }}
+    .ai-tool-card h3 {{
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(20px, 2vw, 28px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }}
+    .ai-tool-card p {{
+      margin: 8px 0 0;
+      color: #565656;
+      font: 13px/1.58 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .tool-meta-row {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }}
+    .tool-chip {{
+      border: 1px solid #d8d2c4;
+      background: #ffffff;
+      padding: 4px 7px;
+      color: #111111;
+      font: 800 11px/1.25 Arial, "Noto Sans KR", sans-serif;
+    }}
     .key-points {{
       margin: 9px 0 0;
       padding-left: 20px;
@@ -3416,6 +3472,11 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       padding: 9px 12px;
       text-decoration: none;
       font: 800 14px/1.3 Arial, "Noto Sans KR", sans-serif;
+    }}
+    @media (max-width: 860px) {{
+      .tool-list-grid {{
+        grid-template-columns: 1fr;
+      }}
     }}
   </style>
 </head>

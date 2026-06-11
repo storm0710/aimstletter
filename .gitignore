@@ -8,3 +8,5 @@ secrets.json
 public/*
 !public/archive/
 !public/archive/**
+!public/ai-tools/
+!public/ai-tools/**
