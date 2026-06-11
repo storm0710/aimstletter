@@ -639,17 +639,39 @@ def _render_editorial_homepage(
     }}
     .insight-grid {{
       display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }}
+    .insight-grid.has-selection {{
       grid-template-columns: minmax(300px, .92fr) minmax(360px, 1.08fr);
       gap: 28px;
       align-items: start;
     }}
     .insight-list {{
       display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }}
+    .insight-grid.has-selection .insight-list {{
+      grid-template-columns: 1fr;
       gap: 0;
       border-top: 1px solid var(--line);
     }}
     .insight-card {{
       width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      min-height: 230px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      cursor: pointer;
+      color: var(--ink);
+      font: inherit;
+    }}
+    .insight-grid.has-selection .insight-card {{
       border: 0;
       border-bottom: 1px solid var(--line);
       background: transparent;
@@ -658,10 +680,7 @@ def _render_editorial_homepage(
       display: grid;
       grid-template-columns: 36px minmax(0, 1fr);
       gap: 14px;
-      text-align: left;
-      cursor: pointer;
-      color: var(--ink);
-      font: inherit;
+      justify-content: initial;
     }}
     .insight-card:hover,
     .insight-card.is-active {{
@@ -675,20 +694,32 @@ def _render_editorial_homepage(
       display: grid;
       place-items: center;
       font-size: 11px;
-      margin-top: 1px;
+      margin-bottom: 26px;
       flex: 0 0 auto;
+    }}
+    .insight-grid.has-selection .card-icon {{
+      margin-top: 1px;
+      margin-bottom: 0;
     }}
     .card-title {{
       display: block;
-      margin: 0 0 6px;
+      margin: 0 0 10px;
       font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
-      font-size: 18px;
+      font-size: 22px;
       letter-spacing: 0;
       font-weight: 700;
+    }}
+    .insight-grid.has-selection .card-title {{
+      margin-bottom: 6px;
+      font-size: 18px;
     }}
     .insight-card p {{
       margin: 0;
       color: var(--muted);
+      font-size: 13px;
+      line-height: 1.58;
+    }}
+    .insight-grid.has-selection .insight-card p {{
       font-size: 12px;
       line-height: 1.52;
     }}
@@ -701,11 +732,14 @@ def _render_editorial_homepage(
         #f7f7f4;
       background-size: 32px 32px;
       padding: 34px;
-      display: flex;
+      display: none;
       flex-direction: column;
       justify-content: space-between;
       position: sticky;
       top: 24px;
+    }}
+    .insight-grid.has-selection .insight-detail {{
+      display: flex;
     }}
     .detail-number {{
       width: 26px;
@@ -758,9 +792,13 @@ def _render_editorial_homepage(
       .insight-grid {{
         grid-template-columns: 1fr;
       }}
+      .insight-list,
+      .insight-grid.has-selection,
+      .insight-grid.has-selection .insight-list {{ grid-template-columns: 1fr; }}
       .insight-detail {{ position: static; min-height: 360px; }}
       .date {{ text-align: left; }}
       .insight-card {{ min-height: 210px; }}
+      .insight-grid.has-selection .insight-card {{ min-height: 112px; }}
       .footer {{ align-items: flex-start; flex-direction: column; gap: 12px; padding: 22px 0; }}
     }}
   </style>
@@ -799,7 +837,7 @@ def _render_editorial_homepage(
         <h2>이번 주 AI 업데이트를 업무 관점으로 정리했습니다.</h2>
         <p>홀수 카드는 에이전트 운영과 엔지니어링 트렌드, 짝수 카드는 AI 제품 제작에 필요한 프론트·디자인·백엔드·데이터 도구를 함께 정리했습니다.</p>
       </div>
-      <div class="insight-grid">
+      <div class="insight-grid" data-insight-grid>
         {insight_cards}
       </div>
     </section>
@@ -1635,9 +1673,8 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
 
     cards = []
     for number, title, body, href in entries:
-        active_class = " is-active" if number == 1 else ""
         cards.append(
-            f'<button class="insight-card{active_class}" type="button" '
+            '<button class="insight-card" type="button" '
             f'data-insight-card data-number="{number}" '
             f'data-title="{escape(title, quote=True)}" '
             f'data-body="{escape(body, quote=True)}" '
@@ -1668,10 +1705,12 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const title = document.querySelector('[data-insight-title]');
   const body = document.querySelector('[data-insight-body]');
   const link = document.querySelector('[data-insight-link]');
-  if (!buttons.length || !number || !title || !body || !link) return;
+  const grid = document.querySelector('[data-insight-grid]');
+  if (!buttons.length || !number || !title || !body || !link || !grid) return;
 
   buttons.forEach((button) => {
     button.addEventListener('click', () => {
+      grid.classList.add('has-selection');
       buttons.forEach((item) => item.classList.remove('is-active'));
       button.classList.add('is-active');
       number.textContent = button.dataset.number || '';
