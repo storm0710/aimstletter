@@ -552,6 +552,10 @@ def _render_editorial_homepage(
       letter-spacing: 0;
       white-space: nowrap;
     }}
+    .hero h1 a {{
+      color: inherit;
+      text-decoration: none;
+    }}
     .hero-image {{
       align-self: end;
       margin-top: 42px;
@@ -934,7 +938,7 @@ def _render_editorial_homepage(
       </div>
     </header>
     <section class="hero" aria-label="Hero">
-      <h1>AI MASTER TIMES</h1>
+      <h1><a href="./" aria-label="AI MASTER TIMES 첫 화면으로 이동">AI MASTER TIMES</a></h1>
       <section class="hero-image" aria-label="AI Talent Lab pass criteria">
         <div class="talent-card">
           <div class="talent-logo"><span class="sk">SK</span><span class="ax">AX</span></div>
