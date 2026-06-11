@@ -713,28 +713,20 @@ def _render_editorial_homepage(
       margin-top: 42px;
       overflow: hidden;
       border-radius: 20px;
-      min-height: clamp(170px, 21vw, 250px);
+      min-height: clamp(150px, 18vw, 220px);
       background:
         linear-gradient(rgba(0,0,0,.028) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0,0,0,.024) 1px, transparent 1px),
         #f7f7f4;
       background-size: 34px 34px;
       border: 1px solid var(--line);
-      display: grid;
-      grid-template-columns: minmax(260px, .86fr) minmax(320px, 1.14fr);
-      gap: 10px;
-      padding: clamp(16px, 2vw, 26px);
-      align-items: stretch;
+      padding: clamp(22px, 3vw, 34px);
     }}
     .talent-card {{
-      background: rgba(255,255,255,.72);
-      border: 1px solid var(--line);
-      border-radius: 32px;
-      padding: clamp(18px, 2.2vw, 26px);
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 170px;
+      align-items: baseline;
+      gap: clamp(18px, 3vw, 36px);
+      min-width: 0;
     }}
     .talent-logo {{
       display: inline-flex;
@@ -748,49 +740,47 @@ def _render_editorial_homepage(
     .talent-logo .sk {{ color: #e21424; }}
     .talent-logo .ax {{ color: #ff8200; }}
     .talent-title {{
-      margin: 28px 0 0;
+      margin: 0;
       color: #4f5f9a;
       font-family: Arial, "Noto Sans KR", sans-serif;
-      font-size: clamp(26px, 3.1vw, 42px);
+      font-size: clamp(30px, 4.5vw, 58px);
       line-height: .98;
       font-weight: 900;
       letter-spacing: 0;
+      white-space: nowrap;
     }}
     .talent-copy {{
-      margin: 16px 0 0;
+      margin: 0;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(18px, 2.2vw, 28px);
+      font-size: clamp(19px, 2.8vw, 34px);
       line-height: 1.22;
       font-weight: 900;
       letter-spacing: 0;
+      white-space: nowrap;
     }}
     .criteria-card {{
-      border: 1px solid var(--line);
-      border-radius: 32px;
-      background: rgba(255,255,255,.8);
-      padding: clamp(20px, 2.8vw, 34px);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      margin-top: clamp(22px, 2.6vw, 30px);
     }}
     .criteria-card h2 {{
-      margin: 0 0 18px;
+      margin: 0 0 16px;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(18px, 2vw, 26px);
+      font-size: clamp(20px, 2.4vw, 32px);
       line-height: 1.18;
       letter-spacing: 0;
       font-weight: 800;
     }}
     .criteria-card ul {{
       margin: 0;
-      padding-left: 1.1em;
+      padding-left: 1.05em;
       display: grid;
-      gap: 7px;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      column-gap: clamp(26px, 5vw, 70px);
+      row-gap: 8px;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(14px, 1.55vw, 20px);
+      font-size: clamp(16px, 2vw, 25px);
       line-height: 1.25;
       letter-spacing: 0;
       font-weight: 500;
@@ -1123,9 +1113,12 @@ def _render_editorial_homepage(
       .archive-year {{ margin-left: 24px; font-size: 18px; }}
       .archive-month {{ margin-left: 36px; font-size: 15px; }}
       .hero {{ min-height: auto; padding-top: 48px; }}
-      .hero-image {{ grid-template-columns: 1fr; border-radius: 14px; }}
-      .talent-card {{ min-height: 240px; }}
-      .criteria-card {{ border-radius: 28px; }}
+      .hero-image {{ border-radius: 14px; padding: 20px; }}
+      .talent-card {{ align-items: flex-start; flex-direction: column; gap: 10px; }}
+      .talent-title,
+      .talent-copy {{ white-space: normal; }}
+      .criteria-card {{ margin-top: 24px; }}
+      .criteria-card ul {{ grid-template-columns: 1fr; }}
       .intro-row,
       .insight-grid {{
         grid-template-columns: 1fr;
