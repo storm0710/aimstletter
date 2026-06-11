@@ -603,7 +603,7 @@ def _render_editorial_homepage(
     }}
     a {{ color: inherit; text-decoration: none; }}
     .page {{
-      width: min(1180px, calc(100% - 34px));
+      width: min(1320px, calc(100% - 12px));
       margin: 0 auto;
       min-height: 100vh;
     }}
@@ -678,13 +678,13 @@ def _render_editorial_homepage(
     }}
     @media (min-width: 1100px) {{
       .page-shell {{
-        width: min(1040px, calc(100% - 318px));
-        margin-left: 286px;
+        width: min(1200px, calc(100% - 292px));
+        margin-left: 260px;
         margin-right: 32px;
       }}
       .archive-nav {{
         position: absolute;
-        left: -260px;
+        left: -244px;
         top: 76px;
         margin: 0;
       }}
@@ -759,7 +759,7 @@ def _render_editorial_homepage(
         #f7f7f4;
       background-size: 34px 34px;
       border: 1px solid var(--line);
-      padding: clamp(20px, 2.8vw, 34px);
+      padding: clamp(18px, 2.4vw, 30px);
     }}
     .talent-card {{
       min-width: 0;
@@ -786,7 +786,7 @@ def _render_editorial_homepage(
       margin: 0;
       color: #4f5f9a;
       font-family: Arial, "Noto Sans KR", sans-serif;
-      font-size: clamp(36px, 5vw, 66px);
+      font-size: clamp(34px, 4.35vw, 58px);
       line-height: .98;
       font-weight: 900;
       letter-spacing: 0;
@@ -795,7 +795,7 @@ def _render_editorial_homepage(
     .talent-dash {{
       color: #111;
       font-family: Arial, "Noto Sans KR", sans-serif;
-      font-size: clamp(28px, 4vw, 52px);
+      font-size: clamp(24px, 3.3vw, 44px);
       line-height: 1;
       font-weight: 900;
       white-space: nowrap;
@@ -804,7 +804,7 @@ def _render_editorial_homepage(
       margin: 0;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(20px, 2.8vw, 36px);
+      font-size: clamp(18px, 2.15vw, 29px);
       line-height: 1.22;
       font-weight: 900;
       letter-spacing: 0;
