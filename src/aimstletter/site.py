@@ -775,16 +775,43 @@ def _render_editorial_homepage(
       margin-top: 1px;
       margin-bottom: 0;
     }}
-    .card-title {{
-      display: block;
+    .card-heading {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
       margin: 0 0 10px;
+      flex-wrap: wrap;
+    }}
+    .card-title {{
+      display: inline;
       font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
       font-size: 22px;
       letter-spacing: 0;
       font-weight: 700;
     }}
-    .insight-grid.has-selection .card-title {{
+    .topic-badge {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 18px;
+      border-radius: 999px;
+      background: #dfeeff;
+      color: #2f69b1;
+      padding: 0 8px;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }}
+    .topic-badge.trend {{
+      background: #e7f2ff;
+      color: #4772a6;
+    }}
+    .insight-grid.has-selection .card-heading {{
       margin-bottom: 6px;
+    }}
+    .insight-grid.has-selection .card-title {{
       font-size: 18px;
     }}
     .insight-card p {{
@@ -826,8 +853,15 @@ def _render_editorial_homepage(
       margin-bottom: 42px;
       background: #fff;
     }}
+    .detail-title-row {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }}
     .insight-detail h3 {{
-      margin: 0 0 16px;
+      margin: 0;
       font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
       font-size: clamp(30px, 4vw, 54px);
       line-height: .98;
@@ -1812,6 +1846,11 @@ def _render_command_tasks(items: list[SiteItem]) -> str:
     )
 
 
+def _smart_insight_category(index: int) -> str:
+    trend_indexes = {4, 6, 7, 11, 13}
+    return "동향" if index in trend_indexes else "기술"
+
+
 def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     labels = _smart_insight_blueprint()
     entries = []
@@ -1827,17 +1866,20 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         tags = item.tags if item else ()
         criteria = "선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다."
         source_url = item.url if item else ""
-        entries.append((index + 1, title, body, detail, meta, points, tags, criteria, source_url))
+        category = _smart_insight_category(index)
+        entries.append((index + 1, title, body, detail, meta, points, tags, criteria, source_url, category))
 
     if not entries:
         return ""
 
     cards = []
-    for number, title, body, detail, meta, points, tags, criteria, source_url in entries:
+    for number, title, body, detail, meta, points, tags, criteria, source_url, category in entries:
+        badge_class = " trend" if category == "동향" else ""
         cards.append(
             '<button class="insight-card" type="button" '
             f'data-insight-card data-number="{number}" '
             f'data-title="{escape(title, quote=True)}" '
+            f'data-category="{escape(category, quote=True)}" '
             f'data-body="{escape(body, quote=True)}" '
             f'data-detail="{escape(_clip(detail, 700), quote=True)}" '
             f'data-meta="{escape(meta, quote=True)}" '
@@ -1846,7 +1888,10 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             f'data-criteria="{escape(criteria, quote=True)}" '
             f'data-source="{escape(source_url, quote=True)}">'
             f'<span class="card-icon">{number}</span>'
-            f'<span><span class="card-title">{escape(title)}</span><p>{escape(body)}</p></span>'
+            '<span><span class="card-heading">'
+            f'<span class="card-title">{escape(title)}</span>'
+            f'<span class="topic-badge{badge_class}">{escape(category)}</span>'
+            f'</span><p>{escape(body)}</p></span>'
             '</button>'
         )
 
@@ -1860,7 +1905,9 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         first_tags,
         first_criteria,
         first_source_url,
+        first_category,
     ) = entries[0]
+    first_badge_class = " trend" if first_category == "동향" else ""
     return (
         '<div class="insight-list">'
         + "\n".join(cards)
@@ -1869,7 +1916,10 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + "<div>"
         + f'<div class="detail-number" data-insight-number>{first_number}</div>'
         + f'<div class="detail-meta" data-insight-meta>{escape(first_meta)}</div>'
+        + '<div class="detail-title-row">'
         + f'<h3 data-insight-title>{escape(first_title)}</h3>'
+        + f'<span class="topic-badge{first_badge_class}" data-insight-category>{escape(first_category)}</span>'
+        + '</div>'
         + f'<p class="detail-summary" data-insight-body>{escape(first_body)}</p>'
         + f'<p class="detail-copy" data-insight-detail>{escape(_clip(first_detail, 700))}</p>'
         + '<ul class="detail-points" data-insight-points>'
@@ -1890,6 +1940,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const buttons = document.querySelectorAll('[data-insight-card]');
   const number = document.querySelector('[data-insight-number]');
   const title = document.querySelector('[data-insight-title]');
+  const category = document.querySelector('[data-insight-category]');
   const body = document.querySelector('[data-insight-body]');
   const detail = document.querySelector('[data-insight-detail]');
   const meta = document.querySelector('[data-insight-meta]');
@@ -1898,7 +1949,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const criteria = document.querySelector('[data-insight-criteria]');
   const source = document.querySelector('[data-insight-source]');
   const grid = document.querySelector('[data-insight-grid]');
-  if (!buttons.length || !number || !title || !body || !detail || !meta || !points || !tags || !criteria || !source || !grid) return;
+  if (!buttons.length || !number || !title || !category || !body || !detail || !meta || !points || !tags || !criteria || !source || !grid) return;
 
   buttons.forEach((button) => {
     button.addEventListener('click', () => {
@@ -1907,6 +1958,8 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
       button.classList.add('is-active');
       number.textContent = button.dataset.number || '';
       title.textContent = button.dataset.title || '';
+      category.textContent = button.dataset.category || '';
+      category.classList.toggle('trend', button.dataset.category === '동향');
       body.textContent = button.dataset.body || '';
       detail.textContent = button.dataset.detail || '';
       meta.textContent = button.dataset.meta || '';
