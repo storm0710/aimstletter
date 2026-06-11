@@ -106,6 +106,8 @@ def test_render_homepage_includes_archive_entries() -> None:
     assert "2026년" in html
     assert "06월 2째주" in html
     assert 'href="archive/2026/06/week-1/"' in html
+    assert html.index("06월 1째주") < html.index("06월 2째주")
+    assert 'class="is-current" data-archive-link href="archive/2026/06/week-2/"' in html
 
 
 def test_safe_tags_keeps_product_names_and_deduplicates() -> None:
@@ -235,6 +237,7 @@ def test_committed_pages_root_homepage_exists() -> None:
 
     assert "AI MASTER TIMES" in html
     assert "archive/2026/06/week-2/" in html
+    assert html.index("06월 1째주") < html.index("06월 2째주")
     assert "당신의 AI 역량을 성장시켜보세요" in html
     assert "�" not in html
 
@@ -245,9 +248,13 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
 
     assert 'href="archive/2026/06/week-1/"' in week_2
     assert 'href="archive/2026/06/week-2/"' in week_1
+    assert week_2.index("06월 1째주") < week_2.index("06월 2째주")
+    assert week_1.index("06월 1째주") < week_1.index("06월 2째주")
     assert "06월 1째주" in week_1
     assert "당신의 AI 역량을 성장시켜보세요" in week_2
     assert "업무 AI" in week_2
+    assert "하네스: AI와 실제 도구 사이에서 실행 순서" in week_2
+    assert "실제 업무에서 반복 작업, 품질 확인, 배포, 보안, 지식 정리에 적용" in week_2
     assert "�" not in week_1
     assert "�" not in week_2
     assert '<a class="brand" href="./">AI MASTER TIMES</a>' in week_2

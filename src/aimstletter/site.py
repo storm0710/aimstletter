@@ -100,12 +100,14 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
         tool_items,
         analytics_html=_render_analytics(settings),
         archive_entries=archive_entries,
+        current_archive_entry=archive_entry,
         now=now,
     )
 
     path = output_dir / "index.html"
     path.write_text(html, encoding="utf-8")
     _write_weekly_archive(output_dir, archive_entry, html)
+    _refresh_archive_navigation(output_dir, archive_entries)
     _write_secondary_pages(output_dir, ai_items, tool_items, _render_analytics(settings))
     return path
 
@@ -115,6 +117,7 @@ def render_homepage(
     tool_items: list[SiteItem],
     analytics_html: str = "",
     archive_entries: list[dict[str, object]] | None = None,
+    current_archive_entry: dict[str, object] | None = None,
     now: datetime | None = None,
 ) -> str:
     kst = timezone(timedelta(hours=9), name="KST")
@@ -130,6 +133,7 @@ def render_homepage(
         latest_tool_items=latest_tool_items,
         analytics_html=analytics_html,
         archive_entries=archive_entries or [],
+        current_archive_entry=current_archive_entry,
     )
 
 
@@ -187,6 +191,31 @@ def _write_weekly_archive(
     archive_dir.mkdir(parents=True, exist_ok=True)
     archived_html = html.replace("<head>", '<head>\n  <base href="../../../../">', 1)
     archive_dir.joinpath("index.html").write_text(archived_html, encoding="utf-8")
+
+
+def _refresh_archive_navigation(output_dir: Path, entries: list[dict[str, object]]) -> None:
+    archive_root = output_dir / "archive"
+    if not entries or not archive_root.exists():
+        return
+    entries_by_href = {str(entry["href"]).rstrip("/") + "/": entry for entry in entries}
+    for path in archive_root.glob("*/*/week-*/index.html"):
+        try:
+            year = int(path.parts[-4])
+            month = int(path.parts[-3])
+            week = int(path.parts[-2].replace("week-", ""))
+        except (ValueError, IndexError):
+            continue
+        href = f"archive/{year}/{month:02d}/week-{week}/"
+        current_entry = entries_by_href.get(href, {"year": year, "month": month, "week": week, "href": href})
+        html = path.read_text(encoding="utf-8")
+        updated = re.sub(
+            r'<aside class="archive-nav" aria-label="주간 아카이브">[\s\S]*?</aside>',
+            _render_archive_nav(entries, current_entry=current_entry),
+            html,
+            count=1,
+        )
+        if updated != html:
+            path.write_text(updated, encoding="utf-8")
     return
 
     return f"""<!doctype html>
@@ -527,7 +556,14 @@ def _render_tags(item: SiteItem) -> str:
     return f'<div class="tags" aria-label="중요 키워드">{tags}</div>'
 
 
-def _render_archive_nav(entries: list[dict[str, object]]) -> str:
+def _archive_entry_key(entry: dict[str, object]) -> tuple[int, int, int]:
+    return (int(entry["year"]), int(entry["month"]), int(entry["week"]))
+
+
+def _render_archive_nav(
+    entries: list[dict[str, object]],
+    current_entry: dict[str, object] | None = None,
+) -> str:
     if not entries:
         return ""
     grouped: dict[int, dict[int, list[dict[str, object]]]] = {}
@@ -537,14 +573,16 @@ def _render_archive_nav(entries: list[dict[str, object]]) -> str:
         grouped.setdefault(year, {}).setdefault(month, []).append(entry)
 
     years = []
-    first = True
+    current_key = _archive_entry_key(current_entry) if current_entry else max(
+        _archive_entry_key(entry) for entry in entries
+    )
     for year in sorted(grouped, reverse=True):
         months = []
         for month in sorted(grouped[year], reverse=True):
             links = []
-            for entry in sorted(grouped[year][month], key=lambda item: int(item["week"]), reverse=True):
-                current_class = ' class="is-current"' if first else ""
-                first = False
+            for entry in sorted(grouped[year][month], key=lambda item: int(item["week"])):
+                entry_key = (year, month, int(entry["week"]))
+                current_class = ' class="is-current"' if entry_key == current_key else ""
                 links.append(
                     f'<a{current_class} data-archive-link '
                     f'href="{escape(str(entry["href"]))}">'
@@ -578,13 +616,14 @@ def _render_editorial_homepage(
     latest_tool_items: list[SiteItem],
     analytics_html: str,
     archive_entries: list[dict[str, object]] | None = None,
+    current_archive_entry: dict[str, object] | None = None,
 ) -> str:
     all_items = [*infra_items, *other_items, *latest_tool_items]
     lead_item = (infra_items or other_items or latest_tool_items)[0] if all_items else None
     lead_summary = lead_item.summary if lead_item else "이번 주 AI 업무 업데이트를 선별해 보여줍니다."
     insight_cards = _render_smart_insight_cards(all_items)
     logo_roll = _render_logo_roll()
-    archive_html = _render_archive_nav(archive_entries or [])
+    archive_html = _render_archive_nav(archive_entries or [], current_entry=current_archive_entry)
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -1205,6 +1244,17 @@ def _render_editorial_homepage(
       font-size: 13px;
       line-height: 1.55;
     }}
+    .detail-footnotes {{
+      display: grid;
+      gap: 6px;
+      margin: 22px 0 0;
+      padding: 12px 0 0 18px;
+      border-top: 1px solid rgba(0,0,0,.12);
+      color: #565656;
+      font-size: 12px;
+      line-height: 1.55;
+      max-width: 620px;
+    }}
     .detail-tags {{
       display: flex;
       flex-wrap: wrap;
@@ -1664,6 +1714,7 @@ def _render_dashboard_homepage(
     latest_tool_items: list[SiteItem],
     analytics_html: str,
     archive_entries: list[dict[str, object]] | None = None,
+    current_archive_entry: dict[str, object] | None = None,
 ) -> str:
     return _render_editorial_homepage(
         today,
@@ -1672,6 +1723,7 @@ def _render_dashboard_homepage(
         latest_tool_items,
         analytics_html,
         archive_entries=archive_entries or [],
+        current_archive_entry=current_archive_entry,
     )
 
     all_items = [*infra_items, *other_items, *latest_tool_items]
@@ -2352,23 +2404,52 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         item = items[index] if index < len(items) else None
         body = _smart_insight_body(index, item, fallback)
         detail, points = _smart_insight_detail(index, item, fallback)
+        footnotes = _smart_insight_footnotes(index)
         meta = (
             f"{item.source} · {item.kind} · {_format_date(item.published)}"
             if item
             else "AI Master Times"
         )
         tags = item.tags if item else ()
-        criteria = "선별기준 : 원문 제목과 요약을 기준으로 선별된 항목입니다."
+        criteria = "선별기준 : 실제 업무에서 반복 작업, 품질 확인, 배포, 보안, 지식 정리에 적용할 수 있는지를 기준으로 골랐습니다."
         source_url = _smart_insight_source_url(index)
         category = _smart_insight_category(index)
         subcategory = _smart_insight_subcategory(index)
-        entries.append((index + 1, title, body, detail, meta, points, tags, criteria, source_url, category, subcategory))
+        entries.append(
+            (
+                index + 1,
+                title,
+                body,
+                detail,
+                meta,
+                points,
+                tags,
+                criteria,
+                source_url,
+                category,
+                subcategory,
+                footnotes,
+            )
+        )
 
     if not entries:
         return ""
 
     cards = []
-    for number, title, body, detail, meta, points, tags, criteria, source_url, category, subcategory in entries:
+    for (
+        number,
+        title,
+        body,
+        detail,
+        meta,
+        points,
+        tags,
+        criteria,
+        source_url,
+        category,
+        subcategory,
+        footnotes,
+    ) in entries:
         badge_class = " trend" if category == "동향" else ""
         cards.append(
             '<button class="insight-card" type="button" '
@@ -2382,6 +2463,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             f'data-points="{escape(json.dumps(list(points[:4]), ensure_ascii=False), quote=True)}" '
             f'data-tags="{escape(json.dumps(list(tags[:6]), ensure_ascii=False), quote=True)}" '
             f'data-criteria="{escape(criteria, quote=True)}" '
+            f'data-footnotes="{escape(json.dumps(list(footnotes[:5]), ensure_ascii=False), quote=True)}" '
             f'data-source="{escape(source_url, quote=True)}">'
             f'<span class="card-icon">{number}</span>'
             '<span><span class="card-heading">'
@@ -2404,6 +2486,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         first_source_url,
         first_category,
         first_subcategory,
+        first_footnotes,
     ) = entries[0]
     first_badge_class = " trend" if first_category == "동향" else ""
     return (
@@ -2424,6 +2507,9 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + '<ul class="detail-points" data-insight-points>'
         + "".join(f"<li>{escape(point)}</li>" for point in first_points[:4])
         + "</ul>"
+        + '<ol class="detail-footnotes" data-insight-footnotes>'
+        + "".join(f"<li>{escape(note)}</li>" for note in first_footnotes[:5])
+        + "</ol>"
         + f'<p class="detail-criteria" data-insight-criteria>{escape(first_criteria)}</p>'
         + f'<a class="detail-source" data-insight-source href="{escape(first_source_url or "#")}" target="_blank" rel="noopener noreferrer"'
         + (" hidden" if not first_source_url else "")
@@ -2446,13 +2532,14 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const meta = document.querySelector('[data-insight-meta]');
   const points = document.querySelector('[data-insight-points]');
   const tags = document.querySelector('[data-insight-tags]');
+  const footnotes = document.querySelector('[data-insight-footnotes]');
   const criteria = document.querySelector('[data-insight-criteria]');
   const source = document.querySelector('[data-insight-source]');
   const grid = document.querySelector('[data-insight-grid]');
   const detailPanel = document.querySelector('.insight-detail');
   const insightList = document.querySelector('.insight-list');
   const mobileQuery = window.matchMedia('(max-width: 760px)');
-  if (!buttons.length || !number || !title || !category || !subcategory || !body || !detail || !meta || !points || !tags || !criteria || !source || !grid || !detailPanel || !insightList) return;
+  if (!buttons.length || !number || !title || !category || !subcategory || !body || !detail || !meta || !points || !tags || !footnotes || !criteria || !source || !grid || !detailPanel || !insightList) return;
 
   const placeDetailPanel = (button) => {
     if (mobileQuery.matches) {
@@ -2484,9 +2571,16 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
 
       let pointItems = [];
       let tagItems = [];
+      let footnoteItems = [];
       try { pointItems = JSON.parse(button.dataset.points || '[]'); } catch (error) { pointItems = []; }
       try { tagItems = JSON.parse(button.dataset.tags || '[]'); } catch (error) { tagItems = []; }
+      try { footnoteItems = JSON.parse(button.dataset.footnotes || '[]'); } catch (error) { footnoteItems = []; }
       points.replaceChildren(...pointItems.map((item) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        return li;
+      }));
+      footnotes.replaceChildren(...footnoteItems.map((item) => {
         const li = document.createElement('li');
         li.textContent = item;
         return li;
@@ -2611,20 +2705,20 @@ def _smart_insight_detail(
 
 def _smart_insight_blueprint() -> tuple[tuple[str, str], ...]:
     return (
-        ("Harness Engineering", "AI 실행을 업무에 붙이기 위한 운영 계층입니다. 모델 호출, 도구 사용, 권한, 검증, 기록을 한 흐름으로 묶어 안전하게 반복 실행하도록 설계합니다."),
-        ("AI Product Builder Stack", "AI 제품을 빠르게 만들기 위한 프론트, 디자인, 백엔드 도구 묶음입니다. 화면 초안에서 인증, 데이터, 배포까지 이어지는 제작 경로를 잡습니다."),
-        ("Agent Harness", "에이전트가 직접 시스템을 만지는 대신, 실행 계층이 도구 호출을 검증하고 결과를 다시 모델에 주입하는 안전한 구조입니다."),
-        ("Design System to Backend", "디자인 규칙과 데이터/API 계약을 함께 관리하는 방식입니다. UI가 예쁘게 보이는 수준을 넘어 실제 백엔드 구조와 연결되게 만듭니다."),
-        ("AI Software Delivery", "개발, 테스트, 보안, 배포, 운영을 AI와 연결하는 전달 체계입니다. 코드 생성 이후의 실제 출시와 운영 품질을 다룹니다."),
-        ("Workflow and Data Layer", "AI 기능을 단발성 호출이 아니라 백엔드 프로세스로 운영하기 위한 워크플로와 데이터 계층입니다. 상태, 재시도, 검색, 저장을 담당합니다."),
-        ("Production Agent Guardrails", "운영 환경의 에이전트가 통제 가능한 범위 안에서 일하도록 만드는 안전장치입니다. 권한, 로그, 평가, 사람 승인 단계를 포함합니다."),
-        ("Deployable AI App Path", "아이디어를 실제 배포 가능한 AI 앱으로 만드는 제작 경로입니다. 디자인, 코드, 서버, 호스팅을 한 흐름으로 연결합니다."),
-        ("Model Gateway and Routing", "여러 모델 API를 하나의 운영 인터페이스로 묶는 계층입니다. 비용, 장애 대응, 모델 교체, 라우팅 정책을 관리합니다."),
-        ("AI Evaluation Stack", "AI 기능의 품질을 배포 전후로 비교하는 평가 체계입니다. 프롬프트, RAG, 에이전트 응답의 회귀를 잡는 데 필요합니다."),
-        ("RAG and Knowledge Backend", "사내 문서와 지식을 AI가 근거로 사용할 수 있게 만드는 백엔드입니다. 검색, 임베딩, 벡터 저장, 출처 추적을 담당합니다."),
-        ("Observability and Incident AI", "AI 기능의 오류, 지연, 비용, 장애 원인을 추적하는 운영 관측 체계입니다. 문제가 났을 때 원인을 빠르게 좁히는 데 필요합니다."),
-        ("Secure Secrets and Policy", "AI 시스템의 키, 권한, 정책 결정을 분리해 관리하는 보안 계층입니다. 에이전트와 백엔드가 필요한 만큼만 접근하게 만듭니다."),
-        ("Team Knowledge Workflow", "팀의 요구사항, 이슈, 릴리즈 노트, 대화 기록을 AI 워크플로와 연결하는 방식입니다. 지식이 흩어지지 않게 정리합니다."),
+        ("Harness Engineering", "AI가 답을 내는 것에서 끝나지 않고, 실제 업무 도구를 안전하게 실행하도록 돕는 운영 방식입니다."),
+        ("AI Product Builder Stack", "아이디어를 화면, 데이터베이스, 로그인, 배포까지 이어서 빠르게 시험해 볼 수 있는 AI 제품 제작 도구 묶음입니다."),
+        ("Agent Harness", "AI 에이전트가 아무 도구나 바로 실행하지 못하게, 중간에서 확인하고 허락한 작업만 실행하게 만드는 안전 구조입니다."),
+        ("Design System to Backend", "디자인 규칙과 데이터 구조를 함께 맞춰서, 예쁜 화면이 실제 서비스 기능과 자연스럽게 연결되게 하는 방식입니다."),
+        ("AI Software Delivery", "AI를 코드 작성뿐 아니라 테스트, 보안 확인, 배포, 운영 점검까지 넓게 쓰는 개발 전달 방식입니다."),
+        ("Workflow and Data Layer", "AI 작업을 한 번의 질문으로 끝내지 않고, 저장·검색·재시도까지 가능한 업무 흐름으로 만드는 기반입니다."),
+        ("Production Agent Guardrails", "실제 서비스에서 AI 에이전트가 실수해도 큰 문제가 나지 않도록 권한, 기록, 승인 단계를 두는 안전장치입니다."),
+        ("Deployable AI App Path", "AI로 만든 아이디어를 사용자가 접속할 수 있는 앱으로 배포하기까지의 제작 순서입니다."),
+        ("Model Gateway and Routing", "여러 AI 모델을 한 곳에서 불러 쓰고, 비용이나 성능에 따라 알맞은 모델을 고르는 운영 계층입니다."),
+        ("AI Evaluation Stack", "AI 답변이 좋아졌는지 나빠졌는지 느낌이 아니라 테스트와 점수로 확인하는 평가 체계입니다."),
+        ("RAG and Knowledge Backend", "사내 문서나 수업 자료를 AI가 찾아보고 근거로 사용할 수 있게 만드는 지식 검색 백엔드입니다."),
+        ("Observability and Incident AI", "AI 기능에서 오류, 느려짐, 비용 증가가 생겼을 때 원인을 빨리 찾도록 돕는 관측 체계입니다."),
+        ("Secure Secrets and Policy", "API 키와 권한 규칙을 따로 관리해 AI와 서버가 필요한 정보에만 접근하게 하는 보안 방식입니다."),
+        ("Team Knowledge Workflow", "팀의 이슈, 회의 내용, 릴리즈 노트를 AI가 다시 활용할 수 있도록 정리하는 지식 관리 흐름입니다."),
     )
 
 
@@ -2639,121 +2733,197 @@ def _smart_insight_detail(
 ) -> tuple[str, tuple[str, ...]]:
     explainers: tuple[tuple[str, tuple[str, ...]], ...] = (
         (
-            "하네스 엔지니어링은 AI 모델의 답변을 실제 업무 실행으로 연결하기 위한 운영 설계입니다. 프롬프트만 잘 쓰는 것을 넘어, 모델이 어떤 도구를 호출하고 어떤 조건에서 실행되며 어떤 로그와 검증을 남기는지까지 관리합니다.",
+            "하네스 엔지니어링은 AI가 말로만 답하는 단계에서 벗어나 실제 업무를 안전하게 실행하도록 만드는 설계입니다. 예를 들어 AI가 보고서를 만들거나 배포 명령을 실행해야 한다면, 어떤 도구를 쓸 수 있는지, 누가 허락해야 하는지, 실패하면 어떻게 되돌릴지를 미리 정합니다.",
             (
-                "1. 하네스 엔지니어링이란? 모델, 도구, 데이터, 권한, 검증 로직을 묶어 AI 작업을 반복 가능한 실행 흐름으로 만드는 방식입니다.",
-                "2. 프롬프트 엔지니어링과의 차이점: 프롬프트 엔지니어링이 모델 입력을 다듬는 일이라면, 하네스 엔지니어링은 실행 환경과 통제 장치를 설계하는 일입니다.",
-                "3. 주요 구성 요소: 입력 스키마, 도구 호출 규칙, 권한 경계, 평가 기준, 감사 로그, 실패 시 재시도와 롤백 정책입니다.",
+                "AI가 사용할 도구 목록과 실행 조건을 미리 정하면 반복 업무를 자동화하기 쉽습니다.",
+                "실행 기록과 승인 단계를 남기면 사고가 났을 때 원인을 추적할 수 있습니다.",
+                "업무 적용 예: 보고서 생성, 배포 점검, 고객 문의 분류, 장애 대응 초안 작성.",
             ),
         ),
         (
-            "AI Product Builder Stack은 AI 제품을 만들 때 필요한 디자인, 프론트엔드, 백엔드, 배포 도구를 하나의 제작 흐름으로 보는 관점입니다.",
+            "AI Product Builder Stack은 AI 제품을 만들 때 필요한 도구들을 한 줄로 연결해 보는 관점입니다. 화면을 빠르게 만들고, 데이터를 저장하고, 로그인과 배포까지 붙이면 아이디어를 실제로 써볼 수 있는 작은 제품으로 바꿀 수 있습니다.",
             (
-                "1. 무엇인가? Stitch, v0, Lovable, Bolt 같은 화면 제작 도구와 Supabase, Neon, Convex 같은 백엔드 도구를 함께 묶은 제작 스택입니다.",
-                "2. 단순 디자인 도구와의 차이점: 화면 시안에서 끝나지 않고 인증, 데이터, API, 배포까지 이어지는 실제 제품 경로를 만듭니다.",
-                "3. 주요 구성 요소: UI 생성, 컴포넌트 코드, 데이터베이스, 인증, 서버 함수, 배포 플랫폼, 모니터링입니다.",
+                "화면 제작 도구만 쓰면 시안에서 멈추지만, 백엔드와 배포를 붙이면 실제 사용 테스트가 가능합니다.",
+                "수업이나 사내 파일럿에서는 작게 만들고 빠르게 피드백을 받는 데 유용합니다.",
+                "업무 적용 예: 신청 폼, 사내 FAQ 봇, 간단한 대시보드, 데이터 입력 도구.",
             ),
         ),
         (
-            "Agent Harness는 에이전트가 시스템을 직접 제어하지 않고, 정해진 실행 계층을 통해 도구를 안전하게 호출하도록 만드는 구조입니다.",
+            "Agent Harness는 AI 에이전트와 실제 시스템 사이에 두는 안전한 중간 계층입니다. AI가 직접 서버나 데이터베이스를 만지지 않고, 하네스가 입력을 확인한 뒤 허용된 도구만 실행하게 합니다.",
             (
-                "1. 무엇인가? 모델의 판단과 실제 도구 실행 사이에 검증, 권한, 결과 처리 계층을 두는 방식입니다.",
-                "2. 일반 에이전트 호출과의 차이점: 모델이 바로 실행하지 않고 하네스가 입력, 도구, 결과를 통제합니다.",
-                "3. 주요 구성 요소: 도구 목록, 호출 스키마, 실행 제한, 결과 검증, 에러 처리, 사람 승인 단계입니다.",
+                "에이전트가 실수로 위험한 명령을 실행하는 일을 줄일 수 있습니다.",
+                "결과 검증과 에러 처리를 한 곳에서 관리하면 운영하기 편합니다.",
+                "업무 적용 예: 티켓 처리, 데이터 조회, 반복 점검, 자동 알림 생성.",
             ),
         ),
         (
-            "Design System to Backend는 디자인 규칙과 백엔드 계약을 함께 관리해, AI가 만든 화면이 실제 서비스 구조와 맞물리게 하는 방식입니다.",
+            "Design System to Backend는 화면 디자인 규칙과 데이터 구조를 함께 관리하는 방식입니다. AI가 만든 화면이 보기만 좋은 시안으로 끝나지 않고, 실제 데이터 입력과 API 호출까지 자연스럽게 이어지게 합니다.",
             (
-                "1. 무엇인가? DESIGN.md, getdesign.md, 컴포넌트 규칙, 데이터 모델, API 계약을 연결하는 작업 방식입니다.",
-                "2. 단순 UI 제작과의 차이점: 보기 좋은 화면이 아니라 데이터가 흐르고 유지보수 가능한 제품 구조를 목표로 합니다.",
-                "3. 주요 구성 요소: 디자인 토큰, 컴포넌트 규칙, 스키마, API 타입, 폼 검증, 에러 상태입니다.",
+                "디자인 규칙을 문서화하면 AI가 매번 다른 스타일로 화면을 만드는 문제를 줄입니다.",
+                "데이터 구조를 함께 정하면 폼, 표, 상세 화면이 실제 기능과 맞습니다.",
+                "업무 적용 예: 관리자 화면, 고객 정보 입력, 리포트 페이지, 승인 워크플로.",
             ),
         ),
         (
-            "AI Software Delivery는 AI를 코드 작성 보조에만 쓰지 않고 테스트, 배포, 보안, 운영까지 포함한 소프트웨어 전달 과정에 적용하는 관점입니다.",
+            "AI Software Delivery는 AI를 코드 작성에만 쓰지 않고, 테스트와 배포, 보안 점검, 운영 확인까지 연결하는 방식입니다. 실제 서비스는 코드를 만드는 것보다 안전하게 출시하고 계속 관리하는 일이 더 중요하기 때문입니다.",
             (
-                "1. 무엇인가? 개발부터 운영까지의 SDLC에 AI 기반 자동화와 검증을 붙이는 방식입니다.",
-                "2. 코드 생성과의 차이점: 코드를 만드는 것보다 릴리즈 가능성, 품질, 보안, 운영 안정성을 더 중요하게 봅니다.",
-                "3. 주요 구성 요소: CI/CD, 테스트 자동화, 보안 스캔, 배포 승인, 롤백, 비용 관리입니다.",
+                "AI가 테스트 실패 원인을 요약하거나 배포 전 체크리스트를 만들 수 있습니다.",
+                "출시 후 오류와 비용을 함께 확인하면 운영 품질을 높일 수 있습니다.",
+                "업무 적용 예: 자동 테스트, 보안 스캔, 배포 승인, 장애 보고서 초안.",
             ),
         ),
         (
-            "Workflow and Data Layer는 AI 기능을 일회성 응답이 아니라 상태를 가진 백엔드 프로세스로 운영하기 위한 기반입니다.",
+            "Workflow and Data Layer는 AI 작업을 한 번의 답변으로 끝내지 않고, 여러 단계의 업무 흐름으로 운영하기 위한 기반입니다. 긴 작업을 나누고, 중간 상태를 저장하고, 실패하면 다시 시도하게 만들 수 있습니다.",
             (
-                "1. 무엇인가? LangGraph, Inngest, Temporal, n8n 같은 워크플로와 벡터 저장소, 데이터베이스를 연결하는 계층입니다.",
-                "2. 단순 API 호출과의 차이점: 긴 작업, 재시도, 상태 저장, 검색, 후속 처리를 안정적으로 다룹니다.",
-                "3. 주요 구성 요소: 작업 큐, 상태 머신, 스케줄러, 벡터 DB, 이벤트 로그, 재처리 정책입니다.",
+                "작업 상태를 저장하면 중간에 실패해도 처음부터 다시 시작하지 않아도 됩니다.",
+                "문서 검색과 데이터 저장을 붙이면 AI가 이전 정보를 이어서 사용할 수 있습니다.",
+                "업무 적용 예: 정기 보고서 생성, 신청 처리, 문서 검색, 고객 상담 흐름.",
             ),
         ),
         (
-            "Production Agent Guardrails는 운영 환경에서 에이전트가 예측 가능한 범위 안에서만 행동하도록 제한하고 검증하는 안전 체계입니다.",
+            "Production Agent Guardrails는 실제 서비스에서 AI 에이전트가 정해진 범위 안에서만 행동하게 만드는 안전 체계입니다. AI가 틀릴 수 있다는 전제를 두고 권한, 승인, 기록, 되돌리기 방법을 준비합니다.",
             (
-                "1. 무엇인가? 에이전트의 행동 범위와 실패 대응을 미리 정하는 운영 안전장치입니다.",
-                "2. 실험용 에이전트와의 차이점: 데모가 아니라 실제 업무 영향, 권한, 감사, 복구 가능성을 기준으로 설계합니다.",
-                "3. 주요 구성 요소: 권한 경계, 정책 검사, 감사 로그, 평가 기준, 승인 절차, 롤백 경로입니다.",
+                "위험한 작업은 사람 승인 후 실행하게 만들 수 있습니다.",
+                "기록을 남기면 누가 어떤 명령을 실행했는지 확인할 수 있습니다.",
+                "업무 적용 예: 결제 변경, 배포 승인, 고객 데이터 수정, 보안 알림 처리.",
             ),
         ),
         (
-            "Deployable AI App Path는 AI 앱을 아이디어에서 실제 배포까지 가져가기 위한 제작 경로입니다.",
+            "Deployable AI App Path는 아이디어를 실제 접속 가능한 AI 앱으로 만드는 순서입니다. 디자인, 코드, 서버, 데이터베이스, 배포 주소까지 이어져야 다른 사람이 직접 써볼 수 있습니다.",
             (
-                "1. 무엇인가? 디자인, 코드 생성, 백엔드 구성, 호스팅, 운영 확인을 하나의 흐름으로 연결하는 방식입니다.",
-                "2. 프로토타입과의 차이점: 보여주기용 화면이 아니라 사용자 접속, 데이터 저장, 장애 대응이 가능한 앱을 목표로 합니다.",
-                "3. 주요 구성 요소: Figma Make, Cursor, Replit, Vercel, Fly.io, Render, 데이터베이스, 인증입니다.",
+                "프로토타입에서 끝내지 않고 배포까지 가야 실제 피드백을 받을 수 있습니다.",
+                "작은 앱이라도 로그인, 데이터 저장, 오류 확인을 준비하면 더 오래 쓸 수 있습니다.",
+                "업무 적용 예: 수업용 실습 앱, 사내 도구, 예약 폼, 간단한 챗봇.",
             ),
         ),
         (
-            "Model Gateway and Routing은 여러 AI 모델을 하나의 진입점으로 묶고, 요청 성격에 따라 모델과 비용 정책을 바꾸는 운영 계층입니다.",
+            "Model Gateway and Routing은 여러 AI 모델을 한 창구에서 관리하는 방식입니다. 요청이 쉬운지 어려운지, 비용을 줄여야 하는지에 따라 알맞은 모델로 보내는 길잡이 역할을 합니다.",
             (
-                "1. 무엇인가? OpenRouter, LiteLLM, Portkey처럼 모델 호출을 표준화하고 라우팅하는 계층입니다.",
-                "2. 직접 모델 호출과의 차이점: 특정 모델 하나에 묶이지 않고 비용, 장애, 품질 기준에 따라 전환할 수 있습니다.",
-                "3. 주요 구성 요소: 모델 라우팅, fallback, 비용 한도, 응답 로그, 키 관리, 사용량 추적입니다.",
+                "한 모델에 장애가 나면 다른 모델로 바꿔 보내는 fallback을 만들 수 있습니다.",
+                "요청별 비용과 품질을 기록하면 운영 판단이 쉬워집니다.",
+                "업무 적용 예: 고객 문의 분류는 저렴한 모델, 복잡한 분석은 성능 좋은 모델 사용.",
             ),
         ),
         (
-            "AI Evaluation Stack은 AI 기능의 답변 품질을 감각이 아니라 테스트와 지표로 관리하기 위한 체계입니다.",
+            "AI Evaluation Stack은 AI 답변 품질을 느낌이 아니라 테스트와 점수로 확인하는 체계입니다. 프롬프트를 바꾼 뒤 답변이 더 좋아졌는지, 예전보다 실수가 늘었는지를 비교할 수 있습니다.",
             (
-                "1. 무엇인가? LangSmith, Braintrust, OpenAI Evals, Ragas 같은 도구로 프롬프트와 RAG 품질을 평가하는 방식입니다.",
-                "2. 수동 확인과의 차이점: 몇 개 샘플을 눈으로 보는 대신 기준 데이터와 회귀 테스트로 품질 변화를 추적합니다.",
-                "3. 주요 구성 요소: 평가 데이터셋, 채점 기준, 회귀 테스트, 실험 비교, 실패 사례 분석입니다.",
+                "자주 틀리는 질문 목록을 만들어 두면 수정 효과를 반복해서 확인할 수 있습니다.",
+                "출시 전후의 답변 품질을 비교하면 조용한 품질 하락을 잡을 수 있습니다.",
+                "업무 적용 예: 챗봇 답변 평가, 문서 검색 정확도 확인, 프롬프트 변경 테스트.",
             ),
         ),
         (
-            "RAG and Knowledge Backend는 사내 문서와 지식을 AI가 근거로 사용할 수 있도록 검색 가능한 백엔드로 만드는 구조입니다.",
+            "RAG and Knowledge Backend는 사내 문서와 지식을 AI가 찾아보고 답변 근거로 쓰게 만드는 구조입니다. AI가 기억만으로 답하지 않고, 실제 문서에서 관련 내용을 검색해 답변하도록 돕습니다.",
             (
-                "1. 무엇인가? 문서 수집, 임베딩, 벡터 검색, 근거 반환을 담당하는 지식 백엔드입니다.",
-                "2. 일반 검색과의 차이점: 키워드 매칭을 넘어 의미 기반 검색과 답변 근거 추적을 함께 제공합니다.",
-                "3. 주요 구성 요소: LlamaIndex, LangChain, pgvector, Qdrant, Weaviate, 문서 파이프라인입니다.",
+                "근거 문서를 함께 보여주면 사용자가 답변을 더 쉽게 검증할 수 있습니다.",
+                "규정, 매뉴얼, 수업 자료처럼 자주 찾아보는 문서에 특히 유용합니다.",
+                "업무 적용 예: 사내 규정 Q&A, 기술 문서 검색, 교육 자료 챗봇.",
             ),
         ),
         (
-            "Observability and Incident AI는 AI 기능의 오류, 지연, 비용, 품질 문제를 운영자가 추적하고 대응하도록 돕는 관측 체계입니다.",
+            "Observability and Incident AI는 AI 기능이 왜 느려졌는지, 왜 틀린 답을 했는지, 비용이 왜 늘었는지 추적하는 운영 체계입니다. 문제가 생겼을 때 원인을 빠르게 좁히는 데 도움이 됩니다.",
             (
-                "1. 무엇인가? AI 호출과 앱 운영 지표를 로그, 메트릭, 트레이스로 연결하는 방식입니다.",
-                "2. 일반 모니터링과의 차이점: 서버 상태뿐 아니라 모델 응답, 토큰 비용, 프롬프트 실패, 검색 실패까지 봅니다.",
-                "3. 주요 구성 요소: Datadog, Grafana, Sentry, 호출 로그, 비용 대시보드, 장애 분류입니다.",
+                "AI 호출 기록과 서버 오류를 함께 보면 문제 원인을 찾기 쉽습니다.",
+                "비용과 지연 시간을 같이 보면 어떤 기능을 개선해야 할지 보입니다.",
+                "업무 적용 예: 장애 알림 요약, 느린 요청 분석, 비용 급증 원인 찾기.",
             ),
         ),
         (
-            "Secure Secrets and Policy는 AI 앱과 에이전트가 사용하는 키, 권한, 정책 판단을 안전하게 분리해 관리하는 보안 계층입니다.",
+            "Secure Secrets and Policy는 AI 앱이 쓰는 비밀번호 같은 키와 권한 규칙을 안전하게 관리하는 방식입니다. 코드 안에 중요한 값을 넣지 않고, 누가 어떤 정보에 접근할 수 있는지 따로 정합니다.",
             (
-                "1. 무엇인가? API 키, 시크릿, 접근 권한, 정책 결정을 코드와 분리해 관리하는 방식입니다.",
-                "2. 환경변수 관리와의 차이점: 값을 숨기는 것뿐 아니라 누가, 언제, 어떤 조건에서 접근 가능한지까지 통제합니다.",
-                "3. 주요 구성 요소: Doppler, Infisical, Vault, OPA, Cedar, 권한 정책, 감사 로그입니다.",
+                "API 키를 코드에 직접 넣지 않으면 유출 위험을 줄일 수 있습니다.",
+                "정책 규칙을 분리하면 에이전트가 필요한 권한만 쓰게 만들 수 있습니다.",
+                "업무 적용 예: 키 관리, 접근 권한 설정, 보안 감사 기록, 정책 검사.",
             ),
         ),
         (
-            "Team Knowledge Workflow는 팀의 대화, 이슈, 문서, 릴리즈 기록을 AI가 다시 사용할 수 있는 지식 흐름으로 정리하는 방식입니다.",
+            "Team Knowledge Workflow는 팀의 대화, 이슈, 문서, 릴리즈 기록을 AI가 다시 사용할 수 있게 정리하는 방식입니다. 흩어진 정보를 모으면 새 팀원이 맥락을 빨리 파악하고, AI도 더 정확하게 도울 수 있습니다.",
             (
-                "1. 무엇인가? Notion, Linear, GitHub Issues, Slack, Teams의 정보를 AI 워크플로와 연결하는 작업 방식입니다.",
-                "2. 일반 문서화와의 차이점: 사람이 나중에 찾아보는 문서가 아니라 AI가 작업 맥락으로 재사용할 수 있는 지식 구조를 만듭니다.",
-                "3. 주요 구성 요소: 요구사항 정리, 이슈 요약, 릴리즈 노트, 회의/대화 요약, 작업 상태 동기화입니다.",
+                "이슈와 회의 내용을 요약하면 나중에 같은 질문을 반복하지 않아도 됩니다.",
+                "릴리즈 기록을 정리하면 어떤 기능이 언제 바뀌었는지 추적하기 쉽습니다.",
+                "업무 적용 예: 회의 요약, 이슈 정리, 릴리즈 노트 작성, 온보딩 자료 생성.",
             ),
         ),
     )
     if index < len(explainers):
         return explainers[index]
     return fallback, item.key_points if item else ()
+
+
+def _smart_insight_footnotes(index: int) -> tuple[str, ...]:
+    footnotes: tuple[tuple[str, ...], ...] = (
+        (
+            "하네스: AI와 실제 도구 사이에서 실행 순서, 권한, 검증을 관리하는 중간 장치입니다.",
+            "프롬프트: AI에게 원하는 답을 얻기 위해 입력하는 지시문입니다.",
+            "롤백: 문제가 생겼을 때 이전 상태로 되돌리는 작업입니다.",
+        ),
+        (
+            "스택: 제품을 만들 때 함께 쓰는 도구와 기술의 묶음입니다.",
+            "백엔드: 화면 뒤에서 데이터 저장, 로그인, 계산, API 처리를 담당하는 서버 영역입니다.",
+            "배포: 만든 서비스를 다른 사람이 접속할 수 있는 환경에 올리는 일입니다.",
+        ),
+        (
+            "에이전트: 목표를 받고 스스로 여러 단계를 수행하는 AI 프로그램입니다.",
+            "스키마: 입력과 출력의 형식을 미리 정해 둔 규칙입니다.",
+            "권한: 어떤 사용자나 프로그램이 무엇을 할 수 있는지 정한 허용 범위입니다.",
+        ),
+        (
+            "디자인 시스템: 색, 글자, 버튼, 여백 같은 화면 규칙을 모아 둔 기준입니다.",
+            "API: 프로그램끼리 데이터를 주고받기 위해 정한 약속입니다.",
+            "데이터 모델: 서비스에서 저장해야 할 정보의 구조입니다.",
+        ),
+        (
+            "SDLC: 소프트웨어를 계획, 개발, 테스트, 배포, 운영하는 전체 과정입니다.",
+            "CI/CD: 코드 변경을 자동으로 테스트하고 배포하는 개발 절차입니다.",
+            "보안 스캔: 코드나 설정에 위험한 부분이 있는지 자동으로 검사하는 작업입니다.",
+        ),
+        (
+            "워크플로: 여러 작업을 순서대로 연결한 업무 흐름입니다.",
+            "벡터 저장소: 문서의 의미를 숫자로 바꿔 저장하고 비슷한 내용을 찾는 저장소입니다.",
+            "재시도 정책: 실패한 작업을 언제, 몇 번 다시 실행할지 정한 규칙입니다.",
+        ),
+        (
+            "가드레일: AI가 위험한 행동을 하지 않도록 세운 제한 규칙입니다.",
+            "감사 로그: 누가 언제 무엇을 했는지 확인할 수 있게 남긴 기록입니다.",
+            "승인 절차: 중요한 작업 전에 사람이 확인하고 허락하는 단계입니다.",
+        ),
+        (
+            "프로토타입: 아이디어를 빠르게 확인하기 위해 만든 초기 버전입니다.",
+            "호스팅: 웹사이트나 앱을 인터넷에서 접속할 수 있게 운영하는 일입니다.",
+            "인증: 사용자가 누구인지 확인하는 로그인 절차입니다.",
+        ),
+        (
+            "게이트웨이: 여러 서비스로 가는 요청을 한 곳에서 받아 나누어 보내는 입구입니다.",
+            "라우팅: 조건에 따라 요청을 알맞은 목적지로 보내는 일입니다.",
+            "fallback: 기본 방법이 실패했을 때 쓰는 대체 방법입니다.",
+        ),
+        (
+            "평가 데이터셋: AI 답변을 시험하기 위해 미리 준비한 질문과 정답 묶음입니다.",
+            "회귀 테스트: 수정 후 예전에 되던 기능이 망가지지 않았는지 확인하는 테스트입니다.",
+            "RAG: AI가 외부 문서를 검색해 근거를 붙여 답하게 하는 방식입니다.",
+        ),
+        (
+            "임베딩: 문장이나 문서의 의미를 숫자 배열로 바꾸는 기술입니다.",
+            "벡터 검색: 단어가 완전히 같지 않아도 의미가 비슷한 내용을 찾는 검색 방식입니다.",
+            "출처 추적: 답변이 어떤 문서나 근거에서 나왔는지 확인하는 방식입니다.",
+        ),
+        (
+            "관측: 서비스가 어떻게 동작하는지 로그와 지표로 살펴보는 일입니다.",
+            "메트릭: 응답 시간, 오류 수, 비용처럼 숫자로 측정하는 값입니다.",
+            "트레이스: 요청 하나가 시스템 안에서 지나간 경로를 따라가는 기록입니다.",
+        ),
+        (
+            "시크릿: API 키나 비밀번호처럼 외부에 노출되면 안 되는 값입니다.",
+            "정책: 어떤 조건에서 접근을 허용하거나 막을지 정한 규칙입니다.",
+            "감사: 보안과 규칙 준수 여부를 나중에 확인하는 과정입니다.",
+        ),
+        (
+            "이슈: 해야 할 일이나 버그를 기록하고 추적하는 작업 단위입니다.",
+            "릴리즈 노트: 새 버전에서 무엇이 바뀌었는지 정리한 문서입니다.",
+            "온보딩: 새 사람이 팀이나 도구에 적응하도록 돕는 과정입니다.",
+        ),
+    )
+    return footnotes[index] if index < len(footnotes) else ()
 
 
 def _editorial_intro_copy(lead_summary: str) -> str:
@@ -3172,14 +3342,17 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "Titles and summaries must be Korean sentences. Product names such as OpenAI, "
             "Claude, Cursor, GitHub Copilot, Codex, Gartner, Endava, Harness, Warp, AWS, and Azure "
             "must stay in English. "
-            "detail must be 2 to 4 Korean paragraphs that explain the item in more depth for a detail page. "
+            "detail must be 2 to 4 Korean paragraphs that a Korean high-school student can understand. "
+            "Use short sentences, explain why the item matters, and include practical examples rather "
+            "than abstract vendor language. "
             "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
             "3 to 5 short Korean or product-name strings. comparisons must be an array of 0 to 3 Korean "
             "strings comparing the item with adjacent tools or approaches when useful. For Endava items, "
             "compare it with Harness Engineering if relevant: Endava is a consulting/transformation "
             "approach, while Harness is a DevOps/software delivery automation platform. glossary must be "
             "an array of 0 to 5 Korean strings formatted like 'Warp: ...' explaining difficult product "
-            "names, acronyms, or jargon as footnote-style notes. Emphasize practical work skills, "
+            "names, acronyms, or jargon as footnote-style notes for readers who may be seeing the "
+            "terms for the first time. Emphasize practical work skills, "
             "automation patterns, operational usage, and concrete tool adoption. Do not invent unsupported "
             "facts."
         )
@@ -3188,7 +3361,7 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "Use natural Korean titles that preserve product and company names in English. "
             "Summaries must be one concise Korean sentence and must make clear what a DBA, "
             "network engineer, server operator, or technical mentor can do with it at work. "
-            "Key points should explain: what changed, where it can be used in work, and what "
+            "Key points should explain in plain Korean: what changed, where it can be used in work, and what "
             "to watch before adoption. Add comparison notes when the item could be confused with "
             "another tool or vendor, and add glossary notes for difficult words such as Warp, Harness, "
             "Agent tasks REST API, CI/CD, SDK, or orchestration.\n\n"
