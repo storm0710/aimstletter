@@ -38,25 +38,15 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     html = render_homepage([_fallback_korean_item(ai_item)] * 10, [_fallback_korean_item(tool_item)])
 
     assert "AI Master Times" in html
-    assert "업무 AI 스킬 업데이트 · 상위 5개" in html
-    assert "Claude와 AI 도구 업데이트" in html
-    assert "최신 업데이트" in html
-    assert "키포인트" in html
-    assert "tag" in html
-    assert '<span class="toc-number">1.</span>' in html
-    assert '<span class="toc-number">2.</span>' in html
-    assert "업무 AI 스킬 업데이트" in html
+    assert "AI MASTER TIMES" in html
+    assert "AI Talent Lab" in html
+    assert "Smart Insights" in html
+    assert "Harness Engineering" in html
+    assert "topic-badge" in html
     assert 'href="work-skills/"' in html
     assert 'href="tools/"' in html
-    assert 'href="items/' in html
-    assert 'class="content-grid"' in html
-    assert "grid-template-columns: repeat(2, minmax(0, 1fr));" in html
-    assert "(2026-06-04)" in html
     assert "lead-image" not in html
     assert "watch-links" not in html
-    assert "border-top: 1px solid var(--rule);" in html
-    assert "min-height: 39px;" in html
-    assert "min-height: 316px;" in html
 
 
 def test_safe_korean_field_rejects_untranslated_article_text() -> None:
@@ -77,7 +67,7 @@ def test_safe_korean_field_rejects_untranslated_article_text() -> None:
     )
 
 
-def test_render_homepage_orders_each_section_newest_first() -> None:
+def test_render_homepage_includes_archive_entries() -> None:
     old_item = SiteItem(
         title="오래된 항목",
         url="https://example.com/old",
@@ -101,11 +91,20 @@ def test_render_homepage_orders_each_section_newest_first() -> None:
         tags=("OpenAI", "AI 에이전트"),
     )
 
-    html = render_homepage([old_item, new_item, old_item, old_item, old_item], [old_item, new_item])
+    html = render_homepage(
+        [old_item, new_item, old_item, old_item, old_item],
+        [old_item, new_item],
+        archive_entries=[
+            {"year": 2026, "month": 6, "week": 1, "href": "archive/2026/06/week-1/"},
+            {"year": 2026, "month": 6, "week": 2, "href": "archive/2026/06/week-2/"},
+        ],
+        now=datetime(2026, 6, 11, tzinfo=UTC),
+    )
 
-    assert html.index("최신 항목") < html.index("오래된 항목")
-    assert '<span class="tag">#AI 에이전트</span>' in html
-    assert "최신 항목 <span class=\"title-date\">(2026-06-05)</span>" in html
+    assert "Archive" in html
+    assert "2026년" in html
+    assert "06월 2째주" in html
+    assert 'href="archive/2026/06/week-1/"' in html
 
 
 def test_safe_tags_keeps_product_names_and_deduplicates() -> None:

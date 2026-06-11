@@ -77,6 +77,8 @@ GENERAL_STORY_KEYWORDS = {
 
 def build_site(output_dir: Path, settings: Settings) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
+    kst = timezone(timedelta(hours=9), name="KST")
+    now = datetime.now(UTC).astimezone(kst)
 
     source_items = _dedupe_items(
         [
@@ -91,10 +93,19 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     tool_items = _rank_tool_updates(fetch_recent_items(settings.tool_feeds, 21), 10)
     ai_items = _localize_items(ai_items, settings, "DBA, 네트워크, 서버 운영자가 업무에 적용할 AI 스킬 업데이트")
     tool_items = _localize_items(tool_items, settings, "인공지능 도구 업데이트")
-    html = render_homepage(ai_items, tool_items, analytics_html=_render_analytics(settings))
+    archive_entry = _weekly_archive_entry(now)
+    archive_entries = _collect_archive_entries(output_dir, archive_entry)
+    html = render_homepage(
+        ai_items,
+        tool_items,
+        analytics_html=_render_analytics(settings),
+        archive_entries=archive_entries,
+        now=now,
+    )
 
     path = output_dir / "index.html"
     path.write_text(html, encoding="utf-8")
+    _write_weekly_archive(output_dir, archive_entry, html)
     _write_secondary_pages(output_dir, ai_items, tool_items, _render_analytics(settings))
     return path
 
@@ -103,9 +114,12 @@ def render_homepage(
     ai_items: list[SiteItem],
     tool_items: list[SiteItem],
     analytics_html: str = "",
+    archive_entries: list[dict[str, object]] | None = None,
+    now: datetime | None = None,
 ) -> str:
     kst = timezone(timedelta(hours=9), name="KST")
-    today = datetime.now(UTC).astimezone(kst).strftime("%Y년 %m월 %d일")
+    today_dt = now.astimezone(kst) if now else datetime.now(UTC).astimezone(kst)
+    today = today_dt.strftime("%Y년 %m월 %d일")
     infra_items = _latest_first(ai_items[:5])
     other_items = _latest_first(ai_items[5:10])
     latest_tool_items = _latest_first(tool_items[:10])
@@ -115,7 +129,65 @@ def render_homepage(
         other_items=other_items,
         latest_tool_items=latest_tool_items,
         analytics_html=analytics_html,
+        archive_entries=archive_entries or [],
     )
+
+
+def _weekly_archive_entry(day: datetime) -> dict[str, object]:
+    week = ((day.day - 1) // 7) + 1
+    return {
+        "year": day.year,
+        "month": day.month,
+        "week": week,
+        "href": f"archive/{day.year}/{day.month:02d}/week-{week}/",
+    }
+
+
+def _collect_archive_entries(
+    output_dir: Path,
+    current_entry: dict[str, object],
+) -> list[dict[str, object]]:
+    entries: dict[tuple[int, int, int], dict[str, object]] = {}
+    archive_root = output_dir / "archive"
+    if archive_root.exists():
+        for path in archive_root.glob("*/*/week-*/index.html"):
+            try:
+                year = int(path.parts[-4])
+                month = int(path.parts[-3])
+                week = int(path.parts[-2].replace("week-", ""))
+            except (ValueError, IndexError):
+                continue
+            entries[(year, month, week)] = {
+                "year": year,
+                "month": month,
+                "week": week,
+                "href": f"archive/{year}/{month:02d}/week-{week}/",
+            }
+    key = (
+        int(current_entry["year"]),
+        int(current_entry["month"]),
+        int(current_entry["week"]),
+    )
+    entries[key] = current_entry
+    return [entries[key] for key in sorted(entries, reverse=True)]
+
+
+def _write_weekly_archive(
+    output_dir: Path,
+    archive_entry: dict[str, object],
+    html: str,
+) -> None:
+    archive_dir = (
+        output_dir
+        / "archive"
+        / str(archive_entry["year"])
+        / f"{int(archive_entry['month']):02d}"
+        / f"week-{archive_entry['week']}"
+    )
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    archived_html = html.replace("<head>", '<head>\n  <base href="../../../../">', 1)
+    archive_dir.joinpath("index.html").write_text(archived_html, encoding="utf-8")
+    return
 
     return f"""<!doctype html>
 <html lang="ko">
@@ -455,18 +527,52 @@ def _render_tags(item: SiteItem) -> str:
     return f'<div class="tags" aria-label="중요 키워드">{tags}</div>'
 
 
+def _render_archive_nav(entries: list[dict[str, object]]) -> str:
+    if not entries:
+        return ""
+    grouped: dict[int, dict[int, list[dict[str, object]]]] = {}
+    for entry in entries:
+        year = int(entry["year"])
+        month = int(entry["month"])
+        grouped.setdefault(year, {}).setdefault(month, []).append(entry)
+
+    years = []
+    first = True
+    for year in sorted(grouped, reverse=True):
+        months = []
+        for month in sorted(grouped[year], reverse=True):
+            links = []
+            for entry in sorted(grouped[year][month], key=lambda item: int(item["week"]), reverse=True):
+                current_class = ' class="is-current"' if first else ""
+                first = False
+                links.append(
+                    f'<a{current_class} href="{escape(str(entry["href"]))}">'
+                    f'{month:02d}월 {int(entry["week"])}째주</a>'
+                )
+            months.append(f'<div class="archive-month">{"".join(links)}</div>')
+        years.append(f'<div class="archive-year">{year}년</div>{"".join(months)}')
+    return (
+        '<aside class="archive-nav" aria-label="주간 아카이브">'
+        '<div class="archive-title">Archive</div>'
+        + "".join(years)
+        + "</aside>"
+    )
+
+
 def _render_editorial_homepage(
     today: str,
     infra_items: list[SiteItem],
     other_items: list[SiteItem],
     latest_tool_items: list[SiteItem],
     analytics_html: str,
+    archive_entries: list[dict[str, object]] | None = None,
 ) -> str:
     all_items = [*infra_items, *other_items, *latest_tool_items]
     lead_item = (infra_items or other_items or latest_tool_items)[0] if all_items else None
     lead_summary = lead_item.summary if lead_item else "이번 주 AI 업무 업데이트를 선별해 보여줍니다."
     insight_cards = _render_smart_insight_cards(all_items)
     logo_roll = _render_logo_roll()
+    archive_html = _render_archive_nav(archive_entries or [])
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -497,6 +603,52 @@ def _render_editorial_homepage(
       width: min(1180px, calc(100% - 34px));
       margin: 0 auto;
       min-height: 100vh;
+    }}
+    .page-shell {{
+      position: relative;
+    }}
+    .archive-nav {{
+      position: absolute;
+      left: max(-190px, calc((100vw - 1180px) / -2 + 18px));
+      top: 118px;
+      width: 156px;
+      color: #111;
+      font-size: 14px;
+      line-height: 1.25;
+    }}
+    .archive-title {{
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }}
+    .archive-title::before {{
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #111;
+      flex: 0 0 auto;
+      transform: translateY(-3px);
+    }}
+    .archive-year {{
+      margin-left: 32px;
+      font-size: 24px;
+    }}
+    .archive-month {{
+      margin-left: 46px;
+      display: grid;
+      gap: 3px;
+      font-size: 20px;
+    }}
+    .archive-month a {{
+      display: block;
+      color: #111;
+      text-decoration: none;
+    }}
+    .archive-month a.is-current {{
+      font-weight: 800;
     }}
     .nav {{
       height: 58px;
@@ -794,8 +946,8 @@ def _render_editorial_homepage(
       align-items: center;
       min-height: 18px;
       border-radius: 999px;
-      background: #dfeeff;
-      color: #2f69b1;
+      background: #ffe1ef;
+      color: #b73572;
       padding: 0 8px;
       font-family: Arial, "Noto Sans KR", sans-serif;
       font-size: 10px;
@@ -809,9 +961,14 @@ def _render_editorial_homepage(
       color: #4772a6;
     }}
     .topic-badge.sub {{
+      background: #fff0f7;
+      color: #a84a77;
+      border: 1px solid #ffd4e6;
+    }}
+    .topic-badge.trend + .topic-badge.sub {{
       background: #eef6ff;
       color: #5d7fa8;
-      border: 1px solid #d8e8fa;
+      border-color: #d8e8fa;
     }}
     .insight-grid.has-selection .card-heading {{
       margin-bottom: 6px;
@@ -961,6 +1118,10 @@ def _render_editorial_homepage(
     }}
     @media (max-width: 760px) {{
       .nav-links {{ display: none; }}
+      .archive-nav {{ position: static; width: auto; padding: 20px 0 0; }}
+      .archive-title {{ font-size: 18px; }}
+      .archive-year {{ margin-left: 24px; font-size: 18px; }}
+      .archive-month {{ margin-left: 36px; font-size: 15px; }}
       .hero {{ min-height: auto; padding-top: 48px; }}
       .hero-image {{ grid-template-columns: 1fr; border-radius: 14px; }}
       .talent-card {{ min-height: 240px; }}
@@ -981,7 +1142,8 @@ def _render_editorial_homepage(
   </style>
 </head>
 <body>
-  <main class="page">
+  <main class="page page-shell">
+    {archive_html}
     <header class="nav">
       <a class="brand" href="#">AI MASTER TIMES</a>
       <nav class="nav-links" aria-label="Primary">
@@ -1222,8 +1384,16 @@ def _render_dashboard_homepage(
     other_items: list[SiteItem],
     latest_tool_items: list[SiteItem],
     analytics_html: str,
+    archive_entries: list[dict[str, object]] | None = None,
 ) -> str:
-    return _render_editorial_homepage(today, infra_items, other_items, latest_tool_items, analytics_html)
+    return _render_editorial_homepage(
+        today,
+        infra_items,
+        other_items,
+        latest_tool_items,
+        analytics_html,
+        archive_entries=archive_entries or [],
+    )
 
     all_items = [*infra_items, *other_items, *latest_tool_items]
     automation_count = _count_keyword_items(all_items, ("agent", "automation", "workflow", "copilot", "codex"))

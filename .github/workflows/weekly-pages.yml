@@ -14,7 +14,7 @@ on:
     - cron: "5 0 * * 3"
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -49,6 +49,18 @@ jobs:
           SITE_ANALYTICS_ID: ${{ vars.SITE_ANALYTICS_ID }}
           SITE_ANALYTICS_DOMAIN: ${{ vars.SITE_ANALYTICS_DOMAIN }}
         run: aimstletter-site --output-dir public
+
+      - name: Preserve weekly archive
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f public/archive
+          if git diff --cached --quiet; then
+            echo "No archive changes to preserve."
+          else
+            git commit -m "Preserve weekly site archive"
+            git push
+          fi
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
