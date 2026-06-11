@@ -752,19 +752,16 @@ def _render_editorial_homepage(
       margin-top: 42px;
       overflow: hidden;
       border-radius: 20px;
-      min-height: clamp(142px, 17vw, 204px);
+      min-height: clamp(170px, 19vw, 230px);
       background:
         linear-gradient(rgba(0,0,0,.028) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0,0,0,.024) 1px, transparent 1px),
         #f7f7f4;
       background-size: 34px 34px;
       border: 1px solid var(--line);
-      padding: clamp(20px, 2.6vw, 30px);
+      padding: clamp(20px, 2.8vw, 34px);
     }}
     .talent-card {{
-      display: flex;
-      align-items: center;
-      gap: clamp(16px, 2.8vw, 32px);
       min-width: 0;
     }}
     .talent-logo {{
@@ -772,34 +769,49 @@ def _render_editorial_homepage(
       gap: 6px;
       align-items: baseline;
       font-family: Arial, "Noto Sans KR", sans-serif;
-      font-size: clamp(17px, 1.7vw, 22px);
+      font-size: clamp(18px, 1.9vw, 26px);
       font-weight: 900;
       letter-spacing: -.01em;
     }}
     .talent-logo .sk {{ color: #e21424; }}
     .talent-logo .ax {{ color: #ff8200; }}
+    .talent-headline {{
+      display: flex;
+      align-items: baseline;
+      gap: clamp(14px, 2.3vw, 30px);
+      margin-top: 4px;
+      min-width: 0;
+    }}
     .talent-title {{
       margin: 0;
       color: #4f5f9a;
       font-family: Arial, "Noto Sans KR", sans-serif;
-      font-size: clamp(28px, 4vw, 50px);
+      font-size: clamp(36px, 5vw, 66px);
       line-height: .98;
       font-weight: 900;
       letter-spacing: 0;
+      white-space: nowrap;
+    }}
+    .talent-dash {{
+      color: #111;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      font-size: clamp(28px, 4vw, 52px);
+      line-height: 1;
+      font-weight: 900;
       white-space: nowrap;
     }}
     .talent-copy {{
       margin: 0;
       color: #111;
       font-family: "Noto Sans KR", Arial, sans-serif;
-      font-size: clamp(18px, 2.2vw, 28px);
+      font-size: clamp(20px, 2.8vw, 36px);
       line-height: 1.22;
       font-weight: 900;
       letter-spacing: 0;
       white-space: nowrap;
     }}
     .criteria-card {{
-      margin-top: clamp(18px, 2.2vw, 26px);
+      margin-top: clamp(24px, 2.8vw, 34px);
     }}
     .criteria-card h2 {{
       margin: 0 0 12px;
@@ -1154,7 +1166,8 @@ def _render_editorial_homepage(
       .archive-month {{ font-size: 13px; }}
       .hero {{ min-height: auto; padding-top: 48px; }}
       .hero-image {{ border-radius: 14px; padding: 20px; }}
-      .talent-card {{ align-items: flex-start; flex-direction: column; gap: 10px; }}
+      .talent-headline {{ flex-wrap: wrap; gap: 6px 12px; }}
+      .talent-dash {{ display: none; }}
       .talent-title,
       .talent-copy {{ white-space: normal; }}
       .criteria-card {{ margin-top: 24px; }}
@@ -1195,9 +1208,10 @@ def _render_editorial_homepage(
       <section class="hero-image" aria-label="AI Talent Lab pass criteria">
         <div class="talent-card">
           <div class="talent-logo"><span class="sk">SK</span><span class="ax">AX</span></div>
-          <div>
+          <div class="talent-headline">
             <div class="talent-title">AI Talent Lab</div>
-            <p class="talent-copy">당신의 AI 역량을<br>성장시켜보세요</p>
+            <div class="talent-dash">-</div>
+            <p class="talent-copy">당신의 AI 역량을 성장시켜보세요</p>
           </div>
         </div>
         <div class="criteria-card">
