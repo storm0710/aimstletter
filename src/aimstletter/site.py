@@ -543,13 +543,14 @@ def _render_editorial_homepage(
       padding: 70px 0 0;
     }}
     .hero h1 {{
-      max-width: 720px;
+      max-width: none;
       margin: 0;
       font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
-      font-size: clamp(38px, 5.8vw, 78px);
+      font-size: clamp(34px, 7vw, 92px);
       line-height: .98;
       font-weight: 700;
       letter-spacing: 0;
+      white-space: nowrap;
     }}
     .hero-image {{
       align-self: end;
