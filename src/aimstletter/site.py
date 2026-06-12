@@ -946,6 +946,7 @@ def _render_editorial_homepage(
       font-weight: 700;
       letter-spacing: 0;
       white-space: nowrap;
+      text-align: center;
     }}
     .hero h1 a {{
       color: inherit;
@@ -1055,7 +1056,6 @@ def _render_editorial_homepage(
       color: var(--muted);
       font-size: 13px;
       line-height: 1.65;
-      max-width: 620px;
     }}
     .date {{
       color: #9a9a9a;
@@ -1233,10 +1233,9 @@ def _render_editorial_homepage(
       background: transparent;
       min-height: 112px;
       padding: 22px 0;
-      display: grid;
-      grid-template-columns: 36px minmax(0, 1fr);
+      display: flex;
+      flex-direction: column;
       gap: 14px;
-      justify-content: initial;
     }}
     .insight-card:hover,
     .insight-card.is-active {{
@@ -1250,12 +1249,8 @@ def _render_editorial_homepage(
       display: grid;
       place-items: center;
       font-size: 11px;
-      margin-bottom: 26px;
+      margin: 0;
       flex: 0 0 auto;
-    }}
-    .insight-grid.has-selection .card-icon {{
-      margin-top: 1px;
-      margin-bottom: 0;
     }}
     .card-heading {{
       display: flex;
@@ -2632,8 +2627,8 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             f'data-criteria="{escape(criteria, quote=True)}" '
             f'data-footnotes="{escape(json.dumps(list(footnotes[:5]), ensure_ascii=False), quote=True)}" '
             f'data-source="{escape(source_url, quote=True)}">'
-            f'<span class="card-icon">{number}</span>'
             '<span><span class="card-heading">'
+            f'<span class="card-icon">{number}</span>'
             f'<span class="card-title">{escape(title)}</span>'
             f'<span class="topic-badge{badge_class}">{escape(category)}</span>'
             f'<span class="topic-badge sub">{escape(subcategory)}</span>'
