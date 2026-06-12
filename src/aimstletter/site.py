@@ -1197,7 +1197,6 @@ def _render_editorial_homepage(
       letter-spacing: 0;
     }}
     .insights-header {{
-      max-width: 620px;
       margin-bottom: 34px;
     }}
     .insights-header p {{
@@ -1259,18 +1258,16 @@ def _render_editorial_homepage(
       height: 22px;
       border: 1px solid #111;
       border-radius: 50%;
-      display: grid;
-      place-items: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       font-size: 11px;
       margin: 0;
       flex: 0 0 auto;
     }}
     .card-heading {{
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: block;
       margin: 0 0 10px;
-      flex-wrap: wrap;
     }}
     .card-title {{
       display: inline;
@@ -1278,9 +1275,13 @@ def _render_editorial_homepage(
       font-size: 22px;
       letter-spacing: 0;
       font-weight: 700;
+      vertical-align: middle;
+      margin-left: 8px;
     }}
     .topic-badge {{
       display: inline-flex;
+      vertical-align: middle;
+      margin-left: 6px;
       align-items: center;
       min-height: 18px;
       border-radius: 999px;
@@ -1336,8 +1337,10 @@ def _render_editorial_homepage(
       display: none;
       flex-direction: column;
       justify-content: space-between;
+      position: -webkit-sticky;
       position: sticky;
       top: 24px;
+      align-self: start;
     }}
     .insight-grid.has-selection .insight-detail {{
       display: flex;
