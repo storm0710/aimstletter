@@ -953,7 +953,9 @@
       number.textContent = button.dataset.number || '';
       title.textContent = button.dataset.title || '';
       category.textContent = button.dataset.category || '';
-      category.classList.toggle('trend', button.dataset.category === '동향');
+      category.className = 'topic-badge';
+      if (button.dataset.category === '논문') category.classList.add('paper');
+      if (button.dataset.category === '동향') category.classList.add('trend');
       subcategory.textContent = button.dataset.subcategory || '';
       body.textContent = button.dataset.body || '';
       detail.textContent = button.dataset.detail || '';
