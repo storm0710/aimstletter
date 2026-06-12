@@ -1070,8 +1070,8 @@ def _render_editorial_homepage(
     }}
     .intro-row {{
       display: grid;
-      grid-template-columns: minmax(0, 1fr) max-content;
-      gap: 24px;
+      grid-template-columns: 1fr;
+      gap: 18px;
       align-items: end;
       padding: 34px 0 36px;
       border-bottom: 1px solid var(--line);
@@ -1085,7 +1085,8 @@ def _render_editorial_homepage(
       color: #9a9a9a;
       font-size: 12px;
       text-align: right;
-      max-width: 340px;
+      justify-self: end;
+      max-width: 100%;
     }}
     .logo-roll {{
       overflow: hidden;
@@ -1533,7 +1534,7 @@ def _render_editorial_homepage(
       }}
       .insight-grid.has-selection .insight-detail {{ display: flex; }}
       .insight-detail h3 {{ font-size: clamp(30px, 12vw, 44px); }}
-      .date {{ text-align: left; }}
+      .date {{ text-align: right; }}
       .insight-card {{ min-height: 210px; }}
       .insight-grid.has-selection .insight-card {{ min-height: 112px; }}
       .footer {{ align-items: flex-start; flex-direction: column; gap: 12px; padding: 22px 0; }}

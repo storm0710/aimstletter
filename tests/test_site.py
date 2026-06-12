@@ -381,7 +381,9 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "selectFirstVisibleCard();" in week_2
     assert "window.sessionStorage.setItem(\"aimstletter.archiveInsightsOnly\", \"1\")" in week_2
     assert "2026-06-03~2026-06-09 데이터" in week_2
-    assert "grid-template-columns: minmax(0, 1fr) max-content" in week_2
+    assert "grid-template-columns: 1fr" in week_2
+    assert "justify-self: end" in week_2
+    assert "max-width: 100%" in week_2
     assert "max-height: calc(100vh - 48px)" in week_2
     assert "overflow-y: auto" in week_2
     assert "justify-content: flex-start" in week_2
