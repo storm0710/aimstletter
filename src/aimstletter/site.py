@@ -637,7 +637,7 @@ def _render_archive_nav(
         months = []
         for month in sorted(grouped[year], reverse=True):
             links = []
-            for entry in sorted(grouped[year][month], key=lambda item: int(item["week"])):
+            for entry in sorted(grouped[year][month], key=lambda item: int(item["week"]), reverse=True):
                 entry_key = (year, month, int(entry["week"]))
                 current_class = ' class="is-current"' if entry_key == current_key else ""
                 links.append(

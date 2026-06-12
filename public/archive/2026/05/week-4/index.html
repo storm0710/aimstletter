@@ -1,1 +1,1025 @@
-<html></html>
+<!doctype html>
+<html lang="ko">
+<head>
+  <base href="../../../../">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Master Times</title>
+  <meta name="description" content="AI Master Times 주간 AI 업무 업데이트">
+  
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --ink: #111111;
+      --muted: #767676;
+      --line: #e8e8e4;
+      --soft: #f6f6f3;
+      --panel: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, "Noto Sans KR", sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+    .page {
+      width: min(1180px, calc(100% - 34px));
+      margin: 0 auto;
+      min-height: 100vh;
+      --archive-width: 228px;
+      --archive-gap: 64px;
+    }
+    .page-shell {
+      position: relative;
+    }
+    .archive-nav {
+      position: static;
+      width: var(--archive-width);
+      min-width: 180px;
+      max-width: 380px;
+      color: #111;
+      font-size: 14px;
+      line-height: 1.35;
+      margin: 18px 0 18px;
+    }
+    .archive-search {
+      height: 38px;
+      width: 100%;
+      display: block;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: #8a8a8a;
+      background: rgba(255,255,255,.78);
+      font-size: 12px;
+      margin-bottom: 10px;
+      outline: 0;
+    }
+    .archive-search:focus {
+      border-color: #2f7fc0;
+      box-shadow: 0 0 0 2px rgba(47,127,192,.12);
+    }
+    .archive-panel {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.78);
+      min-height: 360px;
+    }
+    .archive-title {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .archive-title::before {
+      content: "";
+      width: 10px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid #777;
+      background: #111;
+      flex: 0 0 auto;
+    }
+    .archive-year {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 12px 12px 6px;
+      color: #555;
+      font-size: 13px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+    .archive-year::-webkit-details-marker {
+      display: none;
+    }
+    .archive-year::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-right: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
+      color: #777;
+      margin-left: 8px;
+      transform: rotate(0deg);
+      transition: transform .16s ease;
+    }
+    .archive-year-group:not([open]) .archive-year::after {
+      transform: rotate(-45deg);
+    }
+    .archive-year-group[open] .archive-year::after {
+      transform: rotate(45deg);
+    }
+    .archive-month {
+      display: grid;
+      gap: 0;
+      font-size: 13px;
+    }
+    .archive-month a {
+      display: block;
+      padding: 11px 12px 11px 26px;
+      color: #111;
+      text-decoration: none;
+      border-top: 1px solid rgba(0,0,0,.05);
+    }
+    .archive-month a.is-current {
+      background: #2f7fc0;
+      color: #fff;
+      font-weight: 800;
+    }
+    .archive-resize {
+      display: none;
+    }
+    @media (min-width: 1100px) {
+      .page-shell {
+        width: min(960px, calc(100% - var(--archive-width) - var(--archive-gap) - 34px));
+        margin-left: calc(var(--archive-width) + var(--archive-gap));
+        margin-right: 32px;
+      }
+      .archive-nav {
+        position: absolute;
+        left: calc((var(--archive-width) + var(--archive-gap)) * -1);
+        top: 76px;
+        margin: 0;
+        overflow: visible;
+      }
+      .archive-resize {
+        position: absolute;
+        top: 0;
+        right: -10px;
+        display: block;
+        width: 12px;
+        height: 100%;
+        cursor: col-resize;
+        touch-action: none;
+      }
+      .archive-resize::after {
+        content: "";
+        position: absolute;
+        top: 48px;
+        right: 4px;
+        width: 2px;
+        height: calc(100% - 48px);
+        border-radius: 2px;
+        background: transparent;
+      }
+      .archive-resize:hover::after,
+      .archive-resize:focus-visible::after,
+      .archive-nav.is-resizing .archive-resize::after {
+        background: #2f7fc0;
+      }
+    }
+    .archive-insight-mode .hero,
+    .archive-insight-mode .logo-roll {
+      display: none;
+    }
+    .archive-insight-mode .insights {
+      padding-top: 64px;
+    }
+    .nav {
+      height: 58px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      color: #555;
+    }
+    .brand {
+      font-weight: 900;
+      margin-right: auto;
+      color: var(--ink);
+    }
+    .nav-links {
+      display: flex;
+      gap: 26px;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+    .nav-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .week-button {
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 14px;
+      border: 1px solid #111111;
+      color: #111111;
+      border-radius: 4px;
+      font-weight: 800;
+      font-size: 12px;
+      background: #ffffff;
+    }
+    .week-button:hover,
+    .week-button:focus-visible {
+      background: #111111;
+      color: #ffffff;
+      outline: 0;
+    }
+    .button {
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 14px;
+      background: #050505;
+      color: #fff;
+      border-radius: 5px;
+      font-weight: 800;
+      font-size: 12px;
+    }
+    .hero {
+      min-height: 560px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 70px 0 0;
+    }
+    .hero h1 {
+      max-width: none;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(34px, 7vw, 92px);
+      line-height: .98;
+      font-weight: 700;
+      letter-spacing: 0;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .hero h1 a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .hero-image {
+      align-self: end;
+      margin-top: 42px;
+      overflow: hidden;
+      border-radius: 20px;
+      min-height: clamp(170px, 19vw, 230px);
+      background:
+        linear-gradient(rgba(0,0,0,.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,.024) 1px, transparent 1px),
+        #f7f7f4;
+      background-size: 34px 34px;
+      border: 1px solid var(--line);
+      padding: clamp(18px, 2.4vw, 30px);
+    }
+    .talent-card {
+      min-width: 0;
+    }
+    .talent-logo {
+      display: inline-flex;
+      gap: 6px;
+      align-items: baseline;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      font-size: clamp(18px, 1.9vw, 26px);
+      font-weight: 900;
+      letter-spacing: -.01em;
+    }
+    .talent-logo .sk { color: #e21424; }
+    .talent-logo .ax { color: #ff8200; }
+    .talent-headline {
+      display: flex;
+      align-items: baseline;
+      gap: clamp(14px, 2.3vw, 30px);
+      margin-top: 4px;
+      min-width: 0;
+    }
+    .talent-title {
+      margin: 0;
+      color: #4f5f9a;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      font-size: clamp(34px, 4.35vw, 58px);
+      line-height: .98;
+      font-weight: 900;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .talent-dash {
+      color: #111;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      font-size: clamp(24px, 3.3vw, 44px);
+      line-height: 1;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .talent-copy {
+      margin: 0;
+      color: #111;
+      font-family: "Noto Sans KR", Arial, sans-serif;
+      font-size: clamp(18px, 2.15vw, 29px);
+      line-height: 1.22;
+      font-weight: 900;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .criteria-card {
+      margin-top: clamp(24px, 2.8vw, 34px);
+    }
+    .criteria-card h2 {
+      margin: 0 0 12px;
+      color: #111;
+      font-family: "Noto Sans KR", Arial, sans-serif;
+      font-size: clamp(16px, 1.55vw, 21px);
+      line-height: 1.18;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+    .criteria-card ul {
+      margin: 0;
+      padding-left: 1.05em;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      column-gap: clamp(24px, 4vw, 58px);
+      row-gap: 7px;
+      color: #111;
+      font-family: "Noto Sans KR", Arial, sans-serif;
+      font-size: clamp(13px, 1.35vw, 18px);
+      line-height: 1.32;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+    .criteria-card strong {
+      font-weight: 900;
+    }
+    .intro-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(240px, 420px);
+      gap: 32px;
+      align-items: end;
+      padding: 34px 0 36px;
+      border-bottom: 1px solid var(--line);
+    }
+    .intro-copy {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .date {
+      color: #9a9a9a;
+      font-size: 12px;
+      text-align: right;
+    }
+    .logo-roll {
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      padding: 24px 0;
+    }
+    .logo-track {
+      display: flex;
+      width: max-content;
+      gap: 54px;
+      animation: roll 24s linear infinite;
+      color: #2f2f2f;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 15px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    @keyframes roll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .tool-directory {
+      padding: 46px 0 56px;
+      border-bottom: 1px solid var(--line);
+    }
+    .tool-directory-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+    .tool-directory h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(26px, 3vw, 42px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+    .tool-directory-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .tool-list-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+    }
+    .ai-tool-card {
+      min-height: 178px;
+      padding: 18px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .ai-tool-card h3 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(20px, 2vw, 28px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+    .ai-tool-card p {
+      margin: 8px 0 0;
+      color: #565656;
+      font-size: 13px;
+      line-height: 1.58;
+    }
+    .tool-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tool-chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 4px 7px;
+      color: #111;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+    .tool-action {
+      display: inline-block;
+      margin-top: 12px;
+      border: 1px solid #222;
+      padding: 7px 9px;
+      color: #111;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.3;
+      text-decoration: none;
+    }
+    .tool-action:hover,
+    .tool-action:focus-visible {
+      background: #111;
+      color: #fff;
+      outline: 0;
+    }
+    .insights {
+      padding: 64px 0 90px;
+    }
+    .section-kicker {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .insights h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(26px, 3vw, 44px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+    .insights-header {
+      max-width: 620px;
+      margin-bottom: 34px;
+    }
+    .insights-header p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .insight-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .insight-grid.has-selection {
+      grid-template-columns: minmax(300px, .92fr) minmax(360px, 1.08fr);
+      gap: 28px;
+      align-items: start;
+    }
+    .insight-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .insight-grid.has-selection .insight-list {
+      grid-template-columns: 1fr;
+      gap: 0;
+      border-top: 1px solid var(--line);
+    }
+    .insight-card {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      min-height: 230px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      cursor: pointer;
+      color: var(--ink);
+      font: inherit;
+    }
+    .insight-grid.has-selection .insight-card {
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      min-height: 112px;
+      padding: 22px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .insight-card:hover,
+    .insight-card.is-active {
+      background: #fbfbf8;
+    }
+    .card-icon {
+      width: 22px;
+      height: 22px;
+      border: 1px solid #111;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      margin: 0;
+      flex: 0 0 auto;
+    }
+    .card-heading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 10px;
+      flex-wrap: wrap;
+    }
+    .card-title {
+      display: inline;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: 22px;
+      letter-spacing: 0;
+      font-weight: 700;
+    }
+    .topic-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 18px;
+      border-radius: 999px;
+      background: #ffe1ef;
+      color: #b73572;
+      padding: 0 8px;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .topic-badge.trend {
+      background: #e7f2ff;
+      color: #4772a6;
+    }
+    .topic-badge.sub {
+      background: #fff0f7;
+      color: #a84a77;
+      border: 1px solid #ffd4e6;
+    }
+    .topic-badge.trend + .topic-badge.sub {
+      background: #eef6ff;
+      color: #5d7fa8;
+      border-color: #d8e8fa;
+    }
+    .insight-grid.has-selection .card-heading {
+      margin-bottom: 6px;
+    }
+    .insight-grid.has-selection .card-title {
+      font-size: 18px;
+    }
+    .insight-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.58;
+    }
+    .insight-grid.has-selection .insight-card p {
+      font-size: 12px;
+      line-height: 1.52;
+    }
+    .insight-detail {
+      min-height: 520px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(rgba(0,0,0,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,.028) 1px, transparent 1px),
+        #f7f7f4;
+      background-size: 32px 32px;
+      padding: 34px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      position: sticky;
+      top: 24px;
+    }
+    .insight-grid.has-selection .insight-detail {
+      display: flex;
+    }
+    .detail-number {
+      width: 26px;
+      height: 26px;
+      border: 1px solid #111;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      margin-bottom: 42px;
+      background: #fff;
+    }
+    .detail-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .insight-detail h3 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(30px, 4vw, 54px);
+      line-height: .98;
+      letter-spacing: 0;
+    }
+    .detail-meta {
+      margin-bottom: 16px;
+      color: #777;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .detail-summary,
+    .detail-copy {
+      margin: 0;
+      color: #565656;
+      font-size: 14px;
+      line-height: 1.68;
+      max-width: 620px;
+    }
+    .detail-summary {
+      color: #222;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+    .detail-criteria {
+      margin: 24px 0 0;
+      border-top: 1px solid rgba(0,0,0,.12);
+      padding-top: 12px;
+      color: #444;
+      font-size: 13px;
+      line-height: 1.55;
+      max-width: 620px;
+    }
+    .detail-source {
+      display: inline-block;
+      margin-top: 10px;
+      color: #111;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+    .detail-points {
+      display: grid;
+      gap: 8px;
+      margin: 26px 0 0;
+      padding: 0;
+      list-style: none;
+      max-width: 620px;
+    }
+    .detail-points li {
+      border-top: 1px solid rgba(0,0,0,.12);
+      padding-top: 8px;
+      color: #444;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .detail-footnotes {
+      display: grid;
+      gap: 6px;
+      margin: 8px 0 0;
+      padding: 12px 0 0 18px;
+      border-top: 1px solid rgba(0,0,0,.12);
+      color: #565656;
+      font-size: 12px;
+      line-height: 1.55;
+      max-width: 620px;
+    }
+    .detail-footnotes-title {
+      display: block;
+      margin: 22px 0 0;
+      color: #111;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.4;
+    }
+    .detail-footnotes-title[hidden] {
+      display: none;
+    }
+    .detail-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 34px;
+    }
+    .detail-tag {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 6px 8px;
+      color: #111;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .mini-link,
+    .detail-link {
+      color: #111;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .detail-link {
+      margin-top: 42px;
+      align-self: flex-start;
+    }
+    .footer {
+      border-top: 1px solid var(--line);
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+      .archive-nav { position: static; width: auto; padding: 20px 0 0; }
+      .archive-panel { min-height: auto; }
+      .archive-title { font-size: 14px; }
+      .archive-year { padding: 10px 12px 5px; font-size: 13px; }
+      .archive-month { font-size: 13px; }
+      .hero { min-height: auto; padding-top: 48px; }
+      .hero-image { border-radius: 14px; padding: 20px; }
+      .talent-headline { flex-wrap: wrap; gap: 6px 12px; }
+      .talent-dash { display: none; }
+      .talent-title,
+      .talent-copy { white-space: normal; }
+      .criteria-card { margin-top: 24px; }
+      .criteria-card ul { grid-template-columns: 1fr; }
+      .intro-row,
+      .tool-directory-header,
+      .insight-grid {
+        grid-template-columns: 1fr;
+      }
+      .tool-list-grid { grid-template-columns: 1fr; }
+      .insight-list,
+      .insight-grid.has-selection,
+      .insight-grid.has-selection .insight-list { grid-template-columns: 1fr; }
+      .insight-grid.has-selection { display: block; }
+      .insight-grid.has-selection .insight-list { display: block; }
+      .insight-detail {
+        position: static;
+        min-height: 360px;
+        margin: 14px 0 22px 36px;
+        padding: 24px;
+        width: calc(100% - 36px);
+      }
+      .insight-grid.has-selection .insight-detail { display: flex; }
+      .insight-detail h3 { font-size: clamp(30px, 12vw, 44px); }
+      .date { text-align: left; }
+      .insight-card { min-height: 210px; }
+      .insight-grid.has-selection .insight-card { min-height: 112px; }
+      .footer { align-items: flex-start; flex-direction: column; gap: 12px; padding: 22px 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page page-shell">
+    <aside class="archive-nav" aria-label="주간 아카이브"><input class="archive-search" data-archive-search type="search" placeholder="검색어를 입력하세요..." aria-label="Archive 검색"><div class="archive-panel"><div class="archive-title">Archive</div><details class="archive-year-group" open><summary class="archive-year">2026년</summary><div class="archive-month"><a data-archive-link href="archive/2026/06/week-2/">06월 2째주</a><a data-archive-link href="archive/2026/06/week-1/">06월 1째주</a></div><div class="archive-month"><a class="is-current" data-archive-link href="archive/2026/05/week-4/">05월 4째주</a></div></details></div><div class="archive-resize" role="separator" aria-orientation="vertical" aria-label="Archive 너비 조절" tabindex="0"></div></aside>
+    <header class="nav">
+      <a class="brand" href="./">AI MASTER TIMES</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#insights">업무 AI</a>
+        <a href="ai-tools/">AI 도구</a>
+      </nav>
+      <div class="nav-actions">
+        
+        <a class="button" href="#insights">Read This Week</a>
+      </div>
+    </header>
+    <section class="hero" aria-label="Hero">
+      <h1><a href="./" aria-label="AI MASTER TIMES 첫 화면으로 이동">AI MASTER TIMES</a></h1>
+      <section class="hero-image" aria-label="AI Talent Lab pass criteria">
+        <div class="talent-card">
+          <div class="talent-logo"><span class="sk">SK</span><span class="ax">AX</span></div>
+          <div class="talent-headline">
+            <div class="talent-title">AI Talent Lab</div>
+            <div class="talent-dash">-</div>
+            <p class="talent-copy">당신의 AI 역량을 성장시켜보세요</p>
+          </div>
+        </div>
+        <div class="criteria-card">
+          <h2>[통과기준]</h2>
+          <ul>
+            <li><strong>Business Logic</strong> 포함(상용툴과 차이점)</li>
+            <li><strong>AI AGENT</strong> 포함(AI 단순호출 불가)</li>
+            <li>시연 동영상 편집(5분내로 편집)</li>
+            <li>AI 면접 통과</li>
+          </ul>
+        </div>
+      </section>
+      <div class="intro-row">
+        <p class="intro-copy">AI Master Times는 매주 수집한 논문, 업무 AI 스킬, Claude와 AI 도구 업데이트를 업무 적용 관점으로 재구성합니다. 이번 주 대표 신호: 이번 주 AI 업무 업데이트를 선별해 보여줍니다.</p>
+        <div class="date">2026년 05월 28일 · 2026-05-20~2026-05-26 데이터 · curated weekly for AI Master teams</div>
+      </div>
+    </section>
+    <section class="logo-roll" aria-label="Source roll">
+      <div class="logo-track"><span>OpenAI</span><span>Claude</span><span>Stitch</span><span>getdesign.md</span><span>Supabase</span><span>Neon</span><span>LangGraph</span><span>Temporal</span><span>Harness</span><span>Cursor</span><span>Vercel</span><span>Pinecone</span><span>LiteLLM</span><span>LangSmith</span><span>Braintrust</span><span>Qdrant</span><span>Datadog</span><span>Infisical</span><span>Linear</span><span>OpenAI</span><span>Claude</span><span>Stitch</span><span>getdesign.md</span><span>Supabase</span><span>Neon</span><span>LangGraph</span><span>Temporal</span><span>Harness</span><span>Cursor</span><span>Vercel</span><span>Pinecone</span><span>LiteLLM</span><span>LangSmith</span><span>Braintrust</span><span>Qdrant</span><span>Datadog</span><span>Infisical</span><span>Linear</span></div>
+    </section>
+    <section class="insights" id="insights">
+      <div class="insights-header">
+        <div class="section-kicker">Smart Insights</div>
+        <h2>이번 주 AI 업데이트를 업무 관점으로 정리했습니다.</h2>
+        <p>홀수 카드는 에이전트 운영과 엔지니어링 트렌드, 짝수 카드는 AI 제품 제작에 필요한 프론트·디자인·백엔드·데이터 도구를 함께 정리했습니다.</p>
+      </div>
+      <div class="insight-grid" data-insight-grid>
+        
+      </div>
+    </section>
+    <footer class="footer">
+      <strong>AI MASTER TIMES</strong>
+      <span>Work Skills · AI Tools · Weekly Briefing · Source Links</span>
+      <span>© AI Master Times</span>
+    </footer>
+  </main>
+  <script>
+    (() => {
+      const shell = document.querySelector(".page-shell");
+      const archive = document.querySelector(".archive-nav");
+      const handle = document.querySelector(".archive-resize");
+      if (!shell || !archive || !handle) return;
+
+      const storageKey = "aimstletter.archiveWidth";
+      const minWidth = 180;
+      const maxWidth = 380;
+
+      const setWidth = (value) => {
+        const width = Math.max(minWidth, Math.min(maxWidth, Math.round(value)));
+        shell.style.setProperty("--archive-width", `${width}px`);
+        handle.setAttribute("aria-valuenow", String(width));
+        return width;
+      };
+
+      const savedWidth = Number(window.localStorage.getItem(storageKey));
+      if (Number.isFinite(savedWidth) && savedWidth > 0) {
+        setWidth(savedWidth);
+      }
+
+      const startResize = (event) => {
+        if (!window.matchMedia("(min-width: 1100px)").matches) return;
+        event.preventDefault();
+        archive.classList.add("is-resizing");
+        const startX = event.clientX;
+        const startWidth = archive.getBoundingClientRect().width;
+
+        const onMove = (moveEvent) => {
+          const width = setWidth(startWidth + moveEvent.clientX - startX);
+          window.localStorage.setItem(storageKey, String(width));
+        };
+
+        const onUp = () => {
+          archive.classList.remove("is-resizing");
+          window.removeEventListener("pointermove", onMove);
+          window.removeEventListener("pointerup", onUp);
+        };
+
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp);
+      };
+
+      handle.setAttribute("aria-valuemin", String(minWidth));
+      handle.setAttribute("aria-valuemax", String(maxWidth));
+      handle.addEventListener("pointerdown", startResize);
+      handle.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        const step = event.shiftKey ? 24 : 12;
+        const currentWidth = archive.getBoundingClientRect().width;
+        const width = setWidth(currentWidth + (event.key === "ArrowRight" ? step : -step));
+        window.localStorage.setItem(storageKey, String(width));
+      });
+
+      const search = document.querySelector("[data-archive-search]");
+      const archiveLinks = Array.from(document.querySelectorAll("[data-archive-link]"));
+      const smartInsightLinks = Array.from(document.querySelectorAll('a[href="#insights"]'));
+      const insightCards = Array.from(document.querySelectorAll("[data-insight-card]"));
+      const insightDetail = document.querySelector(".insight-detail");
+      const insights = document.querySelector("#insights");
+      const normalize = (value) => (value || "").toLowerCase().replace(/\s+/g, " ").trim();
+
+      const showArchiveInsights = (scroll = true) => {
+        shell.classList.add("archive-insight-mode");
+        if (scroll && insights) {
+          insights.scrollIntoView({ block: "start" });
+        }
+      };
+
+      const cardMatches = (card, query) => {
+        const text = normalize([
+          card.dataset.number,
+          card.dataset.title,
+          card.dataset.category,
+          card.dataset.subcategory,
+          card.dataset.body,
+          card.dataset.detail,
+          card.dataset.meta,
+          card.dataset.points,
+          card.dataset.tags,
+          card.textContent,
+        ].join(" "));
+        return !query || text.includes(query);
+      };
+
+      const selectFirstVisibleCard = () => {
+        const firstVisible = insightCards.find((card) => !card.hidden);
+        if (insightDetail) insightDetail.hidden = !firstVisible;
+        if (firstVisible) firstVisible.click();
+      };
+
+      const clearInsightSelection = () => {
+        insightCards.forEach((card) => card.classList.remove("is-active"));
+        if (insightDetail) insightDetail.hidden = true;
+      };
+
+      archiveLinks.forEach((link) => {
+        link.addEventListener("click", (event) => {
+          const target = new URL(link.href, window.location.href);
+          if (target.origin === window.location.origin && target.pathname === window.location.pathname) {
+            event.preventDefault();
+            window.history.pushState(null, "", "#insights");
+            showArchiveInsights();
+            clearInsightSelection();
+          } else {
+            window.sessionStorage.setItem("aimstletter.archiveInsightsOnly", "1");
+          }
+        });
+      });
+
+      smartInsightLinks.forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          shell.classList.remove("archive-insight-mode");
+          window.history.pushState(null, "", "#insights");
+          if (insights) insights.scrollIntoView({ block: "start" });
+          selectFirstVisibleCard();
+        });
+      });
+
+      if (search) {
+        search.addEventListener("input", () => {
+          const query = normalize(search.value);
+          archiveLinks.forEach((link) => {
+            link.hidden = Boolean(query) && !normalize(link.textContent).includes(query);
+          });
+          insightCards.forEach((card) => {
+            card.hidden = !cardMatches(card, query);
+          });
+          if (query) showArchiveInsights(false);
+          clearInsightSelection();
+        });
+      }
+
+      if (
+        window.location.hash === "#insights" ||
+        window.sessionStorage.getItem("aimstletter.archiveInsightsOnly") === "1"
+      ) {
+        window.sessionStorage.removeItem("aimstletter.archiveInsightsOnly");
+        showArchiveInsights(false);
+        clearInsightSelection();
+      }
+    })();
+  </script>
+</body>
+</html>
