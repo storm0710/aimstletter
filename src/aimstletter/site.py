@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import sys
 import textwrap
+from urllib.parse import urlparse
 
 from aimstletter.composer import _make_client
 from aimstletter.config import Settings
@@ -270,9 +271,19 @@ def _refresh_archive_navigation(output_dir: Path, entries: list[dict[str, object
             flags=re.DOTALL,
             count=1,
         )
+        updated = _ensure_primary_nav_sources_link(updated)
         if updated != html:
             path.write_text(updated, encoding="utf-8")
     return
+
+
+def _ensure_primary_nav_sources_link(html: str) -> str:
+    if 'href="ai-sources/"' in html:
+        return html
+    return html.replace(
+        '<a href="ai-tools/">AI 도구</a>',
+        '<a href="ai-tools/">AI 도구</a>\n        <a href="ai-sources/">AI 소스</a>',
+    )
 
     return f"""<!doctype html>
 <html lang="ko">
@@ -1059,8 +1070,8 @@ def _render_editorial_homepage(
     }}
     .intro-row {{
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(240px, 420px);
-      gap: 32px;
+      grid-template-columns: minmax(0, 1fr) max-content;
+      gap: 24px;
       align-items: end;
       padding: 34px 0 36px;
       border-bottom: 1px solid var(--line);
@@ -1074,6 +1085,7 @@ def _render_editorial_homepage(
       color: #9a9a9a;
       font-size: 12px;
       text-align: right;
+      max-width: 340px;
     }}
     .logo-roll {{
       overflow: hidden;
@@ -1326,7 +1338,8 @@ def _render_editorial_homepage(
       line-height: 1.52;
     }}
     .insight-detail {{
-      min-height: 520px;
+      min-height: min(520px, calc(100vh - 48px));
+      max-height: calc(100vh - 48px);
       border: 1px solid var(--line);
       background:
         linear-gradient(rgba(0,0,0,.035) 1px, transparent 1px),
@@ -1336,11 +1349,15 @@ def _render_editorial_homepage(
       padding: 34px;
       display: none;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start;
+      gap: 28px;
       position: -webkit-sticky;
       position: sticky;
       top: 24px;
       align-self: start;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
     }}
     .insight-grid.has-selection .insight-detail {{
       display: flex;
@@ -1508,9 +1525,11 @@ def _render_editorial_homepage(
       .insight-detail {{
         position: static;
         min-height: 360px;
+        max-height: none;
         margin: 14px 0 22px 36px;
         padding: 24px;
         width: calc(100% - 36px);
+        overflow: visible;
       }}
       .insight-grid.has-selection .insight-detail {{ display: flex; }}
       .insight-detail h3 {{ font-size: clamp(30px, 12vw, 44px); }}
@@ -1529,6 +1548,7 @@ def _render_editorial_homepage(
       <nav class="nav-links" aria-label="Primary">
         <a href="#insights">업무 AI</a>
         <a href="ai-tools/">AI 도구</a>
+        <a href="ai-sources/">AI 소스</a>
       </nav>
       <div class="nav-actions">
         {previous_week_button}
@@ -3296,6 +3316,7 @@ def _write_secondary_pages(
     (output_dir / "work-skills").mkdir(parents=True, exist_ok=True)
     (output_dir / "tools").mkdir(parents=True, exist_ok=True)
     (output_dir / "ai-tools").mkdir(parents=True, exist_ok=True)
+    (output_dir / "ai-sources").mkdir(parents=True, exist_ok=True)
     (output_dir / "items").mkdir(parents=True, exist_ok=True)
 
     (output_dir / "work-skills" / "index.html").write_text(
@@ -3320,6 +3341,14 @@ def _write_secondary_pages(
     )
     (output_dir / "ai-tools" / "index.html").write_text(
         _render_ai_tools_page(analytics_html=analytics_html, back_href="../"),
+        encoding="utf-8",
+    )
+    (output_dir / "ai-sources" / "index.html").write_text(
+        _render_ai_sources_page(
+            items=[*work_items, *other_items, *tools],
+            analytics_html=analytics_html,
+            back_href="../",
+        ),
         encoding="utf-8",
     )
 
@@ -3377,6 +3406,75 @@ def _render_ai_tools_page(analytics_html: str, back_href: str) -> str:
         {_render_ai_tool_directory()}
         """,
     )
+
+
+def _render_ai_sources_page(
+    items: list[SiteItem],
+    analytics_html: str,
+    back_href: str,
+) -> str:
+    entries = _source_entries(items)
+    cards = "\n".join(
+        (
+            '<article class="source-card">'
+            f'<div><h3>{escape(entry["name"])}</h3>'
+            f'<p>{escape(entry["description"])}</p></div>'
+            f'<a class="source-action" href="{escape(entry["url"])}" target="_blank" rel="noopener noreferrer">'
+            f'{escape(entry["host"])}</a>'
+            '</article>'
+        )
+        for entry in entries
+    )
+    return _render_plain_page(
+        title="AI 소스",
+        analytics_html=analytics_html,
+        body=f"""
+        <a class="back-link" href="{escape(back_href)}">← 첫 화면</a>
+        <header class="simple-header tool-page-header">
+          <div class="kicker">AI 소스</div>
+          <h1>AI 소스</h1>
+          <p>AI Master Times가 이번 주 업데이트를 정리할 때 참조한 원문 사이트입니다. 논문, 모델·도구 변경 이력, 운영 자동화 문서처럼 실제 업무 적용 여부를 확인할 수 있는 출처를 모았습니다.</p>
+        </header>
+        <section class="source-grid">{cards}</section>
+        """,
+    )
+
+
+def _source_entries(items: list[SiteItem]) -> list[dict[str, str]]:
+    descriptions = {
+        "OpenAI 소식": "OpenAI 제품, API, Codex, 에이전트 관련 업데이트를 확인하는 출처입니다.",
+        "Anthropic 소식": "Claude와 Claude Code 관련 제품·엔지니어링 업데이트를 확인하는 출처입니다.",
+        "GitHub Copilot 변경 이력": "GitHub Copilot과 개발 워크플로 자동화 변경 사항을 확인하는 출처입니다.",
+        "arXiv 네트워크 AI": "네트워크, 데이터베이스, 에이전트 연구 논문을 확인하는 출처입니다.",
+        "arXiv 데이터베이스 AI": "데이터베이스, 검색, 벡터 저장소 관련 AI 연구를 확인하는 출처입니다.",
+        "MIT Technology Review AI": "AI 산업 동향과 조직 적용 사례를 확인하는 출처입니다.",
+    }
+    seen: set[str] = set()
+    entries: list[dict[str, str]] = []
+    for item in items:
+        host = _source_host(item.url)
+        key = f"{item.source}|{host}"
+        if key in seen:
+            continue
+        seen.add(key)
+        entries.append(
+            {
+                "name": item.source,
+                "url": item.url,
+                "host": host,
+                "description": descriptions.get(
+                    item.source,
+                    f"{item.source}에서 공개한 AI 관련 원문과 변경 사항을 확인하는 출처입니다.",
+                ),
+            }
+        )
+    return sorted(entries, key=lambda entry: (entry["name"].lower(), entry["host"].lower()))
+
+
+def _source_host(url: str) -> str:
+    host = urlparse(url).netloc or url
+    return host.removeprefix("www.")
+
 
 def _render_detail_page(item: SiteItem, analytics_html: str, back_href: str) -> str:
     detail_paragraphs = "".join(
@@ -3587,6 +3685,53 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       color: #ffffff;
       outline: 0;
     }}
+    .source-grid {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid #e8e8e4;
+      border-left: 1px solid #e8e8e4;
+      margin-top: 24px;
+    }}
+    .source-card {{
+      min-height: 168px;
+      padding: 18px;
+      border-right: 1px solid #e8e8e4;
+      border-bottom: 1px solid #e8e8e4;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }}
+    .source-card h3 {{
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(20px, 2vw, 28px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }}
+    .source-card p {{
+      margin: 8px 0 0;
+      color: #5d6470;
+      font: 13px/1.58 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .source-action {{
+      display: inline-block;
+      width: fit-content;
+      margin-top: 12px;
+      border: 1px solid #222222;
+      padding: 7px 9px;
+      color: #111111;
+      font: 800 12px/1.3 Arial, "Noto Sans KR", sans-serif;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }}
+    .source-action:hover,
+    .source-action:focus-visible {{
+      background: #111111;
+      color: #ffffff;
+      outline: 0;
+    }}
     .key-points {{
       margin: 9px 0 0;
       padding-left: 20px;
@@ -3630,6 +3775,9 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
         gap: 8px;
       }}
       .tool-list-grid {{
+        grid-template-columns: 1fr;
+      }}
+      .source-grid {{
         grid-template-columns: 1fr;
       }}
     }}

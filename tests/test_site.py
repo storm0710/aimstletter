@@ -48,6 +48,7 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     assert 'data-title="Example: Database incident response with AI agents"' in html
     assert "topic-badge" in html
     assert 'href="ai-tools/"' in html
+    assert 'href="ai-sources/"' in html
     assert '<section class="tool-directory"' not in html
     assert "<h3>Codex</h3>" not in html
     assert "상세 목록" not in html
@@ -273,6 +274,7 @@ def test_committed_pages_root_homepage_exists() -> None:
     assert '<section class="tool-directory"' not in html
     assert "<h3>Codex</h3>" not in html
     assert "archive/2026/06/week-2/" in html
+    assert 'href="ai-sources/"' in html
     assert html.index("06월 1째주") < html.index("06월 2째주")
     assert "당신의 AI 역량을 성장시켜보세요" in html
     assert "�" not in html
@@ -305,6 +307,19 @@ def test_committed_ai_tools_page_exists() -> None:
     assert "�" not in html
 
 
+def test_committed_ai_sources_page_exists() -> None:
+    html = Path("public/ai-sources/index.html").read_text(encoding="utf-8")
+
+    assert "AI 소스" in html
+    assert "source-grid" in html
+    assert "GitHub Copilot 변경 이력" in html
+    assert "OpenAI 소식" in html
+    assert "github.blog" in html
+    assert "developers.openai.com" in html
+    assert 'target="_blank" rel="noopener noreferrer"' in html
+    assert "�" not in html
+
+
 def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     week_2 = Path("public/archive/2026/06/week-2/index.html").read_text(encoding="utf-8")
     week_1 = Path("public/archive/2026/06/week-1/index.html").read_text(encoding="utf-8")
@@ -319,6 +334,7 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "GitHub Copilot coding agent update" in week_2
     assert "해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준" in week_2
     assert "Previous Week" in week_2
+    assert 'href="ai-sources/"' in week_2
     assert "전주로" not in week_2
     assert "1. 왜 필요한가요?" in week_2
     assert "2. 핵심 구성 요소:" in week_2
@@ -338,6 +354,11 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "selectFirstVisibleCard();" in week_2
     assert "window.sessionStorage.setItem(\"aimstletter.archiveInsightsOnly\", \"1\")" in week_2
     assert "2026-06-03~2026-06-09 데이터" in week_2
+    assert "grid-template-columns: minmax(0, 1fr) max-content" in week_2
+    assert "max-height: calc(100vh - 48px)" in week_2
+    assert "overflow-y: auto" in week_2
+    assert "justify-content: flex-start" in week_2
+    assert "overscroll-behavior: contain" in week_2
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
