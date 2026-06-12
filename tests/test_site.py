@@ -113,11 +113,15 @@ def test_render_homepage_includes_archive_entries() -> None:
     )
 
     assert "Archive" in html
+    assert "Knowledge" in html
+    assert 'href="knowledge/harness-engineering/"' in html
+    assert "data-archive-index=" in html
     assert "2026년" in html
     assert "06월 2째주" in html
     assert 'href="archive/2026/06/week-1/"' in html
     assert html.index("06월 1째주") < html.index("06월 2째주")
-    assert 'class="is-current" data-archive-link href="archive/2026/06/week-2/"' in html
+    assert 'class="is-current" data-archive-link' in html
+    assert 'href="archive/2026/06/week-2/"' in html
 
 
 def test_weekly_window_uses_previous_wednesday_to_tuesday_range() -> None:
@@ -389,6 +393,13 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "max-height: calc(100vh - 48px)" in week_2
     assert "overflow-y: auto" in week_2
     assert "justify-content: flex-start" in week_2
+    assert "font-size: 19px" in week_2
+    assert "font-weight: 500" in week_2
+    assert "font-weight: 700" in week_2
+    assert "data-archive-index=" in week_2
+    assert "link.dataset.archiveIndex" in week_2
+    assert "Knowledge" in week_2
+    assert 'href="knowledge/harness-engineering/"' in week_2
     assert "overscroll-behavior: contain" in week_2
     assert "background: #e4efff" in week_2
     assert "color: #2462a8" in week_2
@@ -409,6 +420,18 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "margin: 14px 0 22px" in week_2
     assert "width: 100%" in week_2
     assert "box-sizing: border-box" in week_2
+
+
+def test_committed_knowledge_page_exists() -> None:
+    html = Path("public/knowledge/harness-engineering/index.html").read_text(encoding="utf-8")
+
+    assert "Knowledge" in html
+    assert "하네스 엔지니어링" in html
+    assert "knowledge-article" in html
+    assert "knowledge-toc" in html
+    assert "2.1 하네스 엔지니어링이란?" in html
+    assert "권한" in html
+    assert "검증" in html
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI 소스 · AI Master Times</title>
+  <title>하네스 엔지니어링 · AI Master Times</title>
 
   <style>
     body {
@@ -320,22 +320,38 @@
 <body>
   <main class="page">
 
-        <a class="back-link" href="../">← 첫 화면</a>
+        <a class="back-link" href="../../">첫 화면</a>
         <header class="simple-header tool-page-header">
-          <div class="kicker">AI 소스</div>
-          <h1>AI 소스</h1>
-          <p>AI Master Times가 이번 주 업데이트를 정리할 때 참조한 원문 사이트입니다. 논문, 모델·도구 변경 이력, 운영 자동화 문서처럼 실제 업무 적용 여부를 확인할 수 있는 출처를 모았습니다.</p>
+          <div class="kicker">Knowledge</div>
+          <h1>하네스 엔지니어링</h1>
+          <p>AI 에이전트가 실제 업무 도구를 사용할 때 실행 순서, 권한, 검증, 기록을 한곳에서 관리하는 운영 구조입니다.</p>
         </header>
-        <section class="source-grid"><article class="source-card"><div><h3>Anthropic 소식</h3><p>Claude와 Claude Code 관련 제품·엔지니어링 업데이트를 확인하는 출처입니다.</p></div><a class="source-action" href="https://code.claude.com/docs/" target="_blank" rel="noopener noreferrer">code.claude.com</a></article>
-<article class="source-card"><div><h3>arXiv 네트워크 AI</h3><p>네트워크, 데이터베이스, 에이전트 연구 논문을 확인하는 출처입니다.</p></div><a class="source-action" href="https://arxiv.org/abs/2606.09122v1" target="_blank" rel="noopener noreferrer">arxiv.org</a></article>
-<article class="source-card"><div><h3>arXiv 데이터베이스 AI</h3><p>데이터베이스, 검색, 벡터 저장소 관련 AI 연구를 확인하는 출처입니다.</p></div><a class="source-action" href="https://arxiv.org/abs/2606.09550v1" target="_blank" rel="noopener noreferrer">arxiv.org</a></article>
-<article class="source-card"><div><h3>arXiv 분산시스템 AI</h3><p>arXiv 분산시스템 AI에서 공개한 AI 관련 원문과 변경 사항을 확인하는 출처입니다.</p></div><a class="source-action" href="https://arxiv.org/abs/2606.10415v1" target="_blank" rel="noopener noreferrer">arxiv.org</a></article>
-<article class="source-card"><div><h3>GitHub Copilot 변경 이력</h3><p>GitHub Copilot과 개발 워크플로 자동화 변경 사항을 확인하는 출처입니다.</p></div><a class="source-action" href="https://github.blog/changelog/" target="_blank" rel="noopener noreferrer">github.blog</a></article>
-<article class="source-card"><div><h3>Google AI 블로그</h3><p>Google AI 블로그에서 공개한 AI 관련 원문과 변경 사항을 확인하는 출처입니다.</p></div><a class="source-action" href="https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-may-2026/" target="_blank" rel="noopener noreferrer">blog.google</a></article>
-<article class="source-card"><div><h3>MIT Technology Review AI</h3><p>AI 산업 동향과 조직 적용 사례를 확인하는 출처입니다.</p></div><a class="source-action" href="https://www.technologyreview.com/2026/06/09/1137830/learning-to-lead-in-a-hybrid-human-ai-enterprise/" target="_blank" rel="noopener noreferrer">technologyreview.com</a></article>
-<article class="source-card"><div><h3>OpenAI 소식</h3><p>OpenAI 제품, API, Codex, 에이전트 관련 업데이트를 확인하는 출처입니다.</p></div><a class="source-action" href="https://developers.openai.com/codex/cli" target="_blank" rel="noopener noreferrer">developers.openai.com</a></article>
-<article class="source-card"><div><h3>OpenAI 소식</h3><p>OpenAI 제품, API, Codex, 에이전트 관련 업데이트를 확인하는 출처입니다.</p></div><a class="source-action" href="https://openai.com/index/endava-frontiers" target="_blank" rel="noopener noreferrer">openai.com</a></article>
-<article class="source-card"><div><h3>OpenAI 소식</h3><p>OpenAI API 도구 호출과 에이전트 기능을 확인하는 개발자 문서입니다.</p></div><a class="source-action" href="https://platform.openai.com/docs/guides/tools" target="_blank" rel="noopener noreferrer">platform.openai.com</a></article></section>
+        <section class="knowledge-article">
+          <aside class="knowledge-toc" aria-label="하네스 엔지니어링 목차">
+            <details open>
+              <summary>1. 하네스 엔지니어링 등장 배경</summary>
+              <a href="#prompt-context">1.1 프롬프트, 컨텍스트, 하네스 엔지니어링</a>
+              <a href="#agent-harness">1.2 에이전트와 하네스 엔지니어링</a>
+            </details>
+            <details open>
+              <summary>2. 하네스 엔지니어링 개념</summary>
+              <a class="is-active" href="#definition">2.1 하네스 엔지니어링이란?</a>
+            </details>
+          </aside>
+          <article class="knowledge-body">
+            <h2 id="prompt-context">1.1 프롬프트, 컨텍스트, 하네스 엔지니어링</h2>
+            <p>프롬프트는 AI에게 일을 시키는 지시문이고, 컨텍스트는 AI가 참고해야 할 자료와 상황입니다. 하네스 엔지니어링은 여기에 실제 도구 실행 규칙을 더해, AI가 말만 하는 단계에서 업무를 수행하는 단계로 넘어가도록 돕습니다.</p>
+            <h2 id="agent-harness">1.2 에이전트와 하네스 엔지니어링</h2>
+            <p>에이전트는 목표를 받고 여러 단계를 스스로 진행하는 AI입니다. 하네스는 에이전트가 아무 도구나 바로 실행하지 않도록 중간에서 권한, 입력값, 결과 검증을 관리합니다.</p>
+            <h2 id="definition">2.1 하네스 엔지니어링이란?</h2>
+            <p>하네스 엔지니어링은 AI 에이전트와 실제 업무 시스템 사이에 두는 안전한 실행 계층입니다. 예를 들어 보고서 생성, 배포 점검, 장애 대응 초안 작성처럼 반복되는 업무를 자동화할 때 어떤 도구를 쓸 수 있는지, 누가 승인해야 하는지, 실패하면 어떻게 되돌릴지를 미리 정합니다.</p>
+            <ul class="note-list">
+              <li>권한: AI가 접근할 수 있는 저장소, 파일, API 범위를 제한합니다.</li>
+              <li>검증: AI가 만든 결과를 테스트, 규칙, 사람 승인으로 확인합니다.</li>
+              <li>기록: 어떤 입력으로 어떤 도구를 실행했고 어떤 결과가 나왔는지 남깁니다.</li>
+            </ul>
+          </article>
+        </section>
 
   </main>
 </body>

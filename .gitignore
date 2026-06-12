@@ -10,3 +10,7 @@ public/*
 !public/archive/**
 !public/ai-tools/
 !public/ai-tools/**
+!public/ai-sources/
+!public/ai-sources/**
+!public/knowledge/
+!public/knowledge/**
