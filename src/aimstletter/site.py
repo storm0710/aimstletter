@@ -113,7 +113,7 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     path.write_text(html, encoding="utf-8")
     _write_weekly_archive(output_dir, archive_entry, html)
     _refresh_archive_navigation(output_dir, archive_entries)
-    _write_secondary_pages(output_dir, ai_items, tool_items, _render_analytics(settings))
+    _write_secondary_pages(output_dir, ai_items, tool_items, _render_analytics(settings), archive_entries)
     return path
 
 
@@ -685,6 +685,8 @@ def _previous_archive_entry(
 def _render_archive_nav(
     entries: list[dict[str, object]],
     current_entry: dict[str, object] | None = None,
+    link_prefix: str = "",
+    current_knowledge: bool = False,
 ) -> str:
     if not entries:
         return ""
@@ -717,7 +719,7 @@ def _render_archive_nav(
                 links.append(
                     f'<a{current_class} data-archive-link '
                     f'data-archive-index="{escape(search_text, quote=True)}" '
-                    f'href="{escape(str(entry["href"]))}">'
+                    f'href="{escape(link_prefix + str(entry["href"]))}">'
                     f'{month:02d}월 {int(entry["week"])}째주</a>'
                 )
             months.append(f'<div class="archive-month">{"".join(links)}</div>')
@@ -731,23 +733,25 @@ def _render_archive_nav(
         '<aside class="archive-nav" aria-label="주간 아카이브">'
         '<input class="archive-search" data-archive-search type="search" '
         'placeholder="검색어를 입력하세요..." aria-label="Archive 검색">'
-        + _render_knowledge_nav()
         + '<div class="archive-panel">'
         '<div class="archive-title">Archive</div>'
         + "".join(years)
         + "</div>"
+        + _render_knowledge_nav(link_prefix=link_prefix, is_current=current_knowledge)
         + '<div class="archive-resize" role="separator" aria-orientation="vertical" '
         + 'aria-label="Archive 너비 조절" tabindex="0"></div>'
         + "</aside>"
     )
 
 
-def _render_knowledge_nav() -> str:
+def _render_knowledge_nav(link_prefix: str = "", is_current: bool = False) -> str:
+    current_class = " is-current" if is_current else ""
     return (
         '<div class="archive-panel knowledge-panel" aria-label="Knowledge">'
         '<div class="archive-title knowledge-title">Knowledge</div>'
         '<div class="archive-month knowledge-single">'
-        '<a class="knowledge-link" href="knowledge/harness-engineering/">하네스 엔지니어링이란?</a>'
+        f'<a class="knowledge-link{current_class}" href="{escape(link_prefix)}knowledge/harness-engineering/">'
+        '하네스 엔지니어링이란?</a>'
         '</div>'
         '</div>'
     )
@@ -3404,6 +3408,7 @@ def _write_secondary_pages(
     ai_items: list[SiteItem],
     tool_items: list[SiteItem],
     analytics_html: str,
+    archive_entries: list[dict[str, object]],
 ) -> None:
     work_items = _latest_first(ai_items[:5])
     other_items = _latest_first(ai_items[5:10])
@@ -3449,7 +3454,11 @@ def _write_secondary_pages(
         encoding="utf-8",
     )
     (output_dir / "knowledge" / "harness-engineering" / "index.html").write_text(
-        _render_harness_knowledge_page(analytics_html=analytics_html, back_href="../../"),
+        _render_harness_knowledge_page(
+            analytics_html=analytics_html,
+            back_href="../../",
+            archive_entries=archive_entries,
+        ),
         encoding="utf-8",
     )
 
@@ -3541,10 +3550,19 @@ def _render_ai_sources_page(
     )
 
 
-def _render_harness_knowledge_page(analytics_html: str, back_href: str) -> str:
+def _render_harness_knowledge_page(
+    analytics_html: str,
+    back_href: str,
+    archive_entries: list[dict[str, object]] | None = None,
+) -> str:
     return _render_plain_page(
         title="하네스 엔지니어링이란?",
         analytics_html=analytics_html,
+        sidebar_html=_render_archive_nav(
+            archive_entries or [],
+            link_prefix=back_href,
+            current_knowledge=True,
+        ),
         body=f"""
         <a class="back-link" href="{escape(back_href)}">첫 화면</a>
         <header class="simple-header tool-page-header">
@@ -3686,7 +3704,33 @@ def _render_note_section(title: str, notes: tuple[str, ...]) -> str:
     """
 
 
-def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
+def _render_plain_page(
+    title: str,
+    analytics_html: str,
+    body: str,
+    sidebar_html: str = "",
+) -> str:
+    page_class = "page page-shell" if sidebar_html else "page"
+    sidebar_script = (
+        """
+  <script>
+    (() => {
+      const archiveSearch = document.querySelector("[data-archive-search]");
+      const archiveLinks = Array.from(document.querySelectorAll("[data-archive-link]"));
+      if (!archiveSearch || archiveLinks.length === 0) return;
+      archiveSearch.addEventListener("input", () => {
+        const query = archiveSearch.value.trim().toLowerCase();
+        archiveLinks.forEach((link) => {
+          const match = !query || link.dataset.archiveIndex.includes(query);
+          link.style.display = match ? "" : "none";
+        });
+      });
+    })();
+  </script>
+"""
+        if sidebar_html
+        else ""
+    )
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -3706,6 +3750,125 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       width: min(1180px, calc(100% - 34px));
       margin: 0 auto;
       padding: 24px 0 48px;
+      --archive-width: 228px;
+      --archive-gap: 64px;
+    }}
+    .page-shell {{
+      position: relative;
+    }}
+    .archive-nav {{
+      position: static;
+      width: var(--archive-width);
+      min-width: 180px;
+      max-width: 380px;
+      color: #111111;
+      font-size: 14px;
+      line-height: 1.35;
+      margin: 18px 0 18px;
+    }}
+    .archive-search {{
+      height: 38px;
+      width: 100%;
+      display: block;
+      padding: 0 12px;
+      border: 1px solid #e8e8e4;
+      border-radius: 6px;
+      color: #8a8a8a;
+      background: rgba(255,255,255,.78);
+      font-size: 12px;
+      margin-bottom: 10px;
+      outline: 0;
+    }}
+    .archive-search:focus {{
+      border-color: #2f7fc0;
+      box-shadow: 0 0 0 2px rgba(47,127,192,.12);
+    }}
+    .archive-panel {{
+      border: 1px solid #e8e8e4;
+      background: rgba(255,255,255,.78);
+      min-height: 360px;
+    }}
+    .archive-title {{
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 12px;
+      border-bottom: 1px solid #e8e8e4;
+      font-size: 14px;
+      font-weight: 800;
+    }}
+    .archive-title::before {{
+      content: "";
+      width: 10px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid #777777;
+      background: #111111;
+      flex: 0 0 auto;
+    }}
+    .archive-year {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 12px 12px 6px;
+      color: #555555;
+      font-size: 13px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }}
+    .archive-year::-webkit-details-marker {{
+      display: none;
+    }}
+    .archive-year::after {{
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-right: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
+      color: #777777;
+      margin-left: 8px;
+      transform: rotate(0deg);
+      transition: transform .16s ease;
+    }}
+    .archive-year-group:not([open]) .archive-year::after {{
+      transform: rotate(-45deg);
+    }}
+    .archive-year-group[open] .archive-year::after {{
+      transform: rotate(45deg);
+    }}
+    .archive-month {{
+      display: grid;
+      gap: 0;
+      font-size: 13px;
+    }}
+    .archive-month a {{
+      display: block;
+      padding: 11px 12px 11px 26px;
+      color: #111111;
+      text-decoration: none;
+      border-top: 1px solid rgba(0,0,0,.05);
+    }}
+    .archive-month a.is-current {{
+      background: #2f7fc0;
+      color: #ffffff;
+      font-weight: 800;
+    }}
+    .knowledge-panel {{
+      margin-top: 12px;
+      min-height: auto;
+    }}
+    .knowledge-link {{
+      display: block;
+      padding: 12px 22px;
+      color: #4d4d4d;
+      font-size: 14px;
+      line-height: 1.45;
+    }}
+    .archive-resize {{
+      display: none;
     }}
     .back-link {{
       display: inline-block;
@@ -3957,12 +4120,28 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
         grid-template-columns: 1fr;
       }}
     }}
+    @media (min-width: 1100px) {{
+      .page-shell {{
+        width: min(960px, calc(100% - var(--archive-width) - var(--archive-gap) - 34px));
+        margin-left: calc(var(--archive-width) + var(--archive-gap));
+        margin-right: 32px;
+      }}
+      .archive-nav {{
+        position: absolute;
+        left: calc((var(--archive-width) + var(--archive-gap)) * -1);
+        top: 76px;
+        margin: 0;
+        overflow: visible;
+      }}
+    }}
   </style>
 </head>
 <body>
-  <main class="page">
+  <main class="{page_class}">
+    {sidebar_html}
     {body}
   </main>
+  {sidebar_script}
 </body>
 </html>
 """

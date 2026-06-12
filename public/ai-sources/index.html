@@ -17,6 +17,125 @@
       width: min(1180px, calc(100% - 34px));
       margin: 0 auto;
       padding: 24px 0 48px;
+      --archive-width: 228px;
+      --archive-gap: 64px;
+    }
+    .page-shell {
+      position: relative;
+    }
+    .archive-nav {
+      position: static;
+      width: var(--archive-width);
+      min-width: 180px;
+      max-width: 380px;
+      color: #111111;
+      font-size: 14px;
+      line-height: 1.35;
+      margin: 18px 0 18px;
+    }
+    .archive-search {
+      height: 38px;
+      width: 100%;
+      display: block;
+      padding: 0 12px;
+      border: 1px solid #e8e8e4;
+      border-radius: 6px;
+      color: #8a8a8a;
+      background: rgba(255,255,255,.78);
+      font-size: 12px;
+      margin-bottom: 10px;
+      outline: 0;
+    }
+    .archive-search:focus {
+      border-color: #2f7fc0;
+      box-shadow: 0 0 0 2px rgba(47,127,192,.12);
+    }
+    .archive-panel {
+      border: 1px solid #e8e8e4;
+      background: rgba(255,255,255,.78);
+      min-height: 360px;
+    }
+    .archive-title {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 12px;
+      border-bottom: 1px solid #e8e8e4;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .archive-title::before {
+      content: "";
+      width: 10px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid #777777;
+      background: #111111;
+      flex: 0 0 auto;
+    }
+    .archive-year {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 12px 12px 6px;
+      color: #555555;
+      font-size: 13px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+    .archive-year::-webkit-details-marker {
+      display: none;
+    }
+    .archive-year::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-right: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
+      color: #777777;
+      margin-left: 8px;
+      transform: rotate(0deg);
+      transition: transform .16s ease;
+    }
+    .archive-year-group:not([open]) .archive-year::after {
+      transform: rotate(-45deg);
+    }
+    .archive-year-group[open] .archive-year::after {
+      transform: rotate(45deg);
+    }
+    .archive-month {
+      display: grid;
+      gap: 0;
+      font-size: 13px;
+    }
+    .archive-month a {
+      display: block;
+      padding: 11px 12px 11px 26px;
+      color: #111111;
+      text-decoration: none;
+      border-top: 1px solid rgba(0,0,0,.05);
+    }
+    .archive-month a.is-current {
+      background: #2f7fc0;
+      color: #ffffff;
+      font-weight: 800;
+    }
+    .knowledge-panel {
+      margin-top: 12px;
+      min-height: auto;
+    }
+    .knowledge-link {
+      display: block;
+      padding: 12px 22px;
+      color: #4d4d4d;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .archive-resize {
+      display: none;
     }
     .back-link {
       display: inline-block;
@@ -268,10 +387,25 @@
         grid-template-columns: 1fr;
       }
     }
+    @media (min-width: 1100px) {
+      .page-shell {
+        width: min(960px, calc(100% - var(--archive-width) - var(--archive-gap) - 34px));
+        margin-left: calc(var(--archive-width) + var(--archive-gap));
+        margin-right: 32px;
+      }
+      .archive-nav {
+        position: absolute;
+        left: calc((var(--archive-width) + var(--archive-gap)) * -1);
+        top: 76px;
+        margin: 0;
+        overflow: visible;
+      }
+    }
   </style>
 </head>
 <body>
   <main class="page">
+
 
         <a class="back-link" href="../">← 첫 화면</a>
         <header class="simple-header tool-page-header">
@@ -291,5 +425,6 @@
 <article class="source-card"><div><h3>OpenAI 소식</h3><p>OpenAI API 도구 호출과 에이전트 기능을 확인하는 개발자 문서입니다.</p></div><a class="source-action" href="https://platform.openai.com/docs/guides/tools" target="_blank" rel="noopener noreferrer">platform.openai.com</a></article></section>
 
   </main>
+
 </body>
 </html>
