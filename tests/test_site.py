@@ -253,10 +253,20 @@ def test_committed_ai_tools_page_exists() -> None:
     html = Path("public/ai-tools/index.html").read_text(encoding="utf-8")
 
     assert "AI 활용 도구" in html
+    assert "background: #ffffff;" in html
+    assert "tool-category" in html
+    assert "개발·코딩 에이전트" in html
+    assert "앱 제작·프로토타입" in html
+    assert "디자인·UI" in html
+    assert "터미널·명령 자동화" in html
+    assert "지식·문서·검색" in html
+    assert "운영·협업" in html
     assert "tool-list-grid" in html
     assert "<h3>Codex</h3>" in html
     assert "<h3>Antigravity</h3>" in html
     assert "<h3>Claude Code</h3>" in html
+    assert "<h3>n8n</h3>" in html
+    assert "<h3>Perplexity</h3>" in html
     assert 'class="tool-action"' in html
     assert "https://developers.openai.com/codex/cli" in html
     assert "https://code.claude.com/docs/en/desktop-quickstart" in html

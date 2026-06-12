@@ -3044,98 +3044,90 @@ def _render_logo_roll() -> str:
 
 
 def _render_ai_tool_directory() -> str:
-    tools = (
+    groups = (
         (
-            "Codex",
-            "코드 작성, 수정, 리뷰, 테스트 보조에 쓰는 AI 코딩 에이전트입니다.",
-            ("코딩", "리뷰", "자동화"),
-            "https://developers.openai.com/codex/cli",
+            "개발·코딩 에이전트",
+            "코드 작성, 리팩터링, 리뷰, 테스트 보조처럼 개발 작업을 직접 돕는 도구입니다.",
+            (
+                ("Codex", "코드 작성, 수정, 리뷰, 테스트 보조에 쓰는 AI 코딩 에이전트입니다.", ("코딩", "리뷰", "자동화"), "https://developers.openai.com/codex/cli"),
+                ("Claude Code", "터미널과 코드베이스 안에서 Claude를 실행해 기능 구현과 리팩터링을 진행하는 도구입니다.", ("코딩", "리팩터링", "터미널"), "https://code.claude.com/docs/en/desktop-quickstart"),
+                ("Cursor", "에디터 안에서 코드 이해, 생성, 수정, 대화형 개발을 함께 수행하는 AI 코드 편집기입니다.", ("IDE", "코드 생성", "맥락 이해"), "https://cursor.com/download"),
+                ("GitHub Copilot", "IDE와 GitHub 작업 흐름에서 코드 추천, PR 보조, 이슈 처리를 돕는 개발 도구입니다.", ("IDE", "PR", "협업"), "https://github.com/features/copilot"),
+                ("Windsurf", "프로젝트 맥락을 읽고 여러 파일을 함께 수정하는 AI 개발 환경입니다.", ("개발환경", "멀티파일", "에이전트"), "https://windsurf.com/"),
+            ),
         ),
         (
-            "Antigravity",
-            "아이디어를 앱 화면과 기능 흐름으로 빠르게 실험해 볼 때 참고할 수 있는 AI 개발 도구입니다.",
-            ("앱 제작", "프로토타입", "실험"),
-            "https://antigravity.google/",
+            "앱 제작·프로토타입",
+            "아이디어를 빠르게 화면, 기능, 배포 가능한 앱으로 바꾸는 제작 도구입니다.",
+            (
+                ("Antigravity", "아이디어를 앱 화면과 기능 흐름으로 빠르게 실험해 볼 때 참고할 수 있는 AI 개발 도구입니다.", ("앱 제작", "프로토타입", "실험"), "https://antigravity.google/"),
+                ("Replit", "브라우저에서 코드 작성, 실행, 배포까지 이어서 실습용 앱을 빠르게 만들 수 있는 플랫폼입니다.", ("웹 IDE", "실습", "배포"), "https://replit.com/desktop"),
+                ("Lovable", "자연어 설명으로 웹 앱 초안과 UI 흐름을 빠르게 만들어 보는 제품 제작 도구입니다.", ("웹앱", "UI", "프로토타입"), "https://lovable.dev/"),
+                ("Bolt", "프론트엔드와 간단한 풀스택 프로토타입을 브라우저에서 빠르게 생성하는 도구입니다.", ("프론트엔드", "풀스택", "프로토타입"), "https://bolt.new/"),
+            ),
         ),
         (
-            "Claude Code",
-            "터미널과 코드베이스 안에서 Claude를 활용해 기능 구현과 리팩터링을 진행하는 도구입니다.",
-            ("코딩", "리팩터링", "터미널"),
-            "https://code.claude.com/docs/en/desktop-quickstart",
+            "디자인·UI",
+            "화면 초안, 컴포넌트, 인터랙션을 만들고 개발 코드로 이어가기 좋은 도구입니다.",
+            (
+                ("v0", "UI 컴포넌트와 화면 초안을 빠르게 만들고 코드로 이어가기 좋은 디자인·개발 보조 도구입니다.", ("UI", "컴포넌트", "디자인"), "https://v0.app/"),
+                ("Figma Make", "디자인 아이디어를 인터랙션이 있는 화면 초안으로 발전시킬 때 활용할 수 있는 도구입니다.", ("디자인", "화면", "인터랙션"), "https://www.figma.com/make/"),
+            ),
         ),
         (
-            "Cursor",
-            "에디터 안에서 코드 이해, 생성, 수정, 대화형 개발을 함께 수행하는 AI 코드 편집기입니다.",
-            ("IDE", "코드 생성", "맥락 이해"),
-            "https://cursor.com/download",
+            "터미널·명령 자동화",
+            "명령 실행, 코드 탐색, 문서 요약처럼 터미널 중심 업무를 돕는 도구입니다.",
+            (
+                ("Gemini CLI", "터미널에서 Gemini를 호출해 코드 탐색, 명령 보조, 문서 요약에 활용할 수 있는 도구입니다.", ("터미널", "검색", "요약"), "https://github.com/google-gemini/gemini-cli"),
+                ("Warp", "터미널 작업에 AI 명령 보조와 워크플로 자동화를 붙여 반복 작업을 줄이는 도구입니다.", ("터미널", "명령", "자동화"), "https://www.warp.dev/"),
+            ),
         ),
         (
-            "GitHub Copilot",
-            "IDE와 GitHub 작업 흐름에서 코드 추천, PR 보조, 이슈 처리 자동화에 활용하는 도구입니다.",
-            ("IDE", "PR", "협업"),
-            "https://github.com/features/copilot",
+            "지식·문서·검색",
+            "사내 문서, 지식 검색, 회의 정리처럼 정보 흐름을 다루는 업무에 맞는 도구입니다.",
+            (
+                ("Notion AI", "문서 정리, 회의 요약, 지식 검색을 한 작업 공간 안에서 처리하는 문서형 AI 도구입니다.", ("문서", "요약", "지식관리"), "https://www.notion.com/product/ai"),
+                ("Perplexity", "출처 기반 검색과 요약으로 빠르게 리서치하고 근거 링크를 확인하는 AI 검색 도구입니다.", ("검색", "리서치", "출처"), "https://www.perplexity.ai/"),
+                ("Glean", "회사 내부 문서와 업무 시스템을 검색해 필요한 지식을 찾아주는 엔터프라이즈 검색 도구입니다.", ("사내검색", "지식", "업무"), "https://www.glean.com/"),
+            ),
         ),
         (
-            "Gemini CLI",
-            "터미널에서 Gemini를 호출해 코드 탐색, 명령 보조, 문서 요약에 활용할 수 있는 도구입니다.",
-            ("터미널", "검색", "요약"),
-            "https://github.com/google-gemini/gemini-cli",
-        ),
-        (
-            "Windsurf",
-            "프로젝트 맥락을 읽고 여러 파일을 함께 수정하는 AI 개발 환경입니다.",
-            ("개발환경", "멀티파일", "에이전트"),
-            "https://devin.ai/download/",
-        ),
-        (
-            "Replit",
-            "브라우저에서 코드 작성, 실행, 배포까지 이어서 실습용 앱을 빠르게 만들 수 있는 플랫폼입니다.",
-            ("웹 IDE", "실습", "배포"),
-            "https://replit.com/desktop",
-        ),
-        (
-            "Lovable",
-            "자연어 설명으로 웹 앱 초안과 UI 흐름을 빠르게 만들어 보는 제품 제작 도구입니다.",
-            ("웹앱", "UI", "프로토타입"),
-            "https://lovable.dev/",
-        ),
-        (
-            "Bolt",
-            "프론트엔드 앱과 간단한 풀스택 프로토타입을 브라우저에서 빠르게 생성하는 도구입니다.",
-            ("프론트엔드", "풀스택", "프로토타입"),
-            "https://bolt.new/",
-        ),
-        (
-            "v0",
-            "UI 컴포넌트와 화면 초안을 빠르게 만들고 코드로 이어가기 좋은 디자인·개발 보조 도구입니다.",
-            ("UI", "컴포넌트", "디자인"),
-            "https://v0.app/",
-        ),
-        (
-            "Figma Make",
-            "디자인 아이디어를 인터랙션이 있는 화면 초안으로 발전시키는 데 활용할 수 있는 도구입니다.",
-            ("디자인", "화면", "인터랙션"),
-            "https://www.figma.com/make/",
+            "운영·협업",
+            "배포, 이슈, 팀 협업, 업무 자동화처럼 실제 운영 흐름에 붙이기 좋은 도구입니다.",
+            (
+                ("Linear", "이슈, 로드맵, 제품 개발 흐름을 정리하고 AI로 업무 맥락을 보조하는 협업 도구입니다.", ("이슈", "로드맵", "협업"), "https://linear.app/"),
+                ("Zapier", "여러 업무 도구를 연결해 반복 작업과 알림 흐름을 자동화하는 노코드 자동화 도구입니다.", ("자동화", "연동", "업무흐름"), "https://zapier.com/"),
+                ("n8n", "업무 자동화 워크플로를 직접 구성하고 AI 노드를 연결해 운영 흐름을 만드는 도구입니다.", ("워크플로", "자동화", "AI 노드"), "https://n8n.io/"),
+            ),
         ),
     )
-    cards = []
-    for name, summary, chips, url in tools:
-        chip_html = "".join(f'<span class="tool-chip">{escape(chip)}</span>' for chip in chips)
-        cards.append(
-            '<article class="ai-tool-card">'
-            "<div>"
-            f"<h3>{escape(name)}</h3>"
-            f"<p>{escape(summary)}</p>"
-            "</div>"
-            "<div>"
-            f'<div class="tool-meta-row">{chip_html}</div>'
-            f'<a class="tool-action" href="{escape(url, quote=True)}" '
-            'target="_blank" rel="noopener noreferrer">공식 다운로드/시작</a>'
-            "</div>"
-            "</article>"
-        )
-    return f'<div class="tool-list-grid">{"".join(cards)}</div>'
 
+    sections = []
+    for group_name, group_summary, tools in groups:
+        cards = []
+        for name, summary, chips, url in tools:
+            chip_html = "".join(f'<span class="tool-chip">{escape(chip)}</span>' for chip in chips)
+            cards.append(
+                '<article class="ai-tool-card">'
+                "<div>"
+                f"<h3>{escape(name)}</h3>"
+                f"<p>{escape(summary)}</p>"
+                "</div>"
+                "<div>"
+                f'<div class="tool-meta-row">{chip_html}</div>'
+                f'<a class="tool-action" href="{escape(url, quote=True)}" '
+                'target="_blank" rel="noopener noreferrer">공식 다운로드/시작</a>'
+                "</div>"
+                "</article>"
+            )
+        sections.append(
+            '<section class="tool-category">'
+            f'<header class="tool-category-header"><h2>{escape(group_name)}</h2>'
+            f'<p>{escape(group_summary)}</p></header>'
+            f'<div class="tool-list-grid">{"".join(cards)}</div>'
+            "</section>"
+        )
+    return "".join(sections)
 
 def _render_dashboard_tool_cards(items: list[SiteItem]) -> str:
     if not items:
@@ -3214,7 +3206,7 @@ def _write_secondary_pages(
 ) -> None:
     work_items = _latest_first(ai_items[:5])
     other_items = _latest_first(ai_items[5:10])
-    tools = _latest_first(tool_items[:10])
+    tools = _latest_first(tool_items)
 
     (output_dir / "work-skills").mkdir(parents=True, exist_ok=True)
     (output_dir / "tools").mkdir(parents=True, exist_ok=True)
@@ -3295,12 +3287,11 @@ def _render_ai_tools_page(analytics_html: str, back_href: str) -> str:
         <header class="simple-header tool-page-header">
           <div class="kicker">AI 도구</div>
           <h1>AI 활용 도구</h1>
-          <p>코딩, 앱 제작, 문서 정리, 디자인, 자동화처럼 실제 결과물을 만드는 데 활용할 수 있는 도구 목록입니다.</p>
+          <p>코딩, 앱 제작, 문서 정리, 디자인, 자동화처럼 실제 결과물을 만드는 데 활용할 수 있는 도구 목록입니다. 비슷한 업무 영역끼리 묶어 빠르게 비교할 수 있게 정리했습니다.</p>
         </header>
         {_render_ai_tool_directory()}
         """,
     )
-
 
 def _render_detail_page(item: SiteItem, analytics_html: str, back_href: str) -> str:
     detail_paragraphs = "".join(
@@ -3359,13 +3350,13 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
   <style>
     body {{
       margin: 0;
-      background: #f7f3ea;
+      background: #ffffff;
       color: #111111;
-      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-family: Arial, "Noto Sans KR", sans-serif;
     }}
     a {{ color: inherit; text-underline-offset: 3px; }}
     .page {{
-      width: min(1120px, calc(100% - 32px));
+      width: min(1180px, calc(100% - 34px));
       margin: 0 auto;
       padding: 24px 0 48px;
     }}
@@ -3375,17 +3366,18 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       font: 700 14px/1.4 Arial, "Noto Sans KR", sans-serif;
     }}
     .simple-header, .detail {{
-      border-top: 3px solid #222222;
+      border-top: 1px solid #e8e8e4;
       padding-top: 18px;
     }}
     h1 {{
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
       font-size: clamp(34px, 6vw, 64px);
       line-height: 1.02;
       margin: 0 0 12px;
       letter-spacing: 0;
     }}
     h2 {{
-      border-bottom: 2px solid #222222;
+      border-bottom: 1px solid #e8e8e4;
       font-size: 24px;
       margin: 28px 0 12px;
       padding-bottom: 8px;
@@ -3427,19 +3419,43 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
     .tool-page-header {{
       margin-bottom: 28px;
     }}
+    .tool-category {{
+      margin-top: 32px;
+    }}
+    .tool-category-header {{
+      display: grid;
+      grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
+      gap: 24px;
+      align-items: end;
+      border-top: 1px solid #111111;
+      padding-top: 16px;
+      margin-bottom: 12px;
+    }}
+    .tool-category-header h2 {{
+      border: 0;
+      margin: 0;
+      padding: 0;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(24px, 3vw, 38px);
+    }}
+    .tool-category-header p {{
+      margin: 0;
+      color: #5d6470;
+      font: 14px/1.65 Arial, "Noto Sans KR", sans-serif;
+    }}
     .tool-list-grid {{
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      border-top: 1px solid #222222;
-      border-left: 1px solid #d8d2c4;
-      margin-top: 26px;
+      border-top: 1px solid #e8e8e4;
+      border-left: 1px solid #e8e8e4;
+      margin-top: 0;
     }}
     .ai-tool-card {{
       min-height: 178px;
       padding: 18px;
-      border-right: 1px solid #d8d2c4;
-      border-bottom: 1px solid #d8d2c4;
-      background: #fffaf0;
+      border-right: 1px solid #e8e8e4;
+      border-bottom: 1px solid #e8e8e4;
+      background: #ffffff;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -3454,7 +3470,7 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
     }}
     .ai-tool-card p {{
       margin: 8px 0 0;
-      color: #565656;
+      color: #5d6470;
       font: 13px/1.58 Arial, "Noto Sans KR", sans-serif;
     }}
     .tool-meta-row {{
@@ -3463,8 +3479,8 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       gap: 6px;
     }}
     .tool-chip {{
-      border: 1px solid #d8d2c4;
-      background: #ffffff;
+      border: 1px solid #d7dde6;
+      background: #f7f9fb;
       padding: 4px 7px;
       color: #111111;
       font: 800 11px/1.25 Arial, "Noto Sans KR", sans-serif;
@@ -3509,8 +3525,8 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       margin-top: 12px;
     }}
     .tag {{
-      border: 1px solid #d8d2c4;
-      background: #fffaf0;
+      border: 1px solid #d7dde6;
+      background: #ffffff;
       padding: 3px 7px;
       font: 700 12px/1.3 Arial, "Noto Sans KR", sans-serif;
     }}
@@ -3522,6 +3538,10 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       font: 800 14px/1.3 Arial, "Noto Sans KR", sans-serif;
     }}
     @media (max-width: 860px) {{
+      .tool-category-header {{
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }}
       .tool-list-grid {{
         grid-template-columns: 1fr;
       }}
