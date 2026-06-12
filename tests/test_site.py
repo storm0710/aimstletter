@@ -318,6 +318,13 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "업무 AI" in week_2
     assert "GitHub Copilot coding agent update" in week_2
     assert "해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준" in week_2
+    assert "Previous Week" in week_2
+    assert "전주로" not in week_2
+    assert "1. 왜 필요한가요?" in week_2
+    assert "2. 핵심 구성 요소:" in week_2
+    assert "3. 기존 코드 자동완성과의 차이점:" in week_2
+    assert "원문 제목과 요약을 기준으로 선별된 항목입니다." not in week_2
+    assert "출처 링크에서 세부 변경 사항과 적용 조건을 확인하세요." not in week_2
     assert "�" not in week_1
     assert "�" not in week_2
     assert '<a class="brand" href="./">AI MASTER TIMES</a>' in week_2

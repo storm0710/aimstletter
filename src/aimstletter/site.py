@@ -683,7 +683,7 @@ def _render_editorial_homepage(
     archive_html = _render_archive_nav(archive_entries or [], current_entry=current_archive_entry)
     previous_archive = _previous_archive_entry(archive_entries or [], current_archive_entry)
     previous_week_button = (
-        f'<a class="week-button" href="{escape(str(previous_archive["href"]))}">전주로</a>'
+        f'<a class="week-button" href="{escape(str(previous_archive["href"]))}">Previous Week</a>'
         if previous_archive
         else ""
     )
@@ -3683,7 +3683,9 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "detail must be 2 to 4 Korean paragraphs that a Korean high-school student can understand. "
             "Use short sentences, explain why the item matters, and include practical examples rather "
             "than abstract vendor language. "
-            "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
+            "key_points must be exactly 3 concise Korean strings. Each string should start with "
+            "'1. 왜 필요한가요?', '2. 핵심 구성 요소:', and '3. 기존 방식과의 차이점:' or an item-specific equivalent. "
+            "Do not tell readers to check source links in summary, detail, or key_points. tags must be an array of "
             "3 to 5 short Korean or product-name strings. comparisons must be an array of 0 to 3 Korean "
             "strings comparing the item with adjacent tools or approaches when useful. For Endava items, "
             "compare it with Harness Engineering if relevant: Endava is a consulting/transformation "
@@ -3730,11 +3732,11 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             url=item.url,
             summary=_safe_korean_field(
                 localized_item.get("summary"),
-                fallback="원문 요약을 한국어로 변환하지 못해 출처 링크에서 세부 내용을 확인해 주세요.",
+                fallback="이번 업데이트가 어떤 업무 문제를 줄이고 어떤 자동화 흐름에 붙을 수 있는지 간단히 정리했습니다.",
             ),
             detail=_safe_korean_field(
                 localized_item.get("detail"),
-                fallback="이 항목은 원문 링크에서 세부 내용을 확인한 뒤 업무 적용 가능성을 검토해 주세요.",
+                fallback="이번 업데이트는 업무 자동화, 운영 안정성, 검수 흐름 중 어디에 적용할 수 있는지 빠르게 판단하기 위한 항목입니다.",
             ),
             source=_korean_source_name(item.source),
             kind=_korean_kind_name(item.kind),
@@ -3760,7 +3762,9 @@ def _repair_korean_translation(
         "Translate English article titles and summaries into Korean. Product names may "
         "remain in English, but English clauses or English explanatory sentences are not allowed. "
         "detail must be 2 to 4 Korean paragraphs. "
-        "key_points must be an array of 2 or 3 concise Korean strings. tags must be an array of "
+        "key_points must be exactly 3 concise Korean strings. Each string should start with "
+        "'1. 왜 필요한가요?', '2. 핵심 구성 요소:', and '3. 기존 방식과의 차이점:' or an item-specific equivalent. "
+        "Do not tell readers to check source links in summary, detail, or key_points. tags must be an array of "
         "3 to 5 short Korean or product-name strings. comparisons must be 0 to 3 Korean strings. "
         "glossary must be 0 to 5 Korean strings formatted like 'Warp: ...'."
     )
@@ -3830,10 +3834,7 @@ def _safe_key_points(localized_item: dict[str, object], original: DigestItem) ->
     ]
     if safe_points:
         return tuple(safe_points[:3])
-    return (
-        "원문에서 확인한 변화가 업무 자동화나 운영 방식에 어떤 영향을 줄지 검토하세요.",
-        f"{_korean_source_name(original.source)}의 최신 발표이므로 원문 링크에서 세부 내용을 확인하세요.",
-    )
+    return _fallback_three_line_summary(original)
 
 
 def _safe_tags(localized_item: dict[str, object], original: DigestItem) -> tuple[str, ...]:
@@ -3974,25 +3975,118 @@ def _looks_untranslated(text: str) -> bool:
 def _fallback_korean_item(item: DigestItem) -> SiteItem:
     title = _fallback_display_title(item)
     summary = _fallback_display_summary(item)
+    points = _fallback_three_line_summary(item)
     return SiteItem(
         title=title,
         summary=summary,
-        detail=(
-            f"{summary}\n\n"
-            "현재 자동 한국어 재작성 단계가 지연되어 원문 기반의 간단한 안내로 표시합니다. "
-            "출처 링크에서 발표 원문을 확인한 뒤 업무 적용 가능성, 도입 조건, 운영 리스크를 함께 검토하세요."
-        ),
+        detail=summary,
         source=_korean_source_name(item.source),
         kind=_korean_kind_name(item.kind),
         url=item.url,
         published=item.published,
-        key_points=(
-            "원문 제목과 요약을 기준으로 선별된 항목입니다.",
-            "출처 링크에서 세부 변경 사항과 적용 조건을 확인하세요.",
-        ),
+        key_points=points,
         tags=tuple(_fallback_tags(item)[:5]),
         comparisons=tuple(_fallback_comparisons(item)),
         glossary=tuple(_fallback_glossary(item)),
+    )
+
+
+def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
+    text = _item_text(item)
+    if any(keyword in text for keyword in ("temporal", "durable execution")):
+        return (
+            "1. 왜 필요한가요? 오래 걸리는 AI 작업이 중간에 실패해도 재시도와 복구를 안정적으로 처리하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 워크플로 상태 저장, 재시도 정책, 작업 큐, 실행 이력 추적입니다.",
+            "3. 일반 자동화와의 차이점: 한 번 실행하고 끝나는 스크립트가 아니라 실패와 지연을 전제로 계속 이어지는 운영 흐름입니다.",
+        )
+    if any(keyword in text for keyword in ("copilot", "coding agent")):
+        return (
+            "1. 왜 필요한가요? 반복되는 코드 수정, PR 보조, 저장소 작업을 개발자가 매번 직접 처리하지 않도록 줄여줍니다.",
+            "2. 핵심 구성 요소: 코드 맥락 이해, 변경안 생성, 테스트·PR 흐름 연결, 리뷰 보조입니다.",
+            "3. 기존 코드 자동완성과의 차이점: 한 줄 추천을 넘어 이슈 해결 흐름 전체를 대신 진행하는 방향입니다.",
+        )
+    if any(keyword in text for keyword in ("claude code", "terminal workflow")):
+        return (
+            "1. 왜 필요한가요? 터미널에서 코드 탐색, 수정, 리팩터링을 끊기지 않고 이어가기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 코드베이스 읽기, 명령 실행 보조, 파일 수정, 변경 내용 설명입니다.",
+            "3. 채팅형 AI와의 차이점: 답변만 받는 것이 아니라 작업 폴더 안에서 실제 개발 흐름을 함께 수행합니다.",
+        )
+    if any(keyword in text for keyword in ("codex", "agent workflows")):
+        return (
+            "1. 왜 필요한가요? 코드 변경, 테스트, 리뷰 준비를 한 번의 업무 흐름으로 묶기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 저장소 이해, 파일 편집, 테스트 실행, 변경 요약과 PR 준비입니다.",
+            "3. 단순 코드 생성과의 차이점: 코드를 쓰는 데서 끝나지 않고 검증과 전달 단계까지 포함합니다.",
+        )
+    if any(keyword in text for keyword in ("langgraph", "workflow layer")):
+        return (
+            "1. 왜 필요한가요? 여러 단계로 움직이는 AI 에이전트의 상태와 분기 흐름을 안정적으로 관리하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 그래프 기반 단계 정의, 상태 저장, 도구 호출, 재개 가능한 실행입니다.",
+            "3. 단순 프롬프트 체인과의 차이점: 순서대로 호출하는 수준을 넘어 조건 분기와 상태 관리가 중심입니다.",
+        )
+    if any(keyword in text for keyword in ("n8n", "workflow automation")):
+        return (
+            "1. 왜 필요한가요? 여러 업무 도구와 AI 호출을 연결해 반복 작업을 자동으로 처리하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 트리거, 노드, 조건 분기, 외부 서비스 연동, AI 처리 단계입니다.",
+            "3. 수동 업무와의 차이점: 사람이 복사하고 확인하던 절차를 규칙화해 반복 실행할 수 있습니다.",
+        )
+    if any(keyword in text for keyword in ("vercel", "deployment")):
+        return (
+            "1. 왜 필요한가요? AI 앱을 빠르게 공개하고 프론트엔드와 서버 기능을 함께 운영하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 배포 파이프라인, 서버리스 실행, 환경 변수, 프리뷰 배포입니다.",
+            "3. 로컬 실행과의 차이점: 내 컴퓨터가 아니라 사용자가 접속할 수 있는 운영 환경에서 검증합니다.",
+        )
+    if any(keyword in text for keyword in ("datadog", "observability")):
+        return (
+            "1. 왜 필요한가요? AI 기능의 비용, 지연, 오류, 품질 문제를 운영 중에 빠르게 찾기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 로그, 메트릭, 트레이스, 알림, 대시보드입니다.",
+            "3. 일반 모니터링과의 차이점: 모델 호출과 응답 품질 같은 AI 특화 신호까지 함께 봅니다.",
+        )
+    if any(keyword in text for keyword in ("prompt", "workflow migration")):
+        return (
+            "1. 왜 필요한가요? 한 번 쓰고 버리는 프롬프트를 반복 가능한 업무 절차로 바꾸기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 입력 양식, 승인 단계, 실행 기록, 결과 검수 기준입니다.",
+            "3. 프롬프트 엔지니어링과의 차이점: 좋은 문장을 만드는 것보다 업무가 끝까지 굴러가게 만드는 데 초점이 있습니다.",
+        )
+    if any(keyword in text for keyword in ("database", "supabase", "guardrail")):
+        return (
+            "1. 왜 필요한가요? AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경을 하지 않게 하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 읽기 전용 권한, 스키마 범위 제한, 쿼리 검토, 감사 로그입니다.",
+            "3. 일반 DB 도구와의 차이점: 사람이 직접 쿼리하는 상황보다 AI의 자동 실행 위험을 더 강하게 통제합니다.",
+        )
+    if any(keyword in text for keyword in ("qdrant", "knowledge search", "vector")):
+        return (
+            "1. 왜 필요한가요? 내부 문서와 지식을 AI가 근거와 함께 찾아 쓰게 만들기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 벡터 저장소, 문서 임베딩, 검색 랭킹, 출처 표시입니다.",
+            "3. 일반 검색과의 차이점: 키워드 일치보다 의미가 가까운 정보를 찾아 답변 맥락으로 씁니다.",
+        )
+    if any(keyword in text for keyword in ("release note", "github")):
+        return (
+            "1. 왜 필요한가요? 이슈, 커밋, PR에 흩어진 변경 내용을 릴리즈 설명으로 빠르게 정리하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 변경 내역 수집, 영향 범위 요약, 검수 문구, 게시 전 승인입니다.",
+            "3. 수동 작성과의 차이점: 개발 기록을 자동으로 묶어 초안을 만들고 사람은 정확도만 다듬습니다.",
+        )
+    if any(keyword in text for keyword in ("spreadsheet", "microsoft")):
+        return (
+            "1. 왜 필요한가요? 반복되는 표 계산, 요약, 보고서 준비 시간을 줄이기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 데이터 정리, 수식 제안, 요약 생성, 보고서 초안 작성입니다.",
+            "3. 기존 엑셀 작업과의 차이점: 사용자가 모든 수식과 설명을 직접 만들지 않아도 됩니다.",
+        )
+    if any(keyword in text for keyword in ("vault", "secret")):
+        return (
+            "1. 왜 필요한가요? AI 에이전트가 필요한 비밀값만 안전하게 쓰고 남용하지 못하게 하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 토큰 범위 제한, 비밀 저장소, 접근 정책, 사용 기록입니다.",
+            "3. 일반 환경 변수와의 차이점: 저장만 하는 것이 아니라 누가 언제 무엇을 썼는지 통제합니다.",
+        )
+    if any(keyword in text for keyword in ("playwright", "design qa", "visual")):
+        return (
+            "1. 왜 필요한가요? AI가 만든 화면이 모바일·데스크톱에서 깨지지 않는지 빠르게 확인하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 화면 캡처, 반응형 테스트, 클릭 흐름 검증, 시각 회귀 비교입니다.",
+            "3. 눈으로 확인하는 방식과의 차이점: 반복 검사를 자동화해 수정 때마다 같은 기준으로 확인합니다.",
+        )
+    return (
+        "1. 왜 필요한가요? 이번 업데이트가 실제 업무 흐름의 어떤 문제를 줄일 수 있는지 빠르게 판단하기 위해 필요합니다.",
+        "2. 핵심 구성 요소: 적용 대상, 필요한 도구, 운영 조건, 검수 기준을 함께 확인하는 것입니다.",
+        "3. 기존 방식과의 차이점: 단순 소식 전달이 아니라 업무에 붙일 수 있는 실행 단위로 정리합니다.",
     )
 
 
@@ -4038,7 +4132,7 @@ def _fallback_korean_action(text: str) -> str:
         return "연구 결과가 실제 운영, 자동화, 의사결정 개선에 연결될 수 있는지 검토해 보세요."
     if any(keyword in text for keyword in ("security", "risk", "vulnerability", "incident")):
         return "도입 전 보안 영향과 운영 리스크를 함께 점검하는 것이 좋습니다."
-    return "출처 링크에서 세부 내용을 확인하고 수업 토론이나 업무 적용 아이디어로 활용하세요."
+    return "새 기능이나 변화가 어떤 업무 흐름에 붙을 수 있는지 빠르게 살펴보세요."
 
 
 def _clean_plain_text(text: str) -> str:
