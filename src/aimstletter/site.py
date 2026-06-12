@@ -744,17 +744,11 @@ def _render_archive_nav(
 
 def _render_knowledge_nav() -> str:
     return (
-        '<div class="knowledge-panel" aria-label="Knowledge">'
-        '<div class="knowledge-title">Knowledge</div>'
-        '<details class="knowledge-group" open>'
-        '<summary class="knowledge-summary">1. 하네스 엔지니어링 등장 배경</summary>'
-        '<a class="knowledge-link" href="knowledge/harness-engineering/">1.1 프롬프트, 컨텍스트, 하네스 엔지니어링</a>'
-        '<a class="knowledge-link" href="knowledge/harness-engineering/">1.2 에이전트와 하네스 엔지니어링</a>'
-        '</details>'
-        '<details class="knowledge-group" open>'
-        '<summary class="knowledge-summary">2. 하네스 엔지니어링 개념</summary>'
-        '<a class="knowledge-link is-active" href="knowledge/harness-engineering/">2.1 하네스 엔지니어링이란?</a>'
-        '</details>'
+        '<div class="archive-panel knowledge-panel" aria-label="Knowledge">'
+        '<div class="archive-title knowledge-title">Knowledge</div>'
+        '<div class="archive-month knowledge-single">'
+        '<a class="knowledge-link" href="knowledge/harness-engineering/">하네스 엔지니어링이란?</a>'
+        '</div>'
         '</div>'
     )
 
@@ -846,54 +840,18 @@ def _render_editorial_homepage(
       box-shadow: 0 0 0 2px rgba(47,127,192,.12);
     }}
     .knowledge-panel {{
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.78);
       margin-bottom: 12px;
-      padding: 0 0 6px;
+      min-height: auto;
     }}
     .knowledge-title {{
-      min-height: 42px;
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
       border-bottom: 1px solid var(--line);
-      font-size: 14px;
-      font-weight: 800;
-    }}
-    .knowledge-group {{
-      border-bottom: 1px solid #f0f0ed;
-    }}
-    .knowledge-group:last-child {{
-      border-bottom: 0;
-    }}
-    .knowledge-summary {{
-      cursor: pointer;
-      padding: 11px 12px;
-      color: #4d4d4d;
-      font-size: 13px;
-      line-height: 1.4;
-      list-style: none;
-    }}
-    .knowledge-summary::-webkit-details-marker {{
-      display: none;
-    }}
-    .knowledge-summary::after {{
-      content: "⌄";
-      float: right;
-      color: #5f6770;
-      font-weight: 800;
     }}
     .knowledge-link {{
       display: block;
-      padding: 10px 12px 10px 34px;
+      padding: 12px 22px;
       color: #4d4d4d;
-      font-size: 13px;
+      font-size: 14px;
       line-height: 1.45;
-    }}
-    .knowledge-link.is-active {{
-      background: #2f80c0;
-      color: #fff;
-      font-weight: 800;
     }}
     .archive-panel {{
       border: 1px solid var(--line);
@@ -3585,33 +3543,22 @@ def _render_ai_sources_page(
 
 def _render_harness_knowledge_page(analytics_html: str, back_href: str) -> str:
     return _render_plain_page(
-        title="하네스 엔지니어링",
+        title="하네스 엔지니어링이란?",
         analytics_html=analytics_html,
         body=f"""
         <a class="back-link" href="{escape(back_href)}">첫 화면</a>
         <header class="simple-header tool-page-header">
           <div class="kicker">Knowledge</div>
-          <h1>하네스 엔지니어링</h1>
+          <h1>하네스 엔지니어링이란?</h1>
           <p>AI 에이전트가 실제 업무 도구를 사용할 때 실행 순서, 권한, 검증, 기록을 한곳에서 관리하는 운영 구조입니다.</p>
         </header>
         <section class="knowledge-article">
-          <aside class="knowledge-toc" aria-label="하네스 엔지니어링 목차">
-            <details open>
-              <summary>1. 하네스 엔지니어링 등장 배경</summary>
-              <a href="#prompt-context">1.1 프롬프트, 컨텍스트, 하네스 엔지니어링</a>
-              <a href="#agent-harness">1.2 에이전트와 하네스 엔지니어링</a>
-            </details>
-            <details open>
-              <summary>2. 하네스 엔지니어링 개념</summary>
-              <a class="is-active" href="#definition">2.1 하네스 엔지니어링이란?</a>
-            </details>
-          </aside>
           <article class="knowledge-body">
-            <h2 id="prompt-context">1.1 프롬프트, 컨텍스트, 하네스 엔지니어링</h2>
+            <h2>하네스 엔지니어링이 필요한 이유</h2>
             <p>프롬프트는 AI에게 일을 시키는 지시문이고, 컨텍스트는 AI가 참고해야 할 자료와 상황입니다. 하네스 엔지니어링은 여기에 실제 도구 실행 규칙을 더해, AI가 말만 하는 단계에서 업무를 수행하는 단계로 넘어가도록 돕습니다.</p>
-            <h2 id="agent-harness">1.2 에이전트와 하네스 엔지니어링</h2>
+            <h2>에이전트를 안전하게 움직이는 운영 장치</h2>
             <p>에이전트는 목표를 받고 여러 단계를 스스로 진행하는 AI입니다. 하네스는 에이전트가 아무 도구나 바로 실행하지 않도록 중간에서 권한, 입력값, 결과 검증을 관리합니다.</p>
-            <h2 id="definition">2.1 하네스 엔지니어링이란?</h2>
+            <h2>실제 업무에서는 이렇게 씁니다</h2>
             <p>하네스 엔지니어링은 AI 에이전트와 실제 업무 시스템 사이에 두는 안전한 실행 계층입니다. 예를 들어 보고서 생성, 배포 점검, 장애 대응 초안 작성처럼 반복되는 업무를 자동화할 때 어떤 도구를 쓸 수 있는지, 누가 승인해야 하는지, 실패하면 어떻게 되돌릴지를 미리 정합니다.</p>
             <ul class="note-list">
               <li>권한: AI가 접근할 수 있는 저장소, 파일, API 범위를 제한합니다.</li>
@@ -3950,50 +3897,9 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       outline: 0;
     }}
     .knowledge-article {{
-      display: grid;
-      grid-template-columns: 280px minmax(0, 1fr);
-      gap: 34px;
-      align-items: start;
+      max-width: 900px;
       border-top: 1px solid #111111;
       padding-top: 18px;
-    }}
-    .knowledge-toc {{
-      border: 1px solid #e8e8e4;
-      background: #ffffff;
-      position: sticky;
-      top: 18px;
-    }}
-    .knowledge-toc details {{
-      border-bottom: 1px solid #e8e8e4;
-    }}
-    .knowledge-toc details:last-child {{
-      border-bottom: 0;
-    }}
-    .knowledge-toc summary {{
-      cursor: pointer;
-      padding: 12px;
-      color: #4d4d4d;
-      font: 14px/1.45 Arial, "Noto Sans KR", sans-serif;
-      list-style: none;
-    }}
-    .knowledge-toc summary::-webkit-details-marker {{
-      display: none;
-    }}
-    .knowledge-toc summary::after {{
-      content: "⌄";
-      float: right;
-      font-weight: 800;
-    }}
-    .knowledge-toc a {{
-      display: block;
-      padding: 10px 12px 10px 28px;
-      color: #4d4d4d;
-      font: 14px/1.45 Arial, "Noto Sans KR", sans-serif;
-    }}
-    .knowledge-toc a.is-active {{
-      background: #2f80c0;
-      color: #ffffff;
-      font-weight: 800;
     }}
     .knowledge-body {{
       min-width: 0;
@@ -4049,12 +3955,6 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       }}
       .source-grid {{
         grid-template-columns: 1fr;
-      }}
-      .knowledge-article {{
-        grid-template-columns: 1fr;
-      }}
-      .knowledge-toc {{
-        position: static;
       }}
     }}
   </style>

@@ -115,6 +115,8 @@ def test_render_homepage_includes_archive_entries() -> None:
     assert "Archive" in html
     assert "Knowledge" in html
     assert 'href="knowledge/harness-engineering/"' in html
+    assert "하네스 엔지니어링이란?" in html
+    assert "1.1 프롬프트" not in html
     assert "data-archive-index=" in html
     assert "2026년" in html
     assert "06월 2째주" in html
@@ -400,6 +402,8 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "link.dataset.archiveIndex" in week_2
     assert "Knowledge" in week_2
     assert 'href="knowledge/harness-engineering/"' in week_2
+    assert "하네스 엔지니어링이란?" in week_2
+    assert "1.1 프롬프트" not in week_2
     assert "overscroll-behavior: contain" in week_2
     assert "background: #e4efff" in week_2
     assert "color: #2462a8" in week_2
@@ -426,10 +430,11 @@ def test_committed_knowledge_page_exists() -> None:
     html = Path("public/knowledge/harness-engineering/index.html").read_text(encoding="utf-8")
 
     assert "Knowledge" in html
-    assert "하네스 엔지니어링" in html
+    assert "하네스 엔지니어링이란?" in html
     assert "knowledge-article" in html
-    assert "knowledge-toc" in html
-    assert "2.1 하네스 엔지니어링이란?" in html
+    assert "knowledge-toc" not in html
+    assert "1.1 프롬프트" not in html
+    assert "2.1 하네스 엔지니어링이란?" not in html
     assert "권한" in html
     assert "검증" in html
 
