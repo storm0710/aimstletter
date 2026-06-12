@@ -356,8 +356,8 @@
     }
     .intro-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(240px, 420px);
-      gap: 32px;
+      grid-template-columns: minmax(0, 1fr) max-content;
+      gap: 24px;
       align-items: end;
       padding: 34px 0 36px;
       border-bottom: 1px solid var(--line);
@@ -371,6 +371,7 @@
       color: #9a9a9a;
       font-size: 12px;
       text-align: right;
+      max-width: 340px;
     }
     .logo-roll {
       overflow: hidden;
@@ -494,7 +495,6 @@
       letter-spacing: 0;
     }
     .insights-header {
-      max-width: 620px;
       margin-bottom: 34px;
     }
     .insights-header p {
@@ -556,18 +556,16 @@
       height: 22px;
       border: 1px solid #111;
       border-radius: 50%;
-      display: grid;
-      place-items: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       font-size: 11px;
       margin: 0;
       flex: 0 0 auto;
     }
     .card-heading {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: block;
       margin: 0 0 10px;
-      flex-wrap: wrap;
     }
     .card-title {
       display: inline;
@@ -575,9 +573,13 @@
       font-size: 22px;
       letter-spacing: 0;
       font-weight: 700;
+      vertical-align: middle;
+      margin-left: 8px;
     }
     .topic-badge {
       display: inline-flex;
+      vertical-align: middle;
+      margin-left: 6px;
       align-items: center;
       min-height: 18px;
       border-radius: 999px;
@@ -622,7 +624,8 @@
       line-height: 1.52;
     }
     .insight-detail {
-      min-height: 520px;
+      min-height: min(520px, calc(100vh - 48px));
+      max-height: calc(100vh - 48px);
       border: 1px solid var(--line);
       background:
         linear-gradient(rgba(0,0,0,.035) 1px, transparent 1px),
@@ -632,9 +635,15 @@
       padding: 34px;
       display: none;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start;
+      gap: 28px;
+      position: -webkit-sticky;
       position: sticky;
       top: 24px;
+      align-self: start;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
     }
     .insight-grid.has-selection .insight-detail {
       display: flex;
@@ -802,9 +811,11 @@
       .insight-detail {
         position: static;
         min-height: 360px;
+        max-height: none;
         margin: 14px 0 22px 36px;
         padding: 24px;
         width: calc(100% - 36px);
+        overflow: visible;
       }
       .insight-grid.has-selection .insight-detail { display: flex; }
       .insight-detail h3 { font-size: clamp(30px, 12vw, 44px); }
@@ -852,8 +863,8 @@
         </div>
       </section>
       <div class="intro-row">
-        <p class="intro-copy">AI Master Times는 매주 수집한 논문, 업무 AI 스킬, Claude와 AI 도구 업데이트를 업무 적용 관점으로 재구성합니다. 이번 주 대표 신호: 이번 주 AI 업무 업데이트를 선별해 보여줍니다.</p>
-        <div class="date">2026년 05월 28일 · 2026-05-20~2026-05-26 데이터 · curated weekly for AI Master teams</div>
+        <p class="intro-copy">AI Master Times는 매주 수집한 논문, 업무 AI 스킬, Claude와 AI 도구 업데이트를 업무 적용 관점으로 재구성합니다. 이번 주 대표 신호: Anthropic 소식에 공개된 개발 도구와 코딩 자동화 관련 소식입니다. 새 기능이나 변화가 어떤 업무 흐름에 붙을 수 있는지 빠르게 살펴보세요.</p>
+        <div class="date">2026년 05월 27일 · 2026-05-20~2026-05-26 데이터 · curated weekly for AI Master teams</div>
       </div>
     </section>
     <section class="logo-roll" aria-label="Source roll">
@@ -866,6 +877,101 @@
         <p>홀수 카드는 에이전트 운영과 엔지니어링 트렌드, 짝수 카드는 AI 제품 제작에 필요한 프론트·디자인·백엔드·데이터 도구를 함께 정리했습니다.</p>
       </div>
       <div class="insight-grid" data-insight-grid>
+        <div class="insight-list"><button class="insight-card" type="button" data-insight-card data-number="1" data-title="Anthropic 소식: Claude Code SDK orchestration patterns" data-category="도구" data-subcategory="Claude" data-body="Anthropic 소식에 공개된 개발 도구와 코딩 자동화 관련 소식입니다. 새 기능이나 변화가 어떤 업무 흐름에 붙을 수 있는지 빠르게 살펴보세요." data-detail="Anthropic 소식에 공개된 개발 도구와 코딩 자동화 관련 소식입니다. 새 기능이나 변화가 어떤 업무 흐름에 붙을 수 있는지 빠르게 살펴보세요." data-meta="Anthropic 소식 · 도구 업데이트 · 2026-05-26" data-points="[&quot;1. 왜 필요한가요? 반복되는 코드 수정, PR 보조, 저장소 작업을 개발자가 매번 직접 처리하지 않도록 줄여줍니다.&quot;, &quot;2. 핵심 구성 요소: 코드 맥락 이해, 변경안 생성, 테스트·PR 흐름 연결, 리뷰 보조입니다.&quot;, &quot;3. 기존 코드 자동완성과의 차이점: 한 줄 추천을 넘어 이슈 해결 흐름 전체를 대신 진행하는 방향입니다.&quot;]" data-tags="[&quot;Claude&quot;, &quot;AI 에이전트&quot;, &quot;코딩 자동화&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[&quot;SDK: 특정 플랫폼 기능을 애플리케이션에 쉽게 붙일 수 있도록 제공되는 개발 도구 모음입니다.&quot;, &quot;오케스트레이션: 여러 작업, 도구, 서비스를 순서와 조건에 맞게 묶어 자동 실행하는 방식입니다.&quot;]" data-source="https://code.claude.com/docs/"><span><span class="card-heading"><span class="card-icon">1</span><span class="card-title">Anthropic 소식: Claude Code SDK orchestration patterns</span><span class="topic-badge">도구</span><span class="topic-badge sub">Claude</span></span><p>Anthropic 소식에 공개된 개발 도구와 코딩 자동화 관련 소식입니다. 새 기능이나 변화가 어떤 업무 흐름에 붙을 수 있는지 빠르게 살펴보세요.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="2" data-title="OpenAI 소식: OpenAI Responses API tool calling update" data-category="도구" data-subcategory="OpenAI" data-body="OpenAI 소식에 공개된 OpenAI 도구와 AI 에이전트 관련 소식입니다. 새 기능이나 변경 사항이 업무 흐름에 어떤 영향을 주는지 확인해 보세요." data-detail="OpenAI 소식에 공개된 OpenAI 도구와 AI 에이전트 관련 소식입니다. 새 기능이나 변경 사항이 업무 흐름에 어떤 영향을 주는지 확인해 보세요." data-meta="OpenAI 소식 · 도구 업데이트 · 2026-05-25" data-points="[&quot;1. 왜 필요한가요? 이번 업데이트가 실제 업무 흐름의 어떤 문제를 줄일 수 있는지 빠르게 판단하기 위해 필요합니다.&quot;, &quot;2. 핵심 구성 요소: 적용 대상, 필요한 도구, 운영 조건, 검수 기준을 함께 확인하는 것입니다.&quot;, &quot;3. 기존 방식과의 차이점: 단순 소식 전달이 아니라 업무에 붙일 수 있는 실행 단위로 정리합니다.&quot;]" data-tags="[&quot;OpenAI&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://platform.openai.com/docs/guides/tools"><span><span class="card-heading"><span class="card-icon">2</span><span class="card-title">OpenAI 소식: OpenAI Responses API tool calling update</span><span class="topic-badge">도구</span><span class="topic-badge sub">OpenAI</span></span><p>OpenAI 소식에 공개된 OpenAI 도구와 AI 에이전트 관련 소식입니다. 새 기능이나 변경 사항이 업무 흐름에 어떤 영향을 주는지 확인해 보세요.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="3" data-title="GitHub Copilot 변경 이력: GitHub Copilot pull request review workflow" data-category="도구" data-subcategory="GitHub Copilot" data-body="GitHub Copilot 변경 이력에 공개된 개발 도구와 코딩 자동화 관련 소식입니다. 새 기능이나 변경 사항이 업무 흐름에 어떤 영향을 주는지 확인해 보세요." data-detail="GitHub Copilot 변경 이력에 공개된 개발 도구와 코딩 자동화 관련 소식입니다. 새 기능이나 변경 사항이 업무 흐름에 어떤 영향을 주는지 확인해 보세요." data-meta="GitHub Copilot 변경 이력 · 도구 업데이트 · 2026-05-24" data-points="[&quot;1. 왜 필요한가요? 반복되는 코드 수정, PR 보조, 저장소 작업을 개발자가 매번 직접 처리하지 않도록 줄여줍니다.&quot;, &quot;2. 핵심 구성 요소: 코드 맥락 이해, 변경안 생성, 테스트·PR 흐름 연결, 리뷰 보조입니다.&quot;, &quot;3. 기존 코드 자동완성과의 차이점: 한 줄 추천을 넘어 이슈 해결 흐름 전체를 대신 진행하는 방향입니다.&quot;]" data-tags="[&quot;GitHub Copilot&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://github.blog/changelog/"><span><span class="card-heading"><span class="card-icon">3</span><span class="card-title">GitHub Copilot 변경 이력: GitHub Copilot pull request review workflow</span><span class="topic-badge">도구</span><span class="topic-badge sub">GitHub Copilot</span></span><p>GitHub Copilot 변경 이력에 공개된 개발 도구와 코딩 자동화 관련 소식입니다. 새 기능이나 변경 사항이 업무 흐름에 어떤 영향을 주는지 확인해 보세요.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="4" data-title="arXiv 데이터베이스 AI: arXiv database AI text-to-SQL evaluation" data-category="논문" data-subcategory="AI 에이전트" data-body="arXiv 데이터베이스 AI에 공개된 데이터베이스 업무 AI 활용 관련 소식입니다. 연구 결과가 실제 운영, 자동화, 의사결정 개선에 연결될 수 있는지 검토해 보세요." data-detail="arXiv 데이터베이스 AI에 공개된 데이터베이스 업무 AI 활용 관련 소식입니다. 연구 결과가 실제 운영, 자동화, 의사결정 개선에 연결될 수 있는지 검토해 보세요." data-meta="arXiv 데이터베이스 AI · 논문 · 2026-05-23" data-points="[&quot;1. 왜 필요한가요? AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경을 하지 않게 하기 위해 필요합니다.&quot;, &quot;2. 핵심 구성 요소: 읽기 전용 권한, 스키마 범위 제한, 쿼리 검토, 감사 로그입니다.&quot;, &quot;3. 일반 DB 도구와의 차이점: 사람이 직접 쿼리하는 상황보다 AI의 자동 실행 위험을 더 강하게 통제합니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;데이터베이스&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://arxiv.org/"><span><span class="card-heading"><span class="card-icon">4</span><span class="card-title">arXiv 데이터베이스 AI: arXiv database AI text-to-SQL evaluation</span><span class="topic-badge">논문</span><span class="topic-badge sub">AI 에이전트</span></span><p>arXiv 데이터베이스 AI에 공개된 데이터베이스 업무 AI 활용 관련 소식입니다. 연구 결과가 실제 운영, 자동화, 의사결정 개선에 연결될 수 있는지 검토해 보세요.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="5" data-title="arXiv 네트워크 AI: arXiv network AI anomaly detection agents" data-category="논문" data-subcategory="AI 에이전트" data-body="arXiv 네트워크 AI에 공개된 네트워크 운영 AI 활용 관련 소식입니다. 연구 결과가 실제 운영, 자동화, 의사결정 개선에 연결될 수 있는지 검토해 보세요." data-detail="arXiv 네트워크 AI에 공개된 네트워크 운영 AI 활용 관련 소식입니다. 연구 결과가 실제 운영, 자동화, 의사결정 개선에 연결될 수 있는지 검토해 보세요." data-meta="arXiv 네트워크 AI · 논문 · 2026-05-22" data-points="[&quot;1. 왜 필요한가요? 이번 업데이트가 실제 업무 흐름의 어떤 문제를 줄일 수 있는지 빠르게 판단하기 위해 필요합니다.&quot;, &quot;2. 핵심 구성 요소: 적용 대상, 필요한 도구, 운영 조건, 검수 기준을 함께 확인하는 것입니다.&quot;, &quot;3. 기존 방식과의 차이점: 단순 소식 전달이 아니라 업무에 붙일 수 있는 실행 단위로 정리합니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;, &quot;네트워크&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://arxiv.org/"><span><span class="card-heading"><span class="card-icon">5</span><span class="card-title">arXiv 네트워크 AI: arXiv network AI anomaly detection agents</span><span class="topic-badge">논문</span><span class="topic-badge sub">AI 에이전트</span></span><p>arXiv 네트워크 AI에 공개된 네트워크 운영 AI 활용 관련 소식입니다. 연구 결과가 실제 운영, 자동화, 의사결정 개선에 연결될 수 있는지 검토해 보세요.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="6" data-title="Google AI 블로그: Google AI Gemini app workflow updates" data-category="도구" data-subcategory="Google AI 블로그" data-body="Google AI 블로그에 공개된 AI 에이전트와 업무 자동화 관련 소식입니다. 새 기능이나 변경 사항이 업무 흐름에 어떤 영향을 주는지 확인해 보세요." data-detail="Google AI 블로그에 공개된 AI 에이전트와 업무 자동화 관련 소식입니다. 새 기능이나 변경 사항이 업무 흐름에 어떤 영향을 주는지 확인해 보세요." data-meta="Google AI 블로그 · 도구 업데이트 · 2026-05-21" data-points="[&quot;1. 왜 필요한가요? 이번 업데이트가 실제 업무 흐름의 어떤 문제를 줄일 수 있는지 빠르게 판단하기 위해 필요합니다.&quot;, &quot;2. 핵심 구성 요소: 적용 대상, 필요한 도구, 운영 조건, 검수 기준을 함께 확인하는 것입니다.&quot;, &quot;3. 기존 방식과의 차이점: 단순 소식 전달이 아니라 업무에 붙일 수 있는 실행 단위로 정리합니다.&quot;]" data-tags="[&quot;Google AI 블로그&quot;, &quot;도구 업데이트&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://blog.google/technology/ai/"><span><span class="card-heading"><span class="card-icon">6</span><span class="card-title">Google AI 블로그: Google AI Gemini app workflow updates</span><span class="topic-badge">도구</span><span class="topic-badge sub">Google AI 블로그</span></span><p>Google AI 블로그에 공개된 AI 에이전트와 업무 자동화 관련 소식입니다. 새 기능이나 변경 사항이 업무 흐름에 어떤 영향을 주는지 확인해 보세요.</p></span></button>
+<button class="insight-card" type="button" data-insight-card data-number="7" data-title="MIT Technology Review AI: MIT Technology Review enterprise AI governance" data-category="동향" data-subcategory="엔터프라이즈" data-body="MIT Technology Review AI에 공개된 기업 업무 적용 관련 소식입니다. 새 기능이나 변화가 어떤 업무 흐름에 붙을 수 있는지 빠르게 살펴보세요." data-detail="MIT Technology Review AI에 공개된 기업 업무 적용 관련 소식입니다. 새 기능이나 변화가 어떤 업무 흐름에 붙을 수 있는지 빠르게 살펴보세요." data-meta="MIT Technology Review AI · 동향 · 2026-05-20" data-points="[&quot;1. 왜 필요한가요? 이번 업데이트가 실제 업무 흐름의 어떤 문제를 줄일 수 있는지 빠르게 판단하기 위해 필요합니다.&quot;, &quot;2. 핵심 구성 요소: 적용 대상, 필요한 도구, 운영 조건, 검수 기준을 함께 확인하는 것입니다.&quot;, &quot;3. 기존 방식과의 차이점: 단순 소식 전달이 아니라 업무에 붙일 수 있는 실행 단위로 정리합니다.&quot;]" data-tags="[&quot;엔터프라이즈&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://www.technologyreview.com/topic/artificial-intelligence/"><span><span class="card-heading"><span class="card-icon">7</span><span class="card-title">MIT Technology Review AI: MIT Technology Review enterprise AI governance</span><span class="topic-badge trend">동향</span><span class="topic-badge sub">엔터프라이즈</span></span><p>MIT Technology Review AI에 공개된 기업 업무 적용 관련 소식입니다. 새 기능이나 변화가 어떤 업무 흐름에 붙을 수 있는지 빠르게 살펴보세요.</p></span></button></div><article class="insight-detail" aria-live="polite"><div><div class="detail-number" data-insight-number>1</div><div class="detail-meta" data-insight-meta>Anthropic 소식 · 도구 업데이트 · 2026-05-26</div><div class="detail-title-row"><h3 data-insight-title>Anthropic 소식: Claude Code SDK orchestration patterns</h3><span class="topic-badge" data-insight-category>도구</span><span class="topic-badge sub" data-insight-subcategory>Claude</span></div><p class="detail-summary" data-insight-body>Anthropic 소식에 공개된 개발 도구와 코딩 자동화 관련 소식입니다. 새 기능이나 변화가 어떤 업무 흐름에 붙을 수 있는지 빠르게 살펴보세요.</p><p class="detail-copy" data-insight-detail>Anthropic 소식에 공개된 개발 도구와 코딩 자동화 관련 소식입니다. 새 기능이나 변화가 어떤 업무 흐름에 붙을 수 있는지 빠르게 살펴보세요.</p><ul class="detail-points" data-insight-points><li>1. 왜 필요한가요? 반복되는 코드 수정, PR 보조, 저장소 작업을 개발자가 매번 직접 처리하지 않도록 줄여줍니다.</li><li>2. 핵심 구성 요소: 코드 맥락 이해, 변경안 생성, 테스트·PR 흐름 연결, 리뷰 보조입니다.</li><li>3. 기존 코드 자동완성과의 차이점: 한 줄 추천을 넘어 이슈 해결 흐름 전체를 대신 진행하는 방향입니다.</li></ul><div class="detail-footnotes-title" data-insight-footnotes-title>단어 설명</div><ol class="detail-footnotes" data-insight-footnotes><li>SDK: 특정 플랫폼 기능을 애플리케이션에 쉽게 붙일 수 있도록 제공되는 개발 도구 모음입니다.</li><li>오케스트레이션: 여러 작업, 도구, 서비스를 순서와 조건에 맞게 묶어 자동 실행하는 방식입니다.</li></ol><p class="detail-criteria" data-insight-criteria>선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다.</p><a class="detail-source" data-insight-source href="https://code.claude.com/docs/" target="_blank" rel="noopener noreferrer">https://code.claude.com/docs/</a></div><div class="detail-tags" data-insight-tags><span class="detail-tag">#Claude</span><span class="detail-tag">#AI 에이전트</span><span class="detail-tag">#코딩 자동화</span></div></article>
+<script>
+(() => {
+  const buttons = document.querySelectorAll('[data-insight-card]');
+  const number = document.querySelector('[data-insight-number]');
+  const title = document.querySelector('[data-insight-title]');
+  const category = document.querySelector('[data-insight-category]');
+  const subcategory = document.querySelector('[data-insight-subcategory]');
+  const body = document.querySelector('[data-insight-body]');
+  const detail = document.querySelector('[data-insight-detail]');
+  const meta = document.querySelector('[data-insight-meta]');
+  const points = document.querySelector('[data-insight-points]');
+  const tags = document.querySelector('[data-insight-tags]');
+  const footnotes = document.querySelector('[data-insight-footnotes]');
+  const footnotesTitle = document.querySelector('[data-insight-footnotes-title]');
+  const criteria = document.querySelector('[data-insight-criteria]');
+  const source = document.querySelector('[data-insight-source]');
+  const grid = document.querySelector('[data-insight-grid]');
+  const detailPanel = document.querySelector('.insight-detail');
+  const insightList = document.querySelector('.insight-list');
+  const mobileQuery = window.matchMedia('(max-width: 760px)');
+  if (!buttons.length || !number || !title || !category || !subcategory || !body || !detail || !meta || !points || !tags || !footnotes || !footnotesTitle || !criteria || !source || !grid || !detailPanel || !insightList) return;
+
+  const placeDetailPanel = (button) => {
+    if (mobileQuery.matches) {
+      button.insertAdjacentElement('afterend', detailPanel);
+    } else {
+      grid.appendChild(detailPanel);
+    }
+  };
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      grid.classList.add('has-selection');
+      buttons.forEach((item) => item.classList.remove('is-active'));
+      button.classList.add('is-active');
+      placeDetailPanel(button);
+      number.textContent = button.dataset.number || '';
+      title.textContent = button.dataset.title || '';
+      category.textContent = button.dataset.category || '';
+      category.classList.toggle('trend', button.dataset.category === '동향');
+      subcategory.textContent = button.dataset.subcategory || '';
+      body.textContent = button.dataset.body || '';
+      detail.textContent = button.dataset.detail || '';
+      meta.textContent = button.dataset.meta || '';
+      criteria.textContent = button.dataset.criteria || '';
+      const sourceUrl = button.dataset.source || '';
+      source.textContent = sourceUrl;
+      source.hidden = !sourceUrl;
+      if (sourceUrl && source instanceof HTMLAnchorElement) source.href = sourceUrl;
+
+      let pointItems = [];
+      let tagItems = [];
+      let footnoteItems = [];
+      try { pointItems = JSON.parse(button.dataset.points || '[]'); } catch (error) { pointItems = []; }
+      try { tagItems = JSON.parse(button.dataset.tags || '[]'); } catch (error) { tagItems = []; }
+      try { footnoteItems = JSON.parse(button.dataset.footnotes || '[]'); } catch (error) { footnoteItems = []; }
+      footnotesTitle.hidden = footnoteItems.length === 0;
+      points.replaceChildren(...pointItems.map((item) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        return li;
+      }));
+      footnotes.replaceChildren(...footnoteItems.map((item) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        return li;
+      }));
+      tags.replaceChildren(...tagItems.map((item) => {
+        const tag = document.createElement('span');
+        tag.className = 'detail-tag';
+        tag.textContent = '#' + item;
+        return tag;
+      }));
+    });
+  });
+
+  mobileQuery.addEventListener('change', () => {
+    const active = document.querySelector('[data-insight-card].is-active');
+    if (active instanceof HTMLElement) {
+      placeDetailPanel(active);
+    } else if (!mobileQuery.matches) {
+      grid.appendChild(detailPanel);
+    } else {
+      insightList.appendChild(detailPanel);
+    }
+  });
+})();
+</script>
 
       </div>
     </section>

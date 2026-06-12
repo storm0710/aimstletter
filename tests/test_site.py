@@ -331,7 +331,7 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "06월 1째주" in week_1
     assert "당신의 AI 역량을 성장시켜보세요" in week_2
     assert "업무 AI" in week_2
-    assert "GitHub Copilot coding agent update" in week_2
+    assert "Security validation for third-party coding agents" in week_2
     assert "해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준" in week_2
     assert "Previous Week" in week_2
     assert 'href="ai-sources/"' in week_2
@@ -364,19 +364,30 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
     week_2 = Path("public/archive/2026/06/week-2/index.html").read_text(encoding="utf-8")
     week_1 = Path("public/archive/2026/06/week-1/index.html").read_text(encoding="utf-8")
+    may_4 = Path("public/archive/2026/05/week-4/index.html").read_text(encoding="utf-8")
 
     week_2_titles = re.findall(r'data-title="([^"]*)"', week_2)
     week_1_titles = re.findall(r'data-title="([^"]*)"', week_1)
+    may_4_titles = re.findall(r'data-title="([^"]*)"', may_4)
 
     assert week_2_titles
     assert week_1_titles
+    assert may_4_titles
     assert week_2_titles != week_1_titles
-    assert len(week_2_titles) == len(set(week_2_titles))
+    assert may_4_titles != week_1_titles
+    assert may_4_titles != week_2_titles
     assert len(week_1_titles) == len(set(week_1_titles))
-    assert any("GitHub Copilot coding agent update" in title for title in week_2_titles)
+    assert len(may_4_titles) == len(set(may_4_titles))
+    assert any("Security validation for third-party coding agents" in title for title in week_2_titles)
     assert any("Prompt to workflow migration" in title for title in week_1_titles)
+    assert any("Claude Code SDK orchestration patterns" in title for title in may_4_titles)
+    assert any("OpenAI Responses API tool calling update" in title for title in may_4_titles)
+    assert any("GitHub Copilot pull request review workflow" in title for title in may_4_titles)
+    assert "2026-05-20~2026-05-26" in may_4
+    assert not any("Prompt to workflow migration" in title for title in may_4_titles)
     assert "Harness Engineering" not in week_2_titles
     assert "Harness Engineering" not in week_1_titles
+    assert "Harness Engineering" not in may_4_titles
 
 
 def test_weekly_pages_workflow_runs_wednesday_6am_kst() -> None:
