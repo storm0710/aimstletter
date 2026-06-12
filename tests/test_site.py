@@ -9,11 +9,13 @@ from aimstletter.site import (
     SiteItem,
     _fallback_korean_item,
     _item_slug,
+    _items_in_window,
     _rank_work_skill_updates,
     _render_analytics,
     _render_detail_page,
     _safe_korean_field,
     _safe_tags,
+    _weekly_window,
     render_homepage,
 )
 
@@ -112,6 +114,32 @@ def test_render_homepage_includes_archive_entries() -> None:
     assert 'href="archive/2026/06/week-1/"' in html
     assert html.index("06월 1째주") < html.index("06월 2째주")
     assert 'class="is-current" data-archive-link href="archive/2026/06/week-2/"' in html
+
+
+def test_weekly_window_uses_saturday_to_friday_range() -> None:
+    start, end = _weekly_window(datetime(2026, 6, 12, 12, tzinfo=UTC))
+
+    assert start.date().isoformat() == "2026-06-06"
+    assert end.date().isoformat() == "2026-06-12"
+
+    inside = DigestItem(
+        title="inside",
+        url="https://example.com/inside",
+        source="Example",
+        kind="tool",
+        published=datetime(2026, 6, 6, tzinfo=UTC),
+        summary="inside",
+    )
+    outside = DigestItem(
+        title="outside",
+        url="https://example.com/outside",
+        source="Example",
+        kind="tool",
+        published=datetime(2026, 6, 5, tzinfo=UTC),
+        summary="outside",
+    )
+
+    assert _items_in_window([inside, outside], start, end) == [inside]
 
 
 def test_safe_tags_keeps_product_names_and_deduplicates() -> None:
@@ -254,6 +282,7 @@ def test_committed_ai_tools_page_exists() -> None:
 
     assert "AI 활용 도구" in html
     assert "background: #ffffff;" in html
+    assert "white-space: nowrap;" in html
     assert "tool-category" in html
     assert "개발·코딩 에이전트" in html
     assert "앱 제작·프로토타입" in html

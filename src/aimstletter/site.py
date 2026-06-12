@@ -80,17 +80,20 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     kst = timezone(timedelta(hours=9), name="KST")
     now = datetime.now(UTC).astimezone(kst)
 
+    week_start, week_end = _weekly_window(now)
+    raw_feed_items = fetch_recent_items(settings.feeds, settings.lookback_days)
+    raw_tool_items = fetch_recent_items(settings.tool_feeds, 21)
     source_items = _dedupe_items(
         [
-            *fetch_recent_items(settings.feeds, settings.lookback_days),
-            *fetch_recent_items(settings.tool_feeds, 21),
+            *_items_in_window(raw_feed_items, week_start, week_end),
+            *_items_in_window(raw_tool_items, week_start, week_end),
         ]
     )
     skill_items = _rank_work_skill_updates(source_items, 5)
     skill_urls = {item.url for item in skill_items}
     other_source_items = [item for item in source_items if item.url not in skill_urls]
     ai_items = [*skill_items, *_latest_digest_items(rank_items(other_source_items, 12), 5)]
-    tool_items = _rank_tool_updates(fetch_recent_items(settings.tool_feeds, 21), 10)
+    tool_items = _rank_tool_updates(_items_in_window(raw_tool_items, week_start, week_end), 10)
     ai_items = _localize_items(ai_items, settings, "DBA, 네트워크, 서버 운영자가 업무에 적용할 AI 스킬 업데이트")
     tool_items = _localize_items(tool_items, settings, "인공지능 도구 업데이트")
     archive_entry = _weekly_archive_entry(now)
@@ -137,13 +140,49 @@ def render_homepage(
     )
 
 
+def _weekly_window(day: datetime) -> tuple[datetime, datetime]:
+    kst = timezone(timedelta(hours=9), name="KST")
+    day_kst = day.astimezone(kst)
+    friday_offset = (4 - day_kst.weekday()) % 7
+    week_end = (day_kst + timedelta(days=friday_offset)).replace(
+        hour=23, minute=59, second=59, microsecond=999999
+    )
+    week_start = (week_end - timedelta(days=6)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    return week_start, week_end
+
+
+def _items_in_window(
+    items: list[DigestItem],
+    start: datetime,
+    end: datetime,
+) -> list[DigestItem]:
+    kst = timezone(timedelta(hours=9), name="KST")
+    return [item for item in items if start <= item.published.astimezone(kst) <= end]
+
+
+def _period_label(start: datetime, end: datetime) -> str:
+    return f"{start:%Y-%m-%d}~{end:%Y-%m-%d} 데이터"
+
+
+def _archive_week_window(year: int, month: int, week: int) -> tuple[datetime, datetime]:
+    kst = timezone(timedelta(hours=9), name="KST")
+    anchor_day = min(((week - 1) * 7) + 1, 28)
+    return _weekly_window(datetime(year, month, anchor_day, 12, tzinfo=kst))
+
+
 def _weekly_archive_entry(day: datetime) -> dict[str, object]:
     week = ((day.day - 1) // 7) + 1
+    start, end = _weekly_window(day)
     return {
         "year": day.year,
         "month": day.month,
         "week": week,
         "href": f"archive/{day.year}/{day.month:02d}/week-{week}/",
+        "period_start": start.date().isoformat(),
+        "period_end": end.date().isoformat(),
+        "period_label": _period_label(start, end),
     }
 
 
@@ -161,11 +200,15 @@ def _collect_archive_entries(
                 week = int(path.parts[-2].replace("week-", ""))
             except (ValueError, IndexError):
                 continue
+            start, end = _archive_week_window(year, month, week)
             entries[(year, month, week)] = {
                 "year": year,
                 "month": month,
                 "week": week,
                 "href": f"archive/{year}/{month:02d}/week-{week}/",
+                "period_start": start.date().isoformat(),
+                "period_end": end.date().isoformat(),
+                "period_label": _period_label(start, end),
             }
     key = (
         int(current_entry["year"]),
@@ -556,8 +599,22 @@ def _render_tags(item: SiteItem) -> str:
     return f'<div class="tags" aria-label="중요 키워드">{tags}</div>'
 
 
-def _archive_entry_key(entry: dict[str, object]) -> tuple[int, int, int]:
+def _archive_entry_key(entry: dict[str, object] | None) -> tuple[int, int, int]:
+    if not entry:
+        return (0, 0, 0)
     return (int(entry["year"]), int(entry["month"]), int(entry["week"]))
+
+
+def _previous_archive_entry(
+    entries: list[dict[str, object]],
+    current_entry: dict[str, object] | None,
+) -> dict[str, object] | None:
+    if not entries or not current_entry:
+        return None
+    current_key = _archive_entry_key(current_entry)
+    ordered = sorted(entries, key=_archive_entry_key)
+    previous = [entry for entry in ordered if _archive_entry_key(entry) < current_key]
+    return previous[-1] if previous else None
 
 
 def _render_archive_nav(
@@ -624,6 +681,14 @@ def _render_editorial_homepage(
     insight_cards = _render_smart_insight_cards(all_items)
     logo_roll = _render_logo_roll()
     archive_html = _render_archive_nav(archive_entries or [], current_entry=current_archive_entry)
+    previous_archive = _previous_archive_entry(archive_entries or [], current_archive_entry)
+    previous_week_button = (
+        f'<a class="week-button" href="{escape(str(previous_archive["href"]))}">전주로</a>'
+        if previous_archive
+        else ""
+    )
+    period_label = str(current_archive_entry.get("period_label", "")) if current_archive_entry else ""
+    date_label = f"{escape(today)} · {escape(period_label)}" if period_label else escape(today)
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -655,7 +720,7 @@ def _render_editorial_homepage(
       margin: 0 auto;
       min-height: 100vh;
       --archive-width: 228px;
-      --archive-gap: 128px;
+      --archive-gap: 64px;
     }}
     .page-shell {{
       position: relative;
@@ -833,7 +898,26 @@ def _render_editorial_homepage(
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 18px;
+      gap: 8px;
+    }}
+    .week-button {{
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 14px;
+      border: 1px solid #111111;
+      color: #111111;
+      border-radius: 4px;
+      font-weight: 800;
+      font-size: 12px;
+      background: #ffffff;
+    }}
+    .week-button:hover,
+    .week-button:focus-visible {{
+      background: #111111;
+      color: #ffffff;
+      outline: 0;
     }}
     .button {{
       min-height: 32px;
@@ -1425,6 +1509,7 @@ def _render_editorial_homepage(
         <a href="ai-tools/">AI 도구</a>
       </nav>
       <div class="nav-actions">
+        {previous_week_button}
         <a class="button" href="#insights">Read This Week</a>
       </div>
     </header>
@@ -1451,7 +1536,7 @@ def _render_editorial_homepage(
       </section>
       <div class="intro-row">
         <p class="intro-copy">{escape(_editorial_intro_copy(lead_summary))}</p>
-        <div class="date">{escape(today)} · curated weekly for AI Master teams</div>
+        <div class="date">{date_label} · curated weekly for AI Master teams</div>
       </div>
     </section>
     <section class="logo-roll" aria-label="Source roll">
@@ -3436,7 +3521,9 @@ def _render_plain_page(title: str, analytics_html: str, body: str) -> str:
       margin: 0;
       padding: 0;
       font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
-      font-size: clamp(24px, 3vw, 38px);
+      font-size: clamp(22px, 2.4vw, 32px);
+      white-space: nowrap;
+      word-break: keep-all;
     }}
     .tool-category-header p {{
       margin: 0;
