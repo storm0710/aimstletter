@@ -216,7 +216,7 @@ def _collect_archive_entries(
         int(current_entry["week"]),
     )
     entries[key] = current_entry
-    return [entries[key] for key in sorted(entries, reverse=True)]
+    return [entries[key] for key in sorted(entries)]
 
 
 def _write_weekly_archive(
@@ -646,11 +646,11 @@ def _render_archive_nav(
     current_key = _archive_entry_key(current_entry) if current_entry else max(
         _archive_entry_key(entry) for entry in entries
     )
-    for year in sorted(grouped, reverse=True):
+    for year in sorted(grouped):
         months = []
-        for month in sorted(grouped[year], reverse=True):
+        for month in sorted(grouped[year]):
             links = []
-            for entry in sorted(grouped[year][month], key=lambda item: int(item["week"]), reverse=True):
+            for entry in sorted(grouped[year][month], key=lambda item: int(item["week"])):
                 entry_key = (year, month, int(entry["week"]))
                 current_class = ' class="is-current"' if entry_key == current_key else ""
                 links.append(
