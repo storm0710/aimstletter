@@ -50,10 +50,10 @@ jobs:
           SITE_ANALYTICS_ID: ${{ vars.SITE_ANALYTICS_ID }}
           SITE_ANALYTICS_DOMAIN: ${{ vars.SITE_ANALYTICS_DOMAIN }}
         run: |
-          if timeout 300s aimstletter-site --output-dir public; then
+          if timeout 900s aimstletter-site --output-dir public; then
             echo "Site generated successfully."
           else
-            echo "Site generation did not finish within 5 minutes; deploying committed public files."
+            echo "Site generation did not finish within 15 minutes; deploying committed public files."
           fi
 
       - name: Preserve weekly archive
