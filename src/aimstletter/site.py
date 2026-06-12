@@ -143,8 +143,8 @@ def render_homepage(
 def _weekly_window(day: datetime) -> tuple[datetime, datetime]:
     kst = timezone(timedelta(hours=9), name="KST")
     day_kst = day.astimezone(kst)
-    friday_offset = (4 - day_kst.weekday()) % 7
-    week_end = (day_kst + timedelta(days=friday_offset)).replace(
+    tuesday_offset = (day_kst.weekday() - 1) % 7
+    week_end = (day_kst - timedelta(days=tuesday_offset)).replace(
         hour=23, minute=59, second=59, microsecond=999999
     )
     week_start = (week_end - timedelta(days=6)).replace(
@@ -168,7 +168,7 @@ def _period_label(start: datetime, end: datetime) -> str:
 
 def _archive_week_window(year: int, month: int, week: int) -> tuple[datetime, datetime]:
     kst = timezone(timedelta(hours=9), name="KST")
-    anchor_day = min(((week - 1) * 7) + 1, 28)
+    anchor_day = min(((week - 1) * 7) + 3, 28)
     return _weekly_window(datetime(year, month, anchor_day, 12, tzinfo=kst))
 
 
@@ -1416,13 +1416,24 @@ def _render_editorial_homepage(
     .detail-footnotes {{
       display: grid;
       gap: 6px;
-      margin: 22px 0 0;
+      margin: 8px 0 0;
       padding: 12px 0 0 18px;
       border-top: 1px solid rgba(0,0,0,.12);
       color: #565656;
       font-size: 12px;
       line-height: 1.55;
       max-width: 620px;
+    }}
+    .detail-footnotes-title {{
+      display: block;
+      margin: 22px 0 0;
+      color: #111;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.4;
+    }}
+    .detail-footnotes-title[hidden] {{
+      display: none;
     }}
     .detail-tags {{
       display: flex;
@@ -1652,6 +1663,11 @@ def _render_editorial_homepage(
         if (firstVisible) firstVisible.click();
       }};
 
+      const clearInsightSelection = () => {{
+        insightCards.forEach((card) => card.classList.remove("is-active"));
+        if (insightDetail) insightDetail.hidden = true;
+      }};
+
       archiveLinks.forEach((link) => {{
         link.addEventListener("click", (event) => {{
           const target = new URL(link.href, window.location.href);
@@ -1659,7 +1675,7 @@ def _render_editorial_homepage(
             event.preventDefault();
             window.history.pushState(null, "", "#insights");
             showArchiveInsights();
-            selectFirstVisibleCard();
+            clearInsightSelection();
           }} else {{
             window.sessionStorage.setItem("aimstletter.archiveInsightsOnly", "1");
           }}
@@ -1686,7 +1702,7 @@ def _render_editorial_homepage(
             card.hidden = !cardMatches(card, query);
           }});
           if (query) showArchiveInsights(false);
-          selectFirstVisibleCard();
+          clearInsightSelection();
         }});
       }}
 
@@ -1696,6 +1712,7 @@ def _render_editorial_homepage(
       ) {{
         window.sessionStorage.removeItem("aimstletter.archiveInsightsOnly");
         showArchiveInsights(false);
+        clearInsightSelection();
       }}
     }})();
   </script>
@@ -2644,6 +2661,9 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + '<ul class="detail-points" data-insight-points>'
         + "".join(f"<li>{escape(point)}</li>" for point in first_points[:4])
         + "</ul>"
+        + '<div class="detail-footnotes-title" data-insight-footnotes-title'
+        + (" hidden" if not first_footnotes else "")
+        + ">단어 설명</div>"
         + '<ol class="detail-footnotes" data-insight-footnotes>'
         + "".join(f"<li>{escape(note)}</li>" for note in first_footnotes[:5])
         + "</ol>"
@@ -2670,13 +2690,14 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const points = document.querySelector('[data-insight-points]');
   const tags = document.querySelector('[data-insight-tags]');
   const footnotes = document.querySelector('[data-insight-footnotes]');
+  const footnotesTitle = document.querySelector('[data-insight-footnotes-title]');
   const criteria = document.querySelector('[data-insight-criteria]');
   const source = document.querySelector('[data-insight-source]');
   const grid = document.querySelector('[data-insight-grid]');
   const detailPanel = document.querySelector('.insight-detail');
   const insightList = document.querySelector('.insight-list');
   const mobileQuery = window.matchMedia('(max-width: 760px)');
-  if (!buttons.length || !number || !title || !category || !subcategory || !body || !detail || !meta || !points || !tags || !footnotes || !criteria || !source || !grid || !detailPanel || !insightList) return;
+  if (!buttons.length || !number || !title || !category || !subcategory || !body || !detail || !meta || !points || !tags || !footnotes || !footnotesTitle || !criteria || !source || !grid || !detailPanel || !insightList) return;
 
   const placeDetailPanel = (button) => {
     if (mobileQuery.matches) {
@@ -2712,6 +2733,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
       try { pointItems = JSON.parse(button.dataset.points || '[]'); } catch (error) { pointItems = []; }
       try { tagItems = JSON.parse(button.dataset.tags || '[]'); } catch (error) { tagItems = []; }
       try { footnoteItems = JSON.parse(button.dataset.footnotes || '[]'); } catch (error) { footnoteItems = []; }
+      footnotesTitle.hidden = footnoteItems.length === 0;
       points.replaceChildren(...pointItems.map((item) => {
         const li = document.createElement('li');
         li.textContent = item;

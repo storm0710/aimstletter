@@ -117,18 +117,18 @@ def test_render_homepage_includes_archive_entries() -> None:
     assert 'class="is-current" data-archive-link href="archive/2026/06/week-2/"' in html
 
 
-def test_weekly_window_uses_saturday_to_friday_range() -> None:
-    start, end = _weekly_window(datetime(2026, 6, 12, 12, tzinfo=UTC))
+def test_weekly_window_uses_previous_wednesday_to_tuesday_range() -> None:
+    start, end = _weekly_window(datetime(2026, 6, 10, 6, tzinfo=UTC))
 
-    assert start.date().isoformat() == "2026-06-06"
-    assert end.date().isoformat() == "2026-06-12"
+    assert start.date().isoformat() == "2026-06-03"
+    assert end.date().isoformat() == "2026-06-09"
 
     inside = DigestItem(
         title="inside",
         url="https://example.com/inside",
         source="Example",
         kind="tool",
-        published=datetime(2026, 6, 6, tzinfo=UTC),
+        published=datetime(2026, 6, 3, tzinfo=UTC),
         summary="inside",
     )
     outside = DigestItem(
@@ -136,7 +136,7 @@ def test_weekly_window_uses_saturday_to_friday_range() -> None:
         url="https://example.com/outside",
         source="Example",
         kind="tool",
-        published=datetime(2026, 6, 5, tzinfo=UTC),
+        published=datetime(2026, 6, 2, tzinfo=UTC),
         summary="outside",
     )
 
@@ -331,6 +331,13 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "button.insertAdjacentElement('afterend', detailPanel)" in week_2
     assert ".insight-grid.has-selection .insight-detail { display: flex; }" in week_2
     assert "smartInsightLinks.forEach" in week_2
+    assert "data-insight-footnotes-title" in week_2
+    assert "단어 설명" in week_2
+    assert "const clearInsightSelection" in week_2
+    assert "clearInsightSelection();" in week_2
+    assert "selectFirstVisibleCard();" in week_2
+    assert "window.sessionStorage.setItem(\"aimstletter.archiveInsightsOnly\", \"1\")" in week_2
+    assert "2026-06-03~2026-06-09 데이터" in week_2
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
@@ -349,3 +356,10 @@ def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
     assert any("Prompt to workflow migration" in title for title in week_1_titles)
     assert "Harness Engineering" not in week_2_titles
     assert "Harness Engineering" not in week_1_titles
+
+
+def test_weekly_pages_workflow_runs_wednesday_6am_kst() -> None:
+    workflow = Path(".github/workflows/weekly-pages.yml").read_text(encoding="utf-8")
+
+    assert "06:00 every Wednesday in Asia/Seoul" in workflow
+    assert 'cron: "0 21 * * 2"' in workflow

@@ -3,8 +3,8 @@ name: Weekly AI digest issue
 on:
   workflow_dispatch:
   schedule:
-    # 09:00 every Wednesday in Asia/Seoul.
-    - cron: "0 0 * * 3"
+    # 06:00 every Wednesday in Asia/Seoul.
+    - cron: "0 21 * * 2"
 
 permissions:
   contents: read
