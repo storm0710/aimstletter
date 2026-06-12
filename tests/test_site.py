@@ -386,6 +386,12 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "overflow-y: auto" in week_2
     assert "justify-content: flex-start" in week_2
     assert "overscroll-behavior: contain" in week_2
+    assert "background: #dff5e7" in week_2
+    assert "color: #247a43" in week_2
+    assert "background: #eefaf2" in week_2
+    assert "border: 1px solid #bfe7cc" in week_2
+    assert "margin: 14px 0 22px 12px" in week_2
+    assert "width: calc(100% - 12px)" in week_2
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:

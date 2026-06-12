@@ -1297,8 +1297,8 @@ def _render_editorial_homepage(
       align-items: center;
       min-height: 18px;
       border-radius: 999px;
-      background: #ffe1ef;
-      color: #b73572;
+      background: #dff5e7;
+      color: #247a43;
       padding: 0 8px;
       font-family: Arial, "Noto Sans KR", sans-serif;
       font-size: 10px;
@@ -1312,9 +1312,9 @@ def _render_editorial_homepage(
       color: #4772a6;
     }}
     .topic-badge.sub {{
-      background: #fff0f7;
-      color: #a84a77;
-      border: 1px solid #ffd4e6;
+      background: #eefaf2;
+      color: #2f7f4d;
+      border: 1px solid #bfe7cc;
     }}
     .topic-badge.trend + .topic-badge.sub {{
       background: #eef6ff;
@@ -1526,9 +1526,9 @@ def _render_editorial_homepage(
         position: static;
         min-height: 360px;
         max-height: none;
-        margin: 14px 0 22px 36px;
+        margin: 14px 0 22px 12px;
         padding: 24px;
-        width: calc(100% - 36px);
+        width: calc(100% - 12px);
         overflow: visible;
       }}
       .insight-grid.has-selection .insight-detail {{ display: flex; }}
