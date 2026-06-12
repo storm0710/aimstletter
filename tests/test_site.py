@@ -388,12 +388,25 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "overflow-y: auto" in week_2
     assert "justify-content: flex-start" in week_2
     assert "overscroll-behavior: contain" in week_2
+    assert "background: #e4efff" in week_2
+    assert "color: #2462a8" in week_2
+    assert ".topic-badge.paper" in week_2
     assert "background: #dff5e7" in week_2
-    assert "color: #247a43" in week_2
-    assert "background: #eefaf2" in week_2
-    assert "border: 1px solid #bfe7cc" in week_2
-    assert "margin: 14px 0 22px 12px" in week_2
-    assert "width: calc(100% - 12px)" in week_2
+    assert ".topic-badge.trend" in week_2
+    assert "background: #ffe8e8" in week_2
+    paper = "\ub17c\ubb38"
+    tool = "\ub3c4\uad6c"
+    trend = "\ub3d9\ud5a5"
+    source_label = "\uc6d0\ubb38 \ubcf4\uae30"
+    assert f'class="topic-badge paper">{paper}</span>' in week_2
+    assert f'class="topic-badge">{tool}</span>' in week_2
+    assert f'class="topic-badge trend">{trend}</span>' in week_2
+    assert '<a class="detail-source" data-insight-source' in week_2
+    assert f">{source_label}</a>" in week_2
+    assert "원문 보기" in week_2
+    assert "margin: 14px 0 22px" in week_2
+    assert "width: 100%" in week_2
+    assert "box-sizing: border-box" in week_2
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:

@@ -583,8 +583,8 @@
       align-items: center;
       min-height: 18px;
       border-radius: 999px;
-      background: #dff5e7;
-      color: #247a43;
+      background: #e4efff;
+      color: #2462a8;
       padding: 0 8px;
       font-family: Arial, "Noto Sans KR", sans-serif;
       font-size: 10px;
@@ -594,18 +594,27 @@
       white-space: nowrap;
     }
     .topic-badge.trend {
-      background: #e7f2ff;
-      color: #4772a6;
+      background: #ffe8e8;
+      color: #b73535;
+    }
+    .topic-badge.paper {
+      background: #dff5e7;
+      color: #247a43;
     }
     .topic-badge.sub {
+      background: #edf5ff;
+      color: #2d67a8;
+      border: 1px solid #c6dcf8;
+    }
+    .topic-badge.paper + .topic-badge.sub {
       background: #eefaf2;
       color: #2f7f4d;
-      border: 1px solid #bfe7cc;
+      border-color: #bfe7cc;
     }
     .topic-badge.trend + .topic-badge.sub {
-      background: #eef6ff;
-      color: #5d7fa8;
-      border-color: #d8e8fa;
+      background: #fff0f0;
+      color: #a84545;
+      border-color: #f4c9c9;
     }
     .insight-grid.has-selection .card-heading {
       margin-bottom: 6px;
@@ -704,13 +713,19 @@
       max-width: 620px;
     }
     .detail-source {
-      display: inline-block;
-      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 14px;
+      border: 1px solid #111;
+      background: #fff;
+      min-height: 32px;
+      padding: 0 12px;
       color: #111;
       font-size: 12px;
-      font-weight: 800;
-      line-height: 1.45;
-      overflow-wrap: anywhere;
+      font-weight: 900;
+      line-height: 1;
+      text-decoration: none;
     }
     .detail-points {
       display: grid;
@@ -812,9 +827,10 @@
         position: static;
         min-height: 360px;
         max-height: none;
-        margin: 14px 0 22px 12px;
+        margin: 14px 0 22px;
         padding: 24px;
-        width: calc(100% - 12px);
+        width: 100%;
+        box-sizing: border-box;
         overflow: visible;
       }
       .insight-grid.has-selection .insight-detail { display: flex; }
@@ -883,7 +899,7 @@
 <button class="insight-card" type="button" data-insight-card data-number="4" data-title="LangChain: LangGraph workflow layer" data-category="도구" data-subcategory="AI 에이전트" data-body="여러 단계로 움직이는 AI 에이전트의 상태와 분기 흐름을 안정적으로 관리하기 위해 필요합니다. 그래프 기반 단계 정의, 상태 저장, 도구 호출, 재개 가능한 실행입니다." data-detail="여러 단계로 움직이는 AI 에이전트의 상태와 분기 흐름을 안정적으로 관리하기 위해 필요합니다. 그래프 기반 단계 정의, 상태 저장, 도구 호출, 재개 가능한 실행입니다." data-meta="LangChain · 도구 업데이트 · 2026-06-06" data-points="[&quot;1. 왜 필요한가요? 여러 단계로 움직이는 AI 에이전트의 상태와 분기 흐름을 안정적으로 관리하기 위해 필요합니다.&quot;, &quot;2. 핵심 구성 요소: 그래프 기반 단계 정의, 상태 저장, 도구 호출, 재개 가능한 실행입니다.&quot;, &quot;3. 단순 프롬프트 체인과의 차이점: 순서대로 호출하는 수준을 넘어 조건 분기와 상태 관리가 중심입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://docs.langchain.com/langgraph-platform/"><span><span class="card-heading"><span class="card-icon">4</span><span class="card-title">LangChain: LangGraph workflow layer</span><span class="topic-badge">도구</span><span class="topic-badge sub">AI 에이전트</span></span><p>여러 단계로 움직이는 AI 에이전트의 상태와 분기 흐름을 안정적으로 관리하기 위해 필요합니다. 그래프 기반 단계 정의, 상태 저장, 도구 호출, 재개 가능한 실행입니다.</p></span></button>
 <button class="insight-card" type="button" data-insight-card data-number="5" data-title="n8n: n8n AI workflow automation" data-category="도구" data-subcategory="n8n" data-body="여러 업무 도구와 AI 호출을 연결해 반복 작업을 자동으로 처리하기 위해 필요합니다. 트리거, 노드, 조건 분기, 외부 서비스 연동, AI 처리 단계입니다." data-detail="여러 업무 도구와 AI 호출을 연결해 반복 작업을 자동으로 처리하기 위해 필요합니다. 트리거, 노드, 조건 분기, 외부 서비스 연동, AI 처리 단계입니다." data-meta="n8n · 도구 업데이트 · 2026-06-05" data-points="[&quot;1. 왜 필요한가요? 여러 업무 도구와 AI 호출을 연결해 반복 작업을 자동으로 처리하기 위해 필요합니다.&quot;, &quot;2. 핵심 구성 요소: 트리거, 노드, 조건 분기, 외부 서비스 연동, AI 처리 단계입니다.&quot;, &quot;3. 수동 업무와의 차이점: 사람이 복사하고 확인하던 절차를 규칙화해 반복 실행할 수 있습니다.&quot;]" data-tags="[&quot;n8n&quot;, &quot;도구 업데이트&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://n8n.io/"><span><span class="card-heading"><span class="card-icon">5</span><span class="card-title">n8n: n8n AI workflow automation</span><span class="topic-badge">도구</span><span class="topic-badge sub">n8n</span></span><p>여러 업무 도구와 AI 호출을 연결해 반복 작업을 자동으로 처리하기 위해 필요합니다. 트리거, 노드, 조건 분기, 외부 서비스 연동, AI 처리 단계입니다.</p></span></button>
 <button class="insight-card" type="button" data-insight-card data-number="6" data-title="Temporal: Temporal durable execution for agents" data-category="도구" data-subcategory="AI 에이전트" data-body="오래 걸리는 AI 작업이 중간에 실패해도 재시도와 복구를 안정적으로 처리하기 위해 필요합니다. 워크플로 상태 저장, 재시도 정책, 작업 큐, 실행 이력 추적입니다." data-detail="오래 걸리는 AI 작업이 중간에 실패해도 재시도와 복구를 안정적으로 처리하기 위해 필요합니다. 워크플로 상태 저장, 재시도 정책, 작업 큐, 실행 이력 추적입니다." data-meta="Temporal · 도구 업데이트 · 2026-06-04" data-points="[&quot;1. 왜 필요한가요? 오래 걸리는 AI 작업이 중간에 실패해도 재시도와 복구를 안정적으로 처리하기 위해 필요합니다.&quot;, &quot;2. 핵심 구성 요소: 워크플로 상태 저장, 재시도 정책, 작업 큐, 실행 이력 추적입니다.&quot;, &quot;3. 일반 자동화와의 차이점: 한 번 실행하고 끝나는 스크립트가 아니라 실패와 지연을 전제로 계속 이어지는 운영 흐름입니다.&quot;]" data-tags="[&quot;AI 에이전트&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://temporal.io/"><span><span class="card-heading"><span class="card-icon">6</span><span class="card-title">Temporal: Temporal durable execution for agents</span><span class="topic-badge">도구</span><span class="topic-badge sub">AI 에이전트</span></span><p>오래 걸리는 AI 작업이 중간에 실패해도 재시도와 복구를 안정적으로 처리하기 위해 필요합니다. 워크플로 상태 저장, 재시도 정책, 작업 큐, 실행 이력 추적입니다.</p></span></button>
-<button class="insight-card" type="button" data-insight-card data-number="7" data-title="Datadog: Datadog AI observability" data-category="도구" data-subcategory="Datadog" data-body="AI 기능의 비용, 지연, 오류, 품질 문제를 운영 중에 빠르게 찾기 위해 필요합니다. 로그, 메트릭, 트레이스, 알림, 대시보드입니다." data-detail="AI 기능의 비용, 지연, 오류, 품질 문제를 운영 중에 빠르게 찾기 위해 필요합니다. 로그, 메트릭, 트레이스, 알림, 대시보드입니다." data-meta="Datadog · 도구 업데이트 · 2026-06-03" data-points="[&quot;1. 왜 필요한가요? AI 기능의 비용, 지연, 오류, 품질 문제를 운영 중에 빠르게 찾기 위해 필요합니다.&quot;, &quot;2. 핵심 구성 요소: 로그, 메트릭, 트레이스, 알림, 대시보드입니다.&quot;, &quot;3. 일반 모니터링과의 차이점: 모델 호출과 응답 품질 같은 AI 특화 신호까지 함께 봅니다.&quot;]" data-tags="[&quot;Datadog&quot;, &quot;도구 업데이트&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://docs.datadoghq.com/"><span><span class="card-heading"><span class="card-icon">7</span><span class="card-title">Datadog: Datadog AI observability</span><span class="topic-badge">도구</span><span class="topic-badge sub">Datadog</span></span><p>AI 기능의 비용, 지연, 오류, 품질 문제를 운영 중에 빠르게 찾기 위해 필요합니다. 로그, 메트릭, 트레이스, 알림, 대시보드입니다.</p></span></button></div><article class="insight-detail" aria-live="polite"><div><div class="detail-number" data-insight-number>1</div><div class="detail-meta" data-insight-meta>GitHub Copilot 변경 이력 · 도구 업데이트 · 2026-06-09</div><div class="detail-title-row"><h3 data-insight-title>GitHub Copilot 변경 이력: GitHub Copilot coding agent update</h3><span class="topic-badge" data-insight-category>도구</span><span class="topic-badge sub" data-insight-subcategory>GitHub Copilot</span></div><p class="detail-summary" data-insight-body>GitHub Copilot이 단순 코드 추천을 넘어 이슈 해결과 코드 변경을 이어서 수행하는 코딩 에이전트 업데이트입니다. 개발자가 반복적으로 하던 수정, 테스트, 리뷰 준비 흐름을 더 큰 작업 단위로 맡길 수 있게 하는 내용입니다.</p><p class="detail-copy" data-insight-detail>GitHub Copilot이 단순 코드 추천을 넘어 이슈 해결과 코드 변경을 이어서 수행하는 코딩 에이전트 업데이트입니다. 개발자가 반복적으로 하던 수정, 테스트, 리뷰 준비 흐름을 더 큰 작업 단위로 맡길 수 있게 하는 내용입니다.</p><ul class="detail-points" data-insight-points><li>1. 왜 필요한가요? 이슈 처리, 코드 수정, 테스트 보조를 Copilot이 더 긴 작업 단위로 이어가게 하기 위해 필요합니다.</li><li>2. 핵심 구성 요소: 저장소 맥락 이해, 작업 계획, 코드 변경, 검증 결과와 리뷰 피드백 반영입니다.</li><li>3. 기존 Copilot과의 차이점: 한 줄 추천보다 이슈 해결 흐름 전체를 맡기는 에이전트형 작업 방식에 가깝습니다.</li></ul><div class="detail-footnotes-title" data-insight-footnotes-title hidden>단어 설명</div><ol class="detail-footnotes" data-insight-footnotes></ol><p class="detail-criteria" data-insight-criteria>선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다.</p><a class="detail-source" data-insight-source href="https://github.blog/changelog/" target="_blank" rel="noopener noreferrer">https://github.blog/changelog/</a></div><div class="detail-tags" data-insight-tags><span class="detail-tag">#GitHub Copilot</span><span class="detail-tag">#AI 에이전트</span><span class="detail-tag">#코딩 자동화</span></div></article>
+<button class="insight-card" type="button" data-insight-card data-number="7" data-title="Datadog: Datadog AI observability" data-category="도구" data-subcategory="Datadog" data-body="AI 기능의 비용, 지연, 오류, 품질 문제를 운영 중에 빠르게 찾기 위해 필요합니다. 로그, 메트릭, 트레이스, 알림, 대시보드입니다." data-detail="AI 기능의 비용, 지연, 오류, 품질 문제를 운영 중에 빠르게 찾기 위해 필요합니다. 로그, 메트릭, 트레이스, 알림, 대시보드입니다." data-meta="Datadog · 도구 업데이트 · 2026-06-03" data-points="[&quot;1. 왜 필요한가요? AI 기능의 비용, 지연, 오류, 품질 문제를 운영 중에 빠르게 찾기 위해 필요합니다.&quot;, &quot;2. 핵심 구성 요소: 로그, 메트릭, 트레이스, 알림, 대시보드입니다.&quot;, &quot;3. 일반 모니터링과의 차이점: 모델 호출과 응답 품질 같은 AI 특화 신호까지 함께 봅니다.&quot;]" data-tags="[&quot;Datadog&quot;, &quot;도구 업데이트&quot;]" data-criteria="선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다." data-footnotes="[]" data-source="https://docs.datadoghq.com/"><span><span class="card-heading"><span class="card-icon">7</span><span class="card-title">Datadog: Datadog AI observability</span><span class="topic-badge">도구</span><span class="topic-badge sub">Datadog</span></span><p>AI 기능의 비용, 지연, 오류, 품질 문제를 운영 중에 빠르게 찾기 위해 필요합니다. 로그, 메트릭, 트레이스, 알림, 대시보드입니다.</p></span></button></div><article class="insight-detail" aria-live="polite"><div><div class="detail-number" data-insight-number>1</div><div class="detail-meta" data-insight-meta>GitHub Copilot 변경 이력 · 도구 업데이트 · 2026-06-09</div><div class="detail-title-row"><h3 data-insight-title>GitHub Copilot 변경 이력: GitHub Copilot coding agent update</h3><span class="topic-badge" data-insight-category>도구</span><span class="topic-badge sub" data-insight-subcategory>GitHub Copilot</span></div><p class="detail-summary" data-insight-body>GitHub Copilot이 단순 코드 추천을 넘어 이슈 해결과 코드 변경을 이어서 수행하는 코딩 에이전트 업데이트입니다. 개발자가 반복적으로 하던 수정, 테스트, 리뷰 준비 흐름을 더 큰 작업 단위로 맡길 수 있게 하는 내용입니다.</p><p class="detail-copy" data-insight-detail>GitHub Copilot이 단순 코드 추천을 넘어 이슈 해결과 코드 변경을 이어서 수행하는 코딩 에이전트 업데이트입니다. 개발자가 반복적으로 하던 수정, 테스트, 리뷰 준비 흐름을 더 큰 작업 단위로 맡길 수 있게 하는 내용입니다.</p><ul class="detail-points" data-insight-points><li>1. 왜 필요한가요? 이슈 처리, 코드 수정, 테스트 보조를 Copilot이 더 긴 작업 단위로 이어가게 하기 위해 필요합니다.</li><li>2. 핵심 구성 요소: 저장소 맥락 이해, 작업 계획, 코드 변경, 검증 결과와 리뷰 피드백 반영입니다.</li><li>3. 기존 Copilot과의 차이점: 한 줄 추천보다 이슈 해결 흐름 전체를 맡기는 에이전트형 작업 방식에 가깝습니다.</li></ul><div class="detail-footnotes-title" data-insight-footnotes-title hidden>단어 설명</div><ol class="detail-footnotes" data-insight-footnotes></ol><p class="detail-criteria" data-insight-criteria>선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다.</p><a class="detail-source" data-insight-source href="https://github.blog/changelog/" target="_blank" rel="noopener noreferrer">원문 보기</a></div><div class="detail-tags" data-insight-tags><span class="detail-tag">#GitHub Copilot</span><span class="detail-tag">#AI 에이전트</span><span class="detail-tag">#코딩 자동화</span></div></article>
 <script>
 (() => {
   const buttons = document.querySelectorAll('[data-insight-card]');
@@ -930,7 +946,7 @@
       meta.textContent = button.dataset.meta || '';
       criteria.textContent = button.dataset.criteria || '';
       const sourceUrl = button.dataset.source || '';
-      source.textContent = sourceUrl;
+      source.textContent = '원문 보기';
       source.hidden = !sourceUrl;
       if (sourceUrl && source instanceof HTMLAnchorElement) source.href = sourceUrl;
 

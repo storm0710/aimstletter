@@ -1298,8 +1298,8 @@ def _render_editorial_homepage(
       align-items: center;
       min-height: 18px;
       border-radius: 999px;
-      background: #dff5e7;
-      color: #247a43;
+      background: #e4efff;
+      color: #2462a8;
       padding: 0 8px;
       font-family: Arial, "Noto Sans KR", sans-serif;
       font-size: 10px;
@@ -1309,18 +1309,27 @@ def _render_editorial_homepage(
       white-space: nowrap;
     }}
     .topic-badge.trend {{
-      background: #e7f2ff;
-      color: #4772a6;
+      background: #ffe8e8;
+      color: #b73535;
+    }}
+    .topic-badge.paper {{
+      background: #dff5e7;
+      color: #247a43;
     }}
     .topic-badge.sub {{
+      background: #edf5ff;
+      color: #2d67a8;
+      border: 1px solid #c6dcf8;
+    }}
+    .topic-badge.paper + .topic-badge.sub {{
       background: #eefaf2;
       color: #2f7f4d;
-      border: 1px solid #bfe7cc;
+      border-color: #bfe7cc;
     }}
     .topic-badge.trend + .topic-badge.sub {{
-      background: #eef6ff;
-      color: #5d7fa8;
-      border-color: #d8e8fa;
+      background: #fff0f0;
+      color: #a84545;
+      border-color: #f4c9c9;
     }}
     .insight-grid.has-selection .card-heading {{
       margin-bottom: 6px;
@@ -1419,13 +1428,19 @@ def _render_editorial_homepage(
       max-width: 620px;
     }}
     .detail-source {{
-      display: inline-block;
-      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 14px;
+      border: 1px solid #111;
+      background: #fff;
+      min-height: 32px;
+      padding: 0 12px;
       color: #111;
       font-size: 12px;
-      font-weight: 800;
-      line-height: 1.45;
-      overflow-wrap: anywhere;
+      font-weight: 900;
+      line-height: 1;
+      text-decoration: none;
     }}
     .detail-points {{
       display: grid;
@@ -1527,9 +1542,10 @@ def _render_editorial_homepage(
         position: static;
         min-height: 360px;
         max-height: none;
-        margin: 14px 0 22px 12px;
+        margin: 14px 0 22px;
         padding: 24px;
-        width: calc(100% - 12px);
+        width: 100%;
+        box-sizing: border-box;
         overflow: visible;
       }}
       .insight-grid.has-selection .insight-detail {{ display: flex; }}
@@ -2624,6 +2640,14 @@ def _smart_insight_category(item: SiteItem) -> str:
     return "동향"
 
 
+def _topic_badge_class(category: str) -> str:
+    if category == "논문":
+        return " paper"
+    if category == "동향":
+        return " trend"
+    return ""
+
+
 def _smart_insight_subcategory(item: SiteItem) -> str:
     return item.tags[0] if item.tags else item.source
 
@@ -2649,7 +2673,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
 
     cards = []
     for (number, title, body, detail, meta, points, tags, criteria, source_url, category, subcategory, footnotes) in entries:
-        badge_class = " trend" if category == "동향" else ""
+        badge_class = _topic_badge_class(category)
         cards.append(
             '<button class="insight-card" type="button" '
             f'data-insight-card data-number="{number}" '
@@ -2674,7 +2698,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         )
 
     (first_number, first_title, first_body, first_detail, first_meta, first_points, first_tags, first_criteria, first_source_url, first_category, first_subcategory, first_footnotes) = entries[0]
-    first_badge_class = " trend" if first_category == "동향" else ""
+    first_badge_class = _topic_badge_class(first_category)
     return (
         '<div class="insight-list">'
         + "\n".join(cards)
@@ -2702,7 +2726,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + f'<p class="detail-criteria" data-insight-criteria>{escape(first_criteria)}</p>'
         + f'<a class="detail-source" data-insight-source href="{escape(first_source_url or "#")}" target="_blank" rel="noopener noreferrer"'
         + (" hidden" if not first_source_url else "")
-        + f'>{escape(first_source_url)}</a>'
+        + ">원문 보기</a>"
         + "</div>"
         + '<div class="detail-tags" data-insight-tags>'
         + "".join(f'<span class="detail-tag">#{escape(tag)}</span>' for tag in first_tags[:6])
@@ -2748,14 +2772,16 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
       number.textContent = button.dataset.number || '';
       title.textContent = button.dataset.title || '';
       category.textContent = button.dataset.category || '';
-      category.classList.toggle('trend', button.dataset.category === '동향');
+      category.className = 'topic-badge';
+      if (button.dataset.category === '논문') category.classList.add('paper');
+      if (button.dataset.category === '동향') category.classList.add('trend');
       subcategory.textContent = button.dataset.subcategory || '';
       body.textContent = button.dataset.body || '';
       detail.textContent = button.dataset.detail || '';
       meta.textContent = button.dataset.meta || '';
       criteria.textContent = button.dataset.criteria || '';
       const sourceUrl = button.dataset.source || '';
-      source.textContent = sourceUrl;
+      source.textContent = '원문 보기';
       source.hidden = !sourceUrl;
       if (sourceUrl && source instanceof HTMLAnchorElement) source.href = sourceUrl;
 
