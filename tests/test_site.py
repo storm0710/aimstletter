@@ -8,7 +8,9 @@ from aimstletter.fetchers import DigestItem
 from aimstletter.config import Settings
 from aimstletter.site import (
     SiteItem,
+    _fallback_display_summary,
     _fallback_korean_item,
+    _fallback_three_line_summary,
     _item_slug,
     _items_in_window,
     _rank_work_skill_updates,
@@ -221,6 +223,26 @@ def test_fallback_item_adds_endava_harness_comparison_and_glossary() -> None:
     assert any("Codex:" in note for note in item.glossary)
 
 
+def test_fallback_summary_uses_item_specific_explanation() -> None:
+    item = DigestItem(
+        title="Security validation for third-party coding agents",
+        url="https://github.blog/changelog/2026-06-09-security-validation-for-third-party-coding-agents",
+        source="GitHub Copilot Changelog",
+        kind="tool",
+        published=datetime(2026, 6, 9, tzinfo=UTC),
+        summary="Security validation for third-party coding agents.",
+    )
+
+    summary = _fallback_display_summary(item)
+    points = _fallback_three_line_summary(item)
+
+    assert "서드파티 코딩 에이전트" in summary
+    assert "신원과 권한" in summary
+    assert any("보안 절차" in point for point in points)
+    assert "공개된 개발 도구와 코딩 자동화 관련 소식" not in summary
+    assert "새 기능이나 변경 사항이 업무 흐름" not in summary
+
+
 def test_rank_work_skill_updates_prefers_practical_tool_skills() -> None:
     story = DigestItem(
         title="Meta scam story shows an AI security myth",
@@ -332,13 +354,18 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "당신의 AI 역량을 성장시켜보세요" in week_2
     assert "업무 AI" in week_2
     assert "Security validation for third-party coding agents" in week_2
+    assert "서드파티 코딩 에이전트를 개발 환경에 연결할 때 신원과 권한을 검증하는 보안 업데이트" in week_2
+    assert "외부 코딩 에이전트가 저장소와 개발 도구에 접근할 때" in week_2
+    assert "공개된 개발 도구와 코딩 자동화 관련 소식" not in week_2
+    assert "새 기능이나 변경 사항이 업무 흐름" not in week_2
+    assert "이번 업데이트가 실제 업무 흐름" not in week_2
     assert "해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준" in week_2
     assert "Previous Week" in week_2
     assert 'href="ai-sources/"' in week_2
     assert "전주로" not in week_2
     assert "1. 왜 필요한가요?" in week_2
     assert "2. 핵심 구성 요소:" in week_2
-    assert "3. 기존 코드 자동완성과의 차이점:" in week_2
+    assert "3. 일반 Copilot 기능과의 차이점:" in week_2
     assert "원문 제목과 요약을 기준으로 선별된 항목입니다." not in week_2
     assert "출처 링크에서 세부 변경 사항과 적용 조건을 확인하세요." not in week_2
     assert "�" not in week_1

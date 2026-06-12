@@ -4174,6 +4174,72 @@ def _fallback_korean_item(item: DigestItem) -> SiteItem:
 
 def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
     text = _item_text(item)
+    if "security validation for third-party coding agents" in text:
+        return (
+            "1. 왜 필요한가요? 외부 코딩 에이전트가 저장소와 개발 도구에 접근할 때 악성 동작이나 과도한 권한 사용을 막기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 에이전트 신원 확인, 권한 범위 제한, 코드 변경 검증, 실행 이력 감사입니다.",
+            "3. 일반 Copilot 기능과의 차이점: 코드 추천 자체가 아니라 서드파티 에이전트를 안전하게 연결하고 통제하는 보안 절차가 중심입니다.",
+        )
+    if "github copilot coding agent update" in text:
+        return (
+            "1. 왜 필요한가요? 이슈 처리, 코드 수정, 테스트 보조를 Copilot이 더 긴 작업 단위로 이어가게 하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 저장소 맥락 이해, 작업 계획, 코드 변경, 검증 결과와 리뷰 피드백 반영입니다.",
+            "3. 기존 Copilot과의 차이점: 한 줄 추천보다 이슈 해결 흐름 전체를 맡기는 에이전트형 작업 방식에 가깝습니다.",
+        )
+    if "gpt-5.2" in text and "deprecated" in text:
+        return (
+            "1. 왜 필요한가요? 더 이상 권장되지 않는 모델을 계속 쓰면 품질, 지원, 비용 계획이 흔들릴 수 있어 교체 시점을 알아야 합니다.",
+            "2. 핵심 구성 요소: 중단 대상 모델, 대체 모델, 전환 일정, 영향받는 워크플로 점검입니다.",
+            "3. 일반 기능 업데이트와의 차이점: 새 기능을 추가하는 소식이 아니라 기존 모델 의존성을 정리해야 하는 변경 알림입니다.",
+        )
+    if "enterprise-managed plugins" in text:
+        return (
+            "1. 왜 필요한가요? 조직이 VS Code 플러그인 사용 범위를 통제해 개발 환경의 보안과 일관성을 유지하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 관리자 정책, 허용 플러그인 목록, 배포 범위, 사용자 적용 상태 관리입니다.",
+            "3. 개인 플러그인 설치와의 차이점: 개발자 개인 선택이 아니라 조직 정책으로 도구 사용을 관리합니다.",
+        )
+    if "inquitee" in text or "inquitree" in text:
+        return (
+            "1. 무엇을 다루나요? 과학적 탐구 과정에서 AI 에이전트가 질문을 만들고 근거를 따라가며 결론을 평가하는 방식을 다룹니다.",
+            "2. 핵심 구성 요소: 탐구 트리, 단계별 질의, 증거 평가, 에이전트 추론 경로 검증입니다.",
+            "3. 업무 적용 포인트: 리서치, 기술 검토, 보고서 작성에서 AI가 낸 결론의 근거 흐름을 점검하는 데 참고할 수 있습니다.",
+        )
+    if "autonomous incident resolution" in text:
+        return (
+            "1. 무엇을 다루나요? 대규모 시스템 장애를 AI 에이전트가 탐지, 진단, 조치 후보 제안까지 이어가는 방식을 다룹니다.",
+            "2. 핵심 구성 요소: 장애 신호 수집, 원인 후보 추론, 조치 계획, 사람 승인과 실행 기록입니다.",
+            "3. 업무 적용 포인트: 운영팀의 반복 장애 분석을 줄이되, 실제 조치는 승인 절차와 감사 로그를 함께 둬야 합니다.",
+        )
+    if "workflow integrity" in text or "communication-graph" in text:
+        return (
+            "1. 무엇을 다루나요? 업무 대화와 협업 그래프를 분석해 프라이버시를 지키면서 워크플로 무결성을 평가하는 접근입니다.",
+            "2. 핵심 구성 요소: 커뮤니케이션 그래프, 메타데이터 분석, 프라이버시 보호, 이상 흐름 탐지입니다.",
+            "3. 업무 적용 포인트: 협업 도구 로그를 AI 운영 진단에 쓰려면 개인 정보와 조직 보안 기준을 함께 설계해야 합니다.",
+        )
+    if "deployment-oriented framework" in text or "explainable ai-assisted" in text:
+        return (
+            "1. 무엇을 다루나요? 설명 가능한 AI를 실제 네트워크 운영 환경에 배포하기 위한 구조와 검증 기준을 다룹니다.",
+            "2. 핵심 구성 요소: 배포 아키텍처, 설명 가능한 판단 근거, 운영자 검토, 성능·안전성 평가입니다.",
+            "3. 업무 적용 포인트: 연구 모델을 운영에 붙일 때 정확도뿐 아니라 설명, 책임, 장애 대응 절차가 필요합니다.",
+        )
+    if "truck-drone" in text:
+        return (
+            "1. 무엇을 다루나요? 트럭과 드론이 함께 움직이는 물류 시스템의 계획과 조율 문제를 다룹니다.",
+            "2. 핵심 구성 요소: 경로 계획, 작업 배정, 제약 조건, 다중 에이전트 조정입니다.",
+            "3. 업무 적용 포인트: 여러 자동화 주체가 동시에 움직이는 현장에서는 개별 최적화보다 전체 조율 규칙이 중요합니다.",
+        )
+    if "learning to lead in a hybrid human-ai enterprise" in text:
+        return (
+            "1. 무엇을 다루나요? 사람과 AI가 함께 일하는 기업에서 리더십과 의사결정 방식이 어떻게 바뀌는지 다룹니다.",
+            "2. 핵심 구성 요소: 역할 재설계, 책임 분담, AI 결과 검수, 조직 학습 체계입니다.",
+            "3. 업무 적용 포인트: AI 도입은 도구 배포가 아니라 팀 운영 방식과 관리자 역량을 함께 바꾸는 일입니다.",
+        )
+    if "third-party coding agents" in text:
+        return (
+            "1. 무엇을 다루나요? 외부 코딩 에이전트를 개발 환경에 붙일 때 어떤 검증과 통제가 필요한지 다룹니다.",
+            "2. 핵심 구성 요소: 접근 권한, 실행 범위, 변경 검토, 보안 감사 로그입니다.",
+            "3. 업무 적용 포인트: 에이전트 도입 전에 저장소 권한과 코드 변경 승인 절차를 분리해 설계해야 합니다.",
+        )
     if any(keyword in text for keyword in ("temporal", "durable execution")):
         return (
             "1. 왜 필요한가요? 오래 걸리는 AI 작업이 중간에 실패해도 재시도와 복구를 안정적으로 처리하기 위해 필요합니다.",
@@ -4264,10 +4330,11 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
             "2. 핵심 구성 요소: 화면 캡처, 반응형 테스트, 클릭 흐름 검증, 시각 회귀 비교입니다.",
             "3. 눈으로 확인하는 방식과의 차이점: 반복 검사를 자동화해 수정 때마다 같은 기준으로 확인합니다.",
         )
+    title = _clean_plain_text(item.title)
     return (
-        "1. 왜 필요한가요? 이번 업데이트가 실제 업무 흐름의 어떤 문제를 줄일 수 있는지 빠르게 판단하기 위해 필요합니다.",
-        "2. 핵심 구성 요소: 적용 대상, 필요한 도구, 운영 조건, 검수 기준을 함께 확인하는 것입니다.",
-        "3. 기존 방식과의 차이점: 단순 소식 전달이 아니라 업무에 붙일 수 있는 실행 단위로 정리합니다.",
+        f"1. 무엇을 다루나요? {title} 주제를 다룹니다.",
+        "2. 핵심 내용: 원문에서 다루는 문제, 제안 방식, 변화 지점을 업무 적용 관점으로 요약합니다.",
+        "3. 업무 적용 포인트: 관련 도구, 운영 조건, 리스크를 팀 업무에 맞게 검토할 수 있습니다.",
     )
 
 
@@ -4280,11 +4347,138 @@ def _fallback_display_title(item: DigestItem) -> str:
 
 
 def _fallback_display_summary(item: DigestItem) -> str:
-    text = f"{item.title} {item.summary} {item.source}".lower()
-    topic = _fallback_korean_topic(text)
-    action = _fallback_korean_action(text)
-    source = _korean_source_name(item.source)
-    return f"{source}에 공개된 {topic} 관련 소식입니다. {action}"
+    specific = _fallback_specific_summary(item)
+    if specific:
+        return specific
+
+    points = _fallback_three_line_summary(item)
+    first = _strip_point_prefix(points[0])
+    second = _strip_point_prefix(points[1])
+    return f"{first} {second}"
+
+
+def _strip_point_prefix(text: str) -> str:
+    return re.sub(r"^\d+\.\s*[^?？:：]+[?？:：]\s*", "", text).strip()
+
+
+def _fallback_specific_summary(item: DigestItem) -> str:
+    text = _item_text(item)
+    if "security validation for third-party coding agents" in text:
+        return (
+            "서드파티 코딩 에이전트를 개발 환경에 연결할 때 신원과 권한을 검증하는 보안 업데이트입니다. "
+            "외부 에이전트가 저장소, 코드 변경, 비밀값에 접근하는 범위를 통제하는 데 초점이 있습니다."
+        )
+    if "github copilot coding agent update" in text:
+        return (
+            "GitHub Copilot이 단순 코드 추천을 넘어 이슈 해결과 코드 변경을 이어서 수행하는 코딩 에이전트 업데이트입니다. "
+            "개발자가 반복적으로 하던 수정, 테스트, 리뷰 준비 흐름을 더 큰 작업 단위로 맡길 수 있게 하는 내용입니다."
+        )
+    if "gpt-5.2" in text and "deprecated" in text:
+        return (
+            "GitHub Copilot에서 GPT-5.2와 GPT-5.2-Codex 사용 중단을 알리는 변경 사항입니다. "
+            "해당 모델에 묶인 코딩 자동화나 에이전트 흐름은 대체 모델로 전환해야 합니다."
+        )
+    if "enterprise-managed plugins" in text:
+        return (
+            "VS Code에서 조직 관리 플러그인을 공개 미리보기로 제공하는 업데이트입니다. "
+            "기업 관리자가 Copilot 주변 도구와 확장 사용 범위를 정책으로 통제할 수 있게 하는 내용입니다."
+        )
+    if "inquitree" in text:
+        return (
+            "과학적 탐구에서 AI 에이전트가 질문을 만들고 근거를 따라가며 결론을 검증하는 방식을 평가한 논문입니다. "
+            "단순 답변 정확도보다 탐구 과정의 구조와 추론 경로를 확인하는 데 초점이 있습니다."
+        )
+    if "generative explainability" in text and "networks" in text:
+        return (
+            "차세대 네트워크에서 LLM을 활용해 장애 원인과 운영 판단을 설명하는 방법을 다룬 논문입니다. "
+            "네트워크 운영자가 모델의 판단 근거를 이해하고 검증할 수 있게 하는 설명 가능성이 핵심입니다."
+        )
+    if "vector database scaling paradox" in text:
+        return (
+            "벡터 데이터베이스에서 코어 수를 늘려도 성능이 항상 좋아지지 않는 현상을 분석한 논문입니다. "
+            "AI 검색 인프라를 확장할 때 병목과 비용 효율을 함께 봐야 한다는 점을 보여줍니다."
+        )
+    if "how endava is redesigning software delivery around ai agents" in text:
+        return (
+            "Endava가 AI 에이전트를 중심으로 소프트웨어 전달 방식을 재설계한 사례입니다. "
+            "개발, 검증, 협업 단계를 에이전트 기반 흐름으로 바꿀 때 조직 운영이 어떻게 달라지는지 보여줍니다."
+        )
+    if "how engineers at nextdoor use codex" in text:
+        return (
+            "Nextdoor 엔지니어들이 Codex를 실제 개발 흐름에 활용한 사례입니다. "
+            "작은 코드 보조를 넘어 기능 구현, 수정, 검증 속도를 높이는 사용 방식을 보여줍니다."
+        )
+    if "what codex unlocks for notion" in text:
+        return (
+            "Notion이 Codex를 개발 업무에 활용해 제품 개선과 코드 작업을 빠르게 진행한 사례입니다. "
+            "대규모 코드베이스에서 에이전트가 어떤 반복 작업을 줄일 수 있는지 보여줍니다."
+        )
+    if "built to benefit everyone" in text:
+        return (
+            "OpenAI가 AI 혜택을 넓게 배분하기 위한 제품·정책 방향을 설명한 글입니다. "
+            "기술 출시 자체보다 접근성, 안전성, 사회적 영향 관리가 핵심 주제입니다."
+        )
+    if "industrial policy for the intelligence age" in text:
+        return (
+            "AI 시대의 산업 정책과 국가 경쟁력 방향을 다룬 OpenAI 글입니다. "
+            "인프라, 인재, 규제, 경제 효과를 함께 설계해야 한다는 메시지가 핵심입니다."
+        )
+    if "confidential submission of draft s-1" in text:
+        return (
+            "OpenAI가 SEC에 비공개 S-1 초안을 제출했다는 기업 공시 관련 소식입니다. "
+            "제품 기능보다 회사의 자본시장 준비와 거버넌스 변화 가능성을 보여주는 항목입니다."
+        )
+    if "economic research exchange" in text:
+        return (
+            "OpenAI가 AI의 경제적 영향을 연구하기 위한 협력 프로그램을 소개한 글입니다. "
+            "노동, 생산성, 산업 변화 데이터를 어떻게 분석할지에 초점이 있습니다."
+        )
+    if "latest ai news" in text and "may 2026" in text:
+        return (
+            "Google이 2026년 5월에 발표한 AI 제품과 연구 업데이트를 묶어 정리한 글입니다. "
+            "Gemini, 검색, 개발자 도구 등 여러 영역의 변화를 한 번에 확인할 수 있습니다."
+        )
+    if "claude code sdk orchestration patterns" in text:
+        return (
+            "Claude Code SDK로 여러 개발 작업을 순서와 조건에 맞게 묶는 오케스트레이션 패턴입니다. "
+            "단일 명령 보조보다 반복 가능한 개발 워크플로를 구성하는 데 초점이 있습니다."
+        )
+    if "responses api tool calling update" in text:
+        return (
+            "OpenAI Responses API에서 도구 호출 흐름을 구성하는 방식과 관련된 업데이트입니다. "
+            "모델 응답을 외부 도구 실행과 연결해 실제 업무 자동화로 이어지게 하는 내용입니다."
+        )
+    if "prompt to workflow migration" in text:
+        return (
+            "단발성 프롬프트를 반복 가능한 업무 워크플로로 바꾸는 전환 주제입니다. "
+            "입력, 승인, 실행 기록, 결과 검수 기준을 붙여 AI 사용을 개인 요령이 아니라 운영 절차로 만드는 데 초점이 있습니다."
+        )
+    if "pull request review workflow" in text:
+        return (
+            "GitHub Copilot을 PR 리뷰 흐름에 연결해 변경 내용을 검토하고 피드백을 정리하는 사용 방식입니다. "
+            "코드 작성보다 리뷰 품질과 반복 검토 시간을 줄이는 데 초점이 있습니다."
+        )
+    if "text-to-sql evaluation" in text:
+        return (
+            "AI가 자연어 질문을 SQL로 바꾸는 능력을 평가하는 데이터베이스 AI 주제입니다. "
+            "정확한 쿼리 생성뿐 아니라 스키마 이해와 위험한 실행을 피하는 기준이 중요합니다."
+        )
+    if "anomaly detection agents" in text:
+        return (
+            "네트워크 이상 징후를 AI 에이전트가 탐지하고 원인을 좁혀가는 주제입니다. "
+            "운영자가 로그와 트래픽을 일일이 확인하기 전에 의심 구간을 빠르게 찾는 데 목적이 있습니다."
+        )
+    if "gemini app workflow updates" in text:
+        return (
+            "Gemini 앱의 업무 흐름 개선과 관련된 업데이트입니다. "
+            "문서 작성, 검색, 멀티모달 입력을 실제 작업 흐름에 더 자연스럽게 연결하는 방향을 보여줍니다."
+        )
+    if "enterprise ai governance" in text:
+        return (
+            "기업이 AI를 도입할 때 필요한 거버넌스와 책임 체계를 다룬 동향입니다. "
+            "모델 선택보다 사용 정책, 검수, 위험 관리가 운영 성패를 좌우한다는 내용입니다."
+        )
+    return ""
 
 
 def _fallback_korean_topic(text: str) -> str:
