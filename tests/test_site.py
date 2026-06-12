@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -44,7 +45,7 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     assert "AI MASTER TIMES" in html
     assert "AI Talent Lab" in html
     assert "Smart Insights" in html
-    assert "Harness Engineering" in html
+    assert 'data-title="Example: Database incident response with AI agents"' in html
     assert "topic-badge" in html
     assert 'href="ai-tools/"' in html
     assert '<section class="tool-directory"' not in html
@@ -315,11 +316,29 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "06월 1째주" in week_1
     assert "당신의 AI 역량을 성장시켜보세요" in week_2
     assert "업무 AI" in week_2
-    assert "하네스: AI와 실제 도구 사이에서 실행 순서" in week_2
-    assert "실제 업무에서 반복 작업, 품질 확인, 배포, 보안, 지식 정리에 적용" in week_2
+    assert "GitHub Copilot coding agent update" in week_2
+    assert "해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준" in week_2
     assert "�" not in week_1
     assert "�" not in week_2
     assert '<a class="brand" href="./">AI MASTER TIMES</a>' in week_2
     assert "button.insertAdjacentElement('afterend', detailPanel)" in week_2
     assert ".insight-grid.has-selection .insight-detail { display: flex; }" in week_2
     assert "smartInsightLinks.forEach" in week_2
+
+
+def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
+    week_2 = Path("public/archive/2026/06/week-2/index.html").read_text(encoding="utf-8")
+    week_1 = Path("public/archive/2026/06/week-1/index.html").read_text(encoding="utf-8")
+
+    week_2_titles = re.findall(r'data-title="([^"]*)"', week_2)
+    week_1_titles = re.findall(r'data-title="([^"]*)"', week_1)
+
+    assert week_2_titles
+    assert week_1_titles
+    assert week_2_titles != week_1_titles
+    assert len(week_2_titles) == len(set(week_2_titles))
+    assert len(week_1_titles) == len(set(week_1_titles))
+    assert any("GitHub Copilot coding agent update" in title for title in week_2_titles)
+    assert any("Prompt to workflow migration" in title for title in week_1_titles)
+    assert "Harness Engineering" not in week_2_titles
+    assert "Harness Engineering" not in week_1_titles

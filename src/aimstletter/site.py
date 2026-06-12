@@ -2566,59 +2566,40 @@ def _smart_insight_source_url(index: int) -> str:
     return urls[index] if index < len(urls) else ""
 
 
+
+def _smart_insight_category(item: SiteItem) -> str:
+    if item.kind in {"paper", "논문"}:
+        return "논문"
+    if "도구" in item.kind or item.kind == "tool":
+        return "도구"
+    return "동향"
+
+
+def _smart_insight_subcategory(item: SiteItem) -> str:
+    return item.tags[0] if item.tags else item.source
+
+
 def _render_smart_insight_cards(items: list[SiteItem]) -> str:
-    labels = _smart_insight_blueprint()
     entries = []
-    for index, (title, fallback) in enumerate(labels):
-        item = items[index] if index < len(items) else None
-        body = _smart_insight_body(index, item, fallback)
-        detail, points = _smart_insight_detail(index, item, fallback)
-        footnotes = _smart_insight_footnotes(index)
-        meta = (
-            f"{item.source} · {item.kind} · {_format_date(item.published)}"
-            if item
-            else "AI Master Times"
-        )
-        tags = item.tags if item else ()
-        criteria = "선별기준 : 실제 업무에서 반복 작업, 품질 확인, 배포, 보안, 지식 정리에 적용할 수 있는지를 기준으로 골랐습니다."
-        source_url = _smart_insight_source_url(index)
-        category = _smart_insight_category(index)
-        subcategory = _smart_insight_subcategory(index)
-        entries.append(
-            (
-                index + 1,
-                title,
-                body,
-                detail,
-                meta,
-                points,
-                tags,
-                criteria,
-                source_url,
-                category,
-                subcategory,
-                footnotes,
-            )
-        )
+    for index, item in enumerate(items):
+        title = _clip(item.title, 78)
+        body = _clip(item.summary, 150)
+        detail = item.detail or item.summary
+        points = item.key_points or (item.summary,)
+        footnotes = item.glossary
+        meta = f"{item.source} · {item.kind} · {_format_date(item.published)}"
+        tags = item.tags
+        criteria = "선별기준 : 해당 주간 수집 데이터에서 날짜, 출처, 업무 적용 가능성을 기준으로 선별된 실제 업데이트입니다."
+        source_url = item.url
+        category = _smart_insight_category(item)
+        subcategory = _smart_insight_subcategory(item)
+        entries.append((index + 1, title, body, detail, meta, points, tags, criteria, source_url, category, subcategory, footnotes))
 
     if not entries:
         return ""
 
     cards = []
-    for (
-        number,
-        title,
-        body,
-        detail,
-        meta,
-        points,
-        tags,
-        criteria,
-        source_url,
-        category,
-        subcategory,
-        footnotes,
-    ) in entries:
+    for (number, title, body, detail, meta, points, tags, criteria, source_url, category, subcategory, footnotes) in entries:
         badge_class = " trend" if category == "동향" else ""
         cards.append(
             '<button class="insight-card" type="button" '
@@ -2643,20 +2624,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             '</button>'
         )
 
-    (
-        first_number,
-        first_title,
-        first_body,
-        first_detail,
-        first_meta,
-        first_points,
-        first_tags,
-        first_criteria,
-        first_source_url,
-        first_category,
-        first_subcategory,
-        first_footnotes,
-    ) = entries[0]
+    (first_number, first_title, first_body, first_detail, first_meta, first_points, first_tags, first_criteria, first_source_url, first_category, first_subcategory, first_footnotes) = entries[0]
     first_badge_class = " trend" if first_category == "동향" else ""
     return (
         '<div class="insight-list">'
@@ -2757,7 +2725,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
       tags.replaceChildren(...tagItems.map((item) => {
         const tag = document.createElement('span');
         tag.className = 'detail-tag';
-        tag.textContent = `#${item}`;
+        tag.textContent = '#' + item;
         return tag;
       }));
     });
@@ -2777,7 +2745,6 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
 </script>
 """
     )
-
 
 def _smart_insight_blueprint() -> tuple[tuple[str, str], ...]:
     return (
