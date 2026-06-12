@@ -257,6 +257,19 @@ def _refresh_archive_navigation(output_dir: Path, entries: list[dict[str, object
             html,
             count=1,
         )
+        previous_archive = _previous_archive_entry(entries, current_entry)
+        previous_week_button = (
+            f'<a class="week-button" href="{escape(str(previous_archive["href"]))}">Previous Week</a>'
+            if previous_archive
+            else ""
+        )
+        updated = re.sub(
+            r'<div class="nav-actions">.*?<a class="button" href="#insights">Read This Week</a>\s*</div>',
+            f'<div class="nav-actions">\n        {previous_week_button}\n        <a class="button" href="#insights">Read This Week</a>\n      </div>',
+            updated,
+            flags=re.DOTALL,
+            count=1,
+        )
         if updated != html:
             path.write_text(updated, encoding="utf-8")
     return
