@@ -373,6 +373,8 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert '<a class="brand" href="./">AI MASTER TIMES</a>' in week_2
     assert "button.insertAdjacentElement('afterend', detailPanel)" in week_2
     assert ".insight-grid.has-selection .insight-detail { display: flex; }" in week_2
+    assert 'class="detail-summary"' not in week_2
+    assert "data-insight-body" not in week_2
     assert "smartInsightLinks.forEach" in week_2
     assert "data-insight-footnotes-title" in week_2
     assert "단어 설명" in week_2

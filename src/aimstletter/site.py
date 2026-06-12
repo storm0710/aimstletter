@@ -1405,18 +1405,12 @@ def _render_editorial_homepage(
       letter-spacing: .04em;
       text-transform: uppercase;
     }}
-    .detail-summary,
     .detail-copy {{
       margin: 0;
-      color: #565656;
-      font-size: 14px;
-      line-height: 1.68;
+      color: #333;
+      font-size: 15px;
+      line-height: 1.72;
       max-width: 620px;
-    }}
-    .detail-summary {{
-      color: #222;
-      font-weight: 700;
-      margin-bottom: 18px;
     }}
     .detail-criteria {{
       margin: 24px 0 0;
@@ -2697,7 +2691,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             '</button>'
         )
 
-    (first_number, first_title, first_body, first_detail, first_meta, first_points, first_tags, first_criteria, first_source_url, first_category, first_subcategory, first_footnotes) = entries[0]
+    (first_number, first_title, _first_body, first_detail, first_meta, first_points, first_tags, first_criteria, first_source_url, first_category, first_subcategory, first_footnotes) = entries[0]
     first_badge_class = _topic_badge_class(first_category)
     return (
         '<div class="insight-list">'
@@ -2712,7 +2706,6 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + f'<span class="topic-badge{first_badge_class}" data-insight-category>{escape(first_category)}</span>'
         + f'<span class="topic-badge sub" data-insight-subcategory>{escape(first_subcategory)}</span>'
         + '</div>'
-        + f'<p class="detail-summary" data-insight-body>{escape(first_body)}</p>'
         + f'<p class="detail-copy" data-insight-detail>{escape(_clip(first_detail, 700))}</p>'
         + '<ul class="detail-points" data-insight-points>'
         + "".join(f"<li>{escape(point)}</li>" for point in first_points[:4])
@@ -2740,7 +2733,6 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const title = document.querySelector('[data-insight-title]');
   const category = document.querySelector('[data-insight-category]');
   const subcategory = document.querySelector('[data-insight-subcategory]');
-  const body = document.querySelector('[data-insight-body]');
   const detail = document.querySelector('[data-insight-detail]');
   const meta = document.querySelector('[data-insight-meta]');
   const points = document.querySelector('[data-insight-points]');
@@ -2753,7 +2745,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const detailPanel = document.querySelector('.insight-detail');
   const insightList = document.querySelector('.insight-list');
   const mobileQuery = window.matchMedia('(max-width: 760px)');
-  if (!buttons.length || !number || !title || !category || !subcategory || !body || !detail || !meta || !points || !tags || !footnotes || !footnotesTitle || !criteria || !source || !grid || !detailPanel || !insightList) return;
+  if (!buttons.length || !number || !title || !category || !subcategory || !detail || !meta || !points || !tags || !footnotes || !footnotesTitle || !criteria || !source || !grid || !detailPanel || !insightList) return;
 
   const placeDetailPanel = (button) => {
     if (mobileQuery.matches) {
@@ -2776,7 +2768,6 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
       if (button.dataset.category === '논문') category.classList.add('paper');
       if (button.dataset.category === '동향') category.classList.add('trend');
       subcategory.textContent = button.dataset.subcategory || '';
-      body.textContent = button.dataset.body || '';
       detail.textContent = button.dataset.detail || '';
       meta.textContent = button.dataset.meta || '';
       criteria.textContent = button.dataset.criteria || '';
@@ -3478,6 +3469,39 @@ def _source_entries(items: list[SiteItem]) -> list[dict[str, str]]:
     }
     seen: set[str] = set()
     entries: list[dict[str, str]] = []
+    pinned_entries = (
+        (
+            "OpenAI 소식",
+            "https://developers.openai.com/codex/cli",
+            "OpenAI 제품, API, Codex, 에이전트 관련 업데이트를 확인하는 출처입니다.",
+        ),
+        (
+            "OpenAI 소식",
+            "https://platform.openai.com/docs/guides/tools",
+            "OpenAI API 도구 호출과 에이전트 기능을 확인하는 개발자 문서입니다.",
+        ),
+        (
+            "Anthropic 소식",
+            "https://code.claude.com/docs/",
+            "Claude와 Claude Code 관련 제품·엔지니어링 업데이트를 확인하는 출처입니다.",
+        ),
+        (
+            "GitHub Copilot 변경 이력",
+            "https://github.blog/changelog/",
+            "GitHub Copilot과 개발 워크플로 자동화 변경 사항을 확인하는 출처입니다.",
+        ),
+    )
+    for name, url, description in pinned_entries:
+        host = _source_host(url)
+        seen.add(f"{name}|{host}")
+        entries.append(
+            {
+                "name": name,
+                "url": url,
+                "host": host,
+                "description": description,
+            }
+        )
     for item in items:
         host = _source_host(item.url)
         key = f"{item.source}|{host}"
