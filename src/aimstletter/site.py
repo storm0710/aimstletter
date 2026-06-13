@@ -34,6 +34,145 @@ class SiteItem:
     glossary: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class KnowledgeTopic:
+    order: str
+    slug: str
+    title: str
+    summary: str
+    sections: tuple[tuple[str, str], ...]
+    notes: tuple[str, ...]
+
+
+KNOWLEDGE_TOPICS = (
+    KnowledgeTopic(
+        order="01",
+        slug="langchain",
+        title="LangChain",
+        summary="LLM 앱을 만들 때 모델 호출, 프롬프트, 도구 연결, 검색, 메모리 같은 부품을 한 흐름으로 묶는 개발 프레임워크입니다.",
+        sections=(
+            (
+                "왜 알아야 하나요?",
+                "LangChain은 AI에게 질문만 던지는 수준을 넘어, 사내 문서 검색, API 호출, 결과 정리처럼 여러 단계를 이어 붙이는 데 자주 쓰입니다. 업무 자동화나 챗봇을 만들 때 반복되는 연결 코드를 줄여 줍니다.",
+            ),
+            (
+                "어디에 쓰나요?",
+                "문서 기반 질의응답, 보고서 초안 생성, 데이터 조회 도우미, 고객 문의 분류처럼 모델과 외부 데이터를 함께 써야 하는 작업에 적합합니다.",
+            ),
+            (
+                "업무 적용 포인트",
+                "처음에는 작은 검색형 챗봇이나 사내 절차 안내 봇처럼 범위가 좁은 곳에서 시작하는 것이 좋습니다. 연결되는 데이터 출처와 답변 검증 기준을 함께 정해야 안정적으로 운영할 수 있습니다.",
+            ),
+        ),
+        notes=(
+            "LLM: 문장을 이해하고 생성하는 대규모 언어 모델입니다.",
+            "프레임워크: 자주 쓰는 기능과 구조를 미리 묶어 둔 개발 도구 모음입니다.",
+            "메모리: 대화나 작업 중 필요한 이전 정보를 저장해 다음 단계에서 참고하게 하는 기능입니다.",
+        ),
+    ),
+    KnowledgeTopic(
+        order="02",
+        slug="langgraph",
+        title="LangGraph",
+        summary="AI 에이전트가 여러 단계를 오가며 판단해야 할 때, 작업 흐름을 그래프 구조로 설계하고 제어하는 도구입니다.",
+        sections=(
+            (
+                "LangChain과 무엇이 다른가요?",
+                "LangChain이 여러 AI 기능을 연결하는 부품 상자에 가깝다면, LangGraph는 그 부품들이 어떤 순서로 움직이고 언제 되돌아가야 하는지를 더 명확히 설계합니다.",
+            ),
+            (
+                "어디에 쓰나요?",
+                "장애 원인 분석, 코드 리뷰 보조, 문서 검토처럼 한 번의 답변으로 끝나지 않고 확인, 수정, 재검토가 필요한 업무에 잘 맞습니다.",
+            ),
+            (
+                "업무 적용 포인트",
+                "각 단계의 입력과 출력, 실패했을 때 돌아갈 위치, 사람이 승인해야 하는 지점을 먼저 그려 두면 에이전트 흐름을 안전하게 만들 수 있습니다.",
+            ),
+        ),
+        notes=(
+            "그래프: 여러 작업 단계를 점과 선처럼 연결해 흐름을 표현하는 구조입니다.",
+            "에이전트: 목표를 받고 여러 단계를 스스로 진행하는 AI 시스템입니다.",
+            "상태: 현재 작업이 어디까지 진행됐고 어떤 정보가 남아 있는지를 나타내는 기록입니다.",
+        ),
+    ),
+    KnowledgeTopic(
+        order="03",
+        slug="prompt-engineering",
+        title="프롬프트엔지니어링",
+        summary="AI가 원하는 방식으로 답하도록 지시문, 역할, 예시, 출력 형식을 설계하는 방법입니다.",
+        sections=(
+            (
+                "핵심은 무엇인가요?",
+                "좋은 프롬프트는 AI에게 역할, 목표, 참고 자료, 답변 형식을 분명하게 알려 줍니다. 막연히 요청하는 대신 무엇을 기준으로 판단해야 하는지까지 적어야 결과가 안정적입니다.",
+            ),
+            (
+                "어디에 쓰나요?",
+                "회의록 요약, 장애 보고서 초안, SQL 설명, 정책 문서 정리처럼 답변 형식이 중요한 업무에서 효과가 큽니다.",
+            ),
+            (
+                "업무 적용 포인트",
+                "자주 쓰는 업무는 프롬프트 템플릿으로 만들어 두고, 좋은 결과와 나쁜 결과 예시를 함께 저장하면 팀 전체의 품질을 맞추기 쉽습니다.",
+            ),
+        ),
+        notes=(
+            "프롬프트: AI에게 전달하는 지시문입니다.",
+            "템플릿: 매번 바뀌는 부분만 채워 넣을 수 있게 만든 기본 양식입니다.",
+            "출력 형식: 표, bullet, JSON처럼 답변이 나와야 하는 모양입니다.",
+        ),
+    ),
+    KnowledgeTopic(
+        order="04",
+        slug="context-engineering",
+        title="컨텍스트엔지니어링",
+        summary="AI가 답을 만들 때 참고해야 할 문서, 데이터, 대화 이력, 규칙을 알맞게 골라 넣는 설계 방법입니다.",
+        sections=(
+            (
+                "왜 중요한가요?",
+                "AI는 필요한 자료를 보지 못하면 그럴듯하지만 틀린 답을 만들 수 있습니다. 컨텍스트 엔지니어링은 어떤 정보를 넣고, 어떤 정보는 빼야 하는지 정해 답변의 정확도를 높입니다.",
+            ),
+            (
+                "어디에 쓰나요?",
+                "사내 매뉴얼 검색, 고객 이슈 분석, 코드베이스 질문, 운영 절차 안내처럼 최신 자료나 조직 내부 지식이 필요한 업무에 쓰입니다.",
+            ),
+            (
+                "업무 적용 포인트",
+                "자료를 많이 넣는 것보다 질문과 관련 있는 자료를 정확히 넣는 것이 중요합니다. 문서 출처, 갱신일, 권한 범위도 함께 관리해야 합니다.",
+            ),
+        ),
+        notes=(
+            "컨텍스트: AI가 답변을 만들 때 참고하는 주변 정보입니다.",
+            "검색 증강 생성(RAG): 외부 문서를 검색해 AI 답변에 함께 넣는 방식입니다.",
+            "권한 범위: 사용자가 볼 수 있는 자료와 AI가 참고해도 되는 자료의 한계입니다.",
+        ),
+    ),
+    KnowledgeTopic(
+        order="05",
+        slug="harness-engineering",
+        title="하네스 엔지니어링",
+        summary="AI 에이전트가 실제 업무 도구를 사용할 때 실행 순서, 권한, 검증, 기록을 한곳에서 관리하는 운영 구조입니다.",
+        sections=(
+            (
+                "하네스 엔지니어링이 필요한 이유",
+                "프롬프트는 AI에게 일을 시키는 지시문이고, 컨텍스트는 AI가 참고해야 할 자료와 상황입니다. 하네스 엔지니어링은 여기에 실제 도구 실행 규칙을 더해, AI가 말만 하는 단계에서 업무를 수행하는 단계로 넘어가도록 돕습니다.",
+            ),
+            (
+                "에이전트를 안전하게 움직이는 운영 장치",
+                "에이전트는 목표를 받고 여러 단계를 스스로 진행하는 AI입니다. 하네스는 에이전트가 아무 도구나 바로 실행하지 않도록 중간에서 권한, 입력값, 결과 검증을 관리합니다.",
+            ),
+            (
+                "실제 업무에서는 이렇게 씁니다",
+                "보고서 생성, 배포 점검, 장애 대응 초안 작성처럼 반복되는 업무를 자동화할 때 어떤 도구를 쓸 수 있는지, 누가 승인해야 하는지, 실패하면 어떻게 되돌릴지를 미리 정합니다.",
+            ),
+        ),
+        notes=(
+            "권한: AI가 접근할 수 있는 저장소, 파일, API 범위를 제한하는 기준입니다.",
+            "검증: AI가 만든 결과를 테스트, 규칙, 사람 승인으로 확인하는 절차입니다.",
+            "기록: 어떤 입력으로 어떤 도구를 실행했고 어떤 결과가 나왔는지 남기는 로그입니다.",
+        ),
+    ),
+)
+
+
 WORK_SKILL_KEYWORDS = {
     "workflow": 8,
     "workflows": 8,
@@ -686,7 +825,7 @@ def _render_archive_nav(
     entries: list[dict[str, object]],
     current_entry: dict[str, object] | None = None,
     link_prefix: str = "",
-    current_knowledge: bool = False,
+    current_knowledge_slug: str | None = None,
 ) -> str:
     if not entries:
         return ""
@@ -722,7 +861,12 @@ def _render_archive_nav(
                     f'href="{escape(link_prefix + str(entry["href"]))}">'
                     f'{month:02d}월 {int(entry["week"])}째주</a>'
                 )
-            months.append(f'<div class="archive-month">{"".join(links)}</div>')
+            months.append(
+                f'<details class="archive-year-group archive-month-group" open>'
+                f'<summary class="archive-year archive-month-summary">{month:02d}월</summary>'
+                f'<div class="archive-month">{"".join(links)}</div>'
+                f'</details>'
+            )
         years.append(
             f'<details class="archive-year-group" open>'
             f'<summary class="archive-year">{year}년</summary>'
@@ -737,23 +881,29 @@ def _render_archive_nav(
         '<div class="archive-title">Archive</div>'
         + "".join(years)
         + "</div>"
-        + _render_knowledge_nav(link_prefix=link_prefix, is_current=current_knowledge)
+        + _render_knowledge_nav(link_prefix=link_prefix, current_slug=current_knowledge_slug)
         + '<div class="archive-resize" role="separator" aria-orientation="vertical" '
         + 'aria-label="Archive 너비 조절" tabindex="0"></div>'
         + "</aside>"
     )
 
 
-def _render_knowledge_nav(link_prefix: str = "", is_current: bool = False) -> str:
-    current_class = " is-current" if is_current else ""
+def _render_knowledge_nav(link_prefix: str = "", current_slug: str | None = None) -> str:
+    links = []
+    for topic in KNOWLEDGE_TOPICS:
+        current_class = " is-current" if topic.slug == current_slug else ""
+        links.append(
+            f'<a class="knowledge-link{current_class}" '
+            f'href="{escape(link_prefix)}knowledge/{escape(topic.slug)}/">'
+            f'{escape(topic.order)}.{escape(topic.title)}</a>'
+        )
     return (
         '<div class="archive-panel knowledge-panel" aria-label="Knowledge">'
         '<div class="archive-title knowledge-title">Knowledge</div>'
         '<div class="archive-month knowledge-single">'
-        f'<a class="knowledge-link{current_class}" href="{escape(link_prefix)}knowledge/harness-engineering/">'
-        '하네스 엔지니어링이란?</a>'
-        '</div>'
-        '</div>'
+        + "".join(links)
+        + '</div>'
+        + '</div>'
     )
 
 
@@ -881,7 +1031,8 @@ def _render_editorial_homepage(
       background: #111;
       flex: 0 0 auto;
     }}
-    .archive-year {{
+    .archive-year,
+    .archive-month-summary {{
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -893,10 +1044,16 @@ def _render_editorial_homepage(
       list-style: none;
       user-select: none;
     }}
-    .archive-year::-webkit-details-marker {{
+    .archive-month-summary {{
+      padding-left: 22px;
+      padding-bottom: 8px;
+    }}
+    .archive-year::-webkit-details-marker,
+    .archive-month-summary::-webkit-details-marker {{
       display: none;
     }}
-    .archive-year::after {{
+    .archive-year::after,
+    .archive-month-summary::after {{
       content: "";
       width: 6px;
       height: 6px;
@@ -907,10 +1064,12 @@ def _render_editorial_homepage(
       transform: rotate(0deg);
       transition: transform .16s ease;
     }}
-    .archive-year-group:not([open]) .archive-year::after {{
+    .archive-year-group:not([open]) .archive-year::after,
+    .archive-month-group:not([open]) .archive-month-summary::after {{
       transform: rotate(-45deg);
     }}
-    .archive-year-group[open] .archive-year::after {{
+    .archive-year-group[open] .archive-year::after,
+    .archive-month-group[open] .archive-month-summary::after {{
       transform: rotate(45deg);
     }}
     .archive-month {{
@@ -3418,7 +3577,8 @@ def _write_secondary_pages(
     (output_dir / "tools").mkdir(parents=True, exist_ok=True)
     (output_dir / "ai-tools").mkdir(parents=True, exist_ok=True)
     (output_dir / "ai-sources").mkdir(parents=True, exist_ok=True)
-    (output_dir / "knowledge" / "harness-engineering").mkdir(parents=True, exist_ok=True)
+    for topic in KNOWLEDGE_TOPICS:
+        (output_dir / "knowledge" / topic.slug).mkdir(parents=True, exist_ok=True)
     (output_dir / "items").mkdir(parents=True, exist_ok=True)
 
     (output_dir / "work-skills" / "index.html").write_text(
@@ -3453,14 +3613,16 @@ def _write_secondary_pages(
         ),
         encoding="utf-8",
     )
-    (output_dir / "knowledge" / "harness-engineering" / "index.html").write_text(
-        _render_harness_knowledge_page(
-            analytics_html=analytics_html,
-            back_href="../../",
-            archive_entries=archive_entries,
-        ),
-        encoding="utf-8",
-    )
+    for topic in KNOWLEDGE_TOPICS:
+        (output_dir / "knowledge" / topic.slug / "index.html").write_text(
+            _render_knowledge_topic_page(
+                topic=topic,
+                analytics_html=analytics_html,
+                back_href="../../",
+                archive_entries=archive_entries,
+            ),
+            encoding="utf-8",
+        )
 
     for item in [*work_items, *other_items, *tools]:
         (output_dir / "items" / f"{_item_slug(item)}.html").write_text(
@@ -3550,38 +3712,37 @@ def _render_ai_sources_page(
     )
 
 
-def _render_harness_knowledge_page(
+def _render_knowledge_topic_page(
+    topic: KnowledgeTopic,
     analytics_html: str,
     back_href: str,
     archive_entries: list[dict[str, object]] | None = None,
 ) -> str:
+    sections = "\n".join(
+        f"<h2>{escape(heading)}</h2><p>{escape(body)}</p>"
+        for heading, body in topic.sections
+    )
+    notes = "\n".join(f"<li>{escape(note)}</li>" for note in topic.notes)
     return _render_plain_page(
-        title="하네스 엔지니어링이란?",
+        title=topic.title,
         analytics_html=analytics_html,
         sidebar_html=_render_archive_nav(
             archive_entries or [],
             link_prefix=back_href,
-            current_knowledge=True,
+            current_knowledge_slug=topic.slug,
         ),
         body=f"""
         <a class="back-link" href="{escape(back_href)}">첫 화면</a>
         <header class="simple-header tool-page-header">
           <div class="kicker">Knowledge</div>
-          <h1>하네스 엔지니어링이란?</h1>
-          <p>AI 에이전트가 실제 업무 도구를 사용할 때 실행 순서, 권한, 검증, 기록을 한곳에서 관리하는 운영 구조입니다.</p>
+          <h1>{escape(topic.order)}. {escape(topic.title)}</h1>
+          <p>{escape(topic.summary)}</p>
         </header>
         <section class="knowledge-article">
           <article class="knowledge-body">
-            <h2>하네스 엔지니어링이 필요한 이유</h2>
-            <p>프롬프트는 AI에게 일을 시키는 지시문이고, 컨텍스트는 AI가 참고해야 할 자료와 상황입니다. 하네스 엔지니어링은 여기에 실제 도구 실행 규칙을 더해, AI가 말만 하는 단계에서 업무를 수행하는 단계로 넘어가도록 돕습니다.</p>
-            <h2>에이전트를 안전하게 움직이는 운영 장치</h2>
-            <p>에이전트는 목표를 받고 여러 단계를 스스로 진행하는 AI입니다. 하네스는 에이전트가 아무 도구나 바로 실행하지 않도록 중간에서 권한, 입력값, 결과 검증을 관리합니다.</p>
-            <h2>실제 업무에서는 이렇게 씁니다</h2>
-            <p>하네스 엔지니어링은 AI 에이전트와 실제 업무 시스템 사이에 두는 안전한 실행 계층입니다. 예를 들어 보고서 생성, 배포 점검, 장애 대응 초안 작성처럼 반복되는 업무를 자동화할 때 어떤 도구를 쓸 수 있는지, 누가 승인해야 하는지, 실패하면 어떻게 되돌릴지를 미리 정합니다.</p>
+            {sections}
             <ul class="note-list">
-              <li>권한: AI가 접근할 수 있는 저장소, 파일, API 범위를 제한합니다.</li>
-              <li>검증: AI가 만든 결과를 테스트, 규칙, 사람 승인으로 확인합니다.</li>
-              <li>기록: 어떤 입력으로 어떤 도구를 실행했고 어떤 결과가 나왔는지 남깁니다.</li>
+              {notes}
             </ul>
           </article>
         </section>
@@ -3807,7 +3968,8 @@ def _render_plain_page(
       background: #111111;
       flex: 0 0 auto;
     }}
-    .archive-year {{
+    .archive-year,
+    .archive-month-summary {{
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -3819,10 +3981,16 @@ def _render_plain_page(
       list-style: none;
       user-select: none;
     }}
-    .archive-year::-webkit-details-marker {{
+    .archive-month-summary {{
+      padding-left: 22px;
+      padding-bottom: 8px;
+    }}
+    .archive-year::-webkit-details-marker,
+    .archive-month-summary::-webkit-details-marker {{
       display: none;
     }}
-    .archive-year::after {{
+    .archive-year::after,
+    .archive-month-summary::after {{
       content: "";
       width: 6px;
       height: 6px;
@@ -3833,10 +4001,12 @@ def _render_plain_page(
       transform: rotate(0deg);
       transition: transform .16s ease;
     }}
-    .archive-year-group:not([open]) .archive-year::after {{
+    .archive-year-group:not([open]) .archive-year::after,
+    .archive-month-group:not([open]) .archive-month-summary::after {{
       transform: rotate(-45deg);
     }}
-    .archive-year-group[open] .archive-year::after {{
+    .archive-year-group[open] .archive-year::after,
+    .archive-month-group[open] .archive-month-summary::after {{
       transform: rotate(45deg);
     }}
     .archive-month {{
