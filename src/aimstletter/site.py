@@ -1830,7 +1830,7 @@ def _render_editorial_homepage(
       </section>
       <div class="intro-row">
         <p class="intro-copy">{escape(_editorial_intro_copy(lead_summary))}</p>
-        <div class="date">{date_label} · curated weekly for AI Master teams</div>
+        <div class="date">{date_label} · curated weekly for Cha JeongHwan</div>
       </div>
     </section>
     <section class="logo-roll" aria-label="Source roll">
