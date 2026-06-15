@@ -284,13 +284,13 @@ def render_homepage(
 def _weekly_window(day: datetime) -> tuple[datetime, datetime]:
     kst = timezone(timedelta(hours=9), name="KST")
     day_kst = day.astimezone(kst)
-    tuesday_offset = (day_kst.weekday() - 1) % 7
-    week_end = (day_kst - timedelta(days=tuesday_offset)).replace(
-        hour=23, minute=59, second=59, microsecond=999999
+    monday_offset = day_kst.weekday()
+    week_end = (day_kst - timedelta(days=monday_offset)).replace(
+        hour=7, minute=0, second=0, microsecond=0
     )
-    week_start = (week_end - timedelta(days=6)).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
+    if day_kst < week_end:
+        week_end -= timedelta(days=7)
+    week_start = week_end - timedelta(days=7)
     return week_start, week_end
 
 
@@ -309,8 +309,8 @@ def _period_label(start: datetime, end: datetime) -> str:
 
 def _archive_week_window(year: int, month: int, week: int) -> tuple[datetime, datetime]:
     kst = timezone(timedelta(hours=9), name="KST")
-    anchor_day = min(((week - 1) * 7) + 3, 28)
-    return _weekly_window(datetime(year, month, anchor_day, 12, tzinfo=kst))
+    anchor_day = min(((week - 1) * 7) + 1, 28)
+    return _weekly_window(datetime(year, month, anchor_day, 8, tzinfo=kst))
 
 
 def _weekly_archive_entry(day: datetime) -> dict[str, object]:

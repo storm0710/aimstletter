@@ -11,8 +11,8 @@ on:
       - "pyproject.toml"
   workflow_dispatch:
   schedule:
-    # 06:00 every Wednesday in Asia/Seoul.
-    - cron: "0 21 * * 2"
+    # 07:00 every Monday in Asia/Seoul.
+    - cron: "0 22 * * 0"
 
 permissions:
   contents: write

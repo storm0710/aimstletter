@@ -128,18 +128,18 @@ def test_render_homepage_includes_archive_entries() -> None:
     assert 'href="archive/2026/06/week-2/"' in html
 
 
-def test_weekly_window_uses_previous_wednesday_to_tuesday_range() -> None:
-    start, end = _weekly_window(datetime(2026, 6, 10, 6, tzinfo=UTC))
+def test_weekly_window_uses_previous_monday_7am_to_current_monday_7am_range() -> None:
+    start, end = _weekly_window(datetime(2026, 6, 15, 0, tzinfo=UTC))
 
-    assert start.date().isoformat() == "2026-06-03"
-    assert end.date().isoformat() == "2026-06-09"
+    assert start.isoformat() == "2026-06-08T07:00:00+09:00"
+    assert end.isoformat() == "2026-06-15T07:00:00+09:00"
 
     inside = DigestItem(
         title="inside",
         url="https://example.com/inside",
         source="Example",
         kind="tool",
-        published=datetime(2026, 6, 3, tzinfo=UTC),
+        published=datetime(2026, 6, 8, 0, tzinfo=UTC),
         summary="inside",
     )
     outside = DigestItem(
@@ -147,7 +147,7 @@ def test_weekly_window_uses_previous_wednesday_to_tuesday_range() -> None:
         url="https://example.com/outside",
         source="Example",
         kind="tool",
-        published=datetime(2026, 6, 2, tzinfo=UTC),
+        published=datetime(2026, 6, 7, 21, 59, tzinfo=UTC),
         summary="outside",
     )
 
@@ -460,20 +460,35 @@ def test_committed_knowledge_page_exists() -> None:
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
+    index = Path("public/index.html").read_text(encoding="utf-8")
+    week_3 = Path("public/archive/2026/06/week-3/index.html").read_text(encoding="utf-8")
     week_2 = Path("public/archive/2026/06/week-2/index.html").read_text(encoding="utf-8")
     week_1 = Path("public/archive/2026/06/week-1/index.html").read_text(encoding="utf-8")
     may_4 = Path("public/archive/2026/05/week-4/index.html").read_text(encoding="utf-8")
 
+    week_3_titles = re.findall(r'data-title="([^"]*)"', week_3)
     week_2_titles = re.findall(r'data-title="([^"]*)"', week_2)
     week_1_titles = re.findall(r'data-title="([^"]*)"', week_1)
     may_4_titles = re.findall(r'data-title="([^"]*)"', may_4)
 
+    assert week_3_titles
     assert week_2_titles
     assert week_1_titles
     assert may_4_titles
+    assert "06월 3째주" in index
+    assert "06월 3째주" in week_3
+    assert "2026-06-08~2026-06-15 데이터" in index
+    assert "2026-06-08~2026-06-15 데이터" in week_3
+    assert 'href="archive/2026/06/week-3/"' in index
+    assert 'href="archive/2026/06/week-3/"' in week_3
+    assert '<base href="../../../../">' not in index
+    assert '<base href="../../../../">' in week_3
     assert week_2_titles != week_1_titles
+    assert week_3_titles != week_2_titles
     assert may_4_titles != week_1_titles
     assert may_4_titles != week_2_titles
+    assert may_4_titles != week_3_titles
+    assert len(week_3_titles) == len(set(week_3_titles))
     assert len(week_1_titles) == len(set(week_1_titles))
     assert len(may_4_titles) == len(set(may_4_titles))
     assert any("Security validation for third-party coding agents" in title for title in week_2_titles)
@@ -488,8 +503,8 @@ def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
     assert "Harness Engineering" not in may_4_titles
 
 
-def test_weekly_pages_workflow_runs_wednesday_6am_kst() -> None:
+def test_weekly_pages_workflow_runs_monday_7am_kst() -> None:
     workflow = Path(".github/workflows/weekly-pages.yml").read_text(encoding="utf-8")
 
-    assert "06:00 every Wednesday in Asia/Seoul" in workflow
-    assert 'cron: "0 21 * * 2"' in workflow
+    assert "07:00 every Monday in Asia/Seoul" in workflow
+    assert 'cron: "0 22 * * 0"' in workflow
