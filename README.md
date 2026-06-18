@@ -138,7 +138,7 @@ GitHub 저장소에서 `Settings` → `Secrets and variables` → `Actions` → 
 
 네이버 블로그 자동 게시를 사용하려면 네이버 블로그 관리 화면에서 글쓰기 API를 켜고 API 비밀번호를 발급해야 합니다. `NAVER_BLOG_API_PASSWORD`에는 일반 네이버 로그인 비밀번호가 아니라 블로그 글쓰기 API 비밀번호를 넣습니다.
 
-GitHub Actions에 아래 Repository secret을 추가하면 `Weekly AI digest issue` workflow가 GitHub Issue를 만든 뒤 같은 본문을 네이버 블로그 `storm0710`에도 게시합니다. 블로그 ID나 로그인 ID가 다르면 Repository variable/secret으로 덮어쓸 수 있습니다.
+GitHub Actions에 아래 Repository secret을 추가하면 `Weekly AI digest issue` workflow가 GitHub Issue를 만든 뒤 같은 본문을 네이버 블로그 `storm0710`의 `AI` 게시판에도 게시합니다. 블로그 ID나 로그인 ID가 다르면 Repository variable/secret으로 덮어쓸 수 있습니다.
 
 - `NAVER_BLOG_API_PASSWORD`
 

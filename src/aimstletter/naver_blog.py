@@ -30,7 +30,7 @@ def post_markdown_to_naver_blog(
     post = {
         "title": title,
         "description": html,
-        "categories": ["AI마스터"],
+        "categories": ["AI"],
     }
     return str(
         server.metaWeblog.newPost(
