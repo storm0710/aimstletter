@@ -57,8 +57,8 @@ Repository Settings에서 아래 secrets를 등록합니다.
 
 - `SLACK_WEBHOOK_URL`: 슬랙 Incoming Webhook URL
 - `AZURE_OPENAI_API_KEY`: 선택 사항
-- `NAVER_BLOG_ID`: 네이버 블로그 ID
-- `NAVER_BLOG_USERNAME`: 네이버 로그인 ID
+- `NAVER_BLOG_ID`: 네이버 블로그 ID, 기본값 `storm0710`
+- `NAVER_BLOG_USERNAME`: 네이버 로그인 ID, 기본값 `storm0710`
 - `NAVER_BLOG_API_PASSWORD`: 네이버 블로그 글쓰기 API 비밀번호
 
 Repository Variables에는 필요하면 아래 값을 등록합니다.
@@ -138,11 +138,14 @@ GitHub 저장소에서 `Settings` → `Secrets and variables` → `Actions` → 
 
 네이버 블로그 자동 게시를 사용하려면 네이버 블로그 관리 화면에서 글쓰기 API를 켜고 API 비밀번호를 발급해야 합니다. `NAVER_BLOG_API_PASSWORD`에는 일반 네이버 로그인 비밀번호가 아니라 블로그 글쓰기 API 비밀번호를 넣습니다.
 
-GitHub Actions에 아래 Repository secrets를 추가하면 `Weekly AI digest issue` workflow가 GitHub Issue를 만든 뒤 같은 본문을 네이버 블로그에도 게시합니다.
+GitHub Actions에 아래 Repository secret을 추가하면 `Weekly AI digest issue` workflow가 GitHub Issue를 만든 뒤 같은 본문을 네이버 블로그 `storm0710`에도 게시합니다. 블로그 ID나 로그인 ID가 다르면 Repository variable/secret으로 덮어쓸 수 있습니다.
 
-- `NAVER_BLOG_ID`
-- `NAVER_BLOG_USERNAME`
 - `NAVER_BLOG_API_PASSWORD`
+
+선택 설정:
+
+- Repository variable `NAVER_BLOG_ID`: 기본값 `storm0710`
+- Repository secret `NAVER_BLOG_USERNAME`: 기본값 `storm0710`
 
 로컬에서 먼저 테스트하려면 digest 파일을 만든 뒤 네이버 게시 명령을 실행합니다.
 

@@ -3,8 +3,8 @@ name: Weekly AI digest issue
 on:
   workflow_dispatch:
   schedule:
-    # 06:00 every Wednesday in Asia/Seoul.
-    - cron: "0 21 * * 2"
+    # 07:00 every Monday in Asia/Seoul.
+    - cron: "0 22 * * 0"
 
 permissions:
   contents: read
@@ -75,8 +75,8 @@ jobs:
 
       - name: Publish Naver Blog post
         env:
-          NAVER_BLOG_ID: ${{ secrets.NAVER_BLOG_ID }}
-          NAVER_BLOG_USERNAME: ${{ secrets.NAVER_BLOG_USERNAME }}
+          NAVER_BLOG_ID: ${{ vars.NAVER_BLOG_ID || 'storm0710' }}
+          NAVER_BLOG_USERNAME: ${{ secrets.NAVER_BLOG_USERNAME || 'storm0710' }}
           NAVER_BLOG_API_PASSWORD: ${{ secrets.NAVER_BLOG_API_PASSWORD }}
         run: |
           if [ -z "$NAVER_BLOG_ID" ] || [ -z "$NAVER_BLOG_USERNAME" ] || [ -z "$NAVER_BLOG_API_PASSWORD" ]; then
