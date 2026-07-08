@@ -2884,13 +2884,38 @@ def _topic_badge_class(category: str) -> str:
 
 
 def _smart_insight_subcategory(item: SiteItem) -> str:
+    prefix, _title = _split_title_source_prefix(item)
+    if prefix:
+        return prefix
     return item.tags[0] if item.tags else item.source
+
+
+def _smart_insight_title(item: SiteItem) -> str:
+    _prefix, title = _split_title_source_prefix(item)
+    return _koreanize_display_title(title, item.summary, item.source)
+
+
+def _split_title_source_prefix(item: SiteItem) -> tuple[str, str]:
+    title = _clean_plain_text(item.title)
+    source = _clean_plain_text(item.source)
+    candidates = [
+        source,
+        source.replace(" 업데이트", ""),
+        source.replace(" 소식", ""),
+        source.replace(" 변경 이력", ""),
+    ]
+    for candidate in [candidate for candidate in candidates if candidate]:
+        pattern = rf"^{re.escape(candidate)}\s*[:：]\s*(.+)$"
+        match = re.match(pattern, title, flags=re.IGNORECASE)
+        if match:
+            return candidate, match.group(1).strip()
+    return "", title
 
 
 def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     entries = []
     for index, item in enumerate(items):
-        title = _clip(item.title, 78)
+        title = _clip(_smart_insight_title(item), 78)
         body = _clip(item.summary, 150)
         detail = item.detail or item.summary
         points = item.key_points or (item.summary,)
@@ -4865,10 +4890,57 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
 
 def _fallback_display_title(item: DigestItem) -> str:
     title = _clean_plain_text(item.title)
-    source = _korean_source_name(item.source)
     if title:
-        return f"{source}: {title}"
-    return f"{source}에서 확인한 최신 업데이트"
+        return _koreanize_display_title(title, item.summary, item.source)
+    return f"{_korean_source_name(item.source)}에서 확인한 최신 업데이트"
+
+
+def _koreanize_display_title(title: str, summary: str = "", source: str = "") -> str:
+    title = _clean_plain_text(title)
+    text = f"{title} {summary} {source}".lower()
+    specific = _fallback_specific_title(text)
+    if specific and (_looks_untranslated(title) or _has_source_title_prefix(title, source)):
+        return specific
+    if _looks_untranslated(title):
+        return specific or _fallback_korean_topic(text)
+    return title
+
+
+def _has_source_title_prefix(title: str, source: str) -> bool:
+    source = _clean_plain_text(source)
+    if not source:
+        return False
+    prefixes = (
+        source,
+        source.replace(" 업데이트", ""),
+        source.replace(" 소식", ""),
+        source.replace(" 변경 이력", ""),
+    )
+    return any(
+        prefix and re.match(rf"^{re.escape(prefix)}\s*[:：]", title, flags=re.IGNORECASE)
+        for prefix in prefixes
+    )
+
+
+def _fallback_specific_title(text: str) -> str:
+    title_rules = (
+        (("cloak", "detonate", "scanner evasion"), "스캐너 회피를 탐지하는 보안 AI"),
+        (("verichat", "hardware security"), "하드웨어 보안 검증용 대화형 AI"),
+        (("agenticdatabench", "data agents"), "데이터 에이전트 성능 벤치마크"),
+        (("query-centric", "optimization", "workflows"), "AI 워크플로의 쿼리 중심 최적화"),
+        (("smoothagent", "long-horizon"), "장기 작업을 위한 LLM 에이전트"),
+        (("llm agents say", "no one is watching"), "LLM 에이전트의 사회적 전략 분석"),
+        (("text-to-sql", "evaluation"), "자연어를 SQL로 바꾸는 AI 평가"),
+        (("anomaly detection", "agents"), "네트워크 이상 징후를 찾는 AI 에이전트"),
+        (("database", "query", "sql"), "데이터베이스 업무를 돕는 AI"),
+        (("network", "anomaly"), "네트워크 운영을 돕는 AI"),
+        (("hardware", "verification"), "하드웨어 검증을 돕는 AI"),
+        (("security", "scanner"), "보안 검사를 돕는 AI"),
+    )
+    for keywords, label in title_rules:
+        if all(keyword in text for keyword in keywords):
+            return label
+    return ""
 
 
 def _fallback_display_summary(item: DigestItem) -> str:

@@ -47,7 +47,8 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     assert "AI MASTER TIMES" in html
     assert "AI Talent Lab" in html
     assert "Smart Insights" in html
-    assert 'data-title="Example: Database incident response with AI agents"' in html
+    assert 'data-title="Example: Database incident response with AI agents"' not in html
+    assert "Database incident response with AI agents" not in html
     assert "topic-badge" in html
     assert 'href="ai-tools/"' in html
     assert 'href="ai-sources/"' in html
@@ -58,6 +59,29 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     assert '<a href="work-skills/">Archive</a>' not in html
     assert "lead-image" not in html
     assert "watch-links" not in html
+
+
+def test_smart_insight_moves_source_prefix_to_badge_and_koreanizes_title() -> None:
+    item = SiteItem(
+        title=(
+            "arXiv 데이터베이스 AI: Query-Centric Optimization of AI Workflows "
+            "via Approximate Algorithms"
+        ),
+        url="https://example.com/query",
+        source="arXiv 데이터베이스 AI",
+        kind="논문",
+        published=datetime(2026, 7, 6, tzinfo=UTC),
+        summary="AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경을 하지 않게 하기 위한 연구입니다.",
+        detail="AI가 데이터베이스를 다룰 때 필요한 통제 방식을 설명합니다.",
+        key_points=("읽기 전용 권한과 쿼리 검토가 중요합니다.",),
+        tags=("AI 에이전트",),
+    )
+
+    html = render_homepage([item] * 5, [], now=datetime(2026, 7, 8, tzinfo=UTC))
+
+    assert '<span class="card-title">AI 워크플로의 쿼리 중심 최적화</span>' in html
+    assert '<span class="topic-badge sub">arXiv 데이터베이스 AI</span>' in html
+    assert '<span class="card-title">arXiv 데이터베이스 AI:' not in html
 
 
 def test_safe_korean_field_rejects_untranslated_article_text() -> None:
