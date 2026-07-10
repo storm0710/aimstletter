@@ -103,6 +103,25 @@ def test_smart_insight_uses_specific_tool_titles_instead_of_generic_topics() -> 
     assert '<span class="card-title">개발 도구와 코딩 자동화</span>' not in html
 
 
+def test_smart_insight_rewrites_generic_localized_titles_from_url_context() -> None:
+    item = SiteItem(
+        title="개발 도구와 코딩 자동화",
+        url="https://github.blog/changelog/2026-07-02-copilot-agent-session-streaming-is-now-in-public-preview",
+        source="GitHub Copilot 변경 이력",
+        kind="도구 업데이트",
+        published=datetime(2026, 7, 3, tzinfo=UTC),
+        summary="반복되는 코드 수정과 PR 보조 작업을 줄여주는 GitHub Copilot 업데이트입니다.",
+        detail="반복되는 코드 수정과 PR 보조 작업을 줄여주는 GitHub Copilot 업데이트입니다.",
+        key_points=("세션 진행 상황을 더 잘 확인할 수 있습니다.",),
+        tags=("GitHub Copilot",),
+    )
+
+    html = render_homepage([], [item], now=datetime(2026, 7, 8, tzinfo=UTC))
+
+    assert '<span class="card-title">Copilot 에이전트 세션 스트리밍</span>' in html
+    assert '<span class="card-title">개발 도구와 코딩 자동화</span>' not in html
+
+
 def test_safe_korean_field_rejects_untranslated_article_text() -> None:
     title = "OpenAI named a Leader in enterprise coding agents by Gartner"
     summary = (

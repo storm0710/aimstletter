@@ -2894,7 +2894,7 @@ def _smart_insight_subcategory(item: SiteItem) -> str:
 
 def _smart_insight_title(item: SiteItem) -> str:
     _prefix, title = _split_title_source_prefix(item)
-    return _koreanize_display_title(title, item.summary, item.source)
+    return _koreanize_display_title(title, f"{item.summary} {item.detail} {item.url}", item.source)
 
 
 def _split_title_source_prefix(item: SiteItem) -> tuple[str, str]:
@@ -4902,7 +4902,7 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
 def _fallback_display_title(item: DigestItem) -> str:
     title = _clean_plain_text(item.title)
     if title:
-        return _koreanize_display_title(title, item.summary, item.source)
+        return _koreanize_display_title(title, f"{item.summary} {item.url}", item.source)
     return f"{_korean_source_name(item.source)}에서 확인한 최신 업데이트"
 
 
@@ -4910,11 +4910,28 @@ def _koreanize_display_title(title: str, summary: str = "", source: str = "") ->
     title = _clean_plain_text(title)
     text = f"{title} {summary} {source}".lower()
     specific = _fallback_specific_title(text)
+    if specific and _is_generic_display_title(title):
+        return specific
     if specific and (_looks_untranslated(title) or _has_source_title_prefix(title, source)):
         return specific
     if _looks_untranslated(title):
         return specific or _fallback_korean_topic(text)
     return title
+
+
+def _is_generic_display_title(title: str) -> bool:
+    return title in {
+        "개발 도구와 코딩 자동화",
+        "데이터베이스 업무 AI 활용",
+        "AI 앱 배포와 운영",
+        "서버 운영과 자동화",
+        "AI 에이전트와 업무 자동화",
+        "보안과 리스크 관리",
+        "AI 업데이트",
+        "OpenAI 도구와 AI 에이전트",
+        "네트워크 운영 AI 활용",
+        "GitHub Copilot 변경 이력에서 확인한 최신 업데이트",
+    }
 
 
 def _has_source_title_prefix(title: str, source: str) -> bool:
