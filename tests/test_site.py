@@ -122,6 +122,58 @@ def test_smart_insight_rewrites_generic_localized_titles_from_url_context() -> N
     assert '<span class="card-title">개발 도구와 코딩 자동화</span>' not in html
 
 
+def test_smart_insight_rewrites_generic_summary_from_url_context() -> None:
+    item = SiteItem(
+        title="AI 워크플로의 쿼리 중심 최적화",
+        url="https://arxiv.org/abs/2607.03501v1",
+        source="arXiv 데이터베이스 AI",
+        kind="논문",
+        published=datetime(2026, 7, 1, tzinfo=UTC),
+        summary="AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경을 하지 않게 하기 위해 필요합니다. 읽기 전용 권한, 스키마 범위 제한, 쿼리 검토, 감사 로그입니다.",
+        detail="AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경을 하지 않게 하기 위해 필요합니다. 읽기 전용 권한, 스키마 범위 제한, 쿼리 검토, 감사 로그입니다.",
+        key_points=(
+            "1. 왜 필요한가요? AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경을 하지 않게 하기 위해 필요합니다.",
+            "2. 핵심 구성 요소: 읽기 전용 권한, 스키마 범위 제한, 쿼리 검토, 감사 로그입니다.",
+            "3. 일반 DB 도구와의 차이점: 사람이 직접 쿼리하는 상황보다 AI의 자동 실행 위험을 더 강하게 통제합니다.",
+        ),
+        tags=("AI 에이전트",),
+    )
+
+    html = render_homepage([item] * 5, [], now=datetime(2026, 7, 8, tzinfo=UTC))
+
+    assert "기상 데이터처럼 시간·공간 조건이 있는 질문을 SQL로 바꾸는 Text-to-SQL 연구입니다." in html
+    assert "시공간 조건 해석" in html
+    card = re.search(r'<button class="insight-card"[^>]+data-source="https://arxiv.org/abs/2607.03501v1"[^>]*>', html)
+    assert card
+    assert "실수로 위험한 조회나 변경" not in card.group(0)
+
+
+def test_smart_insight_rewrites_broken_question_mark_title() -> None:
+    item = SiteItem(
+        title="AI 에이전트와 업무 자동화 ? ???",
+        url="https://blog.google/innovation-and-ai/technology/ai/full-stack-ai-explainer/",
+        source="Google AI 블로그",
+        kind="도구 업데이트",
+        published=datetime(2026, 7, 1, tzinfo=UTC),
+        summary="터미널에서 코드 탐색, 수정, 리팩터링을 끊기지 않고 이어가기 위해 필요합니다.",
+        detail="터미널에서 코드 탐색, 수정, 리팩터링을 끊기지 않고 이어가기 위해 필요합니다.",
+        key_points=("1. 왜 필요한가요? 터미널에서 코드 탐색, 수정, 리팩터링을 끊기지 않고 이어가기 위해 필요합니다.",),
+        tags=("AI 에이전트",),
+    )
+
+    html = render_homepage([item] * 5, [], now=datetime(2026, 7, 8, tzinfo=UTC))
+
+    assert '<span class="card-title">풀스택 AI 앱 구조 설명</span>' in html
+    assert "AI 에이전트와 업무 자동화 ? ???" not in html
+    assert "풀스택 AI 애플리케이션을 구성하는 화면, 서버, 모델 호출, 데이터 흐름" in html
+    card = re.search(
+        r'<button class="insight-card"[^>]+data-source="https://blog.google/innovation-and-ai/technology/ai/full-stack-ai-explainer/"[^>]*>',
+        html,
+    )
+    assert card
+    assert "터미널에서 코드 탐색" not in card.group(0)
+
+
 def test_safe_korean_field_rejects_untranslated_article_text() -> None:
     title = "OpenAI named a Leader in enterprise coding agents by Gartner"
     summary = (

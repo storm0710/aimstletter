@@ -2897,6 +2897,68 @@ def _smart_insight_title(item: SiteItem) -> str:
     return _koreanize_display_title(title, f"{item.summary} {item.detail} {item.url}", item.source)
 
 
+def _smart_insight_summary(item: SiteItem) -> str:
+    digest = _site_item_to_digest(item)
+    fallback = _fallback_specific_summary(digest)
+    if fallback and (_needs_specific_insight_copy(item.summary) or _looks_untranslated(item.summary)):
+        return fallback
+    return item.summary
+
+
+def _smart_insight_card_detail(item: SiteItem, summary: str) -> str:
+    detail = item.detail or item.summary
+    digest = _site_item_to_digest(item)
+    fallback = _fallback_specific_summary(digest)
+    if fallback and (_needs_specific_insight_copy(detail) or _looks_untranslated(detail)):
+        return fallback
+    return detail or summary
+
+
+def _smart_insight_points(item: SiteItem) -> tuple[str, ...]:
+    points = item.key_points or (item.summary,)
+    if not any(_needs_specific_insight_copy(point) for point in points):
+        return points
+    digest = _site_item_to_digest(item)
+    fallback = _fallback_three_line_summary(digest)
+    return fallback or points
+
+
+def _site_item_to_digest(item: SiteItem) -> DigestItem:
+    return DigestItem(
+        title=item.title,
+        url=item.url,
+        source=item.source,
+        kind=item.kind,
+        published=item.published,
+        summary=" ".join(part for part in (item.summary, item.detail) if part),
+    )
+
+
+def _needs_specific_insight_copy(text: str) -> bool:
+    clean = _clean_plain_text(text)
+    if not clean:
+        return True
+    generic_snippets = (
+        "원문에서 다루는 문제, 제안 방식, 변화 지점",
+        "관련 도구, 운영 조건, 리스크",
+        "AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경",
+        "터미널에서 코드 탐색, 수정, 리팩터링",
+        "한 번 쓰고 버리는 프롬프트",
+        "AI 앱을 빠르게 공개하고 프론트엔드와 서버 기능",
+        "반복되는 코드 수정, PR 보조",
+        "이번 업데이트가 어떤 업무 문제",
+        "업무 자동화, 운영 안정성",
+        "오래 걸리는 AI 작업",
+        "워크플로 상태 저장, 재시도 정책",
+        "주제를 다룹니다",
+    )
+    return _has_broken_placeholder(clean) or any(snippet in clean for snippet in generic_snippets)
+
+
+def _has_broken_placeholder(text: str) -> bool:
+    return "�" in text or bool(re.search(r"\?{2,}", text))
+
+
 def _split_title_source_prefix(item: SiteItem) -> tuple[str, str]:
     title = _clean_plain_text(item.title)
     source = _clean_plain_text(item.source)
@@ -2927,9 +2989,10 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
 
     for index, item in enumerate(unique_items):
         title = _clip(_smart_insight_title(item), 78)
-        body = _clip(item.summary, 150)
-        detail = item.detail or item.summary
-        points = item.key_points or (item.summary,)
+        smart_summary = _smart_insight_summary(item)
+        body = _clip(smart_summary, 150)
+        detail = _smart_insight_card_detail(item, smart_summary)
+        points = _smart_insight_points(item)
         footnotes = item.glossary
         meta = f"{item.source} · {item.kind} · {_format_date(item.published)}"
         tags = item.tags
@@ -4555,13 +4618,15 @@ def _has_untranslated_items(items: list[dict[str, object]]) -> bool:
     return any(
         _looks_untranslated(str(item.get("title", "")))
         or _looks_untranslated(str(item.get("summary", "")))
+        or _has_broken_placeholder(str(item.get("title", "")))
+        or _has_broken_placeholder(str(item.get("summary", "")))
         for item in items
     )
 
 
 def _safe_korean_field(value: object, fallback: str) -> str:
     cleaned = _clean_visible_korean(str(value or ""))
-    if not cleaned or _looks_untranslated(cleaned):
+    if not cleaned or _looks_untranslated(cleaned) or _has_broken_placeholder(cleaned):
         return fallback
     return cleaned
 
@@ -4572,7 +4637,7 @@ def _safe_key_points(localized_item: dict[str, object], original: DigestItem) ->
     safe_points = [
         _clean_visible_korean(point)
         for point in points
-        if point and not _looks_untranslated(point)
+        if point and not _looks_untranslated(point) and not _needs_specific_insight_copy(point)
     ]
     if safe_points:
         return tuple(safe_points[:3])
@@ -4644,7 +4709,7 @@ def _fallback_glossary(item: DigestItem) -> list[str]:
 
 
 def _item_text(item: DigestItem) -> str:
-    return f"{item.title} {item.summary} {item.source} {item.kind}".lower()
+    return f"{item.title} {item.summary} {item.source} {item.kind} {item.url}".lower()
 
 
 def _detail_href(item: SiteItem) -> str:
@@ -4734,8 +4799,92 @@ def _fallback_korean_item(item: DigestItem) -> SiteItem:
 
 
 def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
-    text = _item_text(item)
-    if "security validation for third-party coding agents" in text:
+    text = re.sub(r"[-_]+", " ", _item_text(item))
+    if "2607.04290" in text or ("agentic v2x" in text and "deadline aware" in text):
+        return (
+            "1. 무엇을 다루나요? 5G/6G V2X 환경에서 차량·사물 통신 작업을 마감 시간에 맞춰 배정하는 에이전트 연구입니다.",
+            "2. 핵심 구성 요소: 지연 시간 제약, 작업 우선순위, 네트워크 자원 배정, 소형 언어모델 기반 의사결정입니다.",
+            "3. 업무 적용 포인트: 통신 운영 자동화에서는 처리 속도뿐 아니라 지연 한계와 실패 시 영향 범위를 함께 봐야 합니다.",
+        )
+    if "2607.04219" in text or ("agentic iot" in text and "architecture" in text):
+        return (
+            "1. 무엇을 다루나요? IoT 기기와 서비스가 에이전트처럼 협력하는 구조와 적용 영역을 정리합니다.",
+            "2. 핵심 구성 요소: 장치 간 통신, 에이전트 역할 분담, 데이터 흐름, 권한과 안전 통제입니다.",
+            "3. 업무 적용 포인트: 현장 장비를 AI로 묶을 때 자동 판단 범위와 사람 승인 지점을 먼저 정해야 합니다.",
+        )
+    if "2607.03859" in text:
+        return (
+            "1. 무엇을 다루나요? 저궤도 위성 네트워크의 자원 할당 모델이 공격이나 교란에도 안정적인지 다룹니다.",
+            "2. 핵심 구성 요소: 위성 자원 배분, 모델 공격 시나리오, 견고성 평가, 운영 성능 비교입니다.",
+            "3. 업무 적용 포인트: 네트워크 AI를 실제 인프라에 쓰려면 평균 성능보다 교란 상황의 안정성을 확인해야 합니다.",
+        )
+    if "2607.03501" in text or ("stratos" in text and "text to sql" in text):
+        return (
+            "1. 무엇을 다루나요? 기상 데이터처럼 시간과 위치 조건이 있는 질문을 SQL로 바꾸는 Text-to-SQL 연구입니다.",
+            "2. 핵심 구성 요소: 시공간 조건 해석, 스키마 연결, 질의 생성, 기상 데이터 검증입니다.",
+            "3. 업무 적용 포인트: 데이터 질의 자동화에서는 권한 통제뿐 아니라 기간·지역 조건을 정확히 해석하는지가 중요합니다.",
+        )
+    if "mapping ai jobs transition eu" in text:
+        return (
+            "1. 무엇을 다루나요? 유럽 노동시장에서 AI 전환 가능성이 큰 업무와 필요한 역량을 지도화한 분석입니다.",
+            "2. 핵심 구성 요소: 직무별 AI 노출도, 전환 가능성, 재교육 우선순위, 산업별 영향 비교입니다.",
+            "3. 업무 적용 포인트: 조직은 자동화 가능 업무뿐 아니라 사람을 재배치하고 훈련할 경로까지 함께 설계해야 합니다.",
+        )
+    if "2607.03639" in text or "signed bar" in text:
+        return (
+            "1. 무엇을 다루나요? Signed BAR 추측을 AI 보조 방식으로 해결한 수학 연구 사례입니다.",
+            "2. 핵심 구성 요소: 증명 후보 탐색, 정형 검증, 사람의 수학적 판단, AI 보조 연구 절차입니다.",
+            "3. 업무 적용 포인트: AI는 결론을 단독으로 확정하기보다 후보를 만들고 전문가 검증을 빠르게 하는 역할에 강점이 있습니다.",
+        )
+    if "latest ai news" in text and "june 2026" in text:
+        return (
+            "1. 무엇을 다루나요? Google이 2026년 6월에 발표한 AI 제품과 연구 소식을 한 번에 정리한 글입니다.",
+            "2. 핵심 구성 요소: Gemini 업데이트, 검색·개발자 도구 변화, 연구 발표, 제품 적용 사례입니다.",
+            "3. 업무 적용 포인트: 개별 발표를 흩어져 확인하기보다 한 달 단위로 변화 방향과 적용 가능성을 점검할 수 있습니다.",
+        )
+    if "nyc ai summit" in text:
+        return (
+            "1. 무엇을 다루나요? 뉴욕 교육 현장에서 교실 AI 활용과 교사 지원 방안을 논의한 서밋 소식입니다.",
+            "2. 핵심 구성 요소: 교육용 AI 활용 사례, 교사 연수, 학생 보호, 학교 운영 정책입니다.",
+            "3. 업무 적용 포인트: 교육 AI는 도구 배포보다 교사의 수업 흐름과 안전 기준에 맞게 설계해야 합니다.",
+        )
+    if "chatgpt adoption has expanded" in text:
+        return (
+            "1. 무엇을 다루나요? ChatGPT 사용이 국가, 산업, 사용자층 전반으로 어떻게 확산됐는지 보여주는 분석입니다.",
+            "2. 핵심 구성 요소: 사용량 증가, 지역별 확산, 업무·학습 활용, 접근성 변화입니다.",
+            "3. 업무 적용 포인트: 도입 전략을 세울 때 단순 사용자 수보다 어떤 업무에서 반복 사용되는지 봐야 합니다.",
+        )
+    if "britains next era of productivity" in text:
+        return (
+            "1. 무엇을 다루나요? 영국의 생산성 향상을 위해 AI 역량과 활용 생태계를 키우는 전략을 설명합니다.",
+            "2. 핵심 구성 요소: AI 인재 육성, 공공·민간 도입, 생산성 개선, 지역별 확산입니다.",
+            "3. 업무 적용 포인트: AI 생산성은 모델 성능만으로 생기지 않고 교육, 인프라, 제도 지원이 함께 필요합니다.",
+        )
+    if "introducing genebench pro" in text:
+        return (
+            "1. 무엇을 다루나요? 유전체·생명과학 영역에서 AI 모델을 평가하기 위한 GeneBench-Pro 벤치마크 소개입니다.",
+            "2. 핵심 구성 요소: 생물학 과제, 모델 평가 기준, 전문가 검증, 실제 연구 활용성입니다.",
+            "3. 업무 적용 포인트: 전문 분야 AI는 일반 성능보다 도메인 과제에서의 정확도와 검증 가능성이 중요합니다.",
+        )
+    if "core dump epidemiology data infrastructure bug" in text:
+        return (
+            "1. 무엇을 다루나요? 오래된 코어덤프 데이터 인프라 버그를 추적하고 수정한 엔지니어링 사례입니다.",
+            "2. 핵심 구성 요소: 장애 재현, 데이터 파이프라인 조사, 원인 추적, 장기 미해결 버그 수정입니다.",
+            "3. 업무 적용 포인트: 드문 장애도 관측 데이터와 재현 경로를 쌓으면 오래된 시스템 문제를 해결할 수 있습니다.",
+        )
+    if "genebench pro case studies" in text or ("genebench pro" in text and "case studies" in text):
+        return (
+            "1. 무엇을 다루나요? GeneBench-Pro를 실제 생물학 연구 과제에 적용한 사례를 소개합니다.",
+            "2. 핵심 구성 요소: 과제별 평가, 모델 비교, 전문가 판단, 연구 워크플로 적용입니다.",
+            "3. 업무 적용 포인트: 벤치마크는 점수표에 그치지 않고 실제 연구 의사결정에 연결될 때 가치가 커집니다.",
+        )
+    if "full stack ai explainer" in text:
+        return (
+            "1. 무엇을 다루나요? 풀스택 AI 애플리케이션을 구성하는 프론트엔드, 백엔드, 모델, 데이터 흐름을 설명합니다.",
+            "2. 핵심 구성 요소: 사용자 인터페이스, 서버 로직, 모델 호출, 컨텍스트 관리, 배포 구조입니다.",
+            "3. 업무 적용 포인트: AI 앱은 모델 하나가 아니라 제품 화면부터 데이터·운영까지 연결된 시스템으로 설계해야 합니다.",
+        )
+    if "security validation for third party coding agents" in text:
         return (
             "1. 왜 필요한가요? 외부 코딩 에이전트가 저장소와 개발 도구에 접근할 때 악성 동작이나 과도한 권한 사용을 막기 위해 필요합니다.",
             "2. 핵심 구성 요소: 에이전트 신원 확인, 권한 범위 제한, 코드 변경 검증, 실행 이력 감사입니다.",
@@ -4795,7 +4944,7 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
             "2. 핵심 구성 요소: 역할 재설계, 책임 분담, AI 결과 검수, 조직 학습 체계입니다.",
             "3. 업무 적용 포인트: AI 도입은 도구 배포가 아니라 팀 운영 방식과 관리자 역량을 함께 바꾸는 일입니다.",
         )
-    if "third-party coding agents" in text:
+    if "third party coding agents" in text:
         return (
             "1. 무엇을 다루나요? 외부 코딩 에이전트를 개발 환경에 붙일 때 어떤 검증과 통제가 필요한지 다룹니다.",
             "2. 핵심 구성 요소: 접근 권한, 실행 범위, 변경 검토, 보안 감사 로그입니다.",
@@ -4910,6 +5059,8 @@ def _koreanize_display_title(title: str, summary: str = "", source: str = "") ->
     title = _clean_plain_text(title)
     text = f"{title} {summary} {source}".lower()
     specific = _fallback_specific_title(text)
+    if _has_broken_placeholder(title):
+        return specific or _fallback_korean_topic(text)
     if specific and _is_generic_display_title(title):
         return specific
     if specific and (_looks_untranslated(title) or _has_source_title_prefix(title, source)):
@@ -4971,7 +5122,7 @@ def _fallback_specific_title(text: str) -> str:
         (("spreadsheet automation",), "스프레드시트 업무 자동화"),
         (("secure secret handling",), "에이전트 비밀값 관리"),
         (("design qa", "generated ui"), "생성 UI 디자인 QA"),
-        (("security validation", "third-party coding agents"), "서드파티 코딩 에이전트 보안 검증"),
+        (("security validation", "third party coding agents"), "서드파티 코딩 에이전트 보안 검증"),
         (("inquitree", "scientific inquiry"), "과학 탐구 AI 에이전트 평가"),
         (("autonomous incident resolution",), "대규모 장애 자동 해결 에이전트"),
         (("data agents under attack",), "데이터 에이전트 취약점 분석"),
@@ -5090,8 +5241,78 @@ def _strip_point_prefix(text: str) -> str:
 
 
 def _fallback_specific_summary(item: DigestItem) -> str:
-    text = _item_text(item)
-    if "security validation for third-party coding agents" in text:
+    text = re.sub(r"[-_]+", " ", _item_text(item))
+    if "2607.04290" in text or ("agentic v2x" in text and "deadline aware" in text):
+        return (
+            "5G/6G V2X 환경에서 차량·사물 통신 작업을 마감 시간에 맞춰 배정하는 에이전트 연구입니다. "
+            "네트워크 지연과 자원 배분을 자동화할 때 어떤 제약을 함께 봐야 하는지 보여줍니다."
+        )
+    if "2607.04219" in text or ("agentic iot" in text and "architecture" in text):
+        return (
+            "IoT 기기와 서비스가 에이전트처럼 협력하는 구조와 적용 영역, 과제를 정리한 논문입니다. "
+            "여러 장치가 독립적으로 판단할 때 통신, 권한, 안전 통제가 핵심입니다."
+        )
+    if "2607.03859" in text:
+        return (
+            "저궤도 위성 네트워크에서 자원 할당 모델이 공격이나 교란에도 안정적으로 동작하는지 다룬 연구입니다. "
+            "위성·네트워크 운영에서 AI 모델의 견고성을 검토할 때 참고할 수 있습니다."
+        )
+    if "2607.03501" in text or ("stratos" in text and "text to sql" in text):
+        return (
+            "기상 데이터처럼 시간·공간 조건이 있는 질문을 SQL로 바꾸는 Text-to-SQL 연구입니다. "
+            "위치와 기간 조건을 잘못 해석하지 않도록 시공간 정보를 질의 구조에 연결하는 데 초점이 있습니다."
+        )
+    if "mapping ai jobs transition eu" in text:
+        return (
+            "유럽 노동시장에서 AI로 전환 가능한 업무와 필요한 역량을 지도화한 OpenAI 분석입니다. "
+            "조직은 직무별 자동화 영향과 재교육 우선순위를 잡는 데 참고할 수 있습니다."
+        )
+    if "2607.03639" in text or "signed bar" in text:
+        return (
+            "Signed BAR 추측을 AI 보조 방식으로 해결한 수학 연구입니다. "
+            "AI가 증명 후보를 탐색하고 사람이 검증하는 연구 협업 방식의 사례로 볼 수 있습니다."
+        )
+    if "latest ai news" in text and "june 2026" in text:
+        return (
+            "Google이 2026년 6월에 발표한 AI 제품과 연구 업데이트를 묶어 정리한 글입니다. "
+            "여러 발표를 한 번에 훑으며 Gemini, 검색, 개발자 도구의 변화 방향을 확인할 수 있습니다."
+        )
+    if "nyc ai summit" in text:
+        return (
+            "뉴욕 교육 현장에서 교실 AI 활용과 교사 지원 방안을 논의한 Google 교육 서밋 소식입니다. "
+            "수업 적용, 안전 기준, 교사 연수처럼 학교 운영에 필요한 조건을 다룹니다."
+        )
+    if "chatgpt adoption has expanded" in text:
+        return (
+            "ChatGPT 사용이 국가와 산업, 사용자층 전반으로 어떻게 확산됐는지 보여주는 OpenAI 분석입니다. "
+            "조직의 AI 도입 전략을 세울 때 실제 활용 범위와 반복 사용 패턴을 참고할 수 있습니다."
+        )
+    if "britains next era of productivity" in text:
+        return (
+            "영국의 생산성 향상을 위해 AI 역량과 활용 생태계를 키우는 전략을 설명한 Google 글입니다. "
+            "AI 인재, 공공·민간 도입, 지역 확산을 함께 다루는 생산성 관점의 업데이트입니다."
+        )
+    if "introducing genebench pro" in text:
+        return (
+            "유전체·생명과학 영역에서 AI 모델을 평가하기 위한 GeneBench-Pro 벤치마크 소개입니다. "
+            "전문 도메인 과제에서 모델 성능과 검증 가능성을 확인하는 데 초점이 있습니다."
+        )
+    if "core dump epidemiology data infrastructure bug" in text:
+        return (
+            "18년 동안 남아 있던 코어덤프 데이터 인프라 버그를 추적하고 수정한 엔지니어링 사례입니다. "
+            "관측 데이터와 재현 경로를 쌓아 오래된 시스템 문제를 해결하는 과정을 보여줍니다."
+        )
+    if "genebench pro case studies" in text or ("genebench pro" in text and "case studies" in text):
+        return (
+            "GeneBench-Pro를 실제 생물학 연구 과제에 적용한 사례를 소개합니다. "
+            "벤치마크 결과를 연구 의사결정과 모델 선택에 어떻게 연결하는지 보여줍니다."
+        )
+    if "full stack ai explainer" in text:
+        return (
+            "풀스택 AI 애플리케이션을 구성하는 화면, 서버, 모델 호출, 데이터 흐름을 설명한 Google 글입니다. "
+            "AI 앱을 모델 기능 하나가 아니라 운영 가능한 제품 구조로 이해하게 돕습니다."
+        )
+    if "security validation for third party coding agents" in text:
         return (
             "서드파티 코딩 에이전트를 개발 환경에 연결할 때 신원과 권한을 검증하는 보안 업데이트입니다. "
             "외부 에이전트가 저장소, 코드 변경, 비밀값에 접근하는 범위를 통제하는 데 초점이 있습니다."
