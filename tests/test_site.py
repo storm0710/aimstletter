@@ -84,6 +84,25 @@ def test_smart_insight_moves_source_prefix_to_badge_and_koreanizes_title() -> No
     assert '<span class="card-title">arXiv 데이터베이스 AI:' not in html
 
 
+def test_smart_insight_uses_specific_tool_titles_instead_of_generic_topics() -> None:
+    item = SiteItem(
+        title="Copilot agent session streaming is now in public preview",
+        url="https://github.blog/changelog/2026-07-02-copilot-agent-session-streaming-is-now-in-public-preview",
+        source="GitHub Copilot 변경 이력",
+        kind="도구 업데이트",
+        published=datetime(2026, 7, 3, tzinfo=UTC),
+        summary="반복되는 코드 수정과 PR 보조 작업을 줄여주는 GitHub Copilot 업데이트입니다.",
+        detail="반복되는 코드 수정과 PR 보조 작업을 줄여주는 GitHub Copilot 업데이트입니다.",
+        key_points=("세션 진행 상황을 더 잘 확인할 수 있습니다.",),
+        tags=("GitHub Copilot",),
+    )
+
+    html = render_homepage([], [item], now=datetime(2026, 7, 8, tzinfo=UTC))
+
+    assert '<span class="card-title">Copilot 에이전트 세션 스트리밍</span>' in html
+    assert '<span class="card-title">개발 도구와 코딩 자동화</span>' not in html
+
+
 def test_safe_korean_field_rejects_untranslated_article_text() -> None:
     title = "OpenAI named a Leader in enterprise coding agents by Gartner"
     summary = (
@@ -385,7 +404,7 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "06월 1째주" in week_1
     assert "당신의 AI 역량을 성장시켜보세요" in week_2
     assert "업무 AI" in week_2
-    assert "Security validation for third-party coding agents" in week_2
+    assert "서드파티 코딩 에이전트 보안 검증" in week_2
     assert "서드파티 코딩 에이전트를 개발 환경에 연결할 때 신원과 권한을 검증하는 보안 업데이트" in week_2
     assert "외부 코딩 에이전트가 저장소와 개발 도구에 접근할 때" in week_2
     assert "공개된 개발 도구와 코딩 자동화 관련 소식" not in week_2
@@ -515,13 +534,13 @@ def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
     assert len(week_3_titles) == len(set(week_3_titles))
     assert len(week_1_titles) == len(set(week_1_titles))
     assert len(may_4_titles) == len(set(may_4_titles))
-    assert any("Security validation for third-party coding agents" in title for title in week_2_titles)
-    assert any("Prompt to workflow migration" in title for title in week_1_titles)
-    assert any("Claude Code SDK orchestration patterns" in title for title in may_4_titles)
-    assert any("OpenAI Responses API tool calling update" in title for title in may_4_titles)
-    assert any("GitHub Copilot pull request review workflow" in title for title in may_4_titles)
+    assert any("서드파티 코딩 에이전트 보안 검증" in title for title in week_2_titles)
+    assert any("프롬프트를 업무 워크플로로 전환" in title for title in week_1_titles)
+    assert any("Claude Code SDK 오케스트레이션 패턴" in title for title in may_4_titles)
+    assert any("Responses API 도구 호출 업데이트" in title for title in may_4_titles)
+    assert any("Copilot PR 리뷰 워크플로" in title for title in may_4_titles)
     assert "2026-05-20~2026-05-26" in may_4
-    assert not any("Prompt to workflow migration" in title for title in may_4_titles)
+    assert not any("프롬프트를 업무 워크플로로 전환" in title for title in may_4_titles)
     assert "Harness Engineering" not in week_2_titles
     assert "Harness Engineering" not in week_1_titles
     assert "Harness Engineering" not in may_4_titles

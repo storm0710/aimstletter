@@ -2887,6 +2887,8 @@ def _smart_insight_subcategory(item: SiteItem) -> str:
     prefix, _title = _split_title_source_prefix(item)
     if prefix:
         return prefix
+    if item.kind in {"paper", "논문"} and item.source.lower().startswith("arxiv"):
+        return item.source
     return item.tags[0] if item.tags else item.source
 
 
@@ -2914,7 +2916,16 @@ def _split_title_source_prefix(item: SiteItem) -> tuple[str, str]:
 
 def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     entries = []
-    for index, item in enumerate(items):
+    unique_items = []
+    seen_urls = set()
+    for item in items:
+        dedupe_key = item.url or f"{item.source}:{item.title}"
+        if dedupe_key in seen_urls:
+            continue
+        seen_urls.add(dedupe_key)
+        unique_items.append(item)
+
+    for index, item in enumerate(unique_items):
         title = _clip(_smart_insight_title(item), 78)
         body = _clip(item.summary, 150)
         detail = item.detail or item.summary
@@ -4923,14 +4934,111 @@ def _has_source_title_prefix(title: str, source: str) -> bool:
 
 
 def _fallback_specific_title(text: str) -> str:
+    text = re.sub(r"[-_]+", " ", text.lower())
     title_rules = (
+        (("2607.03333",), "에이전트 LLM 추론을 빠르게 하는 SPORK"),
+        (("2607.02609",), "지식 중심 정보 시스템"),
+        (("2607.00828",), "분석 워크플로 운영화 실패 연구"),
+        (("2607.03501",), "기상 데이터용 시공간 Text-to-SQL"),
+        (("claude code sdk", "orchestration"), "Claude Code SDK 오케스트레이션 패턴"),
+        (("responses api", "tool calling"), "Responses API 도구 호출 업데이트"),
+        (("pull request review workflow",), "Copilot PR 리뷰 워크플로"),
+        (("gemini app workflow",), "Gemini 앱 업무 흐름 개선"),
+        (("enterprise ai governance",), "엔터프라이즈 AI 거버넌스"),
+        (("prompt to workflow",), "프롬프트를 업무 워크플로로 전환"),
+        (("database assistant guardrails",), "DB 어시스턴트 안전장치"),
+        (("internal knowledge search stack",), "내부 지식 검색 스택"),
+        (("release note drafting",), "릴리즈 노트 초안 작성 워크플로"),
+        (("spreadsheet automation",), "스프레드시트 업무 자동화"),
+        (("secure secret handling",), "에이전트 비밀값 관리"),
+        (("design qa", "generated ui"), "생성 UI 디자인 QA"),
+        (("security validation", "third-party coding agents"), "서드파티 코딩 에이전트 보안 검증"),
+        (("inquitree", "scientific inquiry"), "과학 탐구 AI 에이전트 평가"),
+        (("autonomous incident resolution",), "대규모 장애 자동 해결 에이전트"),
+        (("data agents under attack",), "데이터 에이전트 취약점 분석"),
+        (("endava", "software delivery"), "Endava의 에이전트 중심 개발 전환"),
+        (("generative explainability", "networks"), "네트워크 장애 원인 설명 AI"),
+        (("hybrid human-ai enterprise",), "인간-AI 혼합 조직 리더십"),
+        (("from stacks to circuits",), "사회기술 시스템 로드맵"),
+        (("deployment-oriented framework", "explainable ai"), "설명 가능한 네트워크 운영 AI"),
+        (("ratrain", "resource-aware"), "리소스 인식 LLM 학습 런타임"),
+        (("coeusbi", "business intelligence"), "대화형 BI 에이전트 CoeusBI"),
+        (("github agentic workflows", "public preview"), "GitHub Agentic Workflows 공개 미리보기"),
+        (("agentic workflows", "personal access token"), "토큰 없이 쓰는 에이전트 워크플로"),
+        (("internet of agentic ai",), "에이전트 AI 인터넷 구조"),
+        (("openai to acquire ona",), "OpenAI의 Ona 인수"),
+        (("mage-rag",), "그래프 근거 기반 에이전트 RAG"),
+        (("federated graph recommendation",), "연합 그래프 추천과 LLM 지식"),
+        (("6g computing", "networking convergence"), "6G 컴퓨팅·네트워크 융합"),
+        (("openai academy courses",), "OpenAI Academy 업무 AI 강좌"),
+        (("plrtune",), "LLM 기반 데이터베이스 튜닝"),
+        (("openai partner network",), "OpenAI 파트너 네트워크"),
+        (("copilot code review", "configurations"), "Copilot 코드 리뷰 설정과 제어"),
+        (("preply", "human tutors"), "Preply의 AI 튜터 개인화"),
+        (("community investments", "virginia"), "버지니아 지역 AI 투자"),
+        (("copilot cli", "configure everything"), "Copilot CLI 통합 설정"),
+        (("bbva", "banking"), "BBVA 은행의 AI 도입"),
+        (("sovereign execution brokers",), "인증서 기반 실행 브로커"),
+        (("probe-and-refine", "repository guidance"), "저장소 가이드 튜닝"),
+        (("defensive misdirection",), "자동화 공격 방어 유도 분석"),
+        (("cryptographic misuse", "embodied ai"), "Embodied AI 암호 오용 측정"),
+        (("big-data-as-a-service",), "LLM 기반 빅데이터 서비스 신뢰성"),
+        (("execution-state capsules",), "그래프 기반 실행 상태 캡슐"),
+        (("ledgeragent",), "정책 준수 도구 호출 상태 관리"),
+        (("multi-turn red-teaming",), "LLM 에이전트 안전성 벤치마크"),
+        (("heterogeneous llm debate",), "적대 환경의 LLM 토론"),
+        (("policy-aware vector search",), "정책 인식 벡터 검색"),
+        (("ai credits consumed",), "사용자별 Copilot AI 크레딧"),
+        (("deprecation of opus",), "Opus 4.6 지원 중단 예정"),
+        (("mai-code-1-flash",), "MAI-Code-1-Flash 지원 확대"),
+        (("agents.md support",), "Copilot 코드 리뷰 AGENTS.md 지원"),
+        (("detecting duplicate issues",), "중복 이슈 탐지 미리보기"),
+        (("spend controls", "enterprises"), "엔터프라이즈 사용 분석과 비용 제어"),
+        (("copilot-authored pull requests",), "Copilot 작성 PR 통계"),
+        (("repository switcher",), "글로벌 저장소 전환기"),
+        (("custom images", "actions"), "Actions 커스텀 이미지 빌드"),
+        (("pull_request_target", "checkout"), "Actions checkout 기본값 강화"),
+        (("sharelock",), "다중 도구 포이즈닝 공격 ShareLock"),
+        (("agentic sysadmin",), "에이전트형 시스템 관리"),
+        (("deterministic control plane",), "LLM 코딩 에이전트 제어 평면"),
+        (("agents that know too much",), "에이전트 프라이버시 조사"),
+        (("agent-native memory system",), "에이전트 네이티브 메모리 시스템"),
+        (("political-elite networks",), "정치 엘리트 네트워크 매핑"),
+        (("gui agents", "experience exploration"), "GUI 에이전트 경험 탐색"),
+        (("combining language models",), "언어 모델 결합의 한계"),
+        (("mirror", "red-teaming"), "기억 기반 MCTS 레드팀"),
+        (("tensor resharding",), "이기종 AI 시스템 텐서 재분할"),
         (("cloak", "detonate", "scanner evasion"), "스캐너 회피를 탐지하는 보안 AI"),
         (("verichat", "hardware security"), "하드웨어 보안 검증용 대화형 AI"),
         (("agenticdatabench", "data agents"), "데이터 에이전트 성능 벤치마크"),
-        (("query-centric", "optimization", "workflows"), "AI 워크플로의 쿼리 중심 최적화"),
+        (("query centric", "optimization", "workflows"), "AI 워크플로의 쿼리 중심 최적화"),
+        (("spork", "self-speculative", "forking"), "에이전트 LLM 추론을 빠르게 하는 SPORK"),
+        (("knowledge-centric", "information systems"), "지식 중심 정보 시스템"),
+        (("semantic gap", "agentic data systems"), "분석 워크플로 운영화 실패 연구"),
+        (("stratos", "spatio temporal", "text to sql"), "기상 데이터용 시공간 Text-to-SQL"),
+        (("agentic-v2x", "deadline-aware"), "5G/6G V2X 스케줄링 에이전트"),
+        (("agentic iot", "internet of agents"), "사물인터넷 에이전트 아키텍처"),
+        (("cocoscale", "online llm serving"), "LLM 서빙을 위한 계층별 확장"),
+        (("brownoutmoe", "expert grouping"), "LLM 웹서비스용 전문가 그룹화"),
         (("smoothagent", "long-horizon"), "장기 작업을 위한 LLM 에이전트"),
         (("llm agents say", "no one is watching"), "LLM 에이전트의 사회적 전략 분석"),
-        (("text-to-sql", "evaluation"), "자연어를 SQL로 바꾸는 AI 평가"),
+        (("text to sql", "evaluation"), "자연어를 SQL로 바꾸는 AI 평가"),
+        (("copilot agent session streaming", "public preview"), "Copilot 에이전트 세션 스트리밍"),
+        (("usage metrics", "reports"), "Copilot 사용량 지표 정확도 개선"),
+        (("deprecation", "gemini"), "Gemini 모델 지원 중단 예정"),
+        (("personal access token", "github actions"), "GitHub Actions에서 토큰 없는 Copilot CLI"),
+        (("cost centers", "usage caps"), "비용 센터의 AI 사용량 한도"),
+        (("cost centers", "ai credit pools"), "비용 센터의 AI 크레딧 풀"),
+        (("latest ai news", "june 2026"), "2026년 6월 Google AI 소식"),
+        (("nyc", "ai", "classrooms"), "교실 AI 활용을 논의한 뉴욕 교육 서밋"),
+        (("chatgpt adoption", "expanded"), "ChatGPT 도입 확산 현황"),
+        (("britain", "productivity", "trailblazers"), "영국 AI 생산성 전략"),
+        (("core dump epidemiology", "bug"), "18년 된 코어덤프 버그 수정"),
+        (("issue fields", "generally available"), "GitHub 이슈 필드 정식 제공"),
+        (("secret scanning", "public monitoring"), "엔터프라이즈 Secret Scanning 모니터링"),
+        (("auto model selection",), "엔터프라이즈 자동 모델 선택"),
+        (("github models", "retired"), "GitHub Models 종료 일정"),
+        (("enterprise managed-settings",), "엔터프라이즈 managed-settings 정식 제공"),
         (("anomaly detection", "agents"), "네트워크 이상 징후를 찾는 AI 에이전트"),
         (("database", "query", "sql"), "데이터베이스 업무를 돕는 AI"),
         (("network", "anomaly"), "네트워크 운영을 돕는 AI"),
