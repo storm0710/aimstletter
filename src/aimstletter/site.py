@@ -4833,8 +4833,92 @@ def _fallback_korean_item(item: DigestItem) -> SiteItem:
     )
 
 
+def _latest_week_specific_summary(text: str) -> tuple[str, tuple[str, str, str]] | None:
+    rules: tuple[tuple[tuple[str, ...], str, tuple[str, str, str]], ...] = (
+        (
+            ("2607.10265",),
+            "시간 이력이 함께 기록되는 그래프 데이터를 에이전트가 안정적으로 질의하도록 만든 bi-temporal 그래프 관리 시스템입니다. 시간, 식별자, 산술 처리를 검증된 도구 호출로 분리해 LLM의 임의 답변 위험을 줄입니다.",
+            (
+                "1. 무엇을 다루나요? 에이전트가 시간 변화와 사후 수정 이력을 모두 가진 그래프 데이터를 다루는 TGMS 구조입니다.",
+                "2. 핵심 구성 요소: bi-temporal 그래프, 검증된 시간 연산자, 비용 제한, 결정적 도구 호출입니다.",
+                "3. 업무 적용 포인트: 이력 데이터나 감사 로그를 AI가 조회할 때는 자연어 답변보다 검증 가능한 연산 경계가 필요합니다.",
+            ),
+        ),
+        (
+            ("2607.10081",),
+            "HPC 애플리케이션과 워크플로를 사람이 직접 스크립트로 엮는 대신 자연어 설명과 도구 호출로 실행·오케스트레이션하는 접근입니다. 작업 정의, 모니터링, 디버깅을 LLM 기반 실행 계층으로 옮기는 흐름을 보여줍니다.",
+            (
+                "1. 무엇을 다루나요? 고성능 컴퓨팅 작업을 자연어 설명 기반으로 실행하고 조율하는 방식입니다.",
+                "2. 핵심 구성 요소: 애플리케이션 오케스트레이션, 워크로드 관리, 시스템 모니터링, LLM 도구 호출입니다.",
+                "3. 업무 적용 포인트: 복잡한 배치·분산 작업은 프롬프트만이 아니라 실행 권한과 관측 체계를 함께 설계해야 합니다.",
+            ),
+        ),
+        (
+            ("2607.09385",),
+            "노트북급 AMD XDNA NPU에서 장문 LLM 추론을 더 적은 에너지로 처리하기 위한 attention 최적화 연구입니다. 에이전트 작업을 클라우드로 보내지 않고 로컬에서 돌릴 때의 지연, 프라이버시, 전력 문제를 다룹니다.",
+            (
+                "1. 무엇을 다루나요? 노트북 NPU에서 긴 컨텍스트 LLM 추론을 효율화하는 STEEL 방식입니다.",
+                "2. 핵심 구성 요소: sparse attention, fused attention, XDNA NPU 매핑, 에너지 효율 추론입니다.",
+                "3. 업무 적용 포인트: 로컬 AI 에이전트 운영은 모델 정확도뿐 아니라 전력, 지연, 프라이버시 조건을 함께 봐야 합니다.",
+            ),
+        ),
+        (
+            ("2607.10712",),
+            "AI가 과학 연구를 자동화할 때 외부 데이터 오염이 연구 부정과 잘못된 결론을 산업화할 수 있다는 보안 연구입니다. 논문·데이터·도구 결과가 AI 연구 흐름에 들어오는 경로를 신뢰 경계로 다룹니다.",
+            (
+                "1. 무엇을 다루나요? AI 연구 자동화 시스템이 간접 데이터 오염으로 잘못된 과학 결과를 만들 수 있는 위험입니다.",
+                "2. 핵심 구성 요소: 데이터 포이즈닝, 연구 에이전트, 과학적 무결성, 결과 검증 경계입니다.",
+                "3. 업무 적용 포인트: 리서치 자동화에는 출처 검증, 재현 실행, 결과와 도구 로그의 연결이 필수입니다.",
+            ),
+        ),
+        (
+            ("2607.10508",),
+            "아이디어 제안, 코드 실행, 결과 분석까지 수행하는 AI 연구 시스템을 DBMS처럼 관리하자는 비전 논문입니다. 비결정적 LLM 출력을 실행 결과와 묶고, 오래된 결과나 재현 불가능한 수치를 줄이는 데 초점이 있습니다.",
+            (
+                "1. 무엇을 다루나요? AI 연구 에이전트를 신뢰 가능한 DBMS 구조로 관리하는 설계 방향입니다.",
+                "2. 핵심 구성 요소: 실행 결과 바인딩, 계보 추적, stale 결과 감지, 협업 가능한 연구 상태 관리입니다.",
+                "3. 업무 적용 포인트: AI가 분석 보고서를 만들 때는 답변 문장보다 실행 기록과 결과 재현성을 먼저 남겨야 합니다.",
+            ),
+        ),
+        (
+            ("2607.10438",),
+            "IoT 기반 자율주행 환경에서 LLM을 활용해 복잡한 도시 주행 경로 계획을 보강하는 연구입니다. 고수준 장면 이해와 미분 가능한 경로 계획을 연결해 안전하고 실행 가능한 궤적 생성을 목표로 합니다.",
+            (
+                "1. 무엇을 다루나요? 자율주행 경로 계획에 LLM의 상황 이해를 결합하는 방식입니다.",
+                "2. 핵심 구성 요소: IoT 교통 정보, 경로 계획, 제약 기반 정제, 장면 추론입니다.",
+                "3. 업무 적용 포인트: 물리 시스템에 AI를 붙일 때는 설명 생성보다 안전 제약과 실행 가능성 검증이 중요합니다.",
+            ),
+        ),
+        (
+            ("2607.08973",),
+            "추론형 모델과 에이전트 시스템에서 병목이 되는 토큰 생성 지연을 줄이기 위한 동기화 없는 All-Reduce 방식입니다. GPU 간 통신 대기를 줄여 저배치 LLM 추론의 응답 시간을 낮추는 데 초점이 있습니다.",
+            (
+                "1. 무엇을 다루나요? LLM 추론 지연을 줄이기 위한 synchronization-free All-Reduce 방식 SiFAR입니다.",
+                "2. 핵심 구성 요소: tensor parallelism, GPU 통신, 저배치 추론, 토큰 생성 지연 최적화입니다.",
+                "3. 업무 적용 포인트: 에이전트 응답 속도 개선은 모델 선택뿐 아니라 분산 추론 통신 병목까지 함께 봐야 합니다.",
+            ),
+        ),
+        (
+            ("openai.com/academy/getting started",),
+            "ChatGPT를 업무에 처음 적용할 때 필요한 기본 사용 흐름과 시작 방법을 정리한 OpenAI Academy 안내입니다. 개인 생산성 실험에서 팀 업무 절차로 확장하기 전 공통 사용법을 맞추는 데 적합합니다.",
+            (
+                "1. 무엇을 다루나요? ChatGPT를 업무에 적용하기 위한 기본 사용법과 시작 흐름입니다.",
+                "2. 핵심 구성 요소: 질문 작성, 결과 검토, 업무별 활용 예시, 안전한 사용 습관입니다.",
+                "3. 업무 적용 포인트: 팀 도입 전에는 공통 프롬프트 방식과 검수 기준을 먼저 맞추는 것이 좋습니다.",
+            ),
+        ),
+    )
+    for keywords, summary, points in rules:
+        if all(keyword in text for keyword in keywords):
+            return summary, points
+    return None
+
+
 def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
     text = re.sub(r"[-_]+", " ", _item_text(item))
+    latest = _latest_week_specific_summary(text)
+    if latest:
+        return latest[1]
     if "2607.04290" in text or ("agentic v2x" in text and "deadline aware" in text):
         return (
             "1. 무엇을 다루나요? 5G/6G V2X 환경에서 차량·사물 통신 작업을 마감 시간에 맞춰 배정하는 에이전트 연구입니다.",
@@ -5275,6 +5359,13 @@ def _fallback_specific_title(text: str) -> str:
         (("2607.08565",), "에이전트 서빙용 세션 중심 LLM 스케줄링"),
         (("2607.08400",), "LLM 에이전트 궤적 워터마크 TRACE"),
         (("2607.08116",), "모바일 추론 서비스용 분산 LLM 스케일링"),
+        (("2607.10265",), "시간 이력 그래프를 다루는 에이전트 DBMS"),
+        (("2607.10081",), "HPC 워크플로의 자연어 실행 오케스트레이션"),
+        (("2607.09385",), "노트북 NPU용 장문 LLM 추론 최적화"),
+        (("2607.10712",), "AI 연구 자동화의 간접 데이터 오염 위험"),
+        (("2607.10508",), "신뢰 가능한 AI 연구 시스템용 DBMS 설계"),
+        (("2607.10438",), "자율주행 경로 계획을 돕는 LLM 추론"),
+        (("2607.08973",), "저지연 LLM 추론을 위한 동기화 제거"),
         (("claude code sdk", "orchestration"), "Claude Code SDK 오케스트레이션 패턴"),
         (("responses api", "tool calling"), "Responses API 도구 호출 업데이트"),
         (("pull request review workflow",), "Copilot PR 리뷰 워크플로"),
@@ -5383,6 +5474,8 @@ def _fallback_specific_title(text: str) -> str:
         (("organization level targeting", "github code quality"), "GitHub Code Quality 조직 단위 타깃팅"),
         (("repository overview",), "Copilot 저장소 개요 질문"),
         (("gpt 5 6 preferred model", "microsoft 365 copilot"), "Microsoft 365 Copilot의 GPT-5.6 우선 모델"),
+        (("openai.com/academy/getting started",), "ChatGPT 업무 활용 시작 가이드"),
+        (("getting started with chatgpt",), "ChatGPT 업무 활용 시작 가이드"),
         (("issue fields", "generally available"), "GitHub 이슈 필드 정식 제공"),
         (("secret scanning", "public monitoring"), "엔터프라이즈 Secret Scanning 모니터링"),
         (("auto model selection",), "엔터프라이즈 자동 모델 선택"),
@@ -5417,6 +5510,9 @@ def _strip_point_prefix(text: str) -> str:
 
 def _fallback_specific_summary(item: DigestItem) -> str:
     text = re.sub(r"[-_]+", " ", _item_text(item))
+    latest = _latest_week_specific_summary(text)
+    if latest:
+        return latest[0]
     if "2607.04290" in text or ("agentic v2x" in text and "deadline aware" in text):
         return (
             "5G/6G V2X 환경에서 차량·사물 통신 작업을 마감 시간에 맞춰 배정하는 에이전트 연구입니다. "

@@ -198,6 +198,29 @@ def test_smart_insight_uses_specific_titles_for_new_week_arxiv_items() -> None:
     assert "프론트엔드와 서버 기능" not in card.group(0)
 
 
+def test_smart_insight_uses_specific_titles_for_latest_week_arxiv_items() -> None:
+    item = SiteItem(
+        title="데이터베이스 업무 AI 활용",
+        url="https://arxiv.org/abs/2607.10265v1",
+        source="arXiv 데이터베이스 AI",
+        kind="논문",
+        published=datetime(2026, 7, 11, tzinfo=UTC),
+        summary="오래 걸리는 AI 작업이 중간에 실패해도 재시도와 복구를 안정적으로 처리하기 위해 필요합니다.",
+        detail="오래 걸리는 AI 작업이 중간에 실패해도 재시도와 복구를 안정적으로 처리하기 위해 필요합니다.",
+        key_points=("1. 무엇을 다루나요? 데이터베이스 업무 AI 활용 주제를 다룹니다.",),
+        tags=("AI 에이전트", "데이터베이스"),
+    )
+
+    html = render_homepage([item] * 5, [], now=datetime(2026, 7, 14, tzinfo=UTC))
+
+    assert '<span class="card-title">시간 이력 그래프를 다루는 에이전트 DBMS</span>' in html
+    assert "bi-temporal 그래프 관리 시스템" in html
+    card = re.search(r'<button class="insight-card"[^>]+data-source="https://arxiv.org/abs/2607.10265v1"[^>]*>', html)
+    assert card
+    assert "데이터베이스 업무 AI 활용" not in card.group(0)
+    assert "재시도와 복구" not in card.group(0)
+
+
 def test_ai_tool_directory_includes_logo_roll_tools() -> None:
     html = _render_ai_tool_directory()
 
