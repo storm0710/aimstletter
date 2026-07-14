@@ -2951,6 +2951,8 @@ def _needs_specific_insight_copy(text: str) -> bool:
         "오래 걸리는 AI 작업",
         "워크플로 상태 저장, 재시도 정책",
         "주제를 다룹니다",
+        "이슈, 커밋, PR에 흩어진 변경 내용",
+        "변경 내역 수집, 영향 범위 요약",
     )
     return _has_broken_placeholder(clean) or any(snippet in clean for snippet in generic_snippets)
 
@@ -3527,6 +3529,8 @@ def _render_ai_tool_directory() -> str:
                 ("Replit", "브라우저에서 코드 작성, 실행, 배포까지 이어서 실습용 앱을 빠르게 만들 수 있는 플랫폼입니다.", ("웹 IDE", "실습", "배포"), "https://replit.com/desktop"),
                 ("Lovable", "자연어 설명으로 웹 앱 초안과 UI 흐름을 빠르게 만들어 보는 제품 제작 도구입니다.", ("웹앱", "UI", "프로토타입"), "https://lovable.dev/"),
                 ("Bolt", "프론트엔드와 간단한 풀스택 프로토타입을 브라우저에서 빠르게 생성하는 도구입니다.", ("프론트엔드", "풀스택", "프로토타입"), "https://bolt.new/"),
+                ("Stitch", "자연어와 참고 이미지를 바탕으로 모바일·웹 UI 초안과 프론트엔드 코드를 빠르게 만드는 Google Labs 디자인 도구입니다.", ("UI 생성", "프로토타입", "Figma"), "https://stitch.withgoogle.com/"),
+                ("Vercel", "프론트엔드와 AI 앱을 빠르게 배포하고 프리뷰 환경에서 검증하는 플랫폼입니다.", ("배포", "프리뷰", "프론트엔드"), "https://vercel.com/"),
             ),
         ),
         (
@@ -3535,6 +3539,37 @@ def _render_ai_tool_directory() -> str:
             (
                 ("v0", "UI 컴포넌트와 화면 초안을 빠르게 만들고 코드로 이어가기 좋은 디자인·개발 보조 도구입니다.", ("UI", "컴포넌트", "디자인"), "https://v0.app/"),
                 ("Figma Make", "디자인 아이디어를 인터랙션이 있는 화면 초안으로 발전시킬 때 활용할 수 있는 도구입니다.", ("디자인", "화면", "인터랙션"), "https://www.figma.com/make/"),
+                ("getdesign.md", "AI 코딩 에이전트가 읽을 수 있는 DESIGN.md 예시와 디자인 시스템 레퍼런스를 모아 둔 컬렉션입니다.", ("DESIGN.md", "디자인 시스템", "AI 에이전트"), "https://getdesign.md/"),
+            ),
+        ),
+        (
+            "데이터·백엔드·검색",
+            "AI 기능이 데이터를 안전하게 읽고 검색하며 서버 기능과 연결되도록 돕는 도구입니다.",
+            (
+                ("Supabase", "Postgres, 인증, 스토리지, Edge Functions를 묶어 AI 앱의 백엔드 기반을 빠르게 구성하는 플랫폼입니다.", ("Postgres", "인증", "백엔드"), "https://supabase.com/"),
+                ("Neon", "서버리스 Postgres와 브랜치 기반 개발 흐름으로 AI 앱 데이터베이스를 실험하기 좋은 플랫폼입니다.", ("Postgres", "서버리스", "브랜치"), "https://neon.com/"),
+                ("Pinecone", "문서 검색과 RAG를 위한 벡터 데이터베이스로 임베딩 기반 검색 인프라를 운영하는 도구입니다.", ("벡터DB", "RAG", "검색"), "https://www.pinecone.io/"),
+                ("Qdrant", "오픈소스 벡터 검색 엔진으로 사내 지식 검색과 추천, RAG 백엔드를 구성할 때 활용합니다.", ("벡터검색", "오픈소스", "RAG"), "https://qdrant.tech/"),
+            ),
+        ),
+        (
+            "에이전트 워크플로·평가",
+            "AI 에이전트의 상태, 실행 흐름, 모델 라우팅, 평가를 운영 가능한 구조로 만드는 도구입니다.",
+            (
+                ("LangGraph", "상태가 있는 다단계 AI 에이전트 흐름을 그래프로 구성하고 제어하는 프레임워크입니다.", ("에이전트", "그래프", "상태"), "https://www.langchain.com/langgraph"),
+                ("Temporal", "오래 걸리는 업무 흐름의 재시도, 상태 저장, 복구를 안정적으로 처리하는 워크플로 오케스트레이션 플랫폼입니다.", ("워크플로", "재시도", "상태"), "https://temporal.io/"),
+                ("Harness", "CI/CD, 테스트, 배포, 관측 흐름을 자동화해 소프트웨어 전달 파이프라인을 운영하는 플랫폼입니다.", ("CI/CD", "배포", "자동화"), "https://www.harness.io/"),
+                ("LiteLLM", "여러 LLM API를 한 인터페이스로 호출하고 비용·라우팅·키 관리를 통합하는 게이트웨이입니다.", ("모델 게이트웨이", "라우팅", "비용"), "https://www.litellm.ai/"),
+                ("LangSmith", "LLM 앱과 에이전트 실행을 추적, 평가, 디버깅하는 LangChain 계열 관측·평가 도구입니다.", ("평가", "트레이싱", "디버깅"), "https://www.langchain.com/langsmith"),
+                ("Braintrust", "AI 제품의 평가 데이터셋, 실험, 회귀 테스트를 관리해 품질 변화를 추적하는 플랫폼입니다.", ("평가", "실험", "회귀테스트"), "https://www.braintrust.dev/"),
+            ),
+        ),
+        (
+            "관측·보안·시크릿",
+            "AI 기능의 오류, 비용, 비밀값, 정책을 운영 중에 추적하고 통제하는 도구입니다.",
+            (
+                ("Datadog", "AI 앱과 백엔드의 로그, 메트릭, 트레이스를 모니터링해 장애와 비용 신호를 추적하는 관측 플랫폼입니다.", ("관측", "로그", "메트릭"), "https://www.datadoghq.com/"),
+                ("Infisical", "API 키와 시크릿을 안전하게 저장하고 환경별 접근을 관리하는 오픈소스 시크릿 관리 플랫폼입니다.", ("시크릿", "보안", "환경변수"), "https://infisical.com/"),
             ),
         ),
         (
@@ -4836,6 +4871,126 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
             "2. 핵심 구성 요소: 증명 후보 탐색, 정형 검증, 사람의 수학적 판단, AI 보조 연구 절차입니다.",
             "3. 업무 적용 포인트: AI는 결론을 단독으로 확정하기보다 후보를 만들고 전문가 검증을 빠르게 하는 역할에 강점이 있습니다.",
         )
+    if "2607.08282" in text:
+        return (
+            "1. 무엇을 다루나요? LLM 사용 과정에서 민감 데이터 유출을 막는 사용자 측 멀티 에이전트 방화벽 구조입니다.",
+            "2. 핵심 구성 요소: 브라우저 확장, 프록시, 결정적 탐지기, LLM 기반 의미 분석, 코드 유출 방지 파이프라인입니다.",
+            "3. 업무 적용 포인트: 사내 LLM 도입 시 모델 선택만큼 입력·출력 트래픽을 가로에서 점검하는 보안 계층이 필요합니다.",
+        )
+    if "2607.08180" in text:
+        return (
+            "1. 무엇을 다루나요? 에이전트 크롤러가 문맥 압축을 거칠 때 고가치 콘텐츠가 보존되지 않도록 보호하는 방법입니다.",
+            "2. 핵심 구성 요소: 보이지 않는 텍스트 교란, 압축기 대상 최적화, 정보 손실 유도, 사람 가독성 유지입니다.",
+            "3. 업무 적용 포인트: 공개 문서나 지식 자산을 보호할 때 사람에게는 읽히지만 에이전트 수집에는 강한 방어가 필요합니다.",
+        )
+    if "2607.07397" in text:
+        return (
+            "1. 무엇을 다루나요? 에이전트가 파일, API, 앱, 데이터베이스를 넘나드는 데이터 환경에서 실패 비용을 제한하는 설계입니다.",
+            "2. 핵심 구성 요소: 데이터 접근 경계, 실패 영향 제한, 작업 환경 모델링, 감사 가능한 실행 구조입니다.",
+            "3. 업무 적용 포인트: 데이터 에이전트는 SQL 권한만이 아니라 주변 파일과 API까지 포함한 운영 범위를 통제해야 합니다.",
+        )
+    if "2607.07052" in text:
+        return (
+            "1. 무엇을 다루나요? 에이전트가 탐색해 검증한 운영 절차를 더 저렴하고 재현 가능한 결정적 워크플로로 승격하는 방법입니다.",
+            "2. 핵심 구성 요소: 탐색 단계, 하이브리드 실행, 결정적 워크플로 승격, 회귀 시 자동 강등, 비용 모델입니다.",
+            "3. 업무 적용 포인트: 반복 장애 대응이나 IT 운영에서는 매번 LLM을 호출하기보다 검증된 절차를 자동화 워크플로로 굳히는 것이 중요합니다.",
+        )
+    if "2607.06229" in text:
+        return (
+            "1. 무엇을 다루나요? AI 함수가 들어간 실제 SQL 워크플로를 모델이 생성할 수 있는지 평가하는 Spider 2.0-AIFunc 벤치마크입니다.",
+            "2. 핵심 구성 요소: Snowflake AI 함수, 자연어 지시 변환, 실행 정확도, 스키마 접지, 함수 파라미터 평가입니다.",
+            "3. 업무 적용 포인트: 데이터 플랫폼에서 AI 함수를 SQL로 쓰려면 단순 Text-to-SQL보다 함수 의미와 매개변수 검증이 중요합니다.",
+        )
+    if "2607.08768" in text:
+        return (
+            "1. 무엇을 다루나요? 실제 도구를 선제적으로 조작하는 에이전트를 동적 환경에서 평가하는 UniClawBench 벤치마크입니다.",
+            "2. 핵심 구성 요소: 기술 사용, 탐색, 장문 맥락 추론, 멀티모달 이해, 크로스 플랫폼 조정 평가입니다.",
+            "3. 업무 적용 포인트: 에이전트 도입 전 단일 답변 정확도보다 실제 작업 완료 과정과 실패 원인을 분리해 봐야 합니다.",
+        )
+    if "2607.08681" in text:
+        return (
+            "1. 무엇을 다루나요? 분산 에너지 시장에서 경제 에이전트가 물리 제약을 지키며 의사결정하는지 평가하는 벤치마크입니다.",
+            "2. 핵심 구성 요소: 물리 안전성, 시장 효용, 감사 가능성, LLM 플래너와 감사자, 위험 행동 수정 로그입니다.",
+            "3. 업무 적용 포인트: 물리 시스템에 AI 에이전트를 붙일 때 보상 최적화만으로는 부족하고 안전 제약과 감사 기록이 필요합니다.",
+        )
+    if "2607.08565" in text:
+        return (
+            "1. 무엇을 다루나요? 사람이 아니라 에이전트가 LLM 요청을 발생시키는 서빙 환경에서 세션 중심 스케줄링을 재검토합니다.",
+            "2. 핵심 구성 요소: 세션 단위 TPS, KV 캐시 재사용, 요청 묶음, 에이전트 워크로드에 맞춘 스케줄링 지표입니다.",
+            "3. 업무 적용 포인트: 에이전트 서비스 운영에서는 토큰 지연만이 아니라 전체 세션 처리량과 캐시 재사용률을 함께 봐야 합니다.",
+        )
+    if "2607.08400" in text:
+        return (
+            "1. 무엇을 다루나요? LLM 에이전트의 도구 호출·관찰·행동 궤적에 강건한 출처 워터마크를 심는 TRACE 방식입니다.",
+            "2. 핵심 구성 요소: 선택 채널, 집계 채널, 삭제·재작성 공격 대응, 궤적 로그 기반 출처 검증입니다.",
+            "3. 업무 적용 포인트: 에이전트 리셀러나 대행 환경에서는 실행 로그가 변조돼도 원 개발자 출처를 확인할 장치가 필요합니다.",
+        )
+    if "2607.08116" in text:
+        return (
+            "1. 무엇을 다루나요? 모바일 기기가 서버와 협력해 LLM 추론 시간 확장을 서비스처럼 쓰는 MORES 프레임워크입니다.",
+            "2. 핵심 구성 요소: 엣지-서버 분산 추론, 반복 추론 단계 배분, 통신 스케줄링, 의미 기반 MoE 라우팅입니다.",
+            "3. 업무 적용 포인트: 모바일 AI 기능은 온디바이스 한계와 클라우드 비용 사이에서 계산과 통신을 같이 최적화해야 합니다.",
+        )
+    if "codeql 2 26 0" in text and "prompt injection" in text:
+        return (
+            "1. 무엇을 다루나요? CodeQL 2.26.0에서 Kotlin 2.4.0 지원과 AI 프롬프트 인젝션 탐지가 추가된 업데이트입니다.",
+            "2. 핵심 구성 요소: Kotlin 분석 지원, 보안 쿼리 확장, 프롬프트 인젝션 패턴 탐지입니다.",
+            "3. 업무 적용 포인트: AI 기능이 들어간 코드베이스는 일반 취약점뿐 아니라 프롬프트 경계와 입력 신뢰 문제도 정적 분석에 포함해야 합니다.",
+        )
+    if "secret scanning detector types" in text:
+        return (
+            "1. 무엇을 다루나요? GitHub secret scanning 탐지 유형 이름을 더 명확하게 바꾼 변경입니다.",
+            "2. 핵심 구성 요소: 탐지기 명칭, 비밀값 분류, 보안 알림 이해도 개선입니다.",
+            "3. 업무 적용 포인트: 보안 알림을 운영팀이 빠르게 분류하려면 탐지 이름이 실제 위험과 조치 방향을 잘 드러내야 합니다.",
+        )
+    if "per user states" in text and "multi user budgets" in text:
+        return (
+            "1. 무엇을 다루나요? REST API에서 다중 사용자 예산의 사용자별 상태를 확인할 수 있게 한 GitHub 업데이트입니다.",
+            "2. 핵심 구성 요소: 사용자별 예산 상태, 멀티 사용자 비용 관리, API 조회 흐름입니다.",
+            "3. 업무 적용 포인트: AI 도구 예산을 조직 단위로 운영할 때 개인별 소진 상태와 정책 적용 여부를 자동 점검할 수 있습니다.",
+        )
+    if "github mobile" in text and "copilot sessions" in text:
+        return (
+            "1. 무엇을 다루나요? GitHub Mobile에서 Copilot 세션을 더 쉽게 찾도록 필터와 정렬을 개선한 업데이트입니다.",
+            "2. 핵심 구성 요소: 모바일 세션 목록, 필터, 정렬, Copilot 작업 추적입니다.",
+            "3. 업무 적용 포인트: 이동 중에도 에이전트 작업 상태를 확인해야 하는 팀은 모바일 관리 경험이 중요해집니다.",
+        )
+    if "deutsche telekom" in text:
+        return (
+            "1. 무엇을 다루나요? Deutsche Telekom이 통신 업무와 고객 경험을 AI로 재구성하는 사례입니다.",
+            "2. 핵심 구성 요소: 통신 운영, 고객 지원, 내부 생산성, 대규모 조직의 AI 적용 방식입니다.",
+            "3. 업무 적용 포인트: 통신사처럼 복잡한 운영 조직은 AI를 개별 챗봇보다 업무 프로세스 재설계 관점에서 봐야 합니다.",
+        )
+    if "new pull requests dashboard" in text:
+        return (
+            "1. 무엇을 다루나요? GitHub의 새 Pull requests 대시보드가 정식 제공으로 전환된 업데이트입니다.",
+            "2. 핵심 구성 요소: PR 상태 집계, 리뷰 흐름 확인, 작업 우선순위 파악입니다.",
+            "3. 업무 적용 포인트: 코드 리뷰 병목을 줄이려면 작성·리뷰·머지 대기 상태를 한 화면에서 추적하는 운영 뷰가 필요합니다.",
+        )
+    if "gpt 5 6 sol terra and luna" in text and "github copilot" in text:
+        return (
+            "1. 무엇을 다루나요? GitHub Copilot에서 OpenAI GPT-5.6 Sol, Terra, Luna 모델을 사용할 수 있게 된 업데이트입니다.",
+            "2. 핵심 구성 요소: 신규 모델 선택, Copilot 통합, 코딩 작업별 모델 옵션입니다.",
+            "3. 업무 적용 포인트: 팀은 작업 난이도와 비용에 맞춰 Copilot 모델 선택 정책을 정리할 필요가 있습니다.",
+        )
+    if "organization level targeting" in text and "github code quality" in text:
+        return (
+            "1. 무엇을 다루나요? GitHub Code Quality 기능을 조직 단위로 타깃팅할 수 있게 한 업데이트입니다.",
+            "2. 핵심 구성 요소: 조직 대상 정책, 코드 품질 기능 적용 범위, 점진적 배포입니다.",
+            "3. 업무 적용 포인트: 대규모 조직에서는 코드 품질 정책을 저장소별 수동 설정보다 조직 단위로 배포하는 편이 안정적입니다.",
+        )
+    if "repository overview" in text:
+        return (
+            "1. 무엇을 다루나요? Copilot에게 저장소 개요를 물어 코드베이스 구조와 주요 맥락을 빠르게 파악하는 기능입니다.",
+            "2. 핵심 구성 요소: 저장소 요약, 주요 폴더 이해, 온보딩 보조, 코드 탐색 질의입니다.",
+            "3. 업무 적용 포인트: 새 프로젝트 투입이나 리뷰 전에 저장소 구조를 빠르게 파악하는 초기 탐색 시간을 줄일 수 있습니다.",
+        )
+    if "gpt 5 6 preferred model" in text and "microsoft 365 copilot" in text:
+        return (
+            "1. 무엇을 다루나요? Microsoft 365 Copilot에서 GPT-5.6을 선호 모델로 쓰는 OpenAI 업데이트입니다.",
+            "2. 핵심 구성 요소: 업무 문서·메일·협업 흐름, 모델 기본값, 엔터프라이즈 AI 경험 개선입니다.",
+            "3. 업무 적용 포인트: 사무 생산성 AI는 모델 변경이 사용자 답변 품질과 조직 표준 업무 흐름에 직접 영향을 줍니다.",
+        )
     if "latest ai news" in text and "june 2026" in text:
         return (
             "1. 무엇을 다루나요? Google이 2026년 6월에 발표한 AI 제품과 연구 소식을 한 번에 정리한 글입니다.",
@@ -5110,6 +5265,16 @@ def _fallback_specific_title(text: str) -> str:
         (("2607.02609",), "지식 중심 정보 시스템"),
         (("2607.00828",), "분석 워크플로 운영화 실패 연구"),
         (("2607.03501",), "기상 데이터용 시공간 Text-to-SQL"),
+        (("2607.08282",), "민감 데이터 보호용 멀티 에이전트 방화벽"),
+        (("2607.08180",), "에이전트 크롤러 대응 콘텐츠 보호"),
+        (("2607.07397",), "에이전트 데이터 환경 안전 설계"),
+        (("2607.07052",), "에이전트 탐색을 결정적 워크플로로 전환"),
+        (("2607.06229",), "AI 네이티브 SQL 워크플로 벤치마크"),
+        (("2607.08768",), "실사용 작업용 선제 에이전트 벤치마크"),
+        (("2607.08681",), "분산 에너지 시장의 신뢰 가능 에이전트 평가"),
+        (("2607.08565",), "에이전트 서빙용 세션 중심 LLM 스케줄링"),
+        (("2607.08400",), "LLM 에이전트 궤적 워터마크 TRACE"),
+        (("2607.08116",), "모바일 추론 서비스용 분산 LLM 스케일링"),
         (("claude code sdk", "orchestration"), "Claude Code SDK 오케스트레이션 패턴"),
         (("responses api", "tool calling"), "Responses API 도구 호출 업데이트"),
         (("pull request review workflow",), "Copilot PR 리뷰 워크플로"),
@@ -5208,6 +5373,16 @@ def _fallback_specific_title(text: str) -> str:
         (("introducing genebench pro",), "GeneBench-Pro 벤치마크 소개"),
         (("full stack ai explainer",), "풀스택 AI 앱 구조 설명"),
         (("core dump epidemiology", "bug"), "18년 된 코어덤프 버그 수정"),
+        (("codeql 2 26 0", "prompt injection"), "CodeQL 프롬프트 인젝션 탐지 추가"),
+        (("secret scanning detector types",), "Secret scanning 탐지 유형 이름 개선"),
+        (("per user states", "multi user budgets"), "다중 사용자 예산 상태 API"),
+        (("github mobile", "copilot sessions"), "모바일 Copilot 세션 필터 개선"),
+        (("deutsche telekom",), "Deutsche Telekom의 통신 AI 전환"),
+        (("new pull requests dashboard",), "Pull requests 대시보드 정식 제공"),
+        (("gpt 5 6 sol terra and luna", "github copilot"), "GitHub Copilot GPT-5.6 모델 추가"),
+        (("organization level targeting", "github code quality"), "GitHub Code Quality 조직 단위 타깃팅"),
+        (("repository overview",), "Copilot 저장소 개요 질문"),
+        (("gpt 5 6 preferred model", "microsoft 365 copilot"), "Microsoft 365 Copilot의 GPT-5.6 우선 모델"),
         (("issue fields", "generally available"), "GitHub 이슈 필드 정식 제공"),
         (("secret scanning", "public monitoring"), "엔터프라이즈 Secret Scanning 모니터링"),
         (("auto model selection",), "엔터프라이즈 자동 모델 선택"),
@@ -5271,6 +5446,106 @@ def _fallback_specific_summary(item: DigestItem) -> str:
         return (
             "Signed BAR 추측을 AI 보조 방식으로 해결한 수학 연구입니다. "
             "AI가 증명 후보를 탐색하고 사람이 검증하는 연구 협업 방식의 사례로 볼 수 있습니다."
+        )
+    if "2607.08282" in text:
+        return (
+            "LLM 사용 과정에서 민감 데이터 유출을 막기 위한 멀티 에이전트 방화벽 구조입니다. "
+            "브라우저 확장과 프록시, 결정적 탐지기와 LLM 의미 분석을 결합해 입력·출력 트래픽을 보호합니다."
+        )
+    if "2607.08180" in text:
+        return (
+            "에이전트 크롤러가 콘텐츠를 압축·요약하는 과정에서 핵심 정보를 잃게 만드는 콘텐츠 보호 연구입니다. "
+            "사람에게 보이는 문장은 유지하면서 에이전트 수집에는 강한 방어층을 추가하는 접근입니다."
+        )
+    if "2607.07397" in text:
+        return (
+            "에이전트가 데이터베이스뿐 아니라 파일, API, 애플리케이션까지 넘나드는 데이터 환경을 안전하게 다루는 설계 주제입니다. "
+            "자동화 이익은 키우되 실패가 미치는 비용과 범위를 제한하는 데 초점이 있습니다."
+        )
+    if "2607.07052" in text:
+        return (
+            "에이전트가 탐색해 검증한 IT 운영 절차를 저비용의 결정적 워크플로로 전환하는 연구입니다. "
+            "반복 검증된 행동은 자동화로 승격하고 문제가 생기면 다시 강등해 비용과 재현성을 함께 관리합니다."
+        )
+    if "2607.06229" in text:
+        return (
+            "AI 함수가 포함된 실제 SQL 워크플로를 모델이 생성할 수 있는지 평가하는 Spider 2.0-AIFunc 벤치마크입니다. "
+            "기존 Text-to-SQL보다 AI 함수 의미, 파라미터, 실행 안정성을 함께 봅니다."
+        )
+    if "2607.08768" in text:
+        return (
+            "실제 도구를 다루는 선제 에이전트를 동적 환경에서 평가하는 UniClawBench 벤치마크입니다. "
+            "도구 사용, 탐색, 장문 추론, 멀티모달 이해, 플랫폼 간 조정을 분리해 실패 원인을 볼 수 있게 합니다."
+        )
+    if "2607.08681" in text:
+        return (
+            "분산 에너지 시장에서 경제 에이전트가 물리 제약과 신뢰성 기준을 지키는지 평가하는 벤치마크입니다. "
+            "시장 효용뿐 아니라 안전성, 감사 가능성, 위험 행동 수정 기록을 함께 측정합니다."
+        )
+    if "2607.08565" in text:
+        return (
+            "에이전트가 LLM 요청을 발생시키는 서빙 환경에 맞춰 세션 중심 스케줄링 지표를 재설계한 연구입니다. "
+            "토큰 지연만이 아니라 전체 세션 처리량과 KV 캐시 재사용을 함께 최적화합니다."
+        )
+    if "2607.08400" in text:
+        return (
+            "LLM 에이전트의 도구 호출과 실행 궤적에 출처 확인용 워터마크를 심는 TRACE 연구입니다. "
+            "로그 삭제와 재작성 공격에도 개발자 출처를 검증할 수 있도록 두 채널 워터마크를 사용합니다."
+        )
+    if "2607.08116" in text:
+        return (
+            "모바일 기기가 서버와 협력해 LLM 추론 시간 확장을 서비스처럼 쓰는 MORES 프레임워크입니다. "
+            "엣지-서버 분산 추론과 통신 스케줄링으로 모바일 환경의 계산 한계를 줄이는 데 초점이 있습니다."
+        )
+    if "codeql 2 26 0" in text and "prompt injection" in text:
+        return (
+            "CodeQL 2.26.0에 Kotlin 2.4.0 지원과 AI 프롬프트 인젝션 탐지가 추가된 업데이트입니다. "
+            "AI 기능이 포함된 코드베이스에서 입력 신뢰 경계와 보안 취약점을 더 잘 점검할 수 있습니다."
+        )
+    if "secret scanning detector types" in text:
+        return (
+            "GitHub secret scanning의 탐지 유형 이름을 더 명확하게 바꾼 업데이트입니다. "
+            "보안 알림을 읽는 팀이 어떤 비밀값과 위험을 다루는지 빠르게 판단하도록 돕습니다."
+        )
+    if "per user states" in text and "multi user budgets" in text:
+        return (
+            "REST API에서 다중 사용자 예산의 사용자별 상태를 확인할 수 있게 한 GitHub 업데이트입니다. "
+            "AI 도구 비용과 사용 한도를 사용자 단위로 추적하는 운영 자동화에 유용합니다."
+        )
+    if "github mobile" in text and "copilot sessions" in text:
+        return (
+            "GitHub Mobile에서 Copilot 세션을 더 쉽게 찾도록 필터와 정렬을 개선한 업데이트입니다. "
+            "모바일에서도 에이전트 작업 상태와 세션 흐름을 확인하기 쉬워집니다."
+        )
+    if "deutsche telekom" in text:
+        return (
+            "Deutsche Telekom이 통신 업무와 고객 경험을 AI로 재구성하는 사례입니다. "
+            "복잡한 통신 운영 조직에서 AI를 개별 챗봇보다 업무 프로세스 전환 관점으로 적용하는 흐름을 보여줍니다."
+        )
+    if "new pull requests dashboard" in text:
+        return (
+            "GitHub의 새 Pull requests 대시보드가 정식 제공으로 전환된 업데이트입니다. "
+            "PR 상태와 리뷰 흐름을 한 화면에서 추적해 코드 리뷰 병목을 줄이는 데 초점이 있습니다."
+        )
+    if "gpt 5 6 sol terra and luna" in text and "github copilot" in text:
+        return (
+            "GitHub Copilot에서 OpenAI GPT-5.6 Sol, Terra, Luna 모델을 사용할 수 있게 된 업데이트입니다. "
+            "팀은 작업 난이도와 비용에 맞춰 Copilot 모델 선택 정책을 정리할 수 있습니다."
+        )
+    if "organization level targeting" in text and "github code quality" in text:
+        return (
+            "GitHub Code Quality 기능을 조직 단위로 타깃팅할 수 있게 한 업데이트입니다. "
+            "대규모 조직에서 코드 품질 정책을 저장소별 수동 설정 대신 조직 정책으로 적용하는 데 유용합니다."
+        )
+    if "repository overview" in text:
+        return (
+            "Copilot에게 저장소 개요를 물어 코드베이스 구조와 주요 맥락을 빠르게 파악하는 기능입니다. "
+            "새 프로젝트 온보딩이나 리뷰 전 초기 탐색 시간을 줄이는 데 도움이 됩니다."
+        )
+    if "gpt 5 6 preferred model" in text and "microsoft 365 copilot" in text:
+        return (
+            "Microsoft 365 Copilot에서 GPT-5.6을 선호 모델로 쓰는 OpenAI 업데이트입니다. "
+            "문서·메일·협업 흐름에서 모델 변경이 업무 AI 품질에 미치는 영향을 보여줍니다."
         )
     if "latest ai news" in text and "june 2026" in text:
         return (

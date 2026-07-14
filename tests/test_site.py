@@ -15,6 +15,7 @@ from aimstletter.site import (
     _items_in_window,
     _rank_work_skill_updates,
     _render_analytics,
+    _render_ai_tool_directory,
     _render_detail_page,
     _safe_korean_field,
     _safe_tags,
@@ -172,6 +173,47 @@ def test_smart_insight_rewrites_broken_question_mark_title() -> None:
     )
     assert card
     assert "터미널에서 코드 탐색" not in card.group(0)
+
+
+def test_smart_insight_uses_specific_titles_for_new_week_arxiv_items() -> None:
+    item = SiteItem(
+        title="네트워크 운영 AI 활용",
+        url="https://arxiv.org/abs/2607.08282v1",
+        source="arXiv 보안 AI",
+        kind="논문",
+        published=datetime(2026, 7, 9, tzinfo=UTC),
+        summary="AI 앱을 빠르게 공개하고 프론트엔드와 서버 기능을 함께 운영하기 위해 필요합니다.",
+        detail="AI 앱을 빠르게 공개하고 프론트엔드와 서버 기능을 함께 운영하기 위해 필요합니다.",
+        key_points=("1. 무엇을 다루나요? 네트워크 운영 AI 활용 주제를 다룹니다.",),
+        tags=("AI 에이전트", "보안"),
+    )
+
+    html = render_homepage([item] * 5, [], now=datetime(2026, 7, 14, tzinfo=UTC))
+
+    assert '<span class="card-title">민감 데이터 보호용 멀티 에이전트 방화벽</span>' in html
+    assert "민감 데이터 유출을 막기 위한 멀티 에이전트 방화벽 구조" in html
+    card = re.search(r'<button class="insight-card"[^>]+data-source="https://arxiv.org/abs/2607.08282v1"[^>]*>', html)
+    assert card
+    assert "네트워크 운영 AI 활용" not in card.group(0)
+    assert "프론트엔드와 서버 기능" not in card.group(0)
+
+
+def test_ai_tool_directory_includes_logo_roll_tools() -> None:
+    html = _render_ai_tool_directory()
+
+    for tool in (
+        "Stitch",
+        "getdesign.md",
+        "Supabase",
+        "Neon",
+        "Temporal",
+        "Harness",
+        "Pinecone",
+        "Qdrant",
+        "Datadog",
+        "Infisical",
+    ):
+        assert f"<h3>{tool}</h3>" in html
 
 
 def test_safe_korean_field_rejects_untranslated_article_text() -> None:
