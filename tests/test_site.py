@@ -221,6 +221,29 @@ def test_smart_insight_uses_specific_titles_for_latest_week_arxiv_items() -> Non
     assert "재시도와 복구" not in card.group(0)
 
 
+def test_smart_insight_uses_paper_specific_summary_for_week_one_arxiv_items() -> None:
+    item = SiteItem(
+        title="데이터 에이전트 성능 벤치마크",
+        url="https://arxiv.org/abs/2607.01647v1",
+        source="arXiv 데이터베이스 AI",
+        kind="논문",
+        published=datetime(2026, 7, 2, tzinfo=UTC),
+        summary="AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경을 하지 않게 하기 위해 필요합니다.",
+        detail="AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경을 하지 않게 하기 위해 필요합니다.",
+        key_points=("1. 왜 필요한가요? AI가 데이터베이스를 다룰 때 실수하지 않게 하기 위해 필요합니다.",),
+        tags=("AI 에이전트", "데이터베이스"),
+    )
+
+    html = render_homepage([item] * 5, [], now=datetime(2026, 7, 8, tzinfo=UTC))
+
+    assert '<span class="card-title">데이터 에이전트 성능 벤치마크</span>' in html
+    assert "AgenticDataBench는 데이터 과학 업무를 자동화하는 LLM 기반 데이터 에이전트" in html
+    card = re.search(r'<button class="insight-card"[^>]+data-source="https://arxiv.org/abs/2607.01647v1"[^>]*>', html)
+    assert card
+    assert "실수로 위험한 조회나 변경" not in card.group(0)
+    assert "읽기 전용 권한" not in card.group(0)
+
+
 def test_ai_tool_directory_includes_logo_roll_tools() -> None:
     html = _render_ai_tool_directory()
 
