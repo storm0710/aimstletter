@@ -244,6 +244,32 @@ def test_smart_insight_uses_paper_specific_summary_for_week_one_arxiv_items() ->
     assert "읽기 전용 권한" not in card.group(0)
 
 
+def test_smart_insight_uses_specific_summary_for_july_twentieth_items() -> None:
+    item = SiteItem(
+        title="Claude와 생성형 AI 도구",
+        url="https://venturebeat.com/ai/the-agent-security-gap-54-of-enterprises-have-already-had-an-ai-agent-incident-and-most-still-let-agents-share-credentials",
+        source="VentureBeat AI",
+        kind="동향",
+        published=datetime(2026, 7, 17, tzinfo=UTC),
+        summary="AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경을 하지 않게 하기 위해 필요합니다.",
+        detail="AI가 데이터베이스를 다룰 때 실수로 위험한 조회나 변경을 하지 않게 하기 위해 필요합니다.",
+        key_points=("1. 무엇을 다루나요? Claude와 생성형 AI 도구 주제를 다룹니다.",),
+        tags=("OpenAI", "AI 에이전트"),
+    )
+
+    html = render_homepage([item] * 5, [], now=datetime(2026, 7, 21, tzinfo=UTC))
+
+    card = re.search(
+        r'<button class="insight-card"[^>]+data-source="https://venturebeat.com/ai/the-agent-security-gap-54-of-enterprises-have-already-had-an-ai-agent-incident-and-most-still-let-agents-share-credentials"[^>]*>',
+        html,
+    )
+    assert card
+    assert 'data-title="AI 에이전트 자격 증명 공유 리스크"' in card.group(0)
+    assert "에이전트 간 자격 증명 공유를 허용한다는 보안 리스크" in card.group(0)
+    assert "Claude와 생성형 AI 도구" not in card.group(0)
+    assert "실수로 위험한 조회나 변경" not in card.group(0)
+
+
 def test_ai_tool_directory_includes_logo_roll_tools() -> None:
     html = _render_ai_tool_directory()
 
