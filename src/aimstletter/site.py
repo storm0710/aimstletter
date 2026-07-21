@@ -2916,7 +2916,7 @@ def _smart_insight_card_detail(item: SiteItem, summary: str) -> str:
 
 def _smart_insight_points(item: SiteItem) -> tuple[str, ...]:
     points = item.key_points or (item.summary,)
-    if not any(_needs_specific_insight_copy(point) for point in points):
+    if not any(_needs_specific_insight_copy(point) or _contains_generic_display_title(point) for point in points):
         return points
     digest = _site_item_to_digest(item)
     fallback = _fallback_three_line_summary(digest)
@@ -5284,7 +5284,8 @@ def _latest_week_specific_summary(text: str) -> tuple[str, tuple[str, str, str]]
 
 
 def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
-    text = re.sub(r"[-_]+", " ", _item_text(item))
+    raw_text = _item_text(item)
+    text = re.sub(r"[-_]+", " ", raw_text)
     latest = _latest_week_specific_summary(text)
     if latest:
         return latest[1]
@@ -5648,7 +5649,11 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
             "2. 핵심 구성 요소: 화면 캡처, 반응형 테스트, 클릭 흐름 검증, 시각 회귀 비교입니다.",
             "3. 눈으로 확인하는 방식과의 차이점: 반복 검사를 자동화해 수정 때마다 같은 기준으로 확인합니다.",
         )
-    title = _clean_plain_text(item.title)
+    title = (
+        _fallback_specific_title(text)
+        or _derive_content_display_title(_clean_plain_text(item.title), raw_text)
+        or _clean_plain_text(item.title)
+    )
     return (
         f"1. 무엇을 다루나요? {title} 주제를 다룹니다.",
         "2. 핵심 내용: 원문에서 다루는 문제, 제안 방식, 변화 지점을 업무 적용 관점으로 요약합니다.",
@@ -5667,19 +5672,221 @@ def _koreanize_display_title(title: str, summary: str = "", source: str = "") ->
     title = _clean_plain_text(title)
     text = f"{title} {summary} {source}".lower()
     specific = _fallback_specific_title(text)
+    derived = _derive_content_display_title(title, text)
     if _has_broken_placeholder(title):
-        return specific or _fallback_korean_topic(text)
+        return specific or derived or _fallback_korean_topic(text)
     if specific and _is_generic_display_title(title):
         return specific
     if specific and (_looks_untranslated(title) or _has_source_title_prefix(title, source)):
         return specific
     if _looks_untranslated(title):
-        return specific or _fallback_korean_topic(text)
+        return specific or derived or _fallback_korean_topic(text)
+    if _is_generic_display_title(title):
+        return specific or derived or _fallback_korean_topic(text)
     return title
 
 
-def _is_generic_display_title(title: str) -> bool:
-    return title in {
+def _derive_content_display_title(title: str, text: str) -> str:
+    candidates: list[str] = []
+    if title and not _is_generic_display_title(title) and _looks_untranslated(title):
+        candidates.append(title)
+    for url in re.findall(r"https?://[^\s\"']+", text):
+        path = urlparse(url).path.strip("/")
+        if not path:
+            continue
+        slug = path.rsplit("/", 1)[-1]
+        if slug and not re.fullmatch(r"v?\d+(?:\.\d+)?", slug):
+            candidates.append(slug)
+    for candidate in candidates:
+        derived = _derive_title_from_english_phrase(candidate)
+        if derived and not _is_generic_display_title(derived):
+            return _clip(derived, 42)
+    return ""
+
+
+def _derive_title_from_english_phrase(phrase: str) -> str:
+    phrase = unescape(_clean_plain_text(phrase))
+    phrase = re.sub(r"\.(?:html?|md)$", "", phrase, flags=re.IGNORECASE)
+    phrase = re.sub(r"[-_/]+", " ", phrase)
+    phrase = re.sub(r"\b20\d{2}\s+\d{2}\s+\d{2}\b", " ", phrase)
+    phrase = re.sub(r"\b\d{4,}\b", " ", phrase)
+    phrase = re.sub(r"\s+", " ", phrase).strip(" -:;,.")
+    if not phrase or len(phrase) < 8:
+        return ""
+
+    lower = phrase.lower()
+    if "scales conversations" in lower and "builds faster" in lower:
+        subject = _title_case_token(lower.split("scales conversations", 1)[0].strip())
+        subject = subject or "고객 서비스"
+        return f"{subject}의 고객 대화 확장과 개발 속도 개선"
+    gap_match = re.search(r"(?:the\s+)?(.+?)\s+gap\b", lower)
+    if gap_match:
+        topic = _translate_title_tokens(gap_match.group(1), max_tokens=6)
+        if topic:
+            return f"{topic} 격차"
+    if "generally available" in lower or "general availability" in lower:
+        topic = _translate_title_tokens(re.sub(r"\bgenerally available\b|\bgeneral availability\b", " ", lower), max_tokens=7)
+        return f"{topic} 정식 제공" if topic else ""
+    if "public preview" in lower:
+        topic = _translate_title_tokens(lower.replace("public preview", " "), max_tokens=7)
+        return f"{topic} 공개 미리보기" if topic else ""
+    if "deprecation" in lower or "retired" in lower:
+        topic = _translate_title_tokens(lower, max_tokens=7)
+        return f"{topic} 지원 중단 예정" if topic and "지원 중단" not in topic else topic
+    if "cost aware evaluation" in lower:
+        return "비용 인식형 보안 에이전트 평가"
+    if "cost governed rag" in lower:
+        return "비용 관리형 RAG 운영 체계"
+
+    translated = _translate_title_tokens(lower, max_tokens=8)
+    if translated:
+        return translated
+    return ""
+
+
+def _translate_title_tokens(text: str, max_tokens: int = 8) -> str:
+    phrase_replacements = (
+        ("github copilot", "GitHub Copilot"),
+        ("github actions", "GitHub Actions"),
+        ("github projects", "GitHub Projects"),
+        ("visual studio", "Visual Studio"),
+        ("usage metrics api", "Usage Metrics API"),
+        ("usage metrics", "사용량 지표"),
+        ("pull request", "PR"),
+        ("pull requests", "PR"),
+        ("cloud agent", "클라우드 에이전트"),
+        ("code review", "코드 리뷰"),
+        ("repository level", "저장소 단위"),
+        ("repository admins", "저장소 관리자"),
+        ("advanced search", "고급 검색"),
+        ("xcode", "Xcode"),
+        ("runner image", "러너 이미지"),
+        ("safe ai", "안전한 AI"),
+        ("agent security", "에이전트 보안"),
+        ("agent evaluation", "에이전트 평가"),
+        ("agentic orchestration", "에이전트 오케스트레이션"),
+        ("ai context", "AI 컨텍스트"),
+        ("ai compute", "AI 컴퓨트"),
+        ("multi tenant", "멀티테넌트"),
+        ("cost governed", "비용 관리형"),
+        ("cost aware", "비용 인식형"),
+        ("semantic communication", "의미 통신"),
+        ("wireless sensor networks", "무선 센서 네트워크"),
+        ("adaptive sampling", "적응형 샘플링"),
+        ("mission plan", "미션 계획"),
+        ("policy as code", "정책 코드"),
+    )
+    normalized = text
+    protected: list[str] = []
+    for phrase, replacement in phrase_replacements:
+        token = f" __P{len(protected)}__ "
+        normalized = re.sub(rf"\b{re.escape(phrase)}\b", token, normalized, flags=re.IGNORECASE)
+        protected.append(replacement)
+
+    stopwords = {
+        "a", "an", "and", "are", "as", "at", "be", "by", "can", "for", "from", "has", "have",
+        "how", "in", "into", "is", "it", "lets", "most", "new", "no", "now", "of", "on", "the",
+        "their", "to", "via", "with", "without", "why", "adds", "added", "available", "improved",
+        "improvements", "using", "use", "users", "still", "already",
+    }
+    word_map = {
+        "agent": "에이전트",
+        "agents": "에이전트",
+        "agentic": "에이전트형",
+        "ai": "AI",
+        "api": "API",
+        "app": "앱",
+        "archive": "아카이브",
+        "adoption": "도입",
+        "builds": "개발",
+        "chatbots": "챗봇",
+        "comments": "댓글",
+        "compute": "컴퓨트",
+        "context": "컨텍스트",
+        "conversations": "대화",
+        "cost": "비용",
+        "credentials": "자격 증명",
+        "customer": "고객",
+        "customers": "고객",
+        "data": "데이터",
+        "deployment": "배포",
+        "evaluation": "평가",
+        "enterprise": "엔터프라이즈",
+        "enterprises": "엔터프라이즈",
+        "faster": "속도 개선",
+        "gap": "격차",
+        "generation": "생성",
+        "governance": "거버넌스",
+        "management": "관리",
+        "metrics": "지표",
+        "mobile": "모바일",
+        "model": "모델",
+        "models": "모델",
+        "monitoring": "모니터링",
+        "openai": "OpenAI",
+        "orchestration": "오케스트레이션",
+        "projects": "프로젝트",
+        "production": "운영",
+        "rag": "RAG",
+        "reality": "현실",
+        "reliability": "신뢰성",
+        "retrieval": "검색",
+        "review": "리뷰",
+        "risk": "리스크",
+        "risks": "리스크",
+        "safe": "안전",
+        "safety": "안전",
+        "scales": "확장",
+        "search": "검색",
+        "security": "보안",
+        "subscription": "구독",
+        "support": "지원",
+        "team": "팀",
+        "teams": "팀",
+        "teens": "청소년",
+        "trust": "신뢰",
+        "workflows": "워크플로",
+        "workflow": "워크플로",
+    }
+
+    pieces: list[str] = []
+    for raw in re.findall(r"__P\d+__|[a-z0-9][a-z0-9+.]*", normalized, flags=re.IGNORECASE):
+        if raw.startswith("__P"):
+            index = int(re.sub(r"\D", "", raw))
+            pieces.append(protected[index])
+            continue
+        word = raw.lower().strip(".")
+        if word in stopwords:
+            continue
+        if re.fullmatch(r"\d+", word):
+            continue
+        if word in word_map:
+            pieces.append(word_map[word])
+        elif re.search(r"\d", raw) or raw.isupper():
+            pieces.append(raw.upper() if raw.isupper() else _title_case_token(raw))
+        elif len(word) > 2 and len(pieces) < 3:
+            pieces.append(_title_case_token(word))
+        if len(pieces) >= max_tokens:
+            break
+
+    compact: list[str] = []
+    for piece in pieces:
+        if piece and piece not in compact:
+            compact.append(piece)
+    title = " ".join(compact).strip()
+    title = re.sub(r"\s+", " ", title)
+    return title
+
+
+def _title_case_token(token: str) -> str:
+    if not token:
+        return ""
+    if any(ch.isdigit() for ch in token):
+        return token.upper()
+    return token[:1].upper() + token[1:]
+
+
+GENERIC_DISPLAY_TITLES = {
         "개발 도구와 코딩 자동화",
         "데이터베이스 업무 AI 활용",
         "AI 앱 배포와 운영",
@@ -5693,6 +5900,15 @@ def _is_generic_display_title(title: str) -> bool:
         "네트워크 운영을 돕는 AI",
         "GitHub Copilot 변경 이력에서 확인한 최신 업데이트",
     }
+
+
+def _is_generic_display_title(title: str) -> bool:
+    return title in GENERIC_DISPLAY_TITLES
+
+
+def _contains_generic_display_title(text: str) -> bool:
+    clean = _clean_plain_text(text)
+    return any(title in clean for title in GENERIC_DISPLAY_TITLES)
 
 
 def _has_source_title_prefix(title: str, source: str) -> bool:

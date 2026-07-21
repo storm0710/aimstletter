@@ -270,6 +270,30 @@ def test_smart_insight_uses_specific_summary_for_july_twentieth_items() -> None:
     assert "실수로 위험한 조회나 변경" not in card.group(0)
 
 
+def test_smart_insight_derives_title_from_content_for_unmapped_generic_items() -> None:
+    item = SiteItem(
+        title="Claude와 생성형 AI 도구",
+        url="https://example.com/ai/the-enterprise-agent-reliability-gap-for-production-workflows",
+        source="Example AI",
+        kind="동향",
+        published=datetime(2026, 7, 21, tzinfo=UTC),
+        summary="이번 업데이트가 어떤 업무 문제를 해결하는지 업무 적용 관점으로 요약합니다.",
+        detail="이번 업데이트가 어떤 업무 문제를 해결하는지 업무 적용 관점으로 요약합니다.",
+        key_points=("1. 무엇을 다루나요? Claude와 생성형 AI 도구 주제를 다룹니다.",),
+        tags=("AI 에이전트", "엔터프라이즈"),
+    )
+
+    html = render_homepage([item] * 5, [], now=datetime(2026, 7, 21, tzinfo=UTC))
+
+    card = re.search(
+        r'<button class="insight-card"[^>]+data-source="https://example.com/ai/the-enterprise-agent-reliability-gap-for-production-workflows"[^>]*>',
+        html,
+    )
+    assert card
+    assert 'data-title="엔터프라이즈 에이전트 신뢰성 격차"' in card.group(0)
+    assert "Claude와 생성형 AI 도구" not in card.group(0)
+
+
 def test_ai_tool_directory_includes_logo_roll_tools() -> None:
     html = _render_ai_tool_directory()
 
