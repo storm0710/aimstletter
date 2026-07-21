@@ -4971,6 +4971,15 @@ def _latest_week_specific_summary(text: str) -> tuple[str, tuple[str, str, str]]
             ),
         ),
         (
+            ("openai.com/index/cars24",),
+            "Cars24가 OpenAI를 활용해 고객 상담 대화를 확장하고 제품 개발 속도를 높인 사례입니다. 대규모 대화 데이터와 내부 워크플로에 AI를 연결해 고객 응대 품질과 팀 실행 속도를 함께 개선하는 흐름을 보여줍니다.",
+            (
+                "1. 무엇을 다루나요? Cars24가 OpenAI로 고객 대화와 제품 개발 워크플로를 확장한 사례입니다.",
+                "2. 핵심 구성 요소: 고객 상담 자동화, 대화 확장, 내부 개발 속도 개선, OpenAI 활용 사례입니다.",
+                "3. 업무 적용 포인트: 고객 접점 AI는 챗봇 응답만이 아니라 상담 품질, 운영 데이터, 제품 개선 루프까지 연결해야 효과가 커집니다.",
+            ),
+        ),
+        (
             ("advanced search for projects",),
             "GitHub Projects의 advanced search 기능이 정식 제공된 업데이트입니다. 프로젝트 항목을 더 정교한 조건으로 찾아 우선순위, 담당자, 상태별 운영 현황을 빠르게 확인할 수 있습니다.",
             (
@@ -5753,6 +5762,7 @@ def _fallback_specific_title(text: str) -> str:
         (("copilot code review customization",), "Copilot 코드 리뷰 맞춤 설정 개선"),
         (("github mobile", "pull request comments", "copilot cloud agent"), "모바일 PR 댓글의 Copilot 에이전트 수정"),
         (("scorecard for the ai age",), "AI 시대 경쟁력 스코어카드"),
+        (("openai.com/index/cars24",), "Cars24의 고객 대화 확장과 개발 속도 개선"),
         (("advanced search for projects",), "GitHub Projects 고급 검색 정식 제공"),
         (("repository admins can archive pull requests",), "저장소 관리자의 PR 아카이브"),
         (("visual studio subscription management",), "Visual Studio 구독 관리 REST API"),
