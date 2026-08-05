@@ -541,17 +541,22 @@ def test_smart_insight_points_render_answer_on_next_line_without_space_after_que
         summary="반복되는 코드 수정을 줄이는 업데이트입니다.",
         detail="반복되는 코드 수정을 줄이는 업데이트입니다.",
         key_points=(
-            "1. 왜 필요한가요?반복되는 코드 수정과 PR 보조를 줄여줍니다.",
-            "2. 핵심 구성 요소:코드 맥락 이해와 테스트·PR 흐름 연결입니다.",
-            "3. 기존 방식과의 차이점:한 줄 추천을 넘어 이슈 해결 흐름을 돕습니다.",
+            "1. 한 줄 요약:반복되는 코드 수정과 PR 보조를 줄여줍니다.",
+            "2. 무엇이 바뀌었나:코드 맥락 이해와 테스트·PR 흐름 연결이 강화됐습니다.",
+            "3. 왜 중요한가:한 줄 추천을 넘어 이슈 해결 흐름을 돕습니다.",
+            "4. 누가 보면 좋은가:프론트엔드, 백엔드, AI 엔지니어",
+            "5. 이번 주 해볼 일:낮은 우선순위 이슈 1개로 PR 초안 작성을 시험해보세요.",
+            "6. 한계와 주의사항:저장소 권한과 테스트 결과를 반드시 확인해야 합니다.",
+            "7. 출처와 상태:GitHub Copilot 변경 이력 · 공식 발표 · 2026-08-01",
         ),
         tags=("GitHub Copilot",),
     )
 
     html = render_homepage([item] * 5, [], now=datetime(2026, 8, 5, tzinfo=UTC))
 
-    assert '<span class="point-question"><span class="point-number">1.</span> 왜 필요한가요?</span>' in html
+    assert '<span class="point-question"><span class="point-number">1.</span> 한 줄 요약:</span>' in html
     assert '<span class="point-answer">반복되는 코드 수정과 PR 보조를 줄여줍니다.</span>' in html
+    assert '<span class="point-question"><span class="point-number">7.</span> 출처와 상태:</span>' in html
     assert ".detail-points .point-question" in html
     assert "display: block;" in html
     assert "class=\"detail-criteria\"" not in html

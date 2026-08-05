@@ -3019,11 +3019,151 @@ def _smart_insight_card_detail(item: SiteItem, summary: str) -> str:
 
 def _smart_insight_points(item: SiteItem) -> tuple[str, ...]:
     points = item.key_points or (item.summary,)
-    if not any(_needs_specific_insight_copy(point) or _contains_generic_display_title(point) for point in points):
-        return points
     digest = _site_item_to_digest(item)
-    fallback = _fallback_three_line_summary(digest)
-    return fallback or points
+    if _has_complete_card_points(points) and not any(
+        _needs_specific_insight_copy(point) or _contains_generic_display_title(point) for point in points
+    ):
+        return tuple(points[:7])
+    return _fallback_card_points(digest, points)
+
+
+def _has_complete_card_points(points: tuple[str, ...]) -> bool:
+    if len(points) < 7:
+        return False
+    expected = (
+        "한 줄 요약",
+        "무엇이 바뀌었나",
+        "왜 중요한가",
+        "누가 보면 좋은가",
+        "이번 주 해볼 일",
+        "한계와 주의사항",
+        "출처와 상태",
+    )
+    return all(label in point for label, point in zip(expected, points, strict=False))
+
+
+def _fallback_card_points(
+    item: DigestItem,
+    seed_points: tuple[str, ...] | tuple[str, str, str] = (),
+) -> tuple[str, ...]:
+    three_points = _fallback_three_line_summary(item)
+    title = _fallback_display_title(item)
+    summary = _fallback_display_summary(item)
+    seed_is_generic = any(
+        _needs_specific_insight_copy(point) or _contains_generic_display_title(point)
+        for point in seed_points
+    )
+    seed_answers = [] if seed_is_generic else [_strip_point_prefix(point) for point in seed_points if point]
+
+    one_line = _first_meaningful_text([summary, *seed_answers, title], title)
+    changed = _first_meaningful_text(
+        [
+            seed_answers[1] if len(seed_answers) > 1 else "",
+            _strip_point_prefix(three_points[1]),
+            f"{title}의 대상 업무, 적용 방식, 도입 전 확인할 조건이 정리됐습니다.",
+        ],
+        title,
+    )
+    why = _first_meaningful_text(
+        [
+            seed_answers[2] if len(seed_answers) > 2 else "",
+            _strip_point_prefix(three_points[2]),
+            _fallback_adoption_answer(item, title),
+        ],
+        title,
+    )
+    roles = _recommended_reader_roles(item)
+    action = _weekly_action(item, title)
+    caution = _caution_note(item)
+    status = _source_status(item)
+
+    return (
+        f"1. 한 줄 요약: {one_line}",
+        f"2. 무엇이 바뀌었나: {changed}",
+        f"3. 왜 중요한가: {why}",
+        f"4. 누가 보면 좋은가: {roles}",
+        f"5. 이번 주 해볼 일: {action}",
+        f"6. 한계와 주의사항: {caution}",
+        f"7. 출처와 상태: {_korean_source_name(item.source)} · {status} · {_format_date(item.published)}",
+    )
+
+
+def _first_meaningful_text(candidates: list[str], title: str) -> str:
+    for candidate in candidates:
+        clean = _clean_plain_text(candidate)
+        if not clean:
+            continue
+        if _needs_specific_insight_copy(clean) or _looks_untranslated(clean):
+            continue
+        if clean.strip().lower() == title.strip().lower():
+            continue
+        return _clip(clean, 170)
+    return f"{title}와 관련된 변화가 업무 흐름에 미치는 영향을 정리한 항목입니다."
+
+
+def _recommended_reader_roles(item: DigestItem) -> str:
+    text = _item_text(item)
+    roles: list[str] = []
+    role_rules = (
+        (("design", "ui", "frontend", "front-end", "react"), "프론트엔드"),
+        (("backend", "api", "server", "database", "sql"), "백엔드"),
+        (("database", "sql", "data", "rag", "retrieval"), "데이터"),
+        (("agent", "model", "llm", "ai", "benchmark"), "AI 엔지니어"),
+        (("product", "workflow", "customer", "policy"), "기획자"),
+        (("design", "ux", "visual"), "디자이너"),
+        (("enterprise", "governance", "strategy", "cost", "security"), "리더"),
+    )
+    for keywords, role in role_rules:
+        if any(keyword in text for keyword in keywords) and role not in roles:
+            roles.append(role)
+    if not roles:
+        roles = ["기획자", "AI 엔지니어", "리더"]
+    return ", ".join(roles[:4])
+
+
+def _weekly_action(item: DigestItem, title: str) -> str:
+    text = _item_text(item)
+    if "database" in text or "sql" in text:
+        return "읽기 전용 계정과 샘플 데이터로 작은 PoC를 만들어 권한과 쿼리 검토 흐름을 확인해보세요."
+    if "github" in text or "copilot" in text or "code" in text:
+        return "중요도가 낮은 이슈 1개를 골라 코드 탐색, 수정, 테스트, PR 초안 작성 흐름을 시험해보세요."
+    if "security" in text or "보안" in text or "responsible ai" in text:
+        return "현재 AI 도구가 접근하는 데이터와 권한 목록을 적고, 승인이나 감사 로그가 필요한 지점을 표시해보세요."
+    if "design" in text or "ui" in text:
+        return "작은 화면 1개를 대상으로 생성 결과, 접근성, 모바일 깨짐 여부를 체크리스트로 검토해보세요."
+    if "agent" in text or "workflow" in text:
+        return "반복 업무 하나를 골라 입력, 실행 도구, 승인 단계, 실패 시 되돌릴 방법을 간단히 그려보세요."
+    return f"{title}를 우리 팀 업무에 적용할 수 있는 작은 실험 1개를 정하고 필요한 데이터와 권한을 확인해보세요."
+
+
+def _caution_note(item: DigestItem) -> str:
+    text = _item_text(item)
+    if "arxiv" in text or "paper" in text or "논문" in text:
+        return "아직 논문 단계일 수 있으므로 실제 운영 데이터에 적용하기 전 재현성, 데이터 조건, 실험 규모를 확인해야 합니다."
+    if "preview" in text or "미리보기" in text:
+        return "공개 미리보기 기능일 수 있어 제공 범위, 변경 가능성, 지원 플랜을 확인해야 합니다."
+    if "enterprise" in text:
+        return "엔터프라이즈 플랜이나 조직 설정이 필요할 수 있으므로 권한, 비용, 관리자 정책을 먼저 확인해야 합니다."
+    if "security" in text or "database" in text or "data" in text:
+        return "운영 데이터와 연결할 때는 읽기·쓰기 권한, 감사 로그, 개인정보·보안 정책을 먼저 검토해야 합니다."
+    if "benchmark" in text:
+        return "벤치마크 결과가 실제 팀 환경과 다를 수 있으므로 우리 데이터와 업무 흐름으로 작게 검증해야 합니다."
+    return "한국어 품질, 지원 플랜, 실제 업무 데이터에서의 안정성을 작은 범위로 먼저 검증해야 합니다."
+
+
+def _source_status(item: DigestItem) -> str:
+    text = _item_text(item)
+    if "arxiv" in text or "논문" in text or "paper" in text:
+        return "arXiv 논문"
+    if "benchmark" in text:
+        return "벤치마크 결과"
+    if "preview" in text or "미리보기" in text:
+        return "프리뷰"
+    if "generally available" in text or "정식" in text or "ga" in text:
+        return "정식 출시"
+    if "github.blog/changelog" in text or "openai.com" in text or "anthropic.com" in text:
+        return "공식 발표"
+    return _korean_kind_name(item.kind)
 
 
 def _site_item_to_digest(item: SiteItem) -> DigestItem:
@@ -3122,7 +3262,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             f'data-body="{escape(body, quote=True)}" '
             f'data-detail="{escape(_clip(detail, 700), quote=True)}" '
             f'data-meta="{escape(meta, quote=True)}" '
-            f'data-points="{escape(json.dumps(list(points[:4]), ensure_ascii=False), quote=True)}" '
+            f'data-points="{escape(json.dumps(list(points[:7]), ensure_ascii=False), quote=True)}" '
             f'data-tags="{escape(json.dumps(list(tags[:6]), ensure_ascii=False), quote=True)}" '
             f'data-criteria="{escape(criteria, quote=True)}" '
             f'data-footnotes="{escape(json.dumps(list(footnotes[:5]), ensure_ascii=False), quote=True)}" '
@@ -3153,7 +3293,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + '</div>'
         + f'<p class="detail-copy" data-insight-detail>{escape(_clip(first_detail, 700))}</p>'
         + '<ul class="detail-points" data-insight-points>'
-        + "".join(_render_point_item(point) for point in first_points[:4])
+        + "".join(_render_point_item(point) for point in first_points[:7])
         + "</ul>"
         + '<div class="detail-footnotes-title" data-insight-footnotes-title'
         + (" hidden" if not first_footnotes else "")
@@ -4659,8 +4799,9 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "detail must be 2 to 4 Korean paragraphs that a Korean high-school student can understand. "
             "Use short sentences, explain why the item matters, and include practical examples rather "
             "than abstract vendor language. "
-            "key_points must be exactly 3 concise Korean strings. Each string should start with "
-            "'1. 왜 필요한가요?', '2. 핵심 구성 요소:', and '3. 기존 방식과의 차이점:' or an item-specific equivalent. "
+            "key_points must be exactly 7 concise Korean strings. Each string must start with these labels: "
+            "'1. 한 줄 요약:', '2. 무엇이 바뀌었나:', '3. 왜 중요한가:', '4. 누가 보면 좋은가:', "
+            "'5. 이번 주 해볼 일:', '6. 한계와 주의사항:', and '7. 출처와 상태:'. "
             "After each question or label, write a concrete answer about the source item itself. "
             "Do not use broad placeholders such as '원문에서 다루는 문제, 제안 방식, 변화 지점' or "
             "'관련 도구, 운영 조건, 리스크'. If the title is abstract, infer the concrete topic from the "
@@ -4681,9 +4822,10 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "Use natural Korean titles that preserve product and company names in English. "
             "Summaries must be one concise Korean sentence and must make clear what a DBA, "
             "network engineer, server operator, or technical mentor can do with it at work. "
-            "Key points should explain in plain Korean: what changed, where it can be used in work, and what "
-            "to watch before adoption. The key_points answer text must be specific to the item's content, "
-            "not a generic template. Add comparison notes when the item could be confused with "
+            "Key points should explain in plain Korean: one-line summary, what changed, why it matters, "
+            "who should read it, one small action to try this week, limitations and cautions, and source/status. "
+            "The key_points answer text must be specific to the item's content, not a generic template. "
+            "Add comparison notes when the item could be confused with "
             "another tool or vendor, and add glossary notes for difficult words such as Warp, Harness, "
             "Agent tasks REST API, CI/CD, SDK, or orchestration.\n\n"
             f"{source_block}"
@@ -4743,8 +4885,9 @@ def _repair_korean_translation(
         "Translate English article titles and summaries into Korean. Product names may "
         "remain in English, but English clauses or English explanatory sentences are not allowed. "
         "detail must be 2 to 4 Korean paragraphs. "
-        "key_points must be exactly 3 concise Korean strings. Each string should start with "
-        "'1. 왜 필요한가요?', '2. 핵심 구성 요소:', and '3. 기존 방식과의 차이점:' or an item-specific equivalent. "
+        "key_points must be exactly 7 concise Korean strings. Each string must start with these labels: "
+        "'1. 한 줄 요약:', '2. 무엇이 바뀌었나:', '3. 왜 중요한가:', '4. 누가 보면 좋은가:', "
+        "'5. 이번 주 해볼 일:', '6. 한계와 주의사항:', and '7. 출처와 상태:'. "
         "Each key point must contain concrete content inferred from the source item, not broad placeholders "
         "such as '원문에서 다루는 문제, 제안 방식, 변화 지점'. "
         "Do not tell readers to check source links in summary, detail, or key_points. tags must be an array of "
@@ -4812,14 +4955,14 @@ def _safe_korean_field(value: object, fallback: str) -> str:
 def _safe_key_points(localized_item: dict[str, object], original: DigestItem) -> tuple[str, ...]:
     raw_points = localized_item.get("key_points")
     points = _coerce_string_list(raw_points)
-    safe_points = [
+    safe_points = tuple(
         _clean_visible_korean(point)
         for point in points
         if point and not _looks_untranslated(point) and not _needs_specific_insight_copy(point)
-    ]
-    if safe_points:
-        return tuple(safe_points[:3])
-    return _fallback_three_line_summary(original)
+    )
+    if _has_complete_card_points(safe_points):
+        return safe_points[:7]
+    return _fallback_card_points(original, safe_points)
 
 
 def _safe_tags(localized_item: dict[str, object], original: DigestItem) -> tuple[str, ...]:
@@ -4960,7 +5103,7 @@ def _looks_untranslated(text: str) -> bool:
 def _fallback_korean_item(item: DigestItem) -> SiteItem:
     title = _fallback_display_title(item)
     summary = _fallback_display_summary(item)
-    points = _fallback_three_line_summary(item)
+    points = _fallback_card_points(item)
     return SiteItem(
         title=title,
         summary=summary,
