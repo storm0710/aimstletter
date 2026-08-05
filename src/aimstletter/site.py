@@ -1776,6 +1776,21 @@ def _render_editorial_homepage(
       color: #444;
       font-size: 13px;
       line-height: 1.55;
+      overflow-wrap: anywhere;
+    }}
+    .detail-points .point-question {{
+      display: block;
+      color: #222;
+      font-weight: 800;
+    }}
+    .detail-points .point-number {{
+      font-weight: 700;
+    }}
+    .detail-points .point-answer {{
+      display: block;
+      margin-top: 4px;
+      color: inherit;
+      font-weight: 500;
     }}
     .detail-footnotes {{
       display: grid;

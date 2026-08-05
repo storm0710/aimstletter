@@ -552,6 +552,8 @@ def test_smart_insight_points_render_answer_on_next_line_without_space_after_que
 
     assert '<span class="point-question"><span class="point-number">1.</span> 왜 필요한가요?</span>' in html
     assert '<span class="point-answer">반복되는 코드 수정과 PR 보조를 줄여줍니다.</span>' in html
+    assert ".detail-points .point-question" in html
+    assert "display: block;" in html
     assert "class=\"detail-criteria\"" not in html
     assert "data-insight-criteria" not in html
 
