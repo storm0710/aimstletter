@@ -767,6 +767,9 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
 def test_committed_knowledge_page_exists() -> None:
     html = Path("public/knowledge/harness-engineering/index.html").read_text(encoding="utf-8")
     langchain = Path("public/knowledge/langchain/index.html").read_text(encoding="utf-8")
+    langgraph = Path("public/knowledge/langgraph/index.html").read_text(encoding="utf-8")
+    loop = Path("public/knowledge/loop-engineering/index.html").read_text(encoding="utf-8")
+    graph = Path("public/knowledge/graph-engineering/index.html").read_text(encoding="utf-8")
 
     assert "Knowledge" in html
     assert "Archive" in html
@@ -780,10 +783,19 @@ def test_committed_knowledge_page_exists() -> None:
     assert "knowledge-toc" not in html
     assert "1.1 프롬프트" not in html
     assert "2.1 하네스 엔지니어링이란?" not in html
+    assert "고객 문의 자동 분류" not in html
     assert "권한" in html
     assert "검증" in html
+    assert "Tool Registry" in html
+    assert "Audit Log" in html
+    assert "검증 필요" in html
     assert "01. LangChain" in langchain
-    assert "문서 기반 질의응답" in langchain
+    assert "회의록을 업무 등록 초안으로 바꾸기" in langchain
+    assert "Prompt Template" in langchain
+    assert "서비스 장애 대응 에이전트" in langgraph
+    assert "테스트에 실패한 코드를 에이전트가 수정하는 반복 과정" in loop
+    assert "서비스 변경 시 영향 범위를 분석하는 시스템 의존성 그래프" in graph
+    assert "LangGraph와 그래프 엔지니어링의 차이" in graph
 
 
 def test_knowledge_page_includes_practical_engineering_playbook() -> None:
@@ -793,18 +805,24 @@ def test_knowledge_page_includes_practical_engineering_playbook() -> None:
     assert "30초 요약" in html
     assert "해결하려는 문제" in html
     assert "언제 사용하고 언제 사용하지 않는가" in html
-    assert "실제 업무 예시" in html
+    assert "실제 업무 사례" in html
     assert "최소 구현 예제" in html
     assert "비슷한 개념과 비교" in html
     assert "실패 사례와 주의사항" in html
     assert "운영 체크리스트" in html
     assert "역할별 업무 적용" in html
     assert "학습 정보" in html
+    assert "AI 엔지니어링 관계도" in html
+    assert "개념 간 전체 비교표" in html
+    assert "헷갈리기 쉬운 개념" in html
     assert "State" in html
+    assert "Checkpoint" in html
+    assert "Interrupt" in html
+    assert "Resume" in html
     assert "Human-in-the-loop" in html
     assert "기획자" in html
     assert "백엔드" in html
-    assert "최종 업데이트: 2026-08-05" in html
+    assert "최종 검토 날짜: 2026-08-05" in html
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:

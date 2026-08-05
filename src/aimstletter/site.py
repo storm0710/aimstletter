@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
@@ -16,6 +16,13 @@ from urllib.parse import urlparse
 from aimstletter.composer import _make_client
 from aimstletter.config import Settings
 from aimstletter.fetchers import DigestItem, fetch_recent_items
+from aimstletter.knowledge_content import (
+    CONFUSION_ROWS,
+    GLOBAL_COMPARISON_ROWS,
+    HARNESS_LOOP_ROWS,
+    KNOWLEDGE_PAGES,
+    OFFICIAL_SOURCES,
+)
 from aimstletter.ranking import rank_items
 
 
@@ -514,315 +521,6 @@ def _ensure_primary_nav_sources_link(html: str) -> str:
         '<a href="ai-tools/">AI 도구</a>',
         '<a href="ai-tools/">AI 도구</a>\n        <a href="ai-sources/">AI 소스</a>',
     )
-
-    return f"""<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Master Times</title>
-  <meta name="description" content="인공지능 마스터 과정용 주간 인공지능 업데이트와 도구 출시 소식">
-  {analytics_html}
-  <style>
-    :root {{
-      color-scheme: light;
-      --ink: #111111;
-      --muted: #5b5b5b;
-      --line: #d8d2c4;
-      --paper: #f7f3ea;
-      --accent: #8b1e16;
-      --rule: #222222;
-    }}
-    * {{ box-sizing: border-box; }}
-    body {{
-      margin: 0;
-      background: var(--paper);
-      color: var(--ink);
-      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
-    }}
-    a {{ color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }}
-    .page {{
-      width: min(1420px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 18px 0 44px;
-    }}
-    .topline {{
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      border-top: 3px solid var(--rule);
-      border-bottom: 1px solid var(--rule);
-      padding: 8px 0;
-      font: 700 13px/1.4 Arial, "Noto Sans KR", sans-serif;
-      letter-spacing: 0;
-      text-transform: uppercase;
-    }}
-    .masthead {{
-      border-bottom: 3px double var(--rule);
-      padding: 20px 0 18px;
-      text-align: center;
-    }}
-    .masthead h1 {{
-      margin: 0;
-      font-size: clamp(48px, 9vw, 104px);
-      line-height: .9;
-      letter-spacing: 0;
-    }}
-    .masthead p {{
-      margin: 12px auto 0;
-      max-width: 860px;
-      color: var(--muted);
-      font: 16px/1.6 Arial, "Noto Sans KR", sans-serif;
-    }}
-    .kicker {{
-      color: var(--accent);
-      font: 800 12px/1.4 Arial, "Noto Sans KR", sans-serif;
-      letter-spacing: 0;
-      text-transform: uppercase;
-    }}
-    h2, h3 {{ margin: 0; letter-spacing: 0; }}
-    .summary {{
-      color: #282828;
-      font-size: 17px;
-      line-height: 1.68;
-      margin: 12px 0 0;
-    }}
-    .newspaper {{
-      display: grid;
-      grid-template-columns: 230px minmax(0, 1fr);
-      gap: 28px;
-      padding-top: 0;
-      margin-top: 28px;
-      border-top: 1px solid var(--rule);
-      align-items: start;
-    }}
-    .content-grid {{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 28px;
-      min-width: 0;
-    }}
-    .column {{
-      min-width: 0;
-      padding-top: 22px;
-    }}
-    .content-grid .column + .column {{
-      border-left: 1px solid var(--rule);
-      padding-left: 24px;
-    }}
-    .toc-column {{
-      border-left: 0;
-      padding-left: 0;
-      position: sticky;
-      top: 18px;
-    }}
-    .toc-list {{
-      display: grid;
-      gap: 10px;
-      font: 700 14px/1.45 Arial, "Noto Sans KR", sans-serif;
-    }}
-    .toc-list a {{
-      border: 1px solid var(--line);
-      background: #fffaf0;
-      display: grid;
-      gap: 3px;
-      padding: 10px 11px;
-      text-decoration: none;
-    }}
-    .toc-list a:hover,
-    .toc-list a:focus-visible {{
-      border-color: var(--rule);
-      outline: 0;
-    }}
-    .toc-number {{
-      color: var(--accent);
-      font: 800 12px/1.3 Arial, "Noto Sans KR", sans-serif;
-    }}
-    .toc-label {{
-      font-size: 15px;
-    }}
-    .toc-desc {{
-      color: var(--muted);
-      font: 12px/1.45 Arial, "Noto Sans KR", sans-serif;
-    }}
-    .toc-note {{
-      color: var(--muted);
-      font: 13px/1.55 Arial, "Noto Sans KR", sans-serif;
-      margin: 12px 0 0;
-    }}
-    .section-title {{
-      border-bottom: 2px solid var(--rule);
-      padding-bottom: 8px;
-      margin-bottom: 14px;
-      font-size: 24px;
-      line-height: 1.2;
-      min-height: 39px;
-      display: flex;
-      align-items: flex-start;
-    }}
-    .article {{
-      border-bottom: 1px solid var(--line);
-      min-height: 316px;
-      padding: 14px 0 16px;
-    }}
-    .section-title + .article,
-    .section-title + .tool-list .tool-item:first-child {{
-      padding-top: 0;
-    }}
-    .article h3 {{
-      font-size: 22px;
-      line-height: 1.22;
-    }}
-    .title-date {{
-      color: var(--muted);
-      font: 700 13px/1.35 Arial, "Noto Sans KR", sans-serif;
-      white-space: nowrap;
-    }}
-    .article p {{
-      color: #303030;
-      font-size: 15.5px;
-      line-height: 1.65;
-      margin: 8px 0 0;
-    }}
-    .meta {{
-      color: var(--muted);
-      font: 700 12px/1.45 Arial, "Noto Sans KR", sans-serif;
-      margin-top: 8px;
-    }}
-    .key-points {{
-      margin: 9px 0 0;
-      padding-left: 18px;
-      color: #222222;
-      font: 14px/1.55 Arial, "Noto Sans KR", sans-serif;
-    }}
-    .key-points li,
-    .detail-points li {{
-      overflow-wrap: anywhere;
-    }}
-    .key-points .point-question,
-    .detail-points .point-question {{
-      display: block;
-      color: #222222;
-      font-weight: 800;
-    }}
-    .key-points .point-number,
-    .detail-points .point-number {{
-      font-weight: 700;
-    }}
-    .key-points .point-answer,
-    .detail-points .point-answer {{
-      display: block;
-      margin-top: 4px;
-      color: inherit;
-      font-weight: 500;
-    }}
-    .points-label {{
-      margin-top: 10px;
-      color: var(--accent);
-      font: 800 12px/1.3 Arial, "Noto Sans KR", sans-serif;
-    }}
-    .tags {{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 10px;
-    }}
-    .tag {{
-      border: 1px solid var(--line);
-      background: #fffaf0;
-      padding: 3px 7px;
-      font: 700 12px/1.3 Arial, "Noto Sans KR", sans-serif;
-    }}
-    .tool-list {{
-      display: grid;
-      gap: 0;
-    }}
-    .tool-item {{
-      border-bottom: 1px solid var(--line);
-      min-height: 316px;
-      padding: 14px 0 16px;
-    }}
-    .tool-item h3 {{
-      font-size: 19px;
-      line-height: 1.26;
-    }}
-    .tool-item p {{
-      margin: 7px 0 0;
-      color: #333333;
-      font: 14px/1.58 Arial, "Noto Sans KR", sans-serif;
-    }}
-    footer {{
-      border-top: 3px double var(--rule);
-      margin-top: 28px;
-      padding-top: 12px;
-      color: var(--muted);
-      font: 13px/1.5 Arial, "Noto Sans KR", sans-serif;
-    }}
-    @media (max-width: 840px) {{
-      .newspaper,
-      .content-grid {{
-        grid-template-columns: 1fr;
-      }}
-      .content-grid .column + .column {{
-        border-left: 0;
-        padding-left: 0;
-      }}
-      .toc-column {{
-        position: static;
-      }}
-      .article,
-      .tool-item {{
-        min-height: 0;
-      }}
-      .topline {{
-        flex-direction: column;
-      }}
-    }}
-  </style>
-</head>
-<body>
-  <main class="page">
-    <div class="topline">
-      <span>AI Master 과정 주간판</span>
-      <span>{escape(today)} · 깃허브 페이지판</span>
-    </div>
-    <header class="masthead">
-      <h1>AI Master Times</h1>
-      <p>데이터베이스 관리자, 네트워크, 서버 운영 직군이 AI를 업무 스킬과 비즈니스 모델로 연결할 수 있도록 매주 선별한 연구와 도구 업데이트입니다.</p>
-    </header>
-
-    <section class="newspaper" aria-label="주간 업데이트">
-      <nav class="column toc-column" aria-label="상세 목차">
-        <h2 class="section-title">목차</h2>
-        <div class="toc-list">
-          <a href="work-skills/"><span class="toc-number">1.</span><span class="toc-label">업무 AI 스킬 업데이트</span><span class="toc-desc">DBA·네트워크·서버 업무 적용 사례</span></a>
-          <a href="tools/"><span class="toc-number">2.</span><span class="toc-label">Claude와 AI 도구 업데이트</span><span class="toc-desc">Claude·OpenAI·Copilot 최신 변경</span></a>
-        </div>
-        <p class="toc-note">번호를 눌러 게시판으로 이동하고, 항목 제목을 클릭하면 번역된 상세 설명과 원문 링크를 확인할 수 있습니다.</p>
-      </nav>
-      <div class="content-grid">
-        <div class="column">
-          <h2 class="section-title">업무 AI 스킬 업데이트 · 상위 5개</h2>
-          {_render_articles(infra_items)}
-          <h2 class="section-title">기타 AI 동향 · 하위 5개</h2>
-          {_render_articles(other_items)}
-        </div>
-        <aside class="column">
-          <h2 class="section-title">Claude와 AI 도구 업데이트</h2>
-          <div class="tool-list">
-            {_render_tool_items(latest_tool_items)}
-          </div>
-        </aside>
-      </div>
-    </section>
-    <footer>
-      자동 생성: 깃허브 액션 · 출처 링크를 눌러 원문을 확인하세요. 커서는 공식 변경 이력 링크를 고정 노출하고, 웹 피드가 안정적인 도구는 최신 글을 자동 수집합니다.
-    </footer>
-  </main>
-</body>
-</html>
-"""
-
 
 def _render_articles(items: list[SiteItem]) -> str:
     if not items:
@@ -2303,7 +2001,6 @@ def _render_dashboard_homepage(
 
     all_items = [*infra_items, *other_items, *latest_tool_items]
     automation_count = _count_keyword_items(all_items, ("agent", "automation", "workflow", "copilot", "codex"))
-    ops_count = _count_keyword_items(all_items, ("database", "network", "server", "security", "kubernetes", "cloud"))
     tool_count = len(latest_tool_items)
     lead_item = (infra_items or other_items or latest_tool_items)[0] if all_items else None
     lead_title = lead_item.title if lead_item else "이번 주 AI 업데이트"
@@ -4105,212 +3802,6 @@ def _render_ai_sources_page(
     )
 
 
-def _knowledge_profile(topic: KnowledgeTopic) -> dict[str, object]:
-    profiles: dict[str, dict[str, object]] = {
-        "langchain": {
-            "definition": "모델, 프롬프트, 검색기, 도구 호출을 하나의 AI 애플리케이션 흐름으로 묶는 프레임워크입니다.",
-            "problem": "LLM 앱을 직접 만들면 모델 호출, 문서 검색, 도구 실행, 출력 파싱을 매번 따로 연결해야 합니다.",
-            "use": "문서 질의응답, 내부 도구 호출, 간단한 에이전트, RAG 기반 챗봇처럼 빠른 프로토타입과 표준 연결 구조가 필요할 때 사용합니다.",
-            "avoid": "모델 호출 한 번으로 끝나는 작은 기능이나, 프레임워크 종속성을 피해야 하는 초저수준 서비스에는 과한 선택일 수 있습니다.",
-            "keywords": ("Chain", "Retriever", "Tool", "Agent", "Callback"),
-            "audience": "백엔드 · AI 엔지니어 · 기획자",
-            "difficulty": "초급~중급",
-            "maturity": "실무 활용 가능",
-            "next": "LangGraph → 컨텍스트 엔지니어링 → 하네스 엔지니어링",
-            "source": "LangChain 공식 문서",
-        },
-        "langgraph": {
-            "definition": "여러 단계의 AI 작업 흐름을 상태 기반 그래프로 관리하는 기술입니다.",
-            "problem": "일반 체인 방식은 작업이 길어질수록 현재 상태, 실패 위치, 재시도 지점, 사람 승인 단계를 관리하기 어렵습니다.",
-            "use": "재시도, 승인, 조건부 분기, 장기 실행, 체크포인트가 필요한 AI 업무에 사용합니다.",
-            "avoid": "단일 프롬프트로 끝나는 짧은 요청이나 실패 시 전체 재실행해도 문제가 없는 작업에는 굳이 필요하지 않습니다.",
-            "keywords": ("State", "Node", "Edge", "Checkpoint", "Human-in-the-loop"),
-            "audience": "백엔드 · AI 엔지니어 · 프론트엔드",
-            "difficulty": "중급",
-            "maturity": "실무 활용 가능",
-            "next": "하네스 엔지니어링 → 루프 엔지니어링 → 그래프 엔지니어링",
-            "source": "LangGraph 공식 문서",
-        },
-        "prompt-engineering": {
-            "definition": "AI가 원하는 역할, 제약, 출력 형식에 맞게 답하도록 지시문을 설계하는 방법입니다.",
-            "problem": "막연한 요청은 답변 형식이 흔들리고, 중요한 제약을 빼먹거나 매번 다른 결과를 만들 수 있습니다.",
-            "use": "요약, 분류, 초안 작성, 표준 답변 생성처럼 출력 품질과 형식이 중요한 업무에 사용합니다.",
-            "avoid": "최신 내부 데이터, 도구 실행, 권한 검증이 필요한 업무를 프롬프트만으로 해결하려고 하면 위험합니다.",
-            "keywords": ("System Prompt", "Few-shot", "Constraint", "Structured Output", "Eval"),
-            "audience": "기획자 · 디자이너 · 프론트엔드 · 백엔드",
-            "difficulty": "초급",
-            "maturity": "실무 활용 가능",
-            "next": "구조화된 출력 → 컨텍스트 엔지니어링 → 평가 엔지니어링",
-            "source": "OpenAI·Anthropic 프롬프트 가이드",
-        },
-        "context-engineering": {
-            "definition": "AI가 답변할 때 참고해야 할 문서, 데이터, 대화 이력, 권한 정보를 선별해 넣는 설계 방법입니다.",
-            "problem": "AI가 필요한 자료를 보지 못하거나 오래된 자료를 보면 그럴듯하지만 틀린 답을 만들 수 있습니다.",
-            "use": "사내 지식 검색, 고객 이슈 분석, 코드베이스 질문, 권한별 문서 답변처럼 근거가 중요한 업무에 사용합니다.",
-            "avoid": "공개 지식만으로 충분한 짧은 답변이나, 정확한 출처 검증이 필요 없는 단순 문장 변환에는 과할 수 있습니다.",
-            "keywords": ("Context Window", "Chunk", "Metadata", "Rerank", "Permission Filter"),
-            "audience": "데이터 · AI 엔지니어 · 백엔드 · 리더",
-            "difficulty": "중급",
-            "maturity": "실무 활용 가능",
-            "next": "RAG → LangChain → 그래프 엔지니어링",
-            "source": "RAG·검색 시스템 설계 문서",
-        },
-        "harness-engineering": {
-            "definition": "AI 에이전트가 도구를 실행할 때 권한, 검증, 승인, 로그, 비용 한도를 관리하는 운영 구조입니다.",
-            "problem": "에이전트가 실제 도구를 실행하면 잘못된 입력, 넓은 권한, 비용 폭증, 감사 불가 문제가 생길 수 있습니다.",
-            "use": "코드 수정, 배포 점검, 데이터 조회, 외부 API 호출처럼 AI가 실제 시스템에 영향을 줄 때 사용합니다.",
-            "avoid": "읽기 전용 설명이나 초안 생성처럼 시스템 변경이 없는 작업에는 가벼운 규칙만으로 충분할 수 있습니다.",
-            "keywords": ("Tool Schema", "Permission", "Validation", "Sandbox", "Audit Log"),
-            "audience": "백엔드 · 플랫폼 · 보안 · AI 엔지니어",
-            "difficulty": "중급~고급",
-            "maturity": "실무 활용 가능",
-            "next": "루프 엔지니어링 → Human-in-the-loop → AI 관측 가능성",
-            "source": "에이전트 운영·보안 아키텍처 사례",
-        },
-        "loop-engineering": {
-            "definition": "AI가 계획, 실행, 관찰, 평가, 수정을 반복하며 결과를 개선하도록 설계하는 방법입니다.",
-            "problem": "복잡한 업무는 한 번의 답변으로 끝나지 않고 실패 확인, 재시도, 수정, 검수가 반복됩니다.",
-            "use": "코드 수정, 장애 분석, 리서치 검증, 장기 작업처럼 결과를 보며 다시 고쳐야 하는 업무에 사용합니다.",
-            "avoid": "반복 없이 단일 답변으로 충분하거나 비용 한도를 엄격히 예측해야 하는 작업에는 신중해야 합니다.",
-            "keywords": ("Plan", "Act", "Observe", "Evaluate", "Stop Condition"),
-            "audience": "AI 엔지니어 · 백엔드 · 리더",
-            "difficulty": "중급",
-            "maturity": "실무 적용 확대 중",
-            "next": "하네스 엔지니어링 → 그래프 엔지니어링 → 평가 엔지니어링",
-            "source": "에이전트 루프·자율 작업 설계 사례",
-        },
-        "graph-engineering": {
-            "definition": "업무 흐름, 지식, 권한, 도구 의존성을 노드와 엣지로 표현해 AI 시스템을 제어하는 설계 방법입니다.",
-            "problem": "복잡한 에이전트 시스템은 데이터 출처, 실행 상태, 권한, 실패 경로가 얽혀 추적하기 어려워집니다.",
-            "use": "업무 흐름 그래프, 지식 그래프, 실행 상태 그래프, 데이터 계보 추적이 필요한 시스템에 사용합니다.",
-            "avoid": "핵심 경로가 단순하거나 관계 모델링 없이도 운영 가능한 작은 기능에는 초기 부담이 클 수 있습니다.",
-            "keywords": ("Node", "Edge", "State Graph", "Lineage", "Dependency"),
-            "audience": "데이터 · AI 엔지니어 · 백엔드 · 리더",
-            "difficulty": "중급~고급",
-            "maturity": "설계 패턴 정립 중",
-            "next": "LangGraph → 지식 그래프 → AI 관측 가능성",
-            "source": "그래프 기반 워크플로·지식 시스템 사례",
-        },
-    }
-    return profiles.get(topic.slug, profiles["prompt-engineering"])
-
-
-def _render_knowledge_playbook(topic: KnowledgeTopic) -> str:
-    profile = _knowledge_profile(topic)
-    keywords = "".join(f"<span>{escape(keyword)}</span>" for keyword in profile["keywords"])
-    return f"""
-            <section class="knowledge-quick">
-              <div class="knowledge-meta">
-                <span>난이도: {escape(str(profile["difficulty"]))}</span>
-                <span>대상: {escape(str(profile["audience"]))}</span>
-                <span>예상 시간: 7분</span>
-                <span>성숙도: {escape(str(profile["maturity"]))}</span>
-                <span>최종 업데이트: 2026-08-05</span>
-              </div>
-              <h2>30초 요약</h2>
-              <dl>
-                <dt>한 줄 정의</dt><dd>{escape(str(profile["definition"]))}</dd>
-                <dt>해결하는 문제</dt><dd>{escape(str(profile["problem"]))}</dd>
-                <dt>이럴 때 사용</dt><dd>{escape(str(profile["use"]))}</dd>
-                <dt>사용하지 않아도 되는 경우</dt><dd>{escape(str(profile["avoid"]))}</dd>
-                <dt>핵심 키워드</dt><dd class="keyword-list">{keywords}</dd>
-              </dl>
-            </section>
-            <section>
-              <h2>해결하려는 문제</h2>
-              {_render_simple_table(("구분", "내용"), (
-                  ("기존 방식", "프롬프트나 체인을 단순히 이어 붙이면 상태, 권한, 실패 경로가 암묵적으로 흩어집니다."),
-                  ("발생하는 문제", str(profile["problem"])),
-                  ("이 기술의 해결 방식", str(profile["definition"])),
-                  ("해결하지 못하는 부분", "업무 기준, 데이터 품질, 보안 정책은 별도로 정의해야 합니다. 기술만 도입해도 자동으로 안전해지지는 않습니다."),
-              ))}
-            </section>
-            <section>
-              <h2>동작 구조</h2>
-              <div class="flow-box">
-                <span>사용자 요청</span><span>질문 분류</span><span>필요 데이터 선택</span><span>도구 실행 또는 답변 생성</span><span>검증·승인</span><span>최종 출력</span>
-              </div>
-              {_render_simple_table(("항목", "설계할 내용"), (
-                  ("입력", "사용자 요청, 업무 목표, 접근 권한"),
-                  ("처리 단계", "분류, 검색, 생성, 도구 호출, 검증"),
-                  ("상태", "현재 단계, 실패 위치, 재시도 횟수, 승인 여부"),
-                  ("사용 도구", "검색기, 데이터베이스, 코드 저장소, 외부 API"),
-                  ("실패 경로", "재시도, 중단, 사람 검토, 이전 단계 복귀"),
-                  ("최종 출력", "답변, 초안, 변경안, 실행 로그, 근거"),
-              ))}
-            </section>
-            <section>
-              <h2>언제 사용하고 언제 사용하지 않는가</h2>
-              {_render_simple_table(("적합한 경우", "과한 선택일 수 있는 경우"), (
-                  ("여러 단계가 순서대로 진행되는 업무", "한 번의 질문과 답변으로 끝나는 작업"),
-                  ("실패 후 특정 단계부터 재시도해야 하는 업무", "실패 시 전체 재실행해도 문제가 없는 작업"),
-                  ("사람 승인, 권한, 감사 로그가 필요한 업무", "개인 초안 작성처럼 위험도가 낮은 작업"),
-                  ("상태와 비용을 장시간 추적해야 하는 업무", "짧은 일회성 요청"),
-              ))}
-            </section>
-            <section>
-              <h2>실제 업무 예시</h2>
-              <div class="example-box">
-                <strong>고객 문의 자동 분류</strong>
-                <p><b>입력</b>: "결제했는데 주문 상태가 계속 준비 중입니다."</p>
-                <p><b>처리</b>: 문의 유형 분류 → 주문 정보 조회 → 정책 확인 → 답변 초안 생성 → 담당자 승인</p>
-                <p><b>출력</b>: 문의 유형, 긴급도, 답변 초안, 사용한 데이터, 승인 필요 여부</p>
-              </div>
-            </section>
-            <section>
-              <h2>최소 구현 예제</h2>
-              <pre class="knowledge-code"><code>state = classify_request(user_input)
-context = retrieve_context(state)
-draft = generate_answer(context)
-checked = validate_answer(draft)
-result = request_human_approval(checked)</code></pre>
-              <p>핵심은 모델 호출 자체가 아니라 입력, 컨텍스트, 검증, 승인, 기록을 하나의 흐름으로 연결하는 것입니다.</p>
-            </section>
-            <section>
-              <h2>비슷한 개념과 비교</h2>
-              {_render_simple_table(("구분", "프롬프트", "컨텍스트", "하네스/루프/그래프"), (
-                  ("주요 관심사", "어떻게 지시할 것인가", "어떤 정보를 제공할 것인가", "어떤 규칙과 상태로 실행할 것인가"),
-                  ("관리 대상", "역할, 예시, 출력 형식", "문서, 메모리, 검색 결과", "도구, 권한, 검증, 로그, 재시도"),
-                  ("대표 문제", "답변 형식 불안정", "관련 없는 정보 제공", "위험한 실행과 재현 불가"),
-                  ("선택 기준", "짧은 생성 품질 개선", "근거 있는 답변", "실제 업무 자동화와 운영"),
-              ))}
-            </section>
-            <section>
-              <h2>실패 사례와 주의사항</h2>
-              {_render_simple_table(("문제", "원인", "대응 방법"), (
-                  ("반복 실행", "종료 조건이 불명확함", "최대 반복 횟수와 비용 한도 설정"),
-                  ("잘못된 답변", "검색 자료의 관련성이 낮음", "검색 평가와 재정렬 과정 추가"),
-                  ("위험한 실행", "도구 권한이 너무 넓음", "읽기·쓰기 권한 분리와 승인 단계 추가"),
-                  ("결과 재현 불가", "실행 기록이 없음", "입력, 도구 호출, 출력 로그 저장"),
-              ))}
-            </section>
-            <section>
-              <h2>운영 체크리스트</h2>
-              {_render_checklist(("성공 기준과 좋은/나쁜 결과 예시가 정의되어 있는가?", "사용자가 접근 가능한 정보만 검색하는가?", "쓰기·삭제 작업에 승인 절차가 있는가?", "실패한 단계부터 다시 실행할 수 있는가?", "모델·프롬프트·데이터 버전을 기록하는가?", "지연 시간, 비용, 반복 횟수 한도를 확인할 수 있는가?"))}
-            </section>
-            <section>
-              <h2>역할별 업무 적용</h2>
-              {_render_simple_table(("역할", "활용 방법"), (
-                  ("기획자", "반복 업무를 AI 작업 단계로 나누고 자동 처리와 사람 승인 지점을 정의합니다."),
-                  ("디자이너", "AI 응답 대기, 실패, 재시도, 출처 표시 화면을 설계합니다."),
-                  ("프론트엔드", "스트리밍 응답, 진행 상태, 중단·재시도·승인 인터페이스를 구현합니다."),
-                  ("백엔드", "모델과 도구 호출, 상태 저장, 권한, 로그, 비용 한도를 관리합니다."),
-                  ("데이터·AI 엔지니어", "검색 품질, 평가 데이터, 오류 유형, 성능 지표를 분석합니다."),
-              ))}
-            </section>
-            <section>
-              <h2>학습 정보</h2>
-              {_render_simple_table(("항목", "내용"), (
-                  ("읽기 전에 알면 좋은 내용", "LLM 기본 구조, 토큰과 컨텍스트, 구조화된 출력"),
-                  ("다음에 읽을 문서", str(profile["next"])),
-                  ("관련 개념", "RAG · Tool Calling · Agent · Evaluation · Observability"),
-                  ("참고 출처", str(profile["source"])),
-                  ("빠르게 바뀔 수 있는 부분", "프레임워크 API, 모델 성능, 가격, 지원 플랜, 보안 정책"),
-              ))}
-            </section>
-    """
-
-
 def _render_simple_table(headers: tuple[str, ...], rows: tuple[tuple[str, ...], ...]) -> str:
     head = "".join(f"<th>{escape(header)}</th>" for header in headers)
     body = "".join(
@@ -4324,18 +3815,233 @@ def _render_checklist(items: tuple[str, ...]) -> str:
     return '<ul class="knowledge-checklist">' + "".join(f"<li>{escape(item)}</li>" for item in items) + "</ul>"
 
 
+def _render_table(headers: tuple[str, ...], rows: tuple[tuple[str, ...], ...]) -> str:
+    return _render_simple_table(headers, rows)
+
+
+def _render_knowledge_relation_map() -> str:
+    steps = (
+        ("사용자 요청", "업무 목표와 제약이 시작점입니다."),
+        ("프롬프트 엔지니어링", "모델에게 무엇을 어떻게 요청할지 정의합니다."),
+        ("컨텍스트 엔지니어링", "모델이 판단할 정보와 상태를 구성합니다."),
+        ("LangChain", "모델, 프롬프트, 검색기, 도구를 애플리케이션으로 연결합니다."),
+        ("LangGraph", "상태, 분기, 재시도, 승인 흐름을 그래프로 실행합니다."),
+        ("하네스 엔지니어링", "도구, 권한, 샌드박스, 검증, 승인, 로그로 실행 환경을 통제합니다."),
+        ("하네스 내부의 루프", "계획, 실행, 관찰, 평가를 반복하고 수정 또는 종료를 결정합니다."),
+        ("그래프 엔지니어링", "작업, 데이터, 권한, 서비스, 의존 관계 전체를 그래프로 모델링합니다."),
+    )
+    cards = "".join(
+        f'<div class="relation-step"><strong>{escape(title)}</strong><span>{escape(body)}</span></div>'
+        for title, body in steps
+    )
+    return f"""
+            <section class="knowledge-map">
+              <h2>AI 엔지니어링 관계도</h2>
+              <div class="relation-flow">{cards}</div>
+            </section>
+    """
+
+
+def _knowledge_topic_href(slug: str, back_href: str) -> str:
+    return f"{back_href}knowledge/{slug}/"
+
+
+def _render_related_links(slugs: tuple[str, ...], back_href: str) -> str:
+    topic_by_slug = {topic.slug: topic for topic in KNOWLEDGE_TOPICS}
+    links = []
+    for slug in slugs:
+        topic = topic_by_slug.get(slug)
+        if topic is None:
+            links.append(f"<span>{escape(slug)}</span>")
+            continue
+        links.append(
+            f'<a href="{escape(_knowledge_topic_href(slug, back_href))}">'
+            f"{escape(topic.order)}. {escape(topic.title)}</a>"
+        )
+    return '<div class="concept-links">' + "".join(links) + "</div>"
+
+
+def _render_source_links(slug: str) -> str:
+    links = "".join(
+        f'<li><a href="{escape(url)}" target="_blank" rel="noopener noreferrer">{escape(label)}</a></li>'
+        for label, url in OFFICIAL_SOURCES.get(slug, ())
+    )
+    return f'<ul class="source-list">{links}</ul>'
+
+
+def _render_key_value_cards(items: tuple[tuple[str, str], ...]) -> str:
+    return "".join(
+        f'<div class="kv-card"><strong>{escape(label)}</strong><p>{escape(value)}</p></div>'
+        for label, value in items
+    )
+
+
+def _render_flow_steps(steps: tuple[str, ...]) -> str:
+    return '<div class="flow-box">' + "".join(f"<span>{escape(step)}</span>" for step in steps) + "</div>"
+
+
+def _render_real_world_case(case: dict[str, object]) -> str:
+    rows = (
+        ("업무 목표", str(case["goal"])),
+        ("기존 방식의 문제", str(case["old_problem"])),
+        ("입력", str(case["input"])),
+        ("처리 단계", str(case["steps"])),
+        ("사용 기술 또는 도구", str(case["tools"])),
+        ("사람의 개입 지점", str(case["human"])),
+        ("실패 상황", str(case["failure"])),
+        ("최종 출력", str(case["output"])),
+        ("이 기술을 적용한 이유", str(case["why"])),
+        ("적용하지 않았을 때와의 차이", str(case["without"])),
+    )
+    return f"""
+              <div class="example-box">
+                <strong>{escape(str(case["title"]))}</strong>
+                <div class="case-grid">{_render_key_value_cards(rows)}</div>
+              </div>
+    """
+
+
+def _render_code_example(page: dict[str, object]) -> str:
+    notes = _render_checklist(tuple(str(note) for note in page["code_notes"]))
+    return f"""
+              <p class="code-label">{escape(str(page["code_label"]))}</p>
+              <pre class="knowledge-code"><code>{escape(str(page["code"]))}</code></pre>
+              {notes}
+    """
+
+
+def _render_prev_next(topic: KnowledgeTopic, back_href: str) -> str:
+    topics = list(KNOWLEDGE_TOPICS)
+    current_index = topics.index(topic)
+    previous_topic = topics[current_index - 1] if current_index > 0 else None
+    next_topic = topics[current_index + 1] if current_index + 1 < len(topics) else None
+    previous_link = (
+        f'<a href="{escape(_knowledge_topic_href(previous_topic.slug, back_href))}">'
+        f"이전 문서: {escape(previous_topic.order)}. {escape(previous_topic.title)}</a>"
+        if previous_topic
+        else "<span>이전 문서 없음</span>"
+    )
+    next_link = (
+        f'<a href="{escape(_knowledge_topic_href(next_topic.slug, back_href))}">'
+        f"다음 문서: {escape(next_topic.order)}. {escape(next_topic.title)}</a>"
+        if next_topic
+        else "<span>다음 문서 없음</span>"
+    )
+    return f'<nav class="knowledge-prev-next" aria-label="Knowledge 이전 다음">{previous_link}{next_link}</nav>'
+
+
+def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
+    page = KNOWLEDGE_PAGES[topic.slug]
+    keywords = "".join(f"<span>{escape(keyword)}</span>" for keyword in page["keywords"])
+    related_links = _render_related_links(tuple(str(slug) for slug in page["related"]), back_href)
+    components_intro, component_steps = page["components"]
+    harness_loop_section = ""
+    if topic.slug in {"harness-engineering", "loop-engineering"}:
+        harness_loop_section = f"""
+            <section>
+              <h2>하네스와 루프에서 겹쳐 보이는 항목</h2>
+              <p>검증, 재시도, 로그, 비용 한도는 양쪽에 모두 등장하지만 맡은 역할이 다릅니다. 하네스는 실행 조건을 강제하고, 루프는 그 결과를 보고 다음 행동을 선택합니다.</p>
+              {_render_table(("항목", "하네스의 역할", "루프의 역할"), HARNESS_LOOP_ROWS)}
+            </section>
+        """
+    langgraph_graph_note = ""
+    if topic.slug in {"langgraph", "graph-engineering"}:
+        langgraph_graph_note = f"""
+            <section>
+              <h2>LangGraph와 그래프 엔지니어링의 차이</h2>
+              {_render_table(("구분", "LangGraph", "그래프 엔지니어링"), (
+                  ("정체", "상태 기반 AI 워크플로를 실행하는 구체적인 프레임워크입니다.", "업무와 시스템의 관계를 노드와 엣지로 설계하는 일반적인 방법론입니다."),
+                  ("중심 질문", "다음 단계로 어디를 실행하고, 언제 중단·재개할 것인가", "무엇이 무엇에 의존하고, 변경 영향이 어디까지 퍼지는가"),
+                  ("결과물", "실행 가능한 그래프 워크플로와 체크포인트", "관계 모델, 영향도 그래프, 데이터 계보"),
+              ))}
+            </section>
+        """
+    return f"""
+            {_render_knowledge_relation_map()}
+            <section>
+              <h2>개념 간 전체 비교표</h2>
+              {_render_table(("개념", "핵심 질문", "설계 대상", "대표 결과물", "대표 실패", "가장 적합한 상황"), GLOBAL_COMPARISON_ROWS)}
+            </section>
+            <section>
+              <h2>헷갈리기 쉬운 개념</h2>
+              {_render_table(("비교", "첫 번째 개념", "두 번째 개념", "관계"), CONFUSION_ROWS)}
+            </section>
+            <section class="knowledge-quick">
+              <div class="knowledge-meta">
+                <span>난이도: {escape(str(page["difficulty"]))}</span>
+                <span>주요 대상: {escape(str(page["audience"]))}</span>
+                <span>예상 읽기 시간: {escape(str(page["reading_time"]))}</span>
+                <span>기술 성숙도: {escape(str(page["maturity"]))}</span>
+                <span>최종 검토 날짜: {escape(str(page["updated_at"]))}</span>
+                <span>빠르게 변경될 수 있는 내용: {escape(str(page["volatile"]))}</span>
+              </div>
+              <h2>30초 요약</h2>
+              <dl>
+                <dt>한 줄 정의</dt><dd>{escape(str(page["definition"]))}</dd>
+                <dt>해결하는 문제</dt><dd>{escape(str(page["problem"][1][1]))}</dd>
+                <dt>이럴 때 사용</dt><dd>{escape(str(page["use_table"][0][0]))}</dd>
+                <dt>사용하지 않아도 되는 경우</dt><dd>{escape(str(page["use_table"][0][1]))}</dd>
+                <dt>핵심 키워드</dt><dd class="keyword-list">{keywords}</dd>
+                <dt>관련 개념</dt><dd>{related_links}</dd>
+              </dl>
+            </section>
+            <section>
+              <h2>해결하려는 문제</h2>
+              {_render_table(("구분", "내용"), tuple(tuple(row) for row in page["problem"]))}
+            </section>
+            <section>
+              <h2>핵심 구성요소</h2>
+              <p>{escape(str(components_intro))}</p>
+              {_render_flow_steps(tuple(str(step) for step in component_steps))}
+            </section>
+            <section>
+              <h2>언제 사용하고 언제 사용하지 않는가</h2>
+              {_render_table(("적합한 상황", "과한 선택이 될 수 있는 상황", "도입 전 확인할 조건", "대안이 될 수 있는 더 단순한 방법"), tuple(tuple(row) for row in page["use_table"]))}
+            </section>
+            <section>
+              <h2>실제 업무 사례</h2>
+              {_render_real_world_case(page["case"])}
+            </section>
+            <section>
+              <h2>최소 구현 예제</h2>
+              {_render_code_example(page)}
+            </section>
+            <section>
+              <h2>비슷한 개념과 비교</h2>
+              {_render_table(("핵심 질문", "관리 대상", "대표 결과물", "적합한 상황", "대표 위험", "선택 기준"), tuple(tuple(row) for row in page["compare"]))}
+            </section>
+            {langgraph_graph_note}
+            {harness_loop_section}
+            <section>
+              <h2>실패 사례와 주의사항</h2>
+              {_render_table(("문제", "발생 원인", "발견 방법", "대응 방법"), tuple(tuple(row) for row in page["failures"]))}
+            </section>
+            <section>
+              <h2>운영 체크리스트</h2>
+              {_render_checklist(tuple(str(item) for item in page["checklist"]))}
+            </section>
+            <section>
+              <h2>역할별 업무 적용</h2>
+              {_render_table(("역할", "실제로 해야 할 일"), tuple(tuple(row) for row in page["roles"]))}
+            </section>
+            <section>
+              <h2>학습 정보</h2>
+              {_render_table(("항목", "내용"), tuple(tuple(row) for row in page["learning"]))}
+              <h3>공식 문서와 참고 출처</h3>
+              {_render_source_links(topic.slug)}
+              {_render_prev_next(topic, back_href)}
+            </section>
+    """
+
+
 def _render_knowledge_topic_page(
     topic: KnowledgeTopic,
     analytics_html: str,
     back_href: str,
     archive_entries: list[dict[str, object]] | None = None,
 ) -> str:
-    sections = "\n".join(
-        f"<h2>{escape(heading)}</h2><p>{escape(body)}</p>"
-        for heading, body in topic.sections
-    )
-    notes = "\n".join(f"<li>{escape(note)}</li>" for note in topic.notes)
-    playbook = _render_knowledge_playbook(topic)
+    page = KNOWLEDGE_PAGES[topic.slug]
+    playbook = _render_knowledge_playbook(topic, back_href)
     return _render_plain_page(
         title=topic.title,
         analytics_html=analytics_html,
@@ -4349,21 +4055,15 @@ def _render_knowledge_topic_page(
         <header class="simple-header tool-page-header">
           <div class="kicker">Knowledge</div>
           <h1>{escape(topic.order)}. {escape(topic.title)}</h1>
-          <p>{escape(topic.summary)}</p>
+          <p>{escape(str(page["definition"]))}</p>
         </header>
         <section class="knowledge-article">
           <article class="knowledge-body">
             {playbook}
-            {sections}
-            <h2>용어 설명</h2>
-            <ul class="note-list">
-              {notes}
-            </ul>
           </article>
         </section>
         """,
     )
-
 
 def _source_entries(items: list[SiteItem]) -> list[dict[str, str]]:
     descriptions = {
@@ -4856,6 +4556,66 @@ def _render_plain_page(
       font-size: clamp(22px, 2.4vw, 32px);
       margin-top: 34px;
     }}
+    .knowledge-body h3 {{
+      font-size: 18px;
+      margin: 18px 0 8px;
+    }}
+    .knowledge-map {{
+      border: 1px solid #d8dde5;
+      background: #fbfcfd;
+      padding: 16px;
+      margin-bottom: 24px;
+    }}
+    .knowledge-map h2 {{
+      margin-top: 0;
+    }}
+    .relation-flow {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 24px;
+      counter-reset: relation-step;
+    }}
+    .relation-step {{
+      position: relative;
+      border: 1px solid #d7dde6;
+      background: #ffffff;
+      padding: 12px 14px;
+    }}
+    .relation-step::before {{
+      counter-increment: relation-step;
+      content: counter(relation-step);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      margin-right: 8px;
+      border: 1px solid #111111;
+      border-radius: 50%;
+      font: 800 11px/1 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .relation-step::after {{
+      content: "↓";
+      position: absolute;
+      right: -18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+      font-weight: 900;
+    }}
+    .relation-step:nth-child(2n)::after,
+    .relation-step:last-child::after {{
+      content: "";
+    }}
+    .relation-step strong {{
+      font: 900 13px/1.3 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .relation-step span {{
+      display: block;
+      margin-top: 7px;
+      color: #4c5563;
+      font: 13px/1.55 Arial, "Noto Sans KR", sans-serif;
+    }}
     .knowledge-quick {{
       border: 1px solid #d8dde5;
       background: #f7f9fb;
@@ -4907,6 +4667,7 @@ def _render_plain_page(
     }}
     .knowledge-table {{
       width: 100%;
+      min-width: 680px;
       border-collapse: collapse;
       font: 14px/1.6 Arial, "Noto Sans KR", sans-serif;
     }}
@@ -4944,6 +4705,31 @@ def _render_plain_page(
     }}
     .example-box p {{
       margin: 8px 0 0;
+    }}
+    .case-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }}
+    .kv-card {{
+      border: 1px solid #dde2e8;
+      background: #ffffff;
+      padding: 10px 12px;
+    }}
+    .kv-card strong {{
+      display: block;
+      font: 900 12px/1.4 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .kv-card p {{
+      margin: 6px 0 0;
+      color: #39404a;
+      font: 14px/1.65 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .code-label {{
+      color: #4c5563;
+      font: 800 12px/1.5 Arial, "Noto Sans KR", sans-serif;
+      margin-bottom: 6px;
     }}
     .knowledge-code {{
       overflow-x: auto;
@@ -5029,6 +4815,17 @@ def _render_plain_page(
       }}
       .source-grid {{
         grid-template-columns: 1fr;
+      }}
+      .relation-flow,
+      .case-grid,
+      .knowledge-quick dl {{
+        grid-template-columns: 1fr;
+      }}
+      .relation-step::after {{
+        display: none;
+      }}
+      .knowledge-table {{
+        min-width: 720px;
       }}
     }}
     @media (min-width: 1100px) {{
@@ -7288,3 +7085,7 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+
+
