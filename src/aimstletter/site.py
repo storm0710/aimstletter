@@ -699,15 +699,18 @@ def _ensure_primary_nav_sources_link(html: str) -> str:
     .detail-points li {{
       overflow-wrap: anywhere;
     }}
-    .point-question {{
+    .key-points .point-question,
+    .detail-points .point-question {{
       display: block;
       color: #222222;
       font-weight: 800;
     }}
-    .point-number {{
+    .key-points .point-number,
+    .detail-points .point-number {{
       font-weight: 700;
     }}
-    .point-answer {{
+    .key-points .point-answer,
+    .detail-points .point-answer {{
       display: block;
       margin-top: 4px;
       color: inherit;
@@ -4718,10 +4721,6 @@ def _render_plain_page(
       margin-top: 32px;
     }}
     .tool-category-header {{
-      display: grid;
-      grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
-      gap: 24px;
-      align-items: end;
       border-top: 1px solid #111111;
       padding-top: 16px;
       margin-bottom: 12px;
@@ -4732,11 +4731,11 @@ def _render_plain_page(
       padding: 0;
       font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
       font-size: clamp(22px, 2.4vw, 32px);
-      white-space: nowrap;
       word-break: keep-all;
     }}
     .tool-category-header p {{
-      margin: 0;
+      margin: 8px 0 0;
+      max-width: 760px;
       color: #5d6470;
       font: 14px/1.65 Arial, "Noto Sans KR", sans-serif;
     }}
@@ -5025,10 +5024,6 @@ def _render_plain_page(
       font: 800 14px/1.3 Arial, "Noto Sans KR", sans-serif;
     }}
     @media (max-width: 860px) {{
-      .tool-category-header {{
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }}
       .tool-list-grid {{
         grid-template-columns: 1fr;
       }}
@@ -6187,6 +6182,33 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
             "2. 핵심 구성 요소: 접근 권한, 실행 범위, 변경 검토, 보안 감사 로그입니다.",
             "3. 업무 적용 포인트: 에이전트 도입 전에 저장소 권한과 코드 변경 승인 절차를 분리해 설계해야 합니다.",
         )
+    paper_context = f"{item.source} {item.kind}".lower()
+    title = _fallback_display_title(item)
+    if "arxiv" in paper_context or "논문" in item.kind:
+        if "데이터베이스" in item.source or "database" in text or "sql" in text or "query" in text:
+            return (
+                f"1. 무엇을 다루나요? {title} 논문은 AI가 데이터베이스와 쿼리 작업을 더 안전하고 정확하게 다루는 방법을 살펴봅니다.",
+                "2. 핵심 구성 요소: 스키마 이해, 쿼리 생성 또는 최적화, 실행 전 검토, 데이터 변경 위험 통제입니다.",
+                "3. 업무 적용 포인트: 데이터 에이전트나 자연어 질의 기능을 만들 때 읽기 전용 권한, 검증 절차, 감사 로그를 함께 설계해야 합니다.",
+            )
+        if "보안" in item.source or "security" in text or "vulnerability" in text or "attack" in text:
+            return (
+                f"1. 무엇을 다루나요? {title} 논문은 AI 시스템이나 에이전트가 보안 위험을 어떻게 만들고 줄일 수 있는지 다룹니다.",
+                "2. 핵심 구성 요소: 공격 시나리오, 탐지 방식, 권한 통제, 실행 기록과 검증 절차입니다.",
+                "3. 업무 적용 포인트: AI 도구를 개발 환경이나 운영 데이터에 연결하기 전 접근 범위와 승인 단계를 먼저 정해야 합니다.",
+            )
+        if "네트워크" in item.source or "network" in text or "latency" in text or "traffic" in text:
+            return (
+                f"1. 무엇을 다루나요? {title} 논문은 네트워크 운영이나 통신 인프라에서 AI를 활용하는 방식을 다룹니다.",
+                "2. 핵심 구성 요소: 운영 상태 분석, 지연 시간과 자원 제약, 이상 징후 탐지, 설명 가능한 의사결정입니다.",
+                "3. 업무 적용 포인트: 네트워크 AI는 평균 성능보다 장애 상황, 지연 한계, 운영자 검토 가능성을 함께 검증해야 합니다.",
+            )
+        if "분산시스템" in item.source or "distributed" in text or "workflow" in text or "agent" in text:
+            return (
+                f"1. 무엇을 다루나요? {title} 논문은 여러 단계로 이어지는 AI 작업이나 분산 실행 흐름을 안정적으로 운영하는 방법을 다룹니다.",
+                "2. 핵심 구성 요소: 작업 상태, 실행 순서, 재시도와 복구, 비용과 성능 제약입니다.",
+                "3. 업무 적용 포인트: 장기 실행 에이전트를 운영할 때 실패한 단계부터 재개하고 호출 비용을 통제할 구조가 필요합니다.",
+            )
     if any(keyword in text for keyword in ("temporal", "durable execution")):
         return (
             "1. 왜 필요한가요? 오래 걸리는 AI 작업이 중간에 실패해도 재시도와 복구를 안정적으로 처리하기 위해 필요합니다.",

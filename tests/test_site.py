@@ -631,6 +631,8 @@ def test_committed_ai_tools_page_exists() -> None:
     assert "background: #ffffff;" in html
     assert "white-space: nowrap;" in html
     assert "tool-category" in html
+    assert "grid-template-columns: minmax(180px, 280px)" not in html
+    assert "margin: 8px 0 0;" in html
     assert "개발·코딩 에이전트" in html
     assert "앱 제작·프로토타입" in html
     assert "디자인·UI" in html
@@ -641,6 +643,8 @@ def test_committed_ai_tools_page_exists() -> None:
     assert "<h3>Codex</h3>" in html
     assert "<h3>Antigravity</h3>" in html
     assert "<h3>Claude Code</h3>" in html
+    assert "<h3>getdesign.md</h3>" in html
+    assert "<h3>Stitch</h3>" in html
     assert "<h3>n8n</h3>" in html
     assert "<h3>Perplexity</h3>" in html
     assert 'class="tool-action"' in html
@@ -685,9 +689,18 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "Previous Week" in week_2
     assert 'href="ai-sources/"' in week_2
     assert "전주로" not in week_2
-    assert "1. 왜 필요한가요?" in week_2
-    assert "2. 핵심 구성 요소:" in week_2
-    assert "3. 일반 Copilot 기능과의 차이점:" in week_2
+    assert "1. 한 줄 요약:" in week_2
+    assert "2. 무엇이 바뀌었나:" in week_2
+    assert "3. 왜 중요한가:" in week_2
+    assert "4. 누가 보면 좋은가:" in week_2
+    assert "5. 이번 주 해볼 일:" in week_2
+    assert "6. 한계와 주의사항:" in week_2
+    assert "7. 출처와 상태:" in week_2
+    assert '<span class="point-question"><span class="point-number">1.</span> 한 줄 요약:</span>' in week_2
+    assert '<span class="point-answer">서드파티 코딩 에이전트를 개발 환경에 연결할 때' in week_2
+    assert ".detail-points .point-question" in week_2
+    assert "data-insight-criteria" not in week_2
+    assert "criteria.textContent" not in week_2
     assert "원문 제목과 요약을 기준으로 선별된 항목입니다." not in week_2
     assert "출처 링크에서 세부 변경 사항과 적용 조건을 확인하세요." not in week_2
     assert "�" not in week_1
