@@ -170,6 +170,56 @@ KNOWLEDGE_TOPICS = (
             "기록: 어떤 입력으로 어떤 도구를 실행했고 어떤 결과가 나왔는지 남기는 로그입니다.",
         ),
     ),
+    KnowledgeTopic(
+        order="06",
+        slug="loop-engineering",
+        title="루프 엔지니어링",
+        summary="AI가 한 번 답하고 끝나는 것이 아니라 실행, 관찰, 평가, 수정 과정을 반복하며 결과를 개선하도록 설계하는 방법입니다.",
+        sections=(
+            (
+                "정의와 등장 배경",
+                "초기 프롬프트 엔지니어링은 좋은 답변을 한 번 얻는 데 집중했습니다. 하지만 코딩, 운영 점검, 리서치처럼 실제 업무는 초안 생성 뒤 검증과 수정이 반복됩니다. 루프 엔지니어링은 이 반복 과정을 명시적으로 설계해 AI가 결과를 보고 다시 고치게 만드는 접근입니다.",
+            ),
+            (
+                "어떻게 사용하나요?",
+                "작업 목표, 실행 도구, 관찰할 지표, 재시도 조건, 종료 기준을 정합니다. 예를 들어 코드 수정 에이전트라면 테스트 실패 내용을 읽고 수정안을 만들고 다시 테스트하는 루프를 둡니다. 운영 업무에서는 알림 확인, 원인 후보 생성, 로그 재조회, 조치안 검토를 순환시킬 수 있습니다.",
+            ),
+            (
+                "기존 엔지니어링과의 차이점 및 개선점",
+                "프롬프트 엔지니어링이 지시문 품질에 집중하고, 컨텍스트 엔지니어링이 참고 자료 선별에 집중한다면 루프 엔지니어링은 결과를 어떻게 다시 평가하고 고칠지에 초점을 둡니다. 장점은 복잡한 업무의 정확도와 재현성이 높아진다는 점이고, 주의점은 무한 반복을 막기 위한 비용 한도와 사람 승인 지점을 반드시 둬야 한다는 점입니다.",
+            ),
+        ),
+        notes=(
+            "루프: 실행 결과를 다시 입력으로 넣어 다음 행동을 정하는 반복 구조입니다.",
+            "종료 기준: 반복을 멈출 조건입니다. 테스트 통과, 승인 완료, 비용 한도 도달 등이 될 수 있습니다.",
+            "관찰: AI가 실행 결과, 로그, 오류 메시지, 사용자 피드백을 읽는 단계입니다.",
+        ),
+    ),
+    KnowledgeTopic(
+        order="07",
+        slug="graph-engineering",
+        title="그래프 엔지니어링",
+        summary="AI 업무 흐름, 지식, 권한, 도구 의존성을 노드와 엣지로 표현해 복잡한 에이전트 시스템을 제어하는 설계 방법입니다.",
+        sections=(
+            (
+                "정의와 등장 배경",
+                "에이전트가 여러 도구와 데이터를 오가면 단순한 순서도만으로는 상태와 의존성을 파악하기 어렵습니다. 그래프 엔지니어링은 작업 단계, 데이터 출처, 권한, 실패 경로를 그래프 구조로 모델링해 어떤 정보가 어디서 왔고 다음에 무엇을 해야 하는지 추적하게 합니다.",
+            ),
+            (
+                "어떻게 사용하나요?",
+                "업무 단계를 노드로 두고, 입력·출력·승인·실패 복구 관계를 엣지로 연결합니다. 지식 검색에서는 문서, 엔티티, 정책, 사용자 권한을 그래프로 묶어 AI가 근거와 접근 가능 범위를 함께 확인하게 할 수 있습니다. 에이전트 개발에서는 실행 상태 그래프를 만들어 어느 단계에서 멈췄는지, 어느 도구 호출이 다음 행동을 만들었는지 기록합니다.",
+            ),
+            (
+                "기존 엔지니어링과의 차이점 및 개선점",
+                "컨텍스트 엔지니어링이 필요한 자료를 고르는 일이라면, 그래프 엔지니어링은 자료와 작업 사이의 관계를 구조화합니다. 루프 엔지니어링이 반복 제어에 강하다면, 그래프 엔지니어링은 분기, 의존성, 권한 추적에 강합니다. 복잡한 업무를 시각화하고 감사할 수 있지만, 처음부터 너무 큰 그래프를 만들면 운영 부담이 커지므로 핵심 경로부터 작게 시작하는 것이 좋습니다.",
+            ),
+        ),
+        notes=(
+            "노드: 그래프에서 하나의 작업, 문서, 도구, 상태를 나타내는 점입니다.",
+            "엣지: 노드 사이의 관계입니다. 다음 단계, 참조, 권한, 의존성을 표현합니다.",
+            "상태 그래프: 에이전트가 지금 어디에 있고 어떤 경로로 왔는지 기록하는 구조입니다.",
+        ),
+    ),
 )
 
 
@@ -645,6 +695,24 @@ def _ensure_primary_nav_sources_link(html: str) -> str:
       color: #222222;
       font: 14px/1.55 Arial, "Noto Sans KR", sans-serif;
     }}
+    .key-points li,
+    .detail-points li {{
+      overflow-wrap: anywhere;
+    }}
+    .point-question {{
+      display: block;
+      color: #222222;
+      font-weight: 800;
+    }}
+    .point-number {{
+      font-weight: 700;
+    }}
+    .point-answer {{
+      display: block;
+      margin-top: 4px;
+      color: inherit;
+      font-weight: 500;
+    }}
     .points-label {{
       margin-top: 10px;
       color: var(--accent);
@@ -792,8 +860,23 @@ def _render_tool_items(items: list[SiteItem]) -> str:
 def _render_key_points(item: SiteItem) -> str:
     if not item.key_points:
         return ""
-    points = "".join(f"<li>{escape(point)}</li>" for point in item.key_points[:3])
+    points = "".join(_render_point_item(point) for point in item.key_points[:3])
     return f'<div class="points-label">키포인트</div><ul class="key-points">{points}</ul>'
+
+
+def _render_point_item(point: str) -> str:
+    clean = _clean_plain_text(point)
+    match = re.match(r"^(\d+\.)\s*([^?？:：]+[?？:：])\s*(.+)$", clean)
+    if not match:
+        return f"<li>{escape(clean)}</li>"
+    number, question, answer = match.groups()
+    return (
+        "<li>"
+        f'<span class="point-question"><span class="point-number">{escape(number)}</span> '
+        f"{escape(question)}</span>"
+        f'<span class="point-answer">{escape(answer)}</span>'
+        "</li>"
+    )
 
 
 def _render_tags(item: SiteItem) -> str:
@@ -861,8 +944,9 @@ def _render_archive_nav(
                     f'href="{escape(link_prefix + str(entry["href"]))}">'
                     f'{month:02d}월 {int(entry["week"])}째주</a>'
                 )
+            month_open = " open" if (year, month) == current_key[:2] else ""
             months.append(
-                f'<details class="archive-year-group archive-month-group" open>'
+                f'<details class="archive-year-group archive-month-group"{month_open}>'
                 f'<summary class="archive-year archive-month-summary">{month:02d}월</summary>'
                 f'<div class="archive-month">{"".join(links)}</div>'
                 f'</details>'
@@ -1979,7 +2063,10 @@ def _render_editorial_homepage(
         search.addEventListener("input", () => {{
           const query = normalize(search.value);
           archiveLinks.forEach((link) => {{
-            link.hidden = Boolean(query) && !normalize(`${{link.dataset.archiveIndex || ""}} ${{link.textContent || ""}}`).includes(query);
+            const match = !query || normalize(`${{link.dataset.archiveIndex || ""}} ${{link.textContent || ""}}`).includes(query);
+            link.hidden = !match;
+            const monthGroup = link.closest(".archive-month-group");
+            if (monthGroup && query && match) monthGroup.open = true;
           }});
           insightCards.forEach((card) => {{
             card.hidden = !cardMatches(card, query);
@@ -3050,7 +3137,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + '</div>'
         + f'<p class="detail-copy" data-insight-detail>{escape(_clip(first_detail, 700))}</p>'
         + '<ul class="detail-points" data-insight-points>'
-        + "".join(f"<li>{escape(point)}</li>" for point in first_points[:4])
+        + "".join(_render_point_item(point) for point in first_points[:4])
         + "</ul>"
         + '<div class="detail-footnotes-title" data-insight-footnotes-title'
         + (" hidden" if not first_footnotes else "")
@@ -3089,6 +3176,26 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const mobileQuery = window.matchMedia('(max-width: 760px)');
   if (!buttons.length || !number || !title || !category || !subcategory || !detail || !meta || !points || !tags || !footnotes || !footnotesTitle || !criteria || !source || !grid || !detailPanel || !insightList) return;
 
+  const renderPoint = (value) => {
+    const li = document.createElement('li');
+    const match = String(value || '').match(/^(\\d+\\.)\\s*([^?？:：]+[?？:：])\\s*(.+)$/);
+    if (!match) {
+      li.textContent = value || '';
+      return li;
+    }
+    const question = document.createElement('span');
+    question.className = 'point-question';
+    const pointNumber = document.createElement('span');
+    pointNumber.className = 'point-number';
+    pointNumber.textContent = match[1];
+    question.append(pointNumber, ' ', match[2]);
+    const answer = document.createElement('span');
+    answer.className = 'point-answer';
+    answer.textContent = match[3];
+    li.append(question, answer);
+    return li;
+  };
+
   const placeDetailPanel = (button) => {
     if (mobileQuery.matches) {
       button.insertAdjacentElement('afterend', detailPanel);
@@ -3125,11 +3232,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
       try { tagItems = JSON.parse(button.dataset.tags || '[]'); } catch (error) { tagItems = []; }
       try { footnoteItems = JSON.parse(button.dataset.footnotes || '[]'); } catch (error) { footnoteItems = []; }
       footnotesTitle.hidden = footnoteItems.length === 0;
-      points.replaceChildren(...pointItems.map((item) => {
-        const li = document.createElement('li');
-        li.textContent = item;
-        return li;
-      }));
+      points.replaceChildren(...pointItems.map(renderPoint));
       footnotes.replaceChildren(...footnoteItems.map((item) => {
         const li = document.createElement('li');
         li.textContent = item;
@@ -4016,8 +4119,11 @@ def _render_plain_page(
       archiveSearch.addEventListener("input", () => {
         const query = archiveSearch.value.trim().toLowerCase();
         archiveLinks.forEach((link) => {
-          const match = !query || link.dataset.archiveIndex.includes(query);
+          const haystack = `${link.dataset.archiveIndex || ""} ${link.textContent || ""}`.toLowerCase();
+          const match = !query || haystack.includes(query);
           link.style.display = match ? "" : "none";
+          const monthGroup = link.closest(".archive-month-group");
+          if (monthGroup && query && match) monthGroup.open = true;
         });
       });
     })();
@@ -4380,6 +4486,23 @@ def _render_plain_page(
       padding-left: 20px;
       font: 15px/1.65 Arial, "Noto Sans KR", sans-serif;
     }}
+    .key-points li {{
+      overflow-wrap: anywhere;
+    }}
+    .point-question {{
+      display: block;
+      color: #222222;
+      font-weight: 800;
+    }}
+    .point-number {{
+      font-weight: 700;
+    }}
+    .point-answer {{
+      display: block;
+      margin-top: 4px;
+      color: inherit;
+      font-weight: 500;
+    }}
     .note-list {{
       margin: 9px 0 0;
       padding-left: 22px;
@@ -4525,6 +4648,10 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "than abstract vendor language. "
             "key_points must be exactly 3 concise Korean strings. Each string should start with "
             "'1. 왜 필요한가요?', '2. 핵심 구성 요소:', and '3. 기존 방식과의 차이점:' or an item-specific equivalent. "
+            "After each question or label, write a concrete answer about the source item itself. "
+            "Do not use broad placeholders such as '원문에서 다루는 문제, 제안 방식, 변화 지점' or "
+            "'관련 도구, 운영 조건, 리스크'. If the title is abstract, infer the concrete topic from the "
+            "URL slug, source title, and summary. "
             "Do not tell readers to check source links in summary, detail, or key_points. tags must be an array of "
             "3 to 5 short Korean or product-name strings. comparisons must be an array of 0 to 3 Korean "
             "strings comparing the item with adjacent tools or approaches when useful. For Endava items, "
@@ -4542,7 +4669,8 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "Summaries must be one concise Korean sentence and must make clear what a DBA, "
             "network engineer, server operator, or technical mentor can do with it at work. "
             "Key points should explain in plain Korean: what changed, where it can be used in work, and what "
-            "to watch before adoption. Add comparison notes when the item could be confused with "
+            "to watch before adoption. The key_points answer text must be specific to the item's content, "
+            "not a generic template. Add comparison notes when the item could be confused with "
             "another tool or vendor, and add glossary notes for difficult words such as Warp, Harness, "
             "Agent tasks REST API, CI/CD, SDK, or orchestration.\n\n"
             f"{source_block}"
@@ -4604,6 +4732,8 @@ def _repair_korean_translation(
         "detail must be 2 to 4 Korean paragraphs. "
         "key_points must be exactly 3 concise Korean strings. Each string should start with "
         "'1. 왜 필요한가요?', '2. 핵심 구성 요소:', and '3. 기존 방식과의 차이점:' or an item-specific equivalent. "
+        "Each key point must contain concrete content inferred from the source item, not broad placeholders "
+        "such as '원문에서 다루는 문제, 제안 방식, 변화 지점'. "
         "Do not tell readers to check source links in summary, detail, or key_points. tags must be an array of "
         "3 to 5 short Korean or product-name strings. comparisons must be 0 to 3 Korean strings. "
         "glossary must be 0 to 5 Korean strings formatted like 'Warp: ...'."
@@ -5289,6 +5419,12 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
     latest = _latest_week_specific_summary(text)
     if latest:
         return latest[1]
+    if "advancing responsible ai" in text or "responsible ai across europe" in text:
+        return (
+            "1. 무엇을 다루나요? OpenAI가 유럽에서 책임 있는 AI를 배포하기 위해 적용하는 거버넌스와 안전 기준을 다룹니다.",
+            "2. 핵심 내용: EU AI Act 대응, 모델 안전·보안 평가, 투명성 확보, 사이버보안 활용 사례, 정책·산업 생태계 협력을 함께 설명합니다.",
+            "3. 업무 적용 포인트: AI 서비스를 운영할 때 기능 출시와 동시에 위험 평가, 감사 기록, 사용자 보호 기준, 규제 대응 절차를 준비해야 합니다.",
+        )
     if "2607.04290" in text or ("agentic v2x" in text and "deadline aware" in text):
         return (
             "1. 무엇을 다루나요? 5G/6G V2X 환경에서 차량·사물 통신 작업을 마감 시간에 맞춰 배정하는 에이전트 연구입니다.",
@@ -5654,11 +5790,56 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
         or _derive_content_display_title(_clean_plain_text(item.title), raw_text)
         or _clean_plain_text(item.title)
     )
+    topic_answer = _fallback_topic_answer(item, title)
+    key_answer = _fallback_key_answer(item, title)
+    adoption_answer = _fallback_adoption_answer(item, title)
     return (
-        f"1. 무엇을 다루나요? {title} 주제를 다룹니다.",
-        "2. 핵심 내용: 원문에서 다루는 문제, 제안 방식, 변화 지점을 업무 적용 관점으로 요약합니다.",
-        "3. 업무 적용 포인트: 관련 도구, 운영 조건, 리스크를 팀 업무에 맞게 검토할 수 있습니다.",
+        f"1. 무엇을 다루나요? {topic_answer}",
+        f"2. 핵심 내용: {key_answer}",
+        f"3. 업무 적용 포인트: {adoption_answer}",
     )
+
+
+def _fallback_topic_answer(item: DigestItem, title: str) -> str:
+    summary = _meaningful_item_summary(item, title)
+    if summary:
+        return summary
+    return f"{title}와 관련된 변화가 실제 업무 흐름에 어떤 영향을 주는지 다룹니다."
+
+
+def _fallback_key_answer(item: DigestItem, title: str) -> str:
+    summary = _meaningful_item_summary(item, title)
+    if summary:
+        return f"{summary} 이 항목은 그 변화가 왜 필요한지와 적용 시 확인할 조건을 함께 봅니다."
+    return f"{title}의 대상 업무, 적용 방식, 도입 전 확인할 제약을 함께 정리합니다."
+
+
+def _fallback_adoption_answer(item: DigestItem, title: str) -> str:
+    text = _item_text(item)
+    if "security" in text or "보안" in text or "responsible ai" in text:
+        return "도입 전에 권한, 감사 로그, 책임 소재, 사용자 보호 기준을 먼저 정해야 합니다."
+    if "database" in text or "sql" in text or "데이터" in text:
+        return "읽기 전용 권한, 스키마 범위, 쿼리 검토처럼 데이터 변경 위험을 줄이는 장치를 함께 둬야 합니다."
+    if "github" in text or "copilot" in text or "code" in text or "코드" in text:
+        return "저장소 권한, 테스트 실행, 리뷰 승인 기준을 정해 자동화가 코드 품질을 해치지 않게 해야 합니다."
+    if "agent" in text or "workflow" in text or "에이전트" in text or "워크플로" in text:
+        return "자동 실행 범위, 재시도 조건, 사람 승인 지점을 정해 반복 업무에 단계적으로 적용할 수 있습니다."
+    return f"{title}를 팀 업무에 적용할 때 필요한 데이터, 권한, 검수 절차를 작은 범위에서 먼저 확인하는 것이 좋습니다."
+
+
+def _meaningful_item_summary(item: DigestItem, title: str) -> str:
+    summary = _clean_plain_text(item.summary)
+    if not summary:
+        return ""
+    if _looks_untranslated(summary) or _has_broken_placeholder(summary):
+        return ""
+    if _needs_specific_insight_copy(summary):
+        return ""
+    if summary.strip().lower() == title.strip().lower():
+        return ""
+    if summary in title or title in summary:
+        return ""
+    return _clip(summary, 150)
 
 
 def _fallback_display_title(item: DigestItem) -> str:
@@ -6084,6 +6265,8 @@ def _fallback_specific_title(text: str) -> str:
         (("core dump epidemiology", "bug"), "18년 된 코어덤프 버그 수정"),
         (("codeql 2 26 0", "prompt injection"), "CodeQL 프롬프트 인젝션 탐지 추가"),
         (("secret scanning detector types",), "Secret scanning 탐지 유형 이름 개선"),
+        (("advancing responsible ai",), "유럽 책임 있는 AI 거버넌스"),
+        (("responsible ai across europe",), "유럽 책임 있는 AI 거버넌스"),
         (("per user states", "multi user budgets"), "다중 사용자 예산 상태 API"),
         (("github mobile", "copilot sessions"), "모바일 Copilot 세션 필터 개선"),
         (("deutsche telekom",), "Deutsche Telekom의 통신 AI 전환"),
@@ -6131,6 +6314,11 @@ def _fallback_specific_summary(item: DigestItem) -> str:
     latest = _latest_week_specific_summary(text)
     if latest:
         return latest[0]
+    if "advancing responsible ai" in text or "responsible ai across europe" in text:
+        return (
+            "OpenAI가 유럽의 AI 규제 환경에서 책임 있는 AI 배포를 어떻게 추진하는지 설명한 글입니다. "
+            "EU AI Act 대응, 안전·보안 평가, 투명성, 사이버보안 사례와 생태계 협력을 함께 다룹니다."
+        )
     if "2607.04290" in text or ("agentic v2x" in text and "deadline aware" in text):
         return (
             "5G/6G V2X 환경에서 차량·사물 통신 작업을 마감 시간에 맞춰 배정하는 에이전트 연구입니다. "

@@ -358,6 +358,7 @@ def test_render_homepage_includes_archive_entries() -> None:
         [old_item, new_item, old_item, old_item, old_item],
         [old_item, new_item],
         archive_entries=[
+            {"year": 2026, "month": 5, "week": 4, "href": "archive/2026/05/week-4/"},
             {"year": 2026, "month": 6, "week": 1, "href": "archive/2026/06/week-1/"},
             {"year": 2026, "month": 6, "week": 2, "href": "archive/2026/06/week-2/"},
         ],
@@ -370,8 +371,15 @@ def test_render_homepage_includes_archive_entries() -> None:
     assert 'href="knowledge/harness-engineering/"' in html
     assert "01.LangChain" in html
     assert "05.하네스 엔지니어링" in html
+    assert "06.루프 엔지니어링" in html
+    assert "07.그래프 엔지니어링" in html
     assert "1.1 프롬프트" not in html
     assert "data-archive-index=" in html
+    assert '<details class="archive-year-group archive-month-group"><summary class="archive-year archive-month-summary">05월</summary>' in html
+    assert '<details class="archive-year-group archive-month-group" open><summary class="archive-year archive-month-summary">06월</summary>' in html
+    assert "point-question" in html
+    assert "point-answer" in html
+    assert "monthGroup.open = true" in html
     assert "2026년" in html
     assert "06월 2째주" in html
     assert 'href="archive/2026/06/week-1/"' in html
@@ -501,6 +509,26 @@ def test_fallback_summary_uses_item_specific_explanation() -> None:
     assert any("보안 절차" in point for point in points)
     assert "공개된 개발 도구와 코딩 자동화 관련 소식" not in summary
     assert "새 기능이나 변경 사항이 업무 흐름" not in summary
+
+
+def test_fallback_summary_avoids_generic_placeholder_points() -> None:
+    item = DigestItem(
+        title="Advancing Responsible AI",
+        url="https://openai.com/index/advancing-responsible-ai-across-europe",
+        source="OpenAI News",
+        kind="tool",
+        published=datetime(2026, 7, 30, tzinfo=UTC),
+        summary="Advancing Responsible AI",
+    )
+
+    summary = _fallback_display_summary(item)
+    points = _fallback_three_line_summary(item)
+
+    assert "유럽" in summary
+    assert "EU AI Act" in summary
+    assert any("투명성" in point for point in points)
+    assert all("주제를 다룹니다" not in point for point in points)
+    assert all("원문에서 다루는 문제" not in point for point in points)
 
 
 def test_rank_work_skill_updates_prefers_practical_tool_skills() -> None:
