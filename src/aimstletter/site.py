@@ -866,10 +866,10 @@ def _render_key_points(item: SiteItem) -> str:
 
 def _render_point_item(point: str) -> str:
     clean = _clean_plain_text(point)
-    match = re.match(r"^(\d+\.)\s*([^?？:：]+[?？:：])\s*(.+)$", clean)
-    if not match:
+    parsed = _split_point_question_answer(clean)
+    if not parsed:
         return f"<li>{escape(clean)}</li>"
-    number, question, answer = match.groups()
+    number, question, answer = parsed
     return (
         "<li>"
         f'<span class="point-question"><span class="point-number">{escape(number)}</span> '
@@ -877,6 +877,16 @@ def _render_point_item(point: str) -> str:
         f'<span class="point-answer">{escape(answer)}</span>'
         "</li>"
     )
+
+
+def _split_point_question_answer(point: str) -> tuple[str, str, str] | None:
+    match = re.match(r"^(\d+\.)\s*(.+?[?？:：])\s*(.+)$", point)
+    if not match:
+        return None
+    number, question, answer = (part.strip() for part in match.groups())
+    if not question or not answer:
+        return None
+    return number, question, answer
 
 
 def _render_tags(item: SiteItem) -> str:
@@ -1735,15 +1745,6 @@ def _render_editorial_homepage(
       font-size: 15px;
       font-weight: 700;
       line-height: 1.72;
-      max-width: 620px;
-    }}
-    .detail-criteria {{
-      margin: 24px 0 0;
-      border-top: 1px solid rgba(0,0,0,.12);
-      padding-top: 12px;
-      color: #444;
-      font-size: 13px;
-      line-height: 1.55;
       max-width: 620px;
     }}
     .detail-source {{
@@ -3120,7 +3121,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             '</button>'
         )
 
-    (first_number, first_title, _first_body, first_detail, first_meta, first_points, first_tags, first_criteria, first_source_url, first_category, first_subcategory, first_footnotes) = entries[0]
+    (first_number, first_title, _first_body, first_detail, first_meta, first_points, first_tags, _first_criteria, first_source_url, first_category, first_subcategory, first_footnotes) = entries[0]
     first_badge_class = _topic_badge_class(first_category)
     return (
         '<div class="insight-list">'
@@ -3145,7 +3146,6 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + '<ol class="detail-footnotes" data-insight-footnotes>'
         + "".join(f"<li>{escape(note)}</li>" for note in first_footnotes[:5])
         + "</ol>"
-        + f'<p class="detail-criteria" data-insight-criteria>{escape(first_criteria)}</p>'
         + f'<a class="detail-source" data-insight-source href="{escape(first_source_url or "#")}" target="_blank" rel="noopener noreferrer"'
         + (" hidden" if not first_source_url else "")
         + ">원문 보기</a>"
@@ -3168,17 +3168,16 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   const tags = document.querySelector('[data-insight-tags]');
   const footnotes = document.querySelector('[data-insight-footnotes]');
   const footnotesTitle = document.querySelector('[data-insight-footnotes-title]');
-  const criteria = document.querySelector('[data-insight-criteria]');
   const source = document.querySelector('[data-insight-source]');
   const grid = document.querySelector('[data-insight-grid]');
   const detailPanel = document.querySelector('.insight-detail');
   const insightList = document.querySelector('.insight-list');
   const mobileQuery = window.matchMedia('(max-width: 760px)');
-  if (!buttons.length || !number || !title || !category || !subcategory || !detail || !meta || !points || !tags || !footnotes || !footnotesTitle || !criteria || !source || !grid || !detailPanel || !insightList) return;
+  if (!buttons.length || !number || !title || !category || !subcategory || !detail || !meta || !points || !tags || !footnotes || !footnotesTitle || !source || !grid || !detailPanel || !insightList) return;
 
   const renderPoint = (value) => {
     const li = document.createElement('li');
-    const match = String(value || '').match(/^(\\d+\\.)\\s*([^?？:：]+[?？:：])\\s*(.+)$/);
+    const match = String(value || '').trim().match(/^(\\d+\\.)\\s*(.+?[?？:：])\\s*(.+)$/);
     if (!match) {
       li.textContent = value || '';
       return li;
@@ -3219,7 +3218,6 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
       subcategory.textContent = button.dataset.subcategory || '';
       detail.textContent = button.dataset.detail || '';
       meta.textContent = button.dataset.meta || '';
-      criteria.textContent = button.dataset.criteria || '';
       const sourceUrl = button.dataset.source || '';
       source.textContent = '원문 보기';
       source.hidden = !sourceUrl;

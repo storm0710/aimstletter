@@ -531,6 +531,31 @@ def test_fallback_summary_avoids_generic_placeholder_points() -> None:
     assert all("원문에서 다루는 문제" not in point for point in points)
 
 
+def test_smart_insight_points_render_answer_on_next_line_without_space_after_question() -> None:
+    item = SiteItem(
+        title="Upcoming August GitHub Copilot",
+        url="https://github.blog/changelog/2026-08-01-upcoming-august-github-copilot",
+        source="GitHub Copilot 변경 이력",
+        kind="도구 업데이트",
+        published=datetime(2026, 8, 1, tzinfo=UTC),
+        summary="반복되는 코드 수정을 줄이는 업데이트입니다.",
+        detail="반복되는 코드 수정을 줄이는 업데이트입니다.",
+        key_points=(
+            "1. 왜 필요한가요?반복되는 코드 수정과 PR 보조를 줄여줍니다.",
+            "2. 핵심 구성 요소:코드 맥락 이해와 테스트·PR 흐름 연결입니다.",
+            "3. 기존 방식과의 차이점:한 줄 추천을 넘어 이슈 해결 흐름을 돕습니다.",
+        ),
+        tags=("GitHub Copilot",),
+    )
+
+    html = render_homepage([item] * 5, [], now=datetime(2026, 8, 5, tzinfo=UTC))
+
+    assert '<span class="point-question"><span class="point-number">1.</span> 왜 필요한가요?</span>' in html
+    assert '<span class="point-answer">반복되는 코드 수정과 PR 보조를 줄여줍니다.</span>' in html
+    assert "class=\"detail-criteria\"" not in html
+    assert "data-insight-criteria" not in html
+
+
 def test_rank_work_skill_updates_prefers_practical_tool_skills() -> None:
     story = DigestItem(
         title="Meta scam story shows an AI security myth",
