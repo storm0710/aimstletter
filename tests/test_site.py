@@ -681,7 +681,7 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "업무 AI" in week_2
     assert "서드파티 코딩 에이전트 보안 검증" in week_2
     assert "서드파티 코딩 에이전트를 개발 환경에 연결할 때 신원과 권한을 검증하는 보안 업데이트" in week_2
-    assert "외부 코딩 에이전트가 저장소와 개발 도구에 접근할 때" in week_2
+    assert "외부 에이전트가 저장소, 코드 변경, 비밀값에 접근하는 범위" in week_2
     assert "공개된 개발 도구와 코딩 자동화 관련 소식" not in week_2
     assert "새 기능이나 변경 사항이 업무 흐름" not in week_2
     assert "이번 업데이트가 실제 업무 흐름" not in week_2
