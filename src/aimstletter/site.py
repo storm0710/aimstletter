@@ -3037,9 +3037,9 @@ def _has_complete_card_points(points: tuple[str, ...]) -> bool:
         "한 줄 요약",
         "무엇이 바뀌었나",
         "왜 중요한가",
-        "누가 보면 좋은가",
-        "이번 주 해볼 일",
         "한계와 주의사항",
+        "이번 주 해볼 일",
+        "누가 보면 좋은가",
         "출처와 상태",
     )
     return all(label in point for label, point in zip(expected, points, strict=False))
@@ -3084,9 +3084,9 @@ def _fallback_card_points(
         f"1. 한 줄 요약: {one_line}",
         f"2. 무엇이 바뀌었나: {changed}",
         f"3. 왜 중요한가: {why}",
-        f"4. 누가 보면 좋은가: {roles}",
+        f"4. 한계와 주의사항: {caution}",
         f"5. 이번 주 해볼 일: {action}",
-        f"6. 한계와 주의사항: {caution}",
+        f"6. 누가 보면 좋은가: {roles}",
         f"7. 출처와 상태: {_korean_source_name(item.source)} · {status} · {_format_date(item.published)}",
     )
 
@@ -5131,8 +5131,8 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "Use short sentences, explain why the item matters, and include practical examples rather "
             "than abstract vendor language. "
             "key_points must be exactly 7 concise Korean strings. Each string must start with these labels: "
-            "'1. 한 줄 요약:', '2. 무엇이 바뀌었나:', '3. 왜 중요한가:', '4. 누가 보면 좋은가:', "
-            "'5. 이번 주 해볼 일:', '6. 한계와 주의사항:', and '7. 출처와 상태:'. "
+            "'1. 한 줄 요약:', '2. 무엇이 바뀌었나:', '3. 왜 중요한가:', '4. 한계와 주의사항:', "
+            "'5. 이번 주 해볼 일:', '6. 누가 보면 좋은가:', and '7. 출처와 상태:'. "
             "After each question or label, write a concrete answer about the source item itself. "
             "Do not use broad placeholders such as '원문에서 다루는 문제, 제안 방식, 변화 지점' or "
             "'관련 도구, 운영 조건, 리스크'. If the title is abstract, infer the concrete topic from the "
@@ -5217,8 +5217,8 @@ def _repair_korean_translation(
         "remain in English, but English clauses or English explanatory sentences are not allowed. "
         "detail must be 2 to 4 Korean paragraphs. "
         "key_points must be exactly 7 concise Korean strings. Each string must start with these labels: "
-        "'1. 한 줄 요약:', '2. 무엇이 바뀌었나:', '3. 왜 중요한가:', '4. 누가 보면 좋은가:', "
-        "'5. 이번 주 해볼 일:', '6. 한계와 주의사항:', and '7. 출처와 상태:'. "
+        "'1. 한 줄 요약:', '2. 무엇이 바뀌었나:', '3. 왜 중요한가:', '4. 한계와 주의사항:', "
+        "'5. 이번 주 해볼 일:', '6. 누가 보면 좋은가:', and '7. 출처와 상태:'. "
         "Each key point must contain concrete content inferred from the source item, not broad placeholders "
         "such as '원문에서 다루는 문제, 제안 방식, 변화 지점'. "
         "Do not tell readers to check source links in summary, detail, or key_points. tags must be an array of "
