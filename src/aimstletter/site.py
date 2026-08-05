@@ -4102,6 +4102,225 @@ def _render_ai_sources_page(
     )
 
 
+def _knowledge_profile(topic: KnowledgeTopic) -> dict[str, object]:
+    profiles: dict[str, dict[str, object]] = {
+        "langchain": {
+            "definition": "모델, 프롬프트, 검색기, 도구 호출을 하나의 AI 애플리케이션 흐름으로 묶는 프레임워크입니다.",
+            "problem": "LLM 앱을 직접 만들면 모델 호출, 문서 검색, 도구 실행, 출력 파싱을 매번 따로 연결해야 합니다.",
+            "use": "문서 질의응답, 내부 도구 호출, 간단한 에이전트, RAG 기반 챗봇처럼 빠른 프로토타입과 표준 연결 구조가 필요할 때 사용합니다.",
+            "avoid": "모델 호출 한 번으로 끝나는 작은 기능이나, 프레임워크 종속성을 피해야 하는 초저수준 서비스에는 과한 선택일 수 있습니다.",
+            "keywords": ("Chain", "Retriever", "Tool", "Agent", "Callback"),
+            "audience": "백엔드 · AI 엔지니어 · 기획자",
+            "difficulty": "초급~중급",
+            "maturity": "실무 활용 가능",
+            "next": "LangGraph → 컨텍스트 엔지니어링 → 하네스 엔지니어링",
+            "source": "LangChain 공식 문서",
+        },
+        "langgraph": {
+            "definition": "여러 단계의 AI 작업 흐름을 상태 기반 그래프로 관리하는 기술입니다.",
+            "problem": "일반 체인 방식은 작업이 길어질수록 현재 상태, 실패 위치, 재시도 지점, 사람 승인 단계를 관리하기 어렵습니다.",
+            "use": "재시도, 승인, 조건부 분기, 장기 실행, 체크포인트가 필요한 AI 업무에 사용합니다.",
+            "avoid": "단일 프롬프트로 끝나는 짧은 요청이나 실패 시 전체 재실행해도 문제가 없는 작업에는 굳이 필요하지 않습니다.",
+            "keywords": ("State", "Node", "Edge", "Checkpoint", "Human-in-the-loop"),
+            "audience": "백엔드 · AI 엔지니어 · 프론트엔드",
+            "difficulty": "중급",
+            "maturity": "실무 활용 가능",
+            "next": "하네스 엔지니어링 → 루프 엔지니어링 → 그래프 엔지니어링",
+            "source": "LangGraph 공식 문서",
+        },
+        "prompt-engineering": {
+            "definition": "AI가 원하는 역할, 제약, 출력 형식에 맞게 답하도록 지시문을 설계하는 방법입니다.",
+            "problem": "막연한 요청은 답변 형식이 흔들리고, 중요한 제약을 빼먹거나 매번 다른 결과를 만들 수 있습니다.",
+            "use": "요약, 분류, 초안 작성, 표준 답변 생성처럼 출력 품질과 형식이 중요한 업무에 사용합니다.",
+            "avoid": "최신 내부 데이터, 도구 실행, 권한 검증이 필요한 업무를 프롬프트만으로 해결하려고 하면 위험합니다.",
+            "keywords": ("System Prompt", "Few-shot", "Constraint", "Structured Output", "Eval"),
+            "audience": "기획자 · 디자이너 · 프론트엔드 · 백엔드",
+            "difficulty": "초급",
+            "maturity": "실무 활용 가능",
+            "next": "구조화된 출력 → 컨텍스트 엔지니어링 → 평가 엔지니어링",
+            "source": "OpenAI·Anthropic 프롬프트 가이드",
+        },
+        "context-engineering": {
+            "definition": "AI가 답변할 때 참고해야 할 문서, 데이터, 대화 이력, 권한 정보를 선별해 넣는 설계 방법입니다.",
+            "problem": "AI가 필요한 자료를 보지 못하거나 오래된 자료를 보면 그럴듯하지만 틀린 답을 만들 수 있습니다.",
+            "use": "사내 지식 검색, 고객 이슈 분석, 코드베이스 질문, 권한별 문서 답변처럼 근거가 중요한 업무에 사용합니다.",
+            "avoid": "공개 지식만으로 충분한 짧은 답변이나, 정확한 출처 검증이 필요 없는 단순 문장 변환에는 과할 수 있습니다.",
+            "keywords": ("Context Window", "Chunk", "Metadata", "Rerank", "Permission Filter"),
+            "audience": "데이터 · AI 엔지니어 · 백엔드 · 리더",
+            "difficulty": "중급",
+            "maturity": "실무 활용 가능",
+            "next": "RAG → LangChain → 그래프 엔지니어링",
+            "source": "RAG·검색 시스템 설계 문서",
+        },
+        "harness-engineering": {
+            "definition": "AI 에이전트가 도구를 실행할 때 권한, 검증, 승인, 로그, 비용 한도를 관리하는 운영 구조입니다.",
+            "problem": "에이전트가 실제 도구를 실행하면 잘못된 입력, 넓은 권한, 비용 폭증, 감사 불가 문제가 생길 수 있습니다.",
+            "use": "코드 수정, 배포 점검, 데이터 조회, 외부 API 호출처럼 AI가 실제 시스템에 영향을 줄 때 사용합니다.",
+            "avoid": "읽기 전용 설명이나 초안 생성처럼 시스템 변경이 없는 작업에는 가벼운 규칙만으로 충분할 수 있습니다.",
+            "keywords": ("Tool Schema", "Permission", "Validation", "Sandbox", "Audit Log"),
+            "audience": "백엔드 · 플랫폼 · 보안 · AI 엔지니어",
+            "difficulty": "중급~고급",
+            "maturity": "실무 활용 가능",
+            "next": "루프 엔지니어링 → Human-in-the-loop → AI 관측 가능성",
+            "source": "에이전트 운영·보안 아키텍처 사례",
+        },
+        "loop-engineering": {
+            "definition": "AI가 계획, 실행, 관찰, 평가, 수정을 반복하며 결과를 개선하도록 설계하는 방법입니다.",
+            "problem": "복잡한 업무는 한 번의 답변으로 끝나지 않고 실패 확인, 재시도, 수정, 검수가 반복됩니다.",
+            "use": "코드 수정, 장애 분석, 리서치 검증, 장기 작업처럼 결과를 보며 다시 고쳐야 하는 업무에 사용합니다.",
+            "avoid": "반복 없이 단일 답변으로 충분하거나 비용 한도를 엄격히 예측해야 하는 작업에는 신중해야 합니다.",
+            "keywords": ("Plan", "Act", "Observe", "Evaluate", "Stop Condition"),
+            "audience": "AI 엔지니어 · 백엔드 · 리더",
+            "difficulty": "중급",
+            "maturity": "실무 적용 확대 중",
+            "next": "하네스 엔지니어링 → 그래프 엔지니어링 → 평가 엔지니어링",
+            "source": "에이전트 루프·자율 작업 설계 사례",
+        },
+        "graph-engineering": {
+            "definition": "업무 흐름, 지식, 권한, 도구 의존성을 노드와 엣지로 표현해 AI 시스템을 제어하는 설계 방법입니다.",
+            "problem": "복잡한 에이전트 시스템은 데이터 출처, 실행 상태, 권한, 실패 경로가 얽혀 추적하기 어려워집니다.",
+            "use": "업무 흐름 그래프, 지식 그래프, 실행 상태 그래프, 데이터 계보 추적이 필요한 시스템에 사용합니다.",
+            "avoid": "핵심 경로가 단순하거나 관계 모델링 없이도 운영 가능한 작은 기능에는 초기 부담이 클 수 있습니다.",
+            "keywords": ("Node", "Edge", "State Graph", "Lineage", "Dependency"),
+            "audience": "데이터 · AI 엔지니어 · 백엔드 · 리더",
+            "difficulty": "중급~고급",
+            "maturity": "설계 패턴 정립 중",
+            "next": "LangGraph → 지식 그래프 → AI 관측 가능성",
+            "source": "그래프 기반 워크플로·지식 시스템 사례",
+        },
+    }
+    return profiles.get(topic.slug, profiles["prompt-engineering"])
+
+
+def _render_knowledge_playbook(topic: KnowledgeTopic) -> str:
+    profile = _knowledge_profile(topic)
+    keywords = "".join(f"<span>{escape(keyword)}</span>" for keyword in profile["keywords"])
+    return f"""
+            <section class="knowledge-quick">
+              <div class="knowledge-meta">
+                <span>난이도: {escape(str(profile["difficulty"]))}</span>
+                <span>대상: {escape(str(profile["audience"]))}</span>
+                <span>예상 시간: 7분</span>
+                <span>성숙도: {escape(str(profile["maturity"]))}</span>
+                <span>최종 업데이트: 2026-08-05</span>
+              </div>
+              <h2>30초 요약</h2>
+              <dl>
+                <dt>한 줄 정의</dt><dd>{escape(str(profile["definition"]))}</dd>
+                <dt>해결하는 문제</dt><dd>{escape(str(profile["problem"]))}</dd>
+                <dt>이럴 때 사용</dt><dd>{escape(str(profile["use"]))}</dd>
+                <dt>사용하지 않아도 되는 경우</dt><dd>{escape(str(profile["avoid"]))}</dd>
+                <dt>핵심 키워드</dt><dd class="keyword-list">{keywords}</dd>
+              </dl>
+            </section>
+            <section>
+              <h2>해결하려는 문제</h2>
+              {_render_simple_table(("구분", "내용"), (
+                  ("기존 방식", "프롬프트나 체인을 단순히 이어 붙이면 상태, 권한, 실패 경로가 암묵적으로 흩어집니다."),
+                  ("발생하는 문제", str(profile["problem"])),
+                  ("이 기술의 해결 방식", str(profile["definition"])),
+                  ("해결하지 못하는 부분", "업무 기준, 데이터 품질, 보안 정책은 별도로 정의해야 합니다. 기술만 도입해도 자동으로 안전해지지는 않습니다."),
+              ))}
+            </section>
+            <section>
+              <h2>동작 구조</h2>
+              <div class="flow-box">
+                <span>사용자 요청</span><span>질문 분류</span><span>필요 데이터 선택</span><span>도구 실행 또는 답변 생성</span><span>검증·승인</span><span>최종 출력</span>
+              </div>
+              {_render_simple_table(("항목", "설계할 내용"), (
+                  ("입력", "사용자 요청, 업무 목표, 접근 권한"),
+                  ("처리 단계", "분류, 검색, 생성, 도구 호출, 검증"),
+                  ("상태", "현재 단계, 실패 위치, 재시도 횟수, 승인 여부"),
+                  ("사용 도구", "검색기, 데이터베이스, 코드 저장소, 외부 API"),
+                  ("실패 경로", "재시도, 중단, 사람 검토, 이전 단계 복귀"),
+                  ("최종 출력", "답변, 초안, 변경안, 실행 로그, 근거"),
+              ))}
+            </section>
+            <section>
+              <h2>언제 사용하고 언제 사용하지 않는가</h2>
+              {_render_simple_table(("적합한 경우", "과한 선택일 수 있는 경우"), (
+                  ("여러 단계가 순서대로 진행되는 업무", "한 번의 질문과 답변으로 끝나는 작업"),
+                  ("실패 후 특정 단계부터 재시도해야 하는 업무", "실패 시 전체 재실행해도 문제가 없는 작업"),
+                  ("사람 승인, 권한, 감사 로그가 필요한 업무", "개인 초안 작성처럼 위험도가 낮은 작업"),
+                  ("상태와 비용을 장시간 추적해야 하는 업무", "짧은 일회성 요청"),
+              ))}
+            </section>
+            <section>
+              <h2>실제 업무 예시</h2>
+              <div class="example-box">
+                <strong>고객 문의 자동 분류</strong>
+                <p><b>입력</b>: "결제했는데 주문 상태가 계속 준비 중입니다."</p>
+                <p><b>처리</b>: 문의 유형 분류 → 주문 정보 조회 → 정책 확인 → 답변 초안 생성 → 담당자 승인</p>
+                <p><b>출력</b>: 문의 유형, 긴급도, 답변 초안, 사용한 데이터, 승인 필요 여부</p>
+              </div>
+            </section>
+            <section>
+              <h2>최소 구현 예제</h2>
+              <pre class="knowledge-code"><code>state = classify_request(user_input)
+context = retrieve_context(state)
+draft = generate_answer(context)
+checked = validate_answer(draft)
+result = request_human_approval(checked)</code></pre>
+              <p>핵심은 모델 호출 자체가 아니라 입력, 컨텍스트, 검증, 승인, 기록을 하나의 흐름으로 연결하는 것입니다.</p>
+            </section>
+            <section>
+              <h2>비슷한 개념과 비교</h2>
+              {_render_simple_table(("구분", "프롬프트", "컨텍스트", "하네스/루프/그래프"), (
+                  ("주요 관심사", "어떻게 지시할 것인가", "어떤 정보를 제공할 것인가", "어떤 규칙과 상태로 실행할 것인가"),
+                  ("관리 대상", "역할, 예시, 출력 형식", "문서, 메모리, 검색 결과", "도구, 권한, 검증, 로그, 재시도"),
+                  ("대표 문제", "답변 형식 불안정", "관련 없는 정보 제공", "위험한 실행과 재현 불가"),
+                  ("선택 기준", "짧은 생성 품질 개선", "근거 있는 답변", "실제 업무 자동화와 운영"),
+              ))}
+            </section>
+            <section>
+              <h2>실패 사례와 주의사항</h2>
+              {_render_simple_table(("문제", "원인", "대응 방법"), (
+                  ("반복 실행", "종료 조건이 불명확함", "최대 반복 횟수와 비용 한도 설정"),
+                  ("잘못된 답변", "검색 자료의 관련성이 낮음", "검색 평가와 재정렬 과정 추가"),
+                  ("위험한 실행", "도구 권한이 너무 넓음", "읽기·쓰기 권한 분리와 승인 단계 추가"),
+                  ("결과 재현 불가", "실행 기록이 없음", "입력, 도구 호출, 출력 로그 저장"),
+              ))}
+            </section>
+            <section>
+              <h2>운영 체크리스트</h2>
+              {_render_checklist(("성공 기준과 좋은/나쁜 결과 예시가 정의되어 있는가?", "사용자가 접근 가능한 정보만 검색하는가?", "쓰기·삭제 작업에 승인 절차가 있는가?", "실패한 단계부터 다시 실행할 수 있는가?", "모델·프롬프트·데이터 버전을 기록하는가?", "지연 시간, 비용, 반복 횟수 한도를 확인할 수 있는가?"))}
+            </section>
+            <section>
+              <h2>역할별 업무 적용</h2>
+              {_render_simple_table(("역할", "활용 방법"), (
+                  ("기획자", "반복 업무를 AI 작업 단계로 나누고 자동 처리와 사람 승인 지점을 정의합니다."),
+                  ("디자이너", "AI 응답 대기, 실패, 재시도, 출처 표시 화면을 설계합니다."),
+                  ("프론트엔드", "스트리밍 응답, 진행 상태, 중단·재시도·승인 인터페이스를 구현합니다."),
+                  ("백엔드", "모델과 도구 호출, 상태 저장, 권한, 로그, 비용 한도를 관리합니다."),
+                  ("데이터·AI 엔지니어", "검색 품질, 평가 데이터, 오류 유형, 성능 지표를 분석합니다."),
+              ))}
+            </section>
+            <section>
+              <h2>학습 정보</h2>
+              {_render_simple_table(("항목", "내용"), (
+                  ("읽기 전에 알면 좋은 내용", "LLM 기본 구조, 토큰과 컨텍스트, 구조화된 출력"),
+                  ("다음에 읽을 문서", str(profile["next"])),
+                  ("관련 개념", "RAG · Tool Calling · Agent · Evaluation · Observability"),
+                  ("참고 출처", str(profile["source"])),
+                  ("빠르게 바뀔 수 있는 부분", "프레임워크 API, 모델 성능, 가격, 지원 플랜, 보안 정책"),
+              ))}
+            </section>
+    """
+
+
+def _render_simple_table(headers: tuple[str, ...], rows: tuple[tuple[str, ...], ...]) -> str:
+    head = "".join(f"<th>{escape(header)}</th>" for header in headers)
+    body = "".join(
+        "<tr>" + "".join(f"<td>{escape(cell)}</td>" for cell in row) + "</tr>"
+        for row in rows
+    )
+    return f'<div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></div>'
+
+
+def _render_checklist(items: tuple[str, ...]) -> str:
+    return '<ul class="knowledge-checklist">' + "".join(f"<li>{escape(item)}</li>" for item in items) + "</ul>"
+
+
 def _render_knowledge_topic_page(
     topic: KnowledgeTopic,
     analytics_html: str,
@@ -4113,6 +4332,7 @@ def _render_knowledge_topic_page(
         for heading, body in topic.sections
     )
     notes = "\n".join(f"<li>{escape(note)}</li>" for note in topic.notes)
+    playbook = _render_knowledge_playbook(topic)
     return _render_plain_page(
         title=topic.title,
         analytics_html=analytics_html,
@@ -4130,7 +4350,9 @@ def _render_knowledge_topic_page(
         </header>
         <section class="knowledge-article">
           <article class="knowledge-body">
+            {playbook}
             {sections}
+            <h2>용어 설명</h2>
             <ul class="note-list">
               {notes}
             </ul>
@@ -4633,6 +4855,120 @@ def _render_plain_page(
     .knowledge-body h2 {{
       font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
       font-size: clamp(22px, 2.4vw, 32px);
+      margin-top: 34px;
+    }}
+    .knowledge-quick {{
+      border: 1px solid #d8dde5;
+      background: #f7f9fb;
+      padding: 18px;
+      margin-bottom: 26px;
+    }}
+    .knowledge-quick h2 {{
+      margin-top: 0;
+    }}
+    .knowledge-meta {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }}
+    .knowledge-meta span,
+    .keyword-list span {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      border: 1px solid #d7dde6;
+      background: #ffffff;
+      padding: 0 8px;
+      font: 800 11px/1 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .knowledge-quick dl {{
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 10px 16px;
+      margin: 0;
+    }}
+    .knowledge-quick dt {{
+      color: #111111;
+      font-weight: 900;
+    }}
+    .knowledge-quick dd {{
+      margin: 0;
+      color: #39404a;
+      line-height: 1.65;
+    }}
+    .keyword-list {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }}
+    .knowledge-table-wrap {{
+      overflow-x: auto;
+      margin: 12px 0 20px;
+    }}
+    .knowledge-table {{
+      width: 100%;
+      border-collapse: collapse;
+      font: 14px/1.6 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .knowledge-table th,
+    .knowledge-table td {{
+      border: 1px solid #dde2e8;
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }}
+    .knowledge-table th {{
+      background: #f2f5f8;
+      color: #111111;
+      font-weight: 900;
+      white-space: nowrap;
+    }}
+    .flow-box {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 18px;
+    }}
+    .flow-box span {{
+      position: relative;
+      border: 1px solid #d7dde6;
+      background: #ffffff;
+      padding: 8px 10px;
+      font: 800 12px/1.25 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .example-box {{
+      border-left: 4px solid #2f7fc0;
+      background: #f8fbff;
+      padding: 14px 16px;
+      margin: 12px 0 20px;
+    }}
+    .example-box p {{
+      margin: 8px 0 0;
+    }}
+    .knowledge-code {{
+      overflow-x: auto;
+      border: 1px solid #d7dde6;
+      background: #101820;
+      color: #f4f7fb;
+      padding: 14px;
+      font: 13px/1.6 Consolas, "Courier New", monospace;
+    }}
+    .knowledge-checklist {{
+      display: grid;
+      gap: 8px;
+      padding-left: 0;
+      list-style: none;
+    }}
+    .knowledge-checklist li {{
+      border: 1px solid #dde2e8;
+      background: #ffffff;
+      padding: 9px 11px;
+    }}
+    .knowledge-checklist li::before {{
+      content: "□";
+      margin-right: 8px;
+      font-weight: 900;
     }}
     .key-points {{
       margin: 9px 0 0;

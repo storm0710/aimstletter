@@ -7,6 +7,7 @@ from pathlib import Path
 from aimstletter.fetchers import DigestItem
 from aimstletter.config import Settings
 from aimstletter.site import (
+    KNOWLEDGE_TOPICS,
     SiteItem,
     _fallback_display_summary,
     _fallback_korean_item,
@@ -17,6 +18,7 @@ from aimstletter.site import (
     _render_analytics,
     _render_ai_tool_directory,
     _render_detail_page,
+    _render_knowledge_topic_page,
     _safe_korean_field,
     _safe_tags,
     _weekly_window,
@@ -769,6 +771,27 @@ def test_committed_knowledge_page_exists() -> None:
     assert "검증" in html
     assert "01. LangChain" in langchain
     assert "문서 기반 질의응답" in langchain
+
+
+def test_knowledge_page_includes_practical_engineering_playbook() -> None:
+    topic = next(topic for topic in KNOWLEDGE_TOPICS if topic.slug == "langgraph")
+    html = _render_knowledge_topic_page(topic, analytics_html="", back_href="../../")
+
+    assert "30초 요약" in html
+    assert "해결하려는 문제" in html
+    assert "언제 사용하고 언제 사용하지 않는가" in html
+    assert "실제 업무 예시" in html
+    assert "최소 구현 예제" in html
+    assert "비슷한 개념과 비교" in html
+    assert "실패 사례와 주의사항" in html
+    assert "운영 체크리스트" in html
+    assert "역할별 업무 적용" in html
+    assert "학습 정보" in html
+    assert "State" in html
+    assert "Human-in-the-loop" in html
+    assert "기획자" in html
+    assert "백엔드" in html
+    assert "최종 업데이트: 2026-08-05" in html
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
