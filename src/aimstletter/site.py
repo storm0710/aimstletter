@@ -22,6 +22,7 @@ from aimstletter.knowledge_content import (
     HARNESS_LOOP_ROWS,
     KNOWLEDGE_PAGES,
     OFFICIAL_SOURCES,
+    REVIEW_DATE,
 )
 from aimstletter.ranking import rank_items
 
@@ -694,7 +695,7 @@ def _render_knowledge_nav(link_prefix: str = "", current_slug: str | None = None
         )
     return (
         '<div class="archive-panel knowledge-panel" aria-label="Knowledge">'
-        '<div class="archive-title knowledge-title">Knowledge</div>'
+        f'<a class="archive-title knowledge-title knowledge-home-link" href="{escape(link_prefix)}knowledge/">Knowledge</a>'
         '<div class="archive-month knowledge-single">'
         + "".join(links)
         + '</div>'
@@ -795,6 +796,15 @@ def _render_editorial_homepage(
     .knowledge-title {{
       border-bottom: 1px solid var(--line);
     }}
+    .knowledge-home-link {{
+      color: inherit;
+      text-decoration: none;
+    }}
+    .knowledge-home-link:hover,
+    .knowledge-home-link:focus-visible {{
+      background: rgba(47,127,192,.08);
+      outline: 0;
+    }}
     .knowledge-link {{
       display: block;
       padding: 12px 22px;
@@ -816,6 +826,15 @@ def _render_editorial_homepage(
       border-bottom: 1px solid var(--line);
       font-size: 14px;
       font-weight: 800;
+    }}
+    .knowledge-home-link {{
+      color: inherit;
+      text-decoration: none;
+    }}
+    .knowledge-home-link:hover,
+    .knowledge-home-link:focus-visible {{
+      background: rgba(47,127,192,.08);
+      outline: 0;
     }}
     .archive-title::before {{
       content: "";
@@ -3667,6 +3686,7 @@ def _write_secondary_pages(
     (output_dir / "tools").mkdir(parents=True, exist_ok=True)
     (output_dir / "ai-tools").mkdir(parents=True, exist_ok=True)
     (output_dir / "ai-sources").mkdir(parents=True, exist_ok=True)
+    (output_dir / "knowledge").mkdir(parents=True, exist_ok=True)
     for topic in KNOWLEDGE_TOPICS:
         (output_dir / "knowledge" / topic.slug).mkdir(parents=True, exist_ok=True)
     (output_dir / "items").mkdir(parents=True, exist_ok=True)
@@ -3700,6 +3720,14 @@ def _write_secondary_pages(
             items=[*work_items, *other_items, *tools],
             analytics_html=analytics_html,
             back_href="../",
+        ),
+        encoding="utf-8",
+    )
+    (output_dir / "knowledge" / "index.html").write_text(
+        _render_knowledge_index_page(
+            analytics_html=analytics_html,
+            back_href="../",
+            archive_entries=archive_entries,
         ),
         encoding="utf-8",
     )
@@ -3802,6 +3830,61 @@ def _render_ai_sources_page(
     )
 
 
+def _render_knowledge_index_page(
+    analytics_html: str,
+    back_href: str,
+    archive_entries: list[dict[str, object]] | None = None,
+) -> str:
+    cards = []
+    for topic in KNOWLEDGE_TOPICS:
+        page = KNOWLEDGE_PAGES[topic.slug]
+        keywords = " · ".join(str(keyword) for keyword in page["keywords"])
+        cards.append(
+            '<article class="knowledge-index-card">'
+            f'<div class="kicker">{escape(topic.order)} · Knowledge</div>'
+            f'<h2><a href="{escape(topic.slug)}/">{escape(topic.title)}</a></h2>'
+            f'<p>{escape(str(page["definition"]))}</p>'
+            f'<div class="knowledge-card-meta"><span>{escape(str(page["difficulty"]))}</span>'
+            f'<span>{escape(str(page["reading_time"]))}</span>'
+            f'<span>{escape(str(page["maturity"]))}</span></div>'
+            f'<p class="knowledge-card-keywords">{escape(keywords)}</p>'
+            '</article>'
+        )
+    return _render_plain_page(
+        title="Knowledge",
+        analytics_html=analytics_html,
+        sidebar_html=_render_archive_nav(
+            archive_entries or [],
+            link_prefix=back_href,
+        ),
+        body=f"""
+        <a class="back-link" href="{escape(back_href)}">← 첫 화면</a>
+        <header class="simple-header tool-page-header">
+          <div class="kicker">Knowledge</div>
+          <h1>AI 엔지니어링 Knowledge</h1>
+          <p>AI 애플리케이션을 설계할 때 자주 섞이는 7개 개념을 관계, 선택 기준, 실제 업무 사례 중심으로 정리했습니다.</p>
+        </header>
+        <section class="knowledge-article">
+          <article class="knowledge-body">
+            {_render_knowledge_relation_map()}
+            <section>
+              <h2>개념 간 전체 비교표</h2>
+              {_render_table(("개념", "핵심 질문", "설계 대상", "대표 결과물", "대표 실패", "가장 적합한 상황"), GLOBAL_COMPARISON_ROWS)}
+            </section>
+            <section>
+              <h2>헷갈리기 쉬운 개념</h2>
+              {_render_table(("비교", "첫 번째 개념", "두 번째 개념", "관계"), CONFUSION_ROWS)}
+            </section>
+            <section>
+              <h2>문서 목록</h2>
+              <div class="knowledge-index-grid">{"".join(cards)}</div>
+            </section>
+          </article>
+        </section>
+        """,
+    )
+
+
 def _render_simple_table(headers: tuple[str, ...], rows: tuple[tuple[str, ...], ...]) -> str:
     head = "".join(f"<th>{escape(header)}</th>" for header in headers)
     body = "".join(
@@ -3866,7 +3949,20 @@ def _render_source_links(slug: str) -> str:
         f'<li><a href="{escape(url)}" target="_blank" rel="noopener noreferrer">{escape(label)}</a></li>'
         for label, url in OFFICIAL_SOURCES.get(slug, ())
     )
-    return f'<ul class="source-list">{links}</ul>'
+    return (
+        f'<p class="source-verified">확인 날짜: {escape(REVIEW_DATE)} · '
+        '외부 출처는 새 창에서 열립니다.</p>'
+        f'<ul class="source-list">{links}</ul>'
+    )
+
+
+def _knowledge_definition_note(topic: KnowledgeTopic) -> str:
+    if topic.slug in {"harness-engineering", "loop-engineering", "graph-engineering"}:
+        return (
+            "이 문서는 해당 용어를 업계 전체의 완전한 표준 분류로 단정하지 않고, "
+            "이 사이트에서 AI 업무 설계와 운영을 설명하기 위한 실무적 정의로 사용합니다."
+        )
+    return "이 문서에서는 실제 AI 애플리케이션 설계에서 구분해야 하는 책임과 선택 기준을 중심으로 정의합니다."
 
 
 def _render_key_value_cards(items: tuple[tuple[str, str], ...]) -> str:
@@ -3905,7 +4001,10 @@ def _render_code_example(page: dict[str, object]) -> str:
     notes = _render_checklist(tuple(str(note) for note in page["code_notes"]))
     return f"""
               <p class="code-label">{escape(str(page["code_label"]))}</p>
-              <pre class="knowledge-code"><code>{escape(str(page["code"]))}</code></pre>
+              <details class="code-details" open>
+                <summary>코드 예제 보기</summary>
+                <pre class="knowledge-code"><code>{escape(str(page["code"]))}</code></pre>
+              </details>
               {notes}
     """
 
@@ -3966,6 +4065,11 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
               <h2>헷갈리기 쉬운 개념</h2>
               {_render_table(("비교", "첫 번째 개념", "두 번째 개념", "관계"), CONFUSION_ROWS)}
             </section>
+            <section class="definition-box">
+              <h2>이 문서에서 사용하는 정의</h2>
+              <p><strong>{escape(topic.title)}</strong>: {escape(str(page["definition"]))}</p>
+              <p>{escape(_knowledge_definition_note(topic))}</p>
+            </section>
             <section class="knowledge-quick">
               <div class="knowledge-meta">
                 <span>난이도: {escape(str(page["difficulty"]))}</span>
@@ -3986,17 +4090,21 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
               </dl>
             </section>
             <section>
-              <h2>해결하려는 문제</h2>
+              <h2>등장 배경과 해결하려는 문제</h2>
               {_render_table(("구분", "내용"), tuple(tuple(row) for row in page["problem"]))}
             </section>
             <section>
-              <h2>핵심 구성요소</h2>
+              <h2>핵심 구성요소와 동작 구조</h2>
               <p>{escape(str(components_intro))}</p>
               {_render_flow_steps(tuple(str(step) for step in component_steps))}
             </section>
             <section>
               <h2>언제 사용하고 언제 사용하지 않는가</h2>
               {_render_table(("적합한 상황", "과한 선택이 될 수 있는 상황", "도입 전 확인할 조건", "대안이 될 수 있는 더 단순한 방법"), tuple(tuple(row) for row in page["use_table"]))}
+              <div class="warning-box">
+                <strong>주의</strong>
+                <p>{escape(str(page["volatile"]))} API, 요금제, 권한 제한, 지원 상태는 운영 전에 공식 문서에서 다시 확인해야 합니다.</p>
+              </div>
             </section>
             <section>
               <h2>실제 업무 사례</h2>
@@ -4286,6 +4394,15 @@ def _render_plain_page(
       background: #111111;
       flex: 0 0 auto;
     }}
+    .knowledge-home-link {{
+      color: inherit;
+      text-decoration: none;
+    }}
+    .knowledge-home-link:hover,
+    .knowledge-home-link:focus-visible {{
+      background: rgba(47,127,192,.08);
+      outline: 0;
+    }}
     .archive-year,
     .archive-month-summary {{
       display: flex;
@@ -4569,6 +4686,29 @@ def _render_plain_page(
     .knowledge-map h2 {{
       margin-top: 0;
     }}
+    .definition-box,
+    .warning-box {{
+      border: 1px solid #d8dde5;
+      background: #ffffff;
+      padding: 16px;
+      margin: 18px 0 24px;
+    }}
+    .definition-box {{
+      border-left: 4px solid #111111;
+    }}
+    .warning-box {{
+      border-left: 4px solid #8b1e16;
+      background: #fffafa;
+    }}
+    .definition-box h2 {{
+      margin-top: 0;
+    }}
+    .warning-box strong {{
+      display: block;
+      color: #8b1e16;
+      font: 900 12px/1.3 Arial, "Noto Sans KR", sans-serif;
+      text-transform: uppercase;
+    }}
     .relation-flow {{
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4731,6 +4871,17 @@ def _render_plain_page(
       font: 800 12px/1.5 Arial, "Noto Sans KR", sans-serif;
       margin-bottom: 6px;
     }}
+    .code-details {{
+      margin: 8px 0 12px;
+    }}
+    .code-details summary {{
+      cursor: pointer;
+      width: fit-content;
+      border: 1px solid #d7dde6;
+      background: #ffffff;
+      padding: 7px 9px;
+      font: 900 12px/1.35 Arial, "Noto Sans KR", sans-serif;
+    }}
     .knowledge-code {{
       overflow-x: auto;
       border: 1px solid #d7dde6;
@@ -4751,9 +4902,46 @@ def _render_plain_page(
       padding: 9px 11px;
     }}
     .knowledge-checklist li::before {{
-      content: "□";
+      content: "-";
       margin-right: 8px;
       font-weight: 900;
+    }}
+    .source-verified,
+    .knowledge-card-keywords {{
+      color: #5d6470;
+      font: 12px/1.55 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .knowledge-index-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }}
+    .knowledge-index-card {{
+      border: 1px solid #dde2e8;
+      background: #ffffff;
+      padding: 16px;
+    }}
+    .knowledge-index-card h2 {{
+      border: 0;
+      margin: 4px 0 8px;
+      padding: 0;
+      font-size: 24px;
+    }}
+    .knowledge-index-card a {{
+      color: #111111;
+      text-decoration: none;
+    }}
+    .knowledge-card-meta {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }}
+    .knowledge-card-meta span {{
+      border: 1px solid #d7dde6;
+      background: #f7f9fb;
+      padding: 3px 7px;
+      font: 800 11px/1.3 Arial, "Noto Sans KR", sans-serif;
     }}
     .key-points {{
       margin: 9px 0 0;
@@ -4817,6 +5005,7 @@ def _render_plain_page(
         grid-template-columns: 1fr;
       }}
       .relation-flow,
+      .knowledge-index-grid,
       .case-grid,
       .knowledge-quick dl {{
         grid-template-columns: 1fr;

@@ -765,12 +765,17 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
 
 
 def test_committed_knowledge_page_exists() -> None:
+    main = Path("public/knowledge/index.html").read_text(encoding="utf-8")
     html = Path("public/knowledge/harness-engineering/index.html").read_text(encoding="utf-8")
     langchain = Path("public/knowledge/langchain/index.html").read_text(encoding="utf-8")
     langgraph = Path("public/knowledge/langgraph/index.html").read_text(encoding="utf-8")
     loop = Path("public/knowledge/loop-engineering/index.html").read_text(encoding="utf-8")
     graph = Path("public/knowledge/graph-engineering/index.html").read_text(encoding="utf-8")
 
+    assert "AI 엔지니어링 Knowledge" in main
+    assert "개념 간 전체 비교표" in main
+    assert "헷갈리기 쉬운 개념" in main
+    assert 'href="langchain/"' in main
     assert "Knowledge" in html
     assert "Archive" in html
     assert "05. 하네스 엔지니어링" in html
@@ -789,6 +794,11 @@ def test_committed_knowledge_page_exists() -> None:
     assert "Tool Registry" in html
     assert "Audit Log" in html
     assert "검증 필요" in html
+    assert "이 문서에서 사용하는 정의" in html
+    assert "주의" in html
+    assert "확인 날짜: 2026-08-06" in html
+    assert 'target="_blank"' in html
+    assert "code-details" in html
     assert "01. LangChain" in langchain
     assert "회의록을 업무 등록 초안으로 바꾸기" in langchain
     assert "Prompt Template" in langchain
@@ -822,7 +832,9 @@ def test_knowledge_page_includes_practical_engineering_playbook() -> None:
     assert "Human-in-the-loop" in html
     assert "기획자" in html
     assert "백엔드" in html
-    assert "최종 검토 날짜: 2026-08-05" in html
+    assert "최종 검토 날짜: 2026-08-06" in html
+    assert "이 문서에서 사용하는 정의" in html
+    assert "code-details" in html
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:

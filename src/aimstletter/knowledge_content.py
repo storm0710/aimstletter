@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-REVIEW_DATE = "2026-08-05"
+REVIEW_DATE = "2026-08-06"
 
 
 OFFICIAL_SOURCES = {
@@ -113,11 +113,36 @@ GLOBAL_COMPARISON_ROWS = (
 
 
 CONFUSION_ROWS = (
-    ("프롬프트와 컨텍스트", "프롬프트는 모델에게 어떤 행동을 요구할지 정의하고, 컨텍스트는 모델이 판단할 때 볼 정보를 구성합니다."),
-    ("LangChain과 LangGraph", "LangChain은 모델·도구·검색기 같은 컴포넌트 조합과 통합에 강하고, LangGraph는 상태 기반 실행과 제어에 집중합니다."),
-    ("LangGraph와 그래프 엔지니어링", "LangGraph는 상태 기반 AI 워크플로를 실행하는 구체적 프레임워크이고, 그래프 엔지니어링은 관계와 의존성을 모델링하는 일반 설계 방법론입니다."),
-    ("하네스와 루프", "하네스는 실행 환경, 권한, 안전장치를 제공하고 강제합니다. 루프는 그 환경 안에서 관찰, 평가, 재시도, 종료를 결정합니다."),
-    ("컨텍스트와 하네스", "컨텍스트는 모델이 볼 정보이고, 하네스는 모델이나 에이전트가 사용할 수 있는 실행 환경입니다."),
+    (
+        "프롬프트와 컨텍스트",
+        "모델에게 어떤 행동을 요구할지 정의",
+        "모델이 판단할 때 어떤 정보를 볼지 정의",
+        "좋은 프롬프트도 잘못된 컨텍스트를 받으면 틀릴 수 있고, 좋은 컨텍스트도 지시가 모호하면 일관된 결과를 만들기 어렵습니다.",
+    ),
+    (
+        "LangChain과 LangGraph",
+        "구성요소 조합과 외부 통합",
+        "상태 기반 실행, 분기, 중단과 재개",
+        "LangChain은 앱 구성요소를 연결하고, LangGraph는 긴 작업의 상태와 실행 흐름을 제어합니다.",
+    ),
+    (
+        "LangGraph와 그래프 엔지니어링",
+        "AI 워크플로 실행 프레임워크",
+        "관계 및 의존성 모델링 방법론",
+        "LangGraph는 실행 그래프이고, 그래프 엔지니어링은 시스템·데이터·권한 관계를 설계하는 더 넓은 방법입니다.",
+    ),
+    (
+        "하네스와 루프",
+        "실행 환경, 도구, 권한과 안전장치",
+        "반복 행동, 평가, 전략 변경과 종료 결정",
+        "하네스가 루프를 감싸고 제한하며, 루프는 하네스가 제공하는 환경 안에서 실행됩니다.",
+    ),
+    (
+        "컨텍스트와 하네스",
+        "모델이 볼 수 있는 정보",
+        "에이전트가 사용할 수 있는 실행 환경과 권한",
+        "컨텍스트는 판단 재료이고, 하네스는 실제 행동의 경계입니다.",
+    ),
 )
 
 
@@ -492,7 +517,7 @@ if context.has_weak_evidence:
             "old_problem": "에이전트가 편리한 명령을 임의로 실행하거나 넓은 파일 범위를 수정해도 나중에 이유를 추적하기 어렵습니다.",
             "input": "작업 요청, 저장소 경로, 허용 파일 범위, 테스트 명령, 비밀 정보 정책, 승인자",
             "steps": ("도구 등록", "읽기·쓰기 권한 분리", "sandbox 설정", "수정 가능 파일 범위 제한", "테스트 validator 실행", "독립 리뷰", "사람 승인", "감사 로그 저장", "실패 시 복구"),
-            "tools": "Codex sandbox/approval 문서, OpenAI Agents SDK guardrails/tracing 문서, Codex Skills 문서. gstack은 로컬 도구로 공식 공개 출처 검증 필요.",
+            "tools": "Codex sandbox/approval 문서, OpenAI Agents SDK guardrails/tracing 문서, Codex Skills 문서. gstack은 로컬 도구로만 확인했으며 공식 공개 출처는 추가 검증 필요.",
             "human": "쓰기, 삭제, 배포, 권한 변경, 비용 큰 명령은 승인 후 실행합니다.",
             "failure": "테스트 실패, 금지 경로 수정, 비밀값 출력, 시간·비용 초과, 리뷰 실패입니다.",
             "output": "허용된 변경 diff, 테스트 결과, 리뷰 결과, 승인 기록, 실행 로그",
@@ -517,7 +542,7 @@ if context.has_weak_evidence:
     \"audit_log\": [\"input\", \"tool_call\", \"diff\", \"test_result\", \"approval\"],
     \"limits\": {\"max_tool_calls\": 40, \"max_minutes\": 20, \"max_cost_usd\": 3.0},
 }""",
-        "code_notes": ("하네스 코드는 tools, permissions, sandbox, validators, approval, audit log, limits를 중심으로 둡니다.", "구체 명령어는 공식 문서나 저장소에서 확인된 경우만 운영 문서에 넣습니다.", "gstack 연동은 이 환경의 로컬 스킬로 확인했지만 공개 공식 출처는 검증 필요로 표시합니다."),
+        "code_notes": ("하네스 코드는 tools, permissions, sandbox, validators, approval, audit log, limits를 중심으로 둡니다.", "구체 명령어는 공식 문서나 저장소에서 확인된 경우만 운영 문서에 넣습니다.", "gstack 연동은 이 환경의 로컬 스킬로 확인했지만 공개 공식 출처는 추가 검증 필요로 표시합니다."),
         "compare": (
             ("루프 엔지니어링", "다음 행동과 종료를 어떻게 결정할 것인가", "상태, 관찰, 평가", "반복 정책", "테스트 실패 수정", "무한 반복", "행동 전략이 문제면 루프입니다."),
             ("LangGraph", "상태 기반 흐름을 어떻게 실행할 것인가", "State, Node, Edge", "워크플로 런타임", "승인·재개", "상태 복잡성", "실행 흐름 자체가 복잡하면 LangGraph입니다."),
@@ -540,7 +565,7 @@ if context.has_weak_evidence:
         "learning": (
             ("읽기 전에", "권한 모델, CI 테스트, 코드 리뷰, 샌드박스"),
             ("다음 문서", "루프 엔지니어링, LangGraph"),
-            ("검증 필요", "gstack의 공개 공식 저장소와 현재 지원 명령은 이 작업에서 확인하지 못했습니다."),
+            ("추가 검증 필요", "gstack의 공개 공식 저장소와 현재 지원 명령은 이 작업에서 확인하지 못했습니다."),
             ("빠르게 바뀔 수 있는 부분", "Codex sandbox/approval, Agents SDK guardrails/tracing, Skills 사양"),
         ),
     },
