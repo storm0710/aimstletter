@@ -5164,30 +5164,53 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
         return [_fallback_korean_item(item) for item in items]
 
     return [
-        SiteItem(
-            title=_safe_korean_field(
-                localized_item.get("title"),
-                fallback=f"{_korean_source_name(item.source)}에서 확인한 최신 업데이트",
-            ),
+        _localized_site_item(item, localized_item)
+        for item, localized_item in zip(items, localized, strict=True)
+    ]
+
+
+def _localized_site_item(item: DigestItem, localized_item: dict[str, object]) -> SiteItem:
+    item_text = re.sub(r"[-_]+", " ", _item_text(item))
+    specific = _latest_week_specific_summary(item_text)
+    if specific:
+        specific_title = _fallback_specific_title(item_text)
+        summary, seed_points = specific
+        return SiteItem(
+            title=specific_title or _fallback_display_title(item),
             url=item.url,
-            summary=_safe_korean_field(
-                localized_item.get("summary"),
-                fallback="이번 업데이트가 어떤 업무 문제를 줄이고 어떤 자동화 흐름에 붙을 수 있는지 간단히 정리했습니다.",
-            ),
-            detail=_safe_korean_field(
-                localized_item.get("detail"),
-                fallback="이번 업데이트는 업무 자동화, 운영 안정성, 검수 흐름 중 어디에 적용할 수 있는지 빠르게 판단하기 위한 항목입니다.",
-            ),
+            summary=summary,
+            detail=summary,
             source=_korean_source_name(item.source),
             kind=_korean_kind_name(item.kind),
             published=item.published,
-            key_points=_safe_key_points(localized_item, item),
+            key_points=_fallback_card_points(item, seed_points),
             tags=_safe_tags(localized_item, item),
             comparisons=_safe_comparisons(localized_item, item),
             glossary=_safe_glossary(localized_item, item),
         )
-        for item, localized_item in zip(items, localized, strict=True)
-    ]
+
+    return SiteItem(
+        title=_safe_korean_field(
+            localized_item.get("title"),
+            fallback=f"{_korean_source_name(item.source)}에서 확인한 최신 업데이트",
+        ),
+        url=item.url,
+        summary=_safe_korean_field(
+            localized_item.get("summary"),
+            fallback="이번 업데이트가 어떤 업무 문제를 줄이고 어떤 자동화 흐름에 붙을 수 있는지 간단히 정리했습니다.",
+        ),
+        detail=_safe_korean_field(
+            localized_item.get("detail"),
+            fallback="이번 업데이트는 업무 자동화, 운영 안정성, 검수 흐름 중 어디에 적용할 수 있는지 빠르게 판단하기 위한 항목입니다.",
+        ),
+        source=_korean_source_name(item.source),
+        kind=_korean_kind_name(item.kind),
+        published=item.published,
+        key_points=_safe_key_points(localized_item, item),
+        tags=_safe_tags(localized_item, item),
+        comparisons=_safe_comparisons(localized_item, item),
+        glossary=_safe_glossary(localized_item, item),
+    )
 
 
 def _repair_korean_translation(
@@ -5438,6 +5461,15 @@ def _fallback_korean_item(item: DigestItem) -> SiteItem:
 
 def _latest_week_specific_summary(text: str) -> tuple[str, tuple[str, str, str]] | None:
     rules: tuple[tuple[tuple[str, ...], str, tuple[str, str, str]], ...] = (
+        (
+            ("2608.13547",),
+            "QuoteBench는 LLM 코딩 에이전트의 Bash 명령 실행 성능을 모델 생성 품질과 실행 경로 변형 실패로 나누어 봐야 한다는 벤치마크 논문입니다. matched score 하나만으로는 모델이 명령을 잘못 만든 것인지, quoting·parser·transport 과정에서 실패가 생긴 것인지 구분하기 어렵다는 점을 보여줍니다.",
+            (
+                "1. 무엇을 다루나요? LLM 코딩 에이전트가 Bash 명령을 만들고 실행 시스템을 통과하는 과정에서 생기는 실패를 분리해 평가하는 QuoteBench입니다.",
+                "2. 핵심 구성 요소: 56개 one-shot Bash 작업, 14개 사고 유래 과제군, 원본 응답 재생, 추가 parser 통과, final-state validation입니다.",
+                "3. 업무 적용 포인트: 코딩 에이전트 평가에서는 모델 설정, generation contract, execution path, validator를 함께 기록해야 matched score를 오해하지 않습니다.",
+            ),
+        ),
         (
             ("agent security gap",),
             "엔터프라이즈의 54%가 이미 AI 에이전트 관련 사고를 겪었고, 다수 조직이 여전히 에이전트 간 자격 증명 공유를 허용한다는 보안 리스크 분석입니다. 에이전트 운영에서 권한 분리, 비밀값 관리, 감사 체계가 실제 사고 예방의 핵심임을 보여줍니다.",
@@ -6611,6 +6643,7 @@ def _has_source_title_prefix(title: str, source: str) -> bool:
 def _fallback_specific_title(text: str) -> str:
     text = re.sub(r"[-_]+", " ", text.lower())
     title_rules = (
+        (("2608.13547",), "QuoteBench: 명령 실행 경로 평가"),
         (("2607.03333",), "에이전트 LLM 추론을 빠르게 하는 SPORK"),
         (("2607.03859",), "저궤도 위성 자원 할당과 모델 공격 견고성"),
         (("2607.03639",), "Signed BAR 추측의 AI 보조 증명"),

@@ -14,6 +14,7 @@ from aimstletter.site import (
     _fallback_three_line_summary,
     _item_slug,
     _items_in_window,
+    _localized_site_item,
     _rank_work_skill_updates,
     _render_analytics,
     _render_ai_tool_directory,
@@ -531,6 +532,42 @@ def test_fallback_summary_avoids_generic_placeholder_points() -> None:
     assert any("투명성" in point for point in points)
     assert all("주제를 다룹니다" not in point for point in points)
     assert all("원문에서 다루는 문제" not in point for point in points)
+
+
+def test_quote_bench_localized_item_uses_command_path_specific_summary() -> None:
+    item = DigestItem(
+        title="QuoteBench: How Matched Scores Can Hide Command-Path Failures",
+        url="https://arxiv.org/abs/2608.13547v1",
+        source="arXiv AI",
+        kind="paper",
+        published=datetime(2026, 8, 14, tzinfo=UTC),
+        summary=(
+            "LLM coding agents issue Bash commands through interfaces that may serialize, "
+            "wrap, and reparse model output."
+        ),
+    )
+    localized_item = {
+        "title": "Quotebench Matched Scores",
+        "summary": "여러 단계로 이어지는 AI 작업이나 분산 실행 흐름을 안정적으로 운영하는 방법을 다룹니다.",
+        "detail": "작업 상태, 실행 순서, 재시도와 복구, 비용과 성능 제약입니다.",
+        "key_points": [
+            "1. 한 줄 요약: 여러 단계로 이어지는 AI 작업이나 분산 실행 흐름을 안정적으로 운영하는 방법을 다룹니다.",
+            "2. 무엇이 바뀌었나: 작업 상태, 실행 순서, 재시도와 복구, 비용과 성능 제약입니다.",
+            "3. 왜 중요한가: 장기 실행 에이전트를 운영할 때 실패한 단계부터 재개합니다.",
+            "4. 한계와 주의사항: 아직 논문 단계일 수 있습니다.",
+            "5. 이번 주 해볼 일: 작은 화면 1개를 체크리스트로 검토해보세요.",
+            "6. 누가 보면 좋은가: 프론트엔드, 백엔드, AI 엔지니어",
+            "7. 출처와 상태: arXiv AI · arXiv 논문 · 2026-08-14",
+        ],
+        "tags": ["AI 에이전트", "코딩 자동화"],
+    }
+
+    site_item = _localized_site_item(item, localized_item)
+
+    assert site_item.title == "QuoteBench: 명령 실행 경로 평가"
+    assert "Bash 명령 실행 성능" in site_item.summary
+    assert "56개 one-shot Bash 작업" in site_item.key_points[1]
+    assert "작업 상태, 실행 순서, 재시도와 복구" not in " ".join(site_item.key_points)
 
 
 def test_smart_insight_points_render_answer_on_next_line_without_space_after_question() -> None:
