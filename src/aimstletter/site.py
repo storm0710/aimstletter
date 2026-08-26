@@ -14,7 +14,7 @@ import textwrap
 from urllib.parse import urlparse
 
 from aimstletter.composer import _make_client
-from aimstletter.config import Settings
+from aimstletter.config import AI_TOOL_DISCOVERY_KEYWORDS, Settings
 from aimstletter.fetchers import DigestItem, fetch_recent_items
 from aimstletter.knowledge_content import (
     CONFUSION_ROWS,
@@ -7377,13 +7377,35 @@ def _rank_tool_updates(items: list[DigestItem], limit: int) -> list[DigestItem]:
         "windsurf",
         "lovable",
         "bolt",
+        *AI_TOOL_DISCOVERY_KEYWORDS,
     )
 
-    def score(item: DigestItem) -> tuple[datetime, int]:
-        text = f"{item.title} {item.summary} {item.source}".lower()
-        return (item.published, sum(1 for keyword in keywords if keyword in text))
+    def is_ai_product_launch(item: DigestItem) -> bool:
+        if item.source != "Product Hunt launches":
+            return True
+        text = f"{item.title} {item.summary}".lower()
+        identity_keywords = (
+            "artificial intelligence",
+            "agent",
+            "agentic",
+            "llm",
+            "language model",
+            "generative",
+            "copilot",
+            "mcp",
+            "model context protocol",
+        )
+        return bool(re.search(r"\bai\b", text)) or any(keyword in text for keyword in identity_keywords)
 
-    return sorted(items, key=score, reverse=True)[:limit]
+    def score(item: DigestItem) -> tuple[datetime, int]:
+        text = f"{item.title} {item.summary}".lower()
+        keyword_score = sum(
+            bool(re.search(r"\bai\b", text)) if keyword == "ai" else keyword in text
+            for keyword in keywords
+        )
+        return (item.published, keyword_score)
+
+    return sorted((item for item in items if is_ai_product_launch(item)), key=score, reverse=True)[:limit]
 
 
 def _rank_work_skill_updates(items: list[DigestItem], limit: int) -> list[DigestItem]:

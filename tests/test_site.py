@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from aimstletter.fetchers import DigestItem
-from aimstletter.config import Settings
+from aimstletter.config import AI_TOOL_DISCOVERY_KEYWORDS, Settings, TOOL_UPDATE_FEEDS
 from aimstletter.site import (
     KNOWLEDGE_TOPICS,
     SiteItem,

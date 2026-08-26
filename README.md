@@ -84,7 +84,7 @@ Slack 공식 문서 기준으로 Incoming Webhook은 특정 채널에 메시지�
 
 Incoming Webhook은 설치할 때 선택한 채널로 보내는 방식이라, 일반 Slack 대화방 URL만으로는 전송할 수 없습니다.
 
-기본 스케줄은 매주 수요일 오전 9시 KST입니다. GitHub Actions cron은 UTC 기준이라 `.github/workflows/weekly-digest.yml`에는 `0 0 * * 3`으로 설정되어 있습니다.
+기본 Slack 알림 스케줄은 매주 수요일 오전 6시 KST입니다. GitHub Actions cron은 UTC 기준이라 `.github/workflows/weekly-digest.yml`에는 `0 21 * * 2`으로 설정되어 있습니다. 일반 AI 동향뿐 아니라 공식 제품 변경과 Product Hunt의 신규 AI 도구 후보를 자동 수집해 `새 AI 도구·업데이트 알림` 섹션으로 보냅니다.
 
 Slack 앱 설치 한도로 Incoming Webhook을 추가할 수 없다면 GitHub Issue 방식도 사용할 수 있습니다.
 
@@ -95,14 +95,14 @@ Slack 앱 설치 한도로 Incoming Webhook을 추가할 수 없다면 GitHub Is
 /github subscribe storm0710/aimstletter issues
 ```
 
-3. GitHub Actions의 `Weekly AI digest issue` workflow가 매주 수요일 오전 9시 KST에 Issue를 생성합니다.
+3. GitHub Actions의 `Weekly AI digest issue` workflow가 매주 월요일 오전 7시 KST에 Issue를 생성합니다. 새 AI 도구와 제품 업데이트가 별도 알림 섹션에 포함됩니다.
 4. Slack에 설치된 GitHub 앱이 새 Issue 알림을 보내줍니다.
 
 수동 테스트는 GitHub 저장소의 `Actions` 탭에서 `Weekly AI digest issue`를 선택한 뒤 `Run workflow`를 누르면 됩니다.
 
 ## GitHub Pages 매거진 사이트
 
-`Weekly AI magazine site` workflow는 매주 수요일 오전 9시 5분 KST에 `public/index.html`을 생성하고 GitHub Pages에 배포합니다. 화면은 두 영역으로 나뉩니다.
+`Weekly AI magazine site` workflow는 매주 월요일 오전 7시 KST에 `public/index.html`을 생성하고 GitHub Pages에 배포합니다. 공식 제품 피드와 Product Hunt의 신규 출시 피드를 함께 읽어 `AI 활용 도구`의 `이번 주 새 도구·업데이트` 영역을 갱신합니다. 이 영역은 아직 고정 목록에 없는 새 AI 도구를 발견하는 용도입니다. 화면은 두 영역으로 나뉩니다.
 
 - 왼쪽 목차: 업무 AI 스킬 업데이트와 Claude/AI 도구 업데이트 게시판으로 이동
 - 가운데: DBA, 네트워크, 서버 운영 직군이 업무에 적용할 만한 AI 스킬 업데이트

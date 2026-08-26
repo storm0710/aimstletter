@@ -175,6 +175,8 @@ DEFAULT_FEEDS = (
 )
 
 TOOL_UPDATE_FEEDS = (
+    # Broad discovery feed: catches products from companies not yet in the curated directory.
+    FeedSource("Product Hunt launches", "https://www.producthunt.com/feed", "tool"),
     FeedSource("Anthropic News", "https://www.anthropic.com/news/rss.xml", "tool"),
     FeedSource("OpenAI News", "https://openai.com/news/rss.xml", "tool"),
     FeedSource("Meta AI News", "https://about.fb.com/news/feed/", "tool"),
@@ -182,6 +184,24 @@ TOOL_UPDATE_FEEDS = (
     FeedSource("GitHub Changelog", "https://github.blog/changelog/feed/", "tool"),
     FeedSource("Google AI Blog", "https://blog.google/technology/ai/rss/", "tool"),
     FeedSource("Microsoft AI Blog", "https://blogs.microsoft.com/ai/feed/", "tool"),
+)
+
+AI_TOOL_DISCOVERY_KEYWORDS = (
+    "ai",
+    "artificial intelligence",
+    "agent",
+    "agentic",
+    "llm",
+    "language model",
+    "generative",
+    "copilot",
+    "coding",
+    "code editor",
+    "mcp",
+    "model context protocol",
+    "prompt",
+    "automation",
+    "workflow",
 )
 
 SIGNAL_KEYWORDS = {
