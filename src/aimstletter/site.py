@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import sys
 import textwrap
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
 
 import feedparser
@@ -306,11 +307,14 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
             *_items_in_window(raw_tool_items, week_start, week_end),
         ]
     )
+    source_items = _enrich_items_from_source_pages(source_items)
     skill_items = _rank_work_skill_updates(source_items, 5)
     skill_urls = {item.url for item in skill_items}
     other_source_items = [item for item in source_items if item.url not in skill_urls]
     ai_items = [*skill_items, *_latest_digest_items(rank_items(other_source_items, 12), 5)]
-    tool_items = _rank_tool_updates(_items_in_window(raw_tool_items, week_start, week_end), 10)
+    tool_items = _rank_tool_updates(
+        _enrich_items_from_source_pages(_items_in_window(raw_tool_items, week_start, week_end)), 10
+    )
     ai_items = _localize_items(ai_items, settings, "DBA, 네트워크, 서버 운영자가 업무에 적용할 AI 스킬 업데이트")
     tool_items = _localize_items(tool_items, settings, "인공지능 도구 업데이트")
     archive_entry = _weekly_archive_entry(now)
@@ -542,9 +546,6 @@ _ARCHIVE_CARD_RE = re.compile(
 
 def _refresh_archive_source_summaries(output_dir: Path, settings: Settings) -> None:
     """Replace old category templates with summaries recovered from each paper's source."""
-    if not (settings.openai_api_key or settings.azure_openai_api_key):
-        return
-
     pages = list((output_dir / "archive").glob("*/*/week-*/index.html"))
     candidates: list[tuple[Path, re.Match[str], DigestItem]] = []
     for path in pages:
@@ -559,10 +560,10 @@ def _refresh_archive_source_summaries(output_dir: Path, settings: Settings) -> N
             if body not in repeated_bodies and not _needs_specific_insight_copy(body):
                 continue
             item = _archive_source_item(match)
-            if item and _arxiv_identifier(item.url):
+            if item:
                 candidates.append((path, match, item))
 
-    recovered = _recover_arxiv_items([item for _, _, item in candidates])
+    recovered = _recover_source_items([item for _, _, item in candidates])
     if not recovered:
         return
     recovered_items = list(recovered.values())
@@ -661,6 +662,76 @@ def _recover_arxiv_items(items: list[DigestItem]) -> dict[str, DigestItem]:
                     summary=summary,
                 )
     return recovered
+
+
+def _recover_source_items(items: list[DigestItem]) -> dict[str, DigestItem]:
+    recovered = _recover_arxiv_items(items)
+    remaining = [item for item in items if item.url not in recovered and not _arxiv_identifier(item.url)]
+    if not remaining:
+        return recovered
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        source_items = executor.map(_recover_web_source_item, remaining)
+    for item in source_items:
+        if item:
+            recovered[item.url] = item
+    return recovered
+
+
+def _enrich_items_from_source_pages(items: list[DigestItem]) -> list[DigestItem]:
+    needs_enrichment = [item for item in items if _source_text_needs_enrichment(item)]
+    if not needs_enrichment:
+        return items
+    recovered = _recover_source_items(needs_enrichment)
+    return [recovered.get(item.url, item) for item in items]
+
+
+def _source_text_needs_enrichment(item: DigestItem) -> bool:
+    summary = _clean_plain_text(item.summary)
+    return not summary or _needs_specific_insight_copy(summary) or summary.lower() == _clean_plain_text(item.title).lower()
+
+
+def _recover_web_source_item(item: DigestItem) -> DigestItem | None:
+    try:
+        response = requests.get(
+            item.url,
+            timeout=12,
+            headers={"User-Agent": "AI-Master-Times/1.0 (+https://storm0710.github.io/aimstletter/)"},
+        )
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+    description = _page_metadata_value(response.text, "og:description") or _page_metadata_value(
+        response.text, "description"
+    )
+    title = _page_metadata_value(response.text, "og:title") or _page_title(response.text)
+    if not description:
+        return None
+    return DigestItem(
+        title=_clean_plain_text(title) or item.title,
+        url=item.url,
+        source=item.source,
+        kind=item.kind,
+        published=item.published,
+        summary=_clean_plain_text(description),
+    )
+
+
+def _page_metadata_value(page: str, name: str) -> str:
+    quoted_name = re.escape(name)
+    patterns = (
+        rf'<meta[^>]+(?:name|property)=["\']{quoted_name}["\'][^>]+content=["\']([^"\']+)',
+        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+(?:name|property)=["\']{quoted_name}["\']',
+    )
+    for pattern in patterns:
+        match = re.search(pattern, page, flags=re.IGNORECASE)
+        if match:
+            return unescape(match.group(1))
+    return ""
+
+
+def _page_title(page: str) -> str:
+    match = re.search(r"<title[^>]*>([\s\S]*?)</title>", page, flags=re.IGNORECASE)
+    return unescape(re.sub(r"<[^>]+>", " ", match.group(1))) if match else ""
 
 
 def _rewrite_archive_card(match: re.Match[str], item: SiteItem) -> str:
@@ -6336,6 +6407,25 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
     latest = _latest_week_specific_summary(text)
     if latest:
         return latest[1]
+    if "new github copilot experience in slack" in text:
+        return (
+            "1. 무엇을 다루나요? Slack에서 @GitHub를 호출해 Copilot 에이전트 기능을 쓰는 공개 미리보기입니다.",
+            "2. 무엇이 바뀌었나: Slack 대화 안에서 Copilot CLI와 Copilot 앱의 에이전트 작업을 시작하고 진행 상황을 함께 볼 수 있습니다.",
+            "3. 업무 적용 포인트: 개발 논의가 이뤄지는 채널에서 작업 요청과 확인을 이어갈 수 있지만, 공개 미리보기의 권한과 제공 범위를 먼저 확인해야 합니다.",
+        )
+    if "shared agentic work" in text and "microsoft teams" in text:
+        return (
+            "1. 무엇을 다루나요? Microsoft Teams 대화에서 팀원과 함께 Copilot 에이전트 세션을 시작하는 기능입니다.",
+            "2. 무엇이 바뀌었나: 채널, 스레드, DM에서 @GitHub를 언급하면 모두가 보는 작업 세션을 열 수 있습니다.",
+            "3. 업무 적용 포인트: 회의나 협업 대화의 요청을 바로 작업으로 이어갈 때, 누가 지시하고 검토하는지 정해 두는 것이 좋습니다.",
+        )
+    source_summary = _source_evidence_summary(item)
+    if source_summary:
+        return (
+            f"1. 무엇을 다루나요? {source_summary}",
+            f"2. 원문 핵심: {source_summary}",
+            "3. 업무 적용 포인트: 도입 전에 실제 사용 흐름과 제공 범위를 작은 업무에서 확인해야 합니다.",
+        )
     if "advancing responsible ai" in text or "responsible ai across europe" in text:
         return (
             "1. 무엇을 다루나요? OpenAI가 유럽에서 책임 있는 AI를 배포하기 위해 적용하는 거버넌스와 안전 기준을 다룹니다.",
@@ -7029,6 +7119,9 @@ def _has_source_title_prefix(title: str, source: str) -> bool:
 def _fallback_specific_title(text: str) -> str:
     text = re.sub(r"[-_]+", " ", text.lower())
     title_rules = (
+        (("new github copilot experience in slack",), "Slack에서 쓰는 GitHub Copilot 에이전트"),
+        (("shared agentic work", "microsoft teams"), "Microsoft Teams의 공동 Copilot 에이전트 작업"),
+        (("better tools for managing blocked users",), "GitHub 차단 사용자 관리 도구 개선"),
         (("2608.22476",), "JetStream: 기존 DBMS용 질의 가속기 생성"),
         (("2608.22063",), "SQL 생성 대신 업무 도구를 고르는 MCP 서버"),
         (("2608.19025",), "과학 논문 데이터 추출의 자기 프롬프팅과 교차 검토"),
@@ -7223,10 +7316,28 @@ def _fallback_display_summary(item: DigestItem) -> str:
     if specific:
         return specific
 
+    source_summary = _source_evidence_summary(item)
+    if source_summary:
+        return source_summary
+
     points = _fallback_three_line_summary(item)
     first = _strip_point_prefix(points[0])
     second = _strip_point_prefix(points[1])
     return f"{first} {second}"
+
+
+def _source_evidence_summary(item: DigestItem) -> str:
+    summary = _clean_plain_text(item.summary)
+    title = _clean_plain_text(item.title)
+    if (
+        not summary
+        or summary.lower() == title.lower()
+        or summary.lower() in title.lower()
+        or title.lower() in summary.lower()
+        or _needs_specific_insight_copy(summary)
+    ):
+        return ""
+    return _clip(summary, 320)
 
 
 def _strip_point_prefix(text: str) -> str:
@@ -7238,6 +7349,21 @@ def _fallback_specific_summary(item: DigestItem) -> str:
     latest = _latest_week_specific_summary(text)
     if latest:
         return latest[0]
+    if "new github copilot experience in slack" in text:
+        return (
+            "Slack에서 @GitHub를 호출해 GitHub Copilot CLI와 Copilot 앱의 에이전트 기능을 쓰는 공개 미리보기입니다. "
+            "대화 중 요청을 시작하고, 팀원이 같은 Slack 대화 안에서 진행 상황을 함께 확인하고 지시할 수 있습니다."
+        )
+    if "shared agentic work" in text and "microsoft teams" in text:
+        return (
+            "Microsoft Teams 대화에서 @GitHub를 호출해 여러 사람이 함께 보는 Copilot 에이전트 세션을 시작하는 기능입니다. "
+            "채널, 스레드, DM의 논의를 작업 요청으로 이어가고 팀원이 진행 방향을 함께 정할 수 있습니다."
+        )
+    if "better tools for managing blocked users" in text:
+        return (
+            "개인 계정과 조직에서 차단한 사용자를 더 빠르게 관리하는 GitHub 업데이트입니다. "
+            "사용자 이름·실명·이메일 검색, 긴 목록의 정렬과 페이지 이동을 지원합니다."
+        )
     if "advancing responsible ai" in text or "responsible ai across europe" in text:
         return (
             "OpenAI가 유럽의 AI 규제 환경에서 책임 있는 AI 배포를 어떻게 추진하는지 설명한 글입니다. "
