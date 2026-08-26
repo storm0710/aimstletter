@@ -13,6 +13,9 @@ import sys
 import textwrap
 from urllib.parse import urlparse
 
+import feedparser
+import requests
+
 from aimstletter.composer import _make_client
 from aimstletter.config import AI_TOOL_DISCOVERY_KEYWORDS, Settings
 from aimstletter.fetchers import DigestItem, fetch_recent_items
@@ -326,6 +329,7 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     path.write_text(html, encoding="utf-8")
     _write_weekly_archive(output_dir, archive_entry, html)
     _refresh_archive_navigation(output_dir, archive_entries)
+    _refresh_archive_source_summaries(output_dir, settings)
     _write_secondary_pages(output_dir, ai_items, tool_items, _render_analytics(settings), archive_entries)
     return path
 
@@ -529,6 +533,172 @@ def _refresh_archive_navigation(output_dir: Path, entries: list[dict[str, object
         if updated != html:
             path.write_text(updated, encoding="utf-8")
     return
+
+
+_ARCHIVE_CARD_RE = re.compile(
+    r'<button class="insight-card"(?P<attributes>[^>]*)>(?P<content>[\s\S]*?)</button>'
+)
+
+
+def _refresh_archive_source_summaries(output_dir: Path, settings: Settings) -> None:
+    """Replace old category templates with summaries recovered from each paper's source."""
+    if not (settings.openai_api_key or settings.azure_openai_api_key):
+        return
+
+    pages = list((output_dir / "archive").glob("*/*/week-*/index.html"))
+    candidates: list[tuple[Path, re.Match[str], DigestItem]] = []
+    for path in pages:
+        html = path.read_text(encoding="utf-8")
+        cards = list(_ARCHIVE_CARD_RE.finditer(html))
+        bodies = [_archive_card_value(match, "data-body") for match in cards]
+        repeated_bodies = {
+            body for body in bodies if body and sum(body == other for other in bodies) > 1
+        }
+        for match in cards:
+            body = _archive_card_value(match, "data-body")
+            if body not in repeated_bodies and not _needs_specific_insight_copy(body):
+                continue
+            item = _archive_source_item(match)
+            if item and _arxiv_identifier(item.url):
+                candidates.append((path, match, item))
+
+    recovered = _recover_arxiv_items([item for _, _, item in candidates])
+    if not recovered:
+        return
+    recovered_items = list(recovered.values())
+    localized_items = _localize_items(recovered_items, settings, "이전 주차 아카이브의 원문 논문")
+    localized_by_url = {item.url: item for item in localized_items}
+    updates_by_page: dict[Path, list[tuple[re.Match[str], SiteItem]]] = {}
+    for path, match, item in candidates:
+        localized = localized_by_url.get(item.url)
+        if localized:
+            updates_by_page.setdefault(path, []).append((match, localized))
+
+    for path, updates in updates_by_page.items():
+        html = path.read_text(encoding="utf-8")
+        replacement_by_source = {
+            _archive_card_value(match, "data-source"): item for match, item in updates
+        }
+
+        def replace_card(match: re.Match[str]) -> str:
+            item = replacement_by_source.get(_archive_card_value(match, "data-source"))
+            return _rewrite_archive_card(match, item) if item else match.group(0)
+
+        updated = _ARCHIVE_CARD_RE.sub(replace_card, html)
+        first_match = _ARCHIVE_CARD_RE.search(updated)
+        first_item = (
+            replacement_by_source.get(_archive_card_value(first_match, "data-source"))
+            if first_match
+            else None
+        )
+        if first_item:
+            detail = _default_insight_detail(first_item)
+            updated = re.sub(
+                r'<article class="insight-detail"[\s\S]*?</article>', detail, updated, count=1
+            )
+        if updated != html:
+            path.write_text(updated, encoding="utf-8")
+
+
+def _archive_card_value(match: re.Match[str], name: str) -> str:
+    value_match = re.search(rf'{re.escape(name)}="([^"]*)"', match.group("attributes"))
+    return unescape(value_match.group(1)) if value_match else ""
+
+
+def _archive_source_item(match: re.Match[str]) -> DigestItem | None:
+    url = _archive_card_value(match, "data-source")
+    if not url:
+        return None
+    meta = _archive_card_value(match, "data-meta")
+    source, kind, date_text = (meta.split(" · ") + ["", ""])[:3]
+    try:
+        published = datetime.fromisoformat(date_text).replace(tzinfo=UTC)
+    except ValueError:
+        published = datetime.now(UTC)
+    return DigestItem(
+        title=_archive_card_value(match, "data-title"),
+        url=url,
+        source=source or "arXiv",
+        kind=kind or "논문",
+        published=published,
+        summary="",
+    )
+
+
+def _arxiv_identifier(url: str) -> str:
+    match = re.search(r'arxiv\.org/(?:abs|pdf)/([0-9]{4}\.[0-9]{4,5})(?:v\d+)?', url)
+    return match.group(1) if match else ""
+
+
+def _recover_arxiv_items(items: list[DigestItem]) -> dict[str, DigestItem]:
+    by_id = {_arxiv_identifier(item.url): item for item in items if _arxiv_identifier(item.url)}
+    recovered: dict[str, DigestItem] = {}
+    for start in range(0, len(by_id), 40):
+        identifiers = list(by_id)[start : start + 40]
+        try:
+            response = requests.get(
+                "https://export.arxiv.org/api/query",
+                params={"id_list": ",".join(identifiers)},
+                timeout=20,
+            )
+            response.raise_for_status()
+        except requests.RequestException:
+            continue
+        for entry in feedparser.parse(response.content).entries:
+            entry_id = _arxiv_identifier(str(getattr(entry, "id", "")))
+            original = by_id.get(entry_id)
+            if not original:
+                continue
+            title = _clean_plain_text(str(getattr(entry, "title", "")))
+            summary = _clean_plain_text(str(getattr(entry, "summary", "")))
+            if title and summary:
+                recovered[original.url] = DigestItem(
+                    title=title,
+                    url=original.url,
+                    source=original.source,
+                    kind=original.kind,
+                    published=original.published,
+                    summary=summary,
+                )
+    return recovered
+
+
+def _rewrite_archive_card(match: re.Match[str], item: SiteItem) -> str:
+    attributes = match.group("attributes")
+    values = {
+        "data-title": item.title,
+        "data-body": _smart_insight_summary(item),
+        "data-detail": _smart_insight_card_detail(item, item.summary),
+        "data-points": json.dumps(list(_smart_insight_points(item)), ensure_ascii=False),
+        "data-tags": json.dumps(list(item.tags[:6]), ensure_ascii=False),
+        "data-footnotes": json.dumps(list(item.glossary[:5]), ensure_ascii=False),
+    }
+    for name, value in values.items():
+        attributes = re.sub(
+            rf'({re.escape(name)}=")[^"]*(")',
+            lambda found: f'{found.group(1)}{escape(value, quote=True)}{found.group(2)}',
+            attributes,
+            count=1,
+        )
+    content = re.sub(
+        r'(<span class="card-title">)[\s\S]*?(</span>)',
+        rf'\1{escape(item.title)}\2',
+        match.group("content"),
+        count=1,
+    )
+    content = re.sub(
+        r'(<p>)[\s\S]*?(</p>)',
+        rf'\1{escape(_clip(_smart_insight_summary(item), 150))}\2',
+        content,
+        count=1,
+    )
+    return f'<button class="insight-card"{attributes}>{content}</button>'
+
+
+def _default_insight_detail(item: SiteItem) -> str:
+    rendered = _render_smart_insight_cards([item])
+    match = re.search(r'<article class="insight-detail"[\s\S]*?</article>', rendered)
+    return match.group(0) if match else ""
 
 
 def _ensure_primary_nav_sources_link(html: str) -> str:
@@ -5277,7 +5447,7 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             f"{source_block}"
         )
         localized = _parse_json_array(_generate_openai_text(client, model, instructions, input_text))
-        if _has_untranslated_items(localized):
+        if _has_untranslated_items(localized) or _has_reused_or_generic_localizations(localized):
             localized = _repair_korean_translation(client, model, source_block, context)
     except Exception as exc:  # noqa: BLE001
         print(f"OpenAI localization failed for {context}: {exc}", file=sys.stderr)
@@ -5298,10 +5468,24 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
     ]
 
 
+def _has_reused_or_generic_localizations(localized: list[dict[str, object]]) -> bool:
+    seen_summaries: set[str] = set()
+    for item in localized:
+        summary = _normalize_search_text(str(item.get("summary", "")))
+        detail = _normalize_search_text(str(item.get("detail", "")))
+        if _needs_specific_insight_copy(summary) or _needs_specific_insight_copy(detail):
+            return True
+        if summary and summary in seen_summaries:
+            return True
+        if summary:
+            seen_summaries.add(summary)
+    return False
+
+
 def _localized_site_item(item: DigestItem, localized_item: dict[str, object]) -> SiteItem:
     item_text = re.sub(r"[-_]+", " ", _item_text(item))
     specific = _latest_week_specific_summary(item_text)
-    if specific:
+    if specific and _localized_payload_needs_repair(localized_item):
         specific_title = _fallback_specific_title(item_text)
         summary, seed_points = specific
         return SiteItem(
@@ -5339,6 +5523,18 @@ def _localized_site_item(item: DigestItem, localized_item: dict[str, object]) ->
         tags=_safe_tags(localized_item, item),
         comparisons=_safe_comparisons(localized_item, item),
         glossary=_safe_glossary(localized_item, item),
+    )
+
+
+def _localized_payload_needs_repair(localized_item: dict[str, object]) -> bool:
+    fields = (
+        str(localized_item.get("title", "")),
+        str(localized_item.get("summary", "")),
+        str(localized_item.get("detail", "")),
+    )
+    points = localized_item.get("key_points", [])
+    return any(_needs_specific_insight_copy(field) or _looks_untranslated(field) for field in fields) or any(
+        _needs_specific_insight_copy(str(point)) for point in points if isinstance(points, list)
     )
 
 
@@ -6383,33 +6579,6 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
             "2. 핵심 구성 요소: 접근 권한, 실행 범위, 변경 검토, 보안 감사 로그입니다.",
             "3. 업무 적용 포인트: 에이전트 도입 전에 저장소 권한과 코드 변경 승인 절차를 분리해 설계해야 합니다.",
         )
-    paper_context = f"{item.source} {item.kind}".lower()
-    title = _fallback_display_title(item)
-    if "arxiv" in paper_context or "논문" in item.kind:
-        if "데이터베이스" in item.source or "database" in text or "sql" in text or "query" in text:
-            return (
-                f"1. 무엇을 다루나요? {title} 논문은 AI가 데이터베이스와 쿼리 작업을 더 안전하고 정확하게 다루는 방법을 살펴봅니다.",
-                "2. 핵심 구성 요소: 스키마 이해, 쿼리 생성 또는 최적화, 실행 전 검토, 데이터 변경 위험 통제입니다.",
-                "3. 업무 적용 포인트: 데이터 에이전트나 자연어 질의 기능을 만들 때 읽기 전용 권한, 검증 절차, 감사 로그를 함께 설계해야 합니다.",
-            )
-        if "보안" in item.source or "security" in text or "vulnerability" in text or "attack" in text:
-            return (
-                f"1. 무엇을 다루나요? {title} 논문은 AI 시스템이나 에이전트가 보안 위험을 어떻게 만들고 줄일 수 있는지 다룹니다.",
-                "2. 핵심 구성 요소: 공격 시나리오, 탐지 방식, 권한 통제, 실행 기록과 검증 절차입니다.",
-                "3. 업무 적용 포인트: AI 도구를 개발 환경이나 운영 데이터에 연결하기 전 접근 범위와 승인 단계를 먼저 정해야 합니다.",
-            )
-        if "네트워크" in item.source or "network" in text or "latency" in text or "traffic" in text:
-            return (
-                f"1. 무엇을 다루나요? {title} 논문은 네트워크 운영이나 통신 인프라에서 AI를 활용하는 방식을 다룹니다.",
-                "2. 핵심 구성 요소: 운영 상태 분석, 지연 시간과 자원 제약, 이상 징후 탐지, 설명 가능한 의사결정입니다.",
-                "3. 업무 적용 포인트: 네트워크 AI는 평균 성능보다 장애 상황, 지연 한계, 운영자 검토 가능성을 함께 검증해야 합니다.",
-            )
-        if "분산시스템" in item.source or "distributed" in text or "workflow" in text or "agent" in text:
-            return (
-                f"1. 무엇을 다루나요? {title} 논문은 여러 단계로 이어지는 AI 작업이나 분산 실행 흐름을 안정적으로 운영하는 방법을 다룹니다.",
-                "2. 핵심 구성 요소: 작업 상태, 실행 순서, 재시도와 복구, 비용과 성능 제약입니다.",
-                "3. 업무 적용 포인트: 장기 실행 에이전트를 운영할 때 실패한 단계부터 재개하고 호출 비용을 통제할 구조가 필요합니다.",
-            )
     if any(keyword in text for keyword in ("temporal", "durable execution")):
         return (
             "1. 왜 필요한가요? 오래 걸리는 AI 작업이 중간에 실패해도 재시도와 복구를 안정적으로 처리하기 위해 필요합니다.",
@@ -7018,10 +7187,6 @@ def _fallback_specific_title(text: str) -> str:
         (("github models", "retired"), "GitHub Models 종료 일정"),
         (("enterprise managed-settings",), "엔터프라이즈 managed-settings 정식 제공"),
         (("anomaly detection", "agents"), "네트워크 이상 징후를 찾는 AI 에이전트"),
-        (("database", "query", "sql"), "데이터베이스 업무를 돕는 AI"),
-        (("network", "anomaly"), "네트워크 운영을 돕는 AI"),
-        (("hardware", "verification"), "하드웨어 검증을 돕는 AI"),
-        (("security", "scanner"), "보안 검사를 돕는 AI"),
     )
     for keywords, label in title_rules:
         if all(keyword in text for keyword in keywords):

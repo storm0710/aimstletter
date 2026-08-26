@@ -12,6 +12,7 @@ from aimstletter.site import (
     _fallback_display_summary,
     _fallback_korean_item,
     _fallback_three_line_summary,
+    _has_reused_or_generic_localizations,
     _item_slug,
     _items_in_window,
     _localized_site_item,
@@ -561,6 +562,37 @@ def test_fallback_summary_avoids_generic_placeholder_points() -> None:
     assert any("투명성" in point for point in points)
     assert all("주제를 다룹니다" not in point for point in points)
     assert all("원문에서 다루는 문제" not in point for point in points)
+
+
+def test_unknown_arxiv_database_item_keeps_its_source_specific_summary() -> None:
+    item = DigestItem(
+        title="Self Prompting Cross",
+        url="https://arxiv.org/abs/2608.00001v1",
+        source="arXiv Database AI",
+        kind="paper",
+        published=datetime(2026, 8, 20, tzinfo=UTC),
+        summary="Self-generated prompts compare and improve database query plans.",
+    )
+
+    summary = _fallback_display_summary(item)
+    points = _fallback_three_line_summary(item)
+
+    assert "AI가 데이터베이스와 쿼리 작업을 더 안전하고 정확하게" not in summary
+    assert "스키마 이해, 쿼리 생성 또는 최적화" not in " ".join(points)
+
+
+def test_localization_repair_detects_reused_or_generic_summaries() -> None:
+    repeated = [
+        {"summary": "원문 내용을 업무 관점으로 정리했습니다.", "detail": "첫 번째 항목의 설명입니다."},
+        {"summary": "원문 내용을 업무 관점으로 정리했습니다.", "detail": "두 번째 항목의 설명입니다."},
+    ]
+    distinct = [
+        {"summary": "코드 변경 전에 비밀값 접근 권한을 검사하는 업데이트입니다.", "detail": "저장소 권한과 감사 기록을 분리해 관리합니다."},
+        {"summary": "쿼리 계획을 비교해 데이터베이스 질의를 개선하는 논문입니다.", "detail": "실행 전 검증으로 잘못된 질의를 줄이는 방법을 평가합니다."},
+    ]
+
+    assert _has_reused_or_generic_localizations(repeated)
+    assert not _has_reused_or_generic_localizations(distinct)
 
 
 def test_quote_bench_localized_item_uses_command_path_specific_summary() -> None:
