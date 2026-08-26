@@ -177,6 +177,7 @@ DEFAULT_FEEDS = (
 TOOL_UPDATE_FEEDS = (
     FeedSource("Anthropic News", "https://www.anthropic.com/news/rss.xml", "tool"),
     FeedSource("OpenAI News", "https://openai.com/news/rss.xml", "tool"),
+    FeedSource("Meta AI News", "https://about.fb.com/news/feed/", "tool"),
     FeedSource("GitHub Copilot Changelog", "https://github.blog/changelog/label/copilot/feed/", "tool"),
     FeedSource("GitHub Changelog", "https://github.blog/changelog/feed/", "tool"),
     FeedSource("Google AI Blog", "https://blog.google/technology/ai/rss/", "tool"),

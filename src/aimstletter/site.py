@@ -228,6 +228,22 @@ KNOWLEDGE_TOPICS = (
             "상태 그래프: 에이전트가 지금 어디에 있고 어떤 경로로 왔는지 기록하는 구조입니다.",
         ),
     ),
+    KnowledgeTopic(
+        order="08",
+        slug="agent-engineering",
+        title="에이전트 엔지니어링",
+        summary="모델, 도구, 데이터, 평가, 관측, 보안을 함께 설계해 AI 에이전트를 실제 업무 환경에서 안정적으로 운영하는 분야입니다.",
+        sections=(
+            ("왜 별도로 다루나요?", "에이전트 엔지니어링은 프롬프트, 컨텍스트, 하네스, 루프, 그래프 설계를 모두 포함하는 넓은 운영 관점입니다. AI가 실제 업무를 수행하면 답변 품질뿐 아니라 비용, 속도, 보안, 장애 대응까지 함께 관리해야 합니다."),
+            ("무엇을 확인하나요?", "실제 사용자 질문으로 품질을 평가하고, 도구 호출과 오류를 추적하며, 민감한 데이터 접근을 제한합니다. 배포 뒤에도 결과가 나빠지지 않는지 계속 관찰해야 합니다."),
+            ("업무 적용 포인트", "처음에는 반복이 많고 위험이 낮은 업무 하나를 선택해 성공 기준을 숫자로 정하는 것이 좋습니다. 그 뒤 테스트 데이터, 승인 절차, 로그를 추가하며 적용 범위를 넓히면 됩니다."),
+        ),
+        notes=(
+            "평가: AI가 업무 기준에 맞는 결과를 내는지 시험하는 과정입니다.",
+            "관측: 에이전트의 도구 호출, 오류, 시간, 비용을 기록해 상태를 파악하는 일입니다.",
+            "회귀: 수정 뒤에 예전에 잘 되던 기능이나 품질이 나빠지는 현상입니다.",
+        ),
+    ),
 )
 
 
@@ -3568,6 +3584,7 @@ def _render_ai_tool_directory() -> str:
             (
                 ("Notion AI", "문서 정리, 회의 요약, 지식 검색을 한 작업 공간 안에서 처리하는 문서형 AI 도구입니다.", ("문서", "요약", "지식관리"), "https://www.notion.com/product/ai"),
                 ("Perplexity", "출처 기반 검색과 요약으로 빠르게 리서치하고 근거 링크를 확인하는 AI 검색 도구입니다.", ("검색", "리서치", "출처"), "https://www.perplexity.ai/"),
+                ("Meta AI", "Meta의 개인형 AI 도구로, 조사와 계획을 돕고 연결한 앱의 정보를 활용하는 작업을 지원합니다.", ("개인 AI", "리서치", "작업"), "https://www.meta.ai/"),
                 ("Glean", "회사 내부 문서와 업무 시스템을 검색해 필요한 지식을 찾아주는 엔터프라이즈 검색 도구입니다.", ("사내검색", "지식", "업무"), "https://www.glean.com/"),
             ),
         ),
@@ -3608,6 +3625,35 @@ def _render_ai_tool_directory() -> str:
             "</section>"
         )
     return "".join(sections)
+
+
+def _render_recent_tool_updates(items: list[SiteItem]) -> str:
+    if not items:
+        return ""
+    cards = "".join(
+        (
+            '<article class="ai-tool-card recent-tool-card">'
+            "<div>"
+            f"<h3>{escape(_clip(item.title, 92))}</h3>"
+            f"<p>{escape(_clip(item.summary, 180))}</p>"
+            "</div>"
+            "<div>"
+            f'<div class="tool-meta-row"><span class="tool-chip">{escape(item.source)}</span>'
+            f'<span class="tool-chip">{_format_date(item.published)}</span></div>'
+            f'<a class="tool-action" href="{escape(item.url, quote=True)}" '
+            'target="_blank" rel="noopener noreferrer">공식 발표 보기</a>'
+            "</div>"
+            "</article>"
+        )
+        for item in _latest_first(items)[:8]
+    )
+    return (
+        '<section class="tool-category recent-tool-updates">'
+        '<header class="tool-category-header"><h2>이번 주 새 도구·업데이트</h2>'
+        '<p>공식 제품 뉴스와 변경 이력에서 자동 수집한 최신 발표입니다. 새 프로그램이나 기능이 발표되면 다음 주 생성 때 이 영역에 반영됩니다.</p></header>'
+        f'<div class="tool-list-grid">{cards}</div>'
+        "</section>"
+    )
 
 def _render_dashboard_tool_cards(items: list[SiteItem]) -> str:
     if not items:
@@ -3719,7 +3765,7 @@ def _write_secondary_pages(
         encoding="utf-8",
     )
     (output_dir / "ai-tools" / "index.html").write_text(
-        _render_ai_tools_page(analytics_html=analytics_html, back_href="../"),
+        _render_ai_tools_page(analytics_html=analytics_html, back_href="../", recent_tool_items=tools),
         encoding="utf-8",
     )
     (output_dir / "ai-sources" / "index.html").write_text(
@@ -3789,7 +3835,7 @@ def _render_board_page(
     )
 
 
-def _render_ai_tools_page(analytics_html: str, back_href: str) -> str:
+def _render_ai_tools_page(analytics_html: str, back_href: str, recent_tool_items: list[SiteItem] | None = None) -> str:
     return _render_plain_page(
         title="AI 활용 도구",
         analytics_html=analytics_html,
@@ -3800,6 +3846,7 @@ def _render_ai_tools_page(analytics_html: str, back_href: str) -> str:
           <h1>AI 활용 도구</h1>
           <p>코딩, 앱 제작, 문서 정리, 디자인, 자동화처럼 실제 결과물을 만드는 데 활용할 수 있는 도구 목록입니다. 비슷한 업무 영역끼리 묶어 빠르게 비교할 수 있게 정리했습니다.</p>
         </header>
+        {_render_recent_tool_updates(recent_tool_items or [])}
         {_render_ai_tool_directory()}
         """,
     )
@@ -3869,7 +3916,7 @@ def _render_knowledge_index_page(
         <header class="simple-header tool-page-header">
           <div class="kicker">Knowledge</div>
           <h1>AI 엔지니어링 Knowledge</h1>
-          <p>AI 애플리케이션을 설계할 때 자주 섞이는 7개 개념을 관계, 선택 기준, 실제 업무 사례 중심으로 정리했습니다.</p>
+          <p>AI 애플리케이션을 설계할 때 자주 섞이는 8개 개념을 관계, 선택 기준, 실제 업무 사례 중심으로 정리했습니다.</p>
         </header>
         <section class="knowledge-article">
           <article class="knowledge-body">
@@ -3919,6 +3966,7 @@ def _render_knowledge_relation_map() -> str:
         ("하네스 엔지니어링", "도구, 권한, 샌드박스, 검증, 승인, 로그로 실행 환경을 통제합니다."),
         ("하네스 내부의 루프", "계획, 실행, 관찰, 평가를 반복하고 수정 또는 종료를 결정합니다."),
         ("그래프 엔지니어링", "작업, 데이터, 권한, 서비스, 의존 관계 전체를 그래프로 모델링합니다."),
+        ("에이전트 엔지니어링", "모델, 도구, 평가, 관측, 보안을 함께 운영해 실제 업무 환경에서 안정성을 관리합니다."),
     )
     cards = "".join(
         f'<div class="relation-step"><strong>{escape(title)}</strong><span>{escape(body)}</span></div>'
@@ -4184,6 +4232,7 @@ def _source_entries(items: list[SiteItem]) -> list[dict[str, str]]:
     descriptions = {
         "OpenAI 소식": "OpenAI 제품, API, Codex, 에이전트 관련 업데이트를 확인하는 출처입니다.",
         "Anthropic 소식": "Claude와 Claude Code 관련 제품·엔지니어링 업데이트를 확인하는 출처입니다.",
+        "Meta AI 소식": "Meta AI, Llama, Meta AI 앱 관련 제품과 기능 업데이트를 확인하는 공식 출처입니다.",
         "GitHub Copilot 변경 이력": "GitHub Copilot과 개발 워크플로 자동화 변경 사항을 확인하는 출처입니다.",
         "arXiv 네트워크 AI": "네트워크, 데이터베이스, 에이전트 연구 논문을 확인하는 출처입니다.",
         "arXiv 데이터베이스 AI": "데이터베이스, 검색, 벡터 저장소 관련 AI 연구를 확인하는 출처입니다.",
@@ -7289,6 +7338,7 @@ def _korean_source_name(source: str) -> str:
     names = {
         "Anthropic News": "Anthropic 소식",
         "OpenAI News": "OpenAI 소식",
+        "Meta AI News": "Meta AI 소식",
         "GitHub Copilot Changelog": "GitHub Copilot 변경 이력",
         "GitHub Changelog": "GitHub 변경 이력",
         "Google AI Blog": "Google AI 블로그",
@@ -7318,6 +7368,15 @@ def _rank_tool_updates(items: list[DigestItem], limit: int) -> list[DigestItem]:
         "api",
         "developer",
         "coding",
+        "meta ai",
+        "meta",
+        "muse",
+        "llama",
+        "gemini",
+        "replit",
+        "windsurf",
+        "lovable",
+        "bolt",
     )
 
     def score(item: DigestItem) -> tuple[datetime, int]:
