@@ -992,6 +992,8 @@ def _render_editorial_homepage(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <title>AI Master Times</title>
   <meta name="description" content="AI Master Times 주간 AI 업무 업데이트">
   {analytics_html}
