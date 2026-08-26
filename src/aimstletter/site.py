@@ -3923,7 +3923,7 @@ def _render_knowledge_index_page(
             {_render_knowledge_relation_map()}
             <section>
               <h2>개념 간 전체 비교표</h2>
-              {_render_table(("개념", "핵심 질문", "설계 대상", "대표 결과물", "대표 실패", "가장 적합한 상황"), GLOBAL_COMPARISON_ROWS)}
+              {_render_global_comparison()}
             </section>
             <section>
               <h2>헷갈리기 쉬운 개념</h2>
@@ -3956,26 +3956,62 @@ def _render_table(headers: tuple[str, ...], rows: tuple[tuple[str, ...], ...]) -
     return _render_simple_table(headers, rows)
 
 
-def _render_knowledge_relation_map() -> str:
-    steps = (
-        ("사용자 요청", "업무 목표와 제약이 시작점입니다."),
-        ("프롬프트 엔지니어링", "모델에게 무엇을 어떻게 요청할지 정의합니다."),
-        ("컨텍스트 엔지니어링", "모델이 판단할 정보와 상태를 구성합니다."),
-        ("LangChain", "모델, 프롬프트, 검색기, 도구를 애플리케이션으로 연결합니다."),
-        ("LangGraph", "상태, 분기, 재시도, 승인 흐름을 그래프로 실행합니다."),
-        ("하네스 엔지니어링", "도구, 권한, 샌드박스, 검증, 승인, 로그로 실행 환경을 통제합니다."),
-        ("하네스 내부의 루프", "계획, 실행, 관찰, 평가를 반복하고 수정 또는 종료를 결정합니다."),
-        ("그래프 엔지니어링", "작업, 데이터, 권한, 서비스, 의존 관계 전체를 그래프로 모델링합니다."),
-        ("에이전트 엔지니어링", "모델, 도구, 평가, 관측, 보안을 함께 운영해 실제 업무 환경에서 안정성을 관리합니다."),
+def _render_global_comparison() -> str:
+    rows = tuple(
+        (concept, question, suitable, risk)
+        for concept, question, _target, _output, risk, suitable in GLOBAL_COMPARISON_ROWS
     )
-    cards = "".join(
-        f'<div class="relation-step"><strong>{escape(title)}</strong><span>{escape(body)}</span></div>'
-        for title, body in steps
+    return _render_table(
+        ("개념", "무엇을 정하나", "이럴 때 사용", "주의할 점"),
+        rows,
+    )
+
+
+def _render_knowledge_relation_map() -> str:
+    stages = (
+        (
+            "1. 설계",
+            "AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.",
+            (
+                ("프롬프트 엔지니어링", "AI에게 맡길 일과 결과 형식을 정합니다."),
+                ("컨텍스트 엔지니어링", "AI가 판단할 때 참고할 자료와 상태를 고릅니다."),
+                ("LangChain", "모델, 검색, 도구를 하나의 앱으로 연결합니다."),
+            ),
+        ),
+        (
+            "2. 실행",
+            "AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.",
+            (
+                ("LangGraph", "분기, 재시도, 승인처럼 긴 작업의 순서를 관리합니다."),
+                ("하네스 엔지니어링", "도구, 권한, 검증, 기록으로 실행 범위를 제한합니다."),
+                ("루프 엔지니어링", "결과를 확인하고 수정하거나 멈추는 반복 규칙을 정합니다."),
+            ),
+        ),
+        (
+            "3. 운영",
+            "관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.",
+            (
+                ("그래프 엔지니어링", "업무, 데이터, 권한의 연결 관계와 영향 범위를 모델링합니다."),
+                ("에이전트 엔지니어링", "모델, 도구, 평가, 관측, 보안을 함께 운영합니다."),
+            ),
+        ),
+    )
+    stage_html = "".join(
+        '<section class="relation-stage">'
+        f'<h3>{escape(stage_title)}</h3><p>{escape(stage_summary)}</p>'
+        '<div class="relation-stage-items">'
+        + "".join(
+            f'<div class="relation-step"><strong>{escape(title)}</strong><span>{escape(body)}</span></div>'
+            for title, body in steps
+        )
+        + "</div></section>"
+        for stage_title, stage_summary, steps in stages
     )
     return f"""
             <section class="knowledge-map">
               <h2>AI 엔지니어링 관계도</h2>
-              <div class="relation-flow">{cards}</div>
+              <p class="knowledge-map-intro">AI 기능은 먼저 설계하고, 정한 규칙에 따라 실행한 뒤, 실제 업무에서 계속 운영합니다.</p>
+              <div class="relation-flow">{stage_html}</div>
             </section>
     """
 
@@ -4114,7 +4150,7 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
             {_render_knowledge_relation_map()}
             <section>
               <h2>개념 간 전체 비교표</h2>
-              {_render_table(("개념", "핵심 질문", "설계 대상", "대표 결과물", "대표 실패", "가장 적합한 상황"), GLOBAL_COMPARISON_ROWS)}
+              {_render_global_comparison()}
             </section>
             <section>
               <h2>헷갈리기 쉬운 개념</h2>
@@ -4130,10 +4166,13 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
                 <span>난이도: {escape(str(page["difficulty"]))}</span>
                 <span>주요 대상: {escape(str(page["audience"]))}</span>
                 <span>예상 읽기 시간: {escape(str(page["reading_time"]))}</span>
-                <span>기술 성숙도: {escape(str(page["maturity"]))}</span>
-                <span>최종 검토 날짜: {escape(str(page["updated_at"]))}</span>
-                <span>빠르게 변경될 수 있는 내용: {escape(str(page["volatile"]))}</span>
               </div>
+              <details class="knowledge-facts">
+                <summary>문서 정보</summary>
+                <p><strong>기술 성숙도:</strong> {escape(str(page["maturity"]))}</p>
+                <p>최종 검토 날짜: {escape(str(page["updated_at"]))}</p>
+                <p><strong>변경 가능성:</strong> {escape(str(page["volatile"]))}</p>
+              </details>
               <h2>30초 요약</h2>
               <dl>
                 <dt>한 줄 정의</dt><dd>{escape(str(page["definition"]))}</dd>
@@ -4735,12 +4774,17 @@ def _render_plain_page(
     }}
     .knowledge-map {{
       border: 1px solid #d8dde5;
-      background: #fbfcfd;
-      padding: 16px;
+      background: #f8fafc;
+      padding: 22px;
       margin-bottom: 24px;
     }}
     .knowledge-map h2 {{
       margin-top: 0;
+    }}
+    .knowledge-map-intro {{
+      margin: -4px 0 18px;
+      color: #465161;
+      font: 14px/1.65 Arial, "Noto Sans KR", sans-serif;
     }}
     .definition-box,
     .warning-box {{
@@ -4767,50 +4811,43 @@ def _render_plain_page(
     }}
     .relation-flow {{
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px 24px;
-      counter-reset: relation-step;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
     }}
-    .relation-step {{
-      position: relative;
+    .relation-stage {{
       border: 1px solid #d7dde6;
       background: #ffffff;
-      padding: 12px 14px;
+      padding: 14px;
     }}
-    .relation-step::before {{
-      counter-increment: relation-step;
-      content: counter(relation-step);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      margin-right: 8px;
-      border: 1px solid #111111;
-      border-radius: 50%;
-      font: 800 11px/1 Arial, "Noto Sans KR", sans-serif;
+    .relation-stage h3 {{
+      margin: 0;
+      color: #1d4f7e;
+      font: 900 14px/1.35 Arial, "Noto Sans KR", sans-serif;
     }}
-    .relation-step::after {{
-      content: "↓";
-      position: absolute;
-      right: -18px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6b7280;
-      font-weight: 900;
+    .relation-stage > p {{
+      min-height: 44px;
+      margin: 6px 0 12px;
+      color: #556170;
+      font: 13px/1.55 Arial, "Noto Sans KR", sans-serif;
     }}
-    .relation-step:nth-child(2n)::after,
-    .relation-step:last-child::after {{
-      content: "";
+    .relation-stage-items {{
+      display: grid;
+      gap: 8px;
+    }}
+    .relation-step {{
+      border-left: 3px solid #2f7fc0;
+      background: #f8fbff;
+      padding: 10px 11px;
     }}
     .relation-step strong {{
-      font: 900 13px/1.3 Arial, "Noto Sans KR", sans-serif;
+      display: block;
+      font: 900 13px/1.35 Arial, "Noto Sans KR", sans-serif;
     }}
     .relation-step span {{
       display: block;
-      margin-top: 7px;
+      margin-top: 4px;
       color: #4c5563;
-      font: 13px/1.55 Arial, "Noto Sans KR", sans-serif;
+      font: 12px/1.55 Arial, "Noto Sans KR", sans-serif;
     }}
     .knowledge-quick {{
       border: 1px solid #d8dde5;
@@ -4824,18 +4861,32 @@ def _render_plain_page(
     .knowledge-meta {{
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 8px 10px;
       margin-bottom: 14px;
     }}
     .knowledge-meta span,
     .keyword-list span {{
       display: inline-flex;
       align-items: center;
-      min-height: 22px;
+      min-height: 26px;
       border: 1px solid #d7dde6;
       background: #ffffff;
-      padding: 0 8px;
+      padding: 0 9px;
       font: 800 11px/1 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .knowledge-facts {{
+      margin: -4px 0 16px;
+      color: #4c5563;
+      font: 12px/1.6 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .knowledge-facts summary {{
+      width: fit-content;
+      cursor: pointer;
+      color: #1d4f7e;
+      font-weight: 800;
+    }}
+    .knowledge-facts p {{
+      margin: 6px 0 0;
     }}
     .knowledge-quick dl {{
       display: grid;
@@ -4863,7 +4914,7 @@ def _render_plain_page(
     }}
     .knowledge-table {{
       width: 100%;
-      min-width: 680px;
+      min-width: 620px;
       border-collapse: collapse;
       font: 14px/1.6 Arial, "Noto Sans KR", sans-serif;
     }}
@@ -4998,6 +5049,28 @@ def _render_plain_page(
       background: #f7f9fb;
       padding: 3px 7px;
       font: 800 11px/1.3 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .concept-links {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }}
+    .concept-links a {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border: 1px solid #b9cbe0;
+      background: #ffffff;
+      padding: 0 10px;
+      color: #1d4f7e;
+      font: 800 12px/1.25 Arial, "Noto Sans KR", sans-serif;
+      text-decoration: none;
+    }}
+    .concept-links a:hover,
+    .concept-links a:focus-visible {{
+      border-color: #1d4f7e;
+      background: #eaf3fc;
+      outline: 0;
     }}
     .key-points {{
       margin: 9px 0 0;

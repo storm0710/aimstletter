@@ -359,12 +359,17 @@
     }
     .knowledge-map {
       border: 1px solid #d8dde5;
-      background: #fbfcfd;
-      padding: 16px;
+      background: #f8fafc;
+      padding: 22px;
       margin-bottom: 24px;
     }
     .knowledge-map h2 {
       margin-top: 0;
+    }
+    .knowledge-map-intro {
+      margin: -4px 0 18px;
+      color: #465161;
+      font: 14px/1.65 Arial, "Noto Sans KR", sans-serif;
     }
     .definition-box,
     .warning-box {
@@ -391,50 +396,43 @@
     }
     .relation-flow {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px 24px;
-      counter-reset: relation-step;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
     }
-    .relation-step {
-      position: relative;
+    .relation-stage {
       border: 1px solid #d7dde6;
       background: #ffffff;
-      padding: 12px 14px;
+      padding: 14px;
     }
-    .relation-step::before {
-      counter-increment: relation-step;
-      content: counter(relation-step);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      margin-right: 8px;
-      border: 1px solid #111111;
-      border-radius: 50%;
-      font: 800 11px/1 Arial, "Noto Sans KR", sans-serif;
+    .relation-stage h3 {
+      margin: 0;
+      color: #1d4f7e;
+      font: 900 14px/1.35 Arial, "Noto Sans KR", sans-serif;
     }
-    .relation-step::after {
-      content: "↓";
-      position: absolute;
-      right: -18px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6b7280;
-      font-weight: 900;
+    .relation-stage > p {
+      min-height: 44px;
+      margin: 6px 0 12px;
+      color: #556170;
+      font: 13px/1.55 Arial, "Noto Sans KR", sans-serif;
     }
-    .relation-step:nth-child(2n)::after,
-    .relation-step:last-child::after {
-      content: "";
+    .relation-stage-items {
+      display: grid;
+      gap: 8px;
+    }
+    .relation-step {
+      border-left: 3px solid #2f7fc0;
+      background: #f8fbff;
+      padding: 10px 11px;
     }
     .relation-step strong {
-      font: 900 13px/1.3 Arial, "Noto Sans KR", sans-serif;
+      display: block;
+      font: 900 13px/1.35 Arial, "Noto Sans KR", sans-serif;
     }
     .relation-step span {
       display: block;
-      margin-top: 7px;
+      margin-top: 4px;
       color: #4c5563;
-      font: 13px/1.55 Arial, "Noto Sans KR", sans-serif;
+      font: 12px/1.55 Arial, "Noto Sans KR", sans-serif;
     }
     .knowledge-quick {
       border: 1px solid #d8dde5;
@@ -448,18 +446,32 @@
     .knowledge-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 8px 10px;
       margin-bottom: 14px;
     }
     .knowledge-meta span,
     .keyword-list span {
       display: inline-flex;
       align-items: center;
-      min-height: 22px;
+      min-height: 26px;
       border: 1px solid #d7dde6;
       background: #ffffff;
-      padding: 0 8px;
+      padding: 0 9px;
       font: 800 11px/1 Arial, "Noto Sans KR", sans-serif;
+    }
+    .knowledge-facts {
+      margin: -4px 0 16px;
+      color: #4c5563;
+      font: 12px/1.6 Arial, "Noto Sans KR", sans-serif;
+    }
+    .knowledge-facts summary {
+      width: fit-content;
+      cursor: pointer;
+      color: #1d4f7e;
+      font-weight: 800;
+    }
+    .knowledge-facts p {
+      margin: 6px 0 0;
     }
     .knowledge-quick dl {
       display: grid;
@@ -487,7 +499,7 @@
     }
     .knowledge-table {
       width: 100%;
-      min-width: 680px;
+      min-width: 620px;
       border-collapse: collapse;
       font: 14px/1.6 Arial, "Noto Sans KR", sans-serif;
     }
@@ -623,6 +635,28 @@
       padding: 3px 7px;
       font: 800 11px/1.3 Arial, "Noto Sans KR", sans-serif;
     }
+    .concept-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .concept-links a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border: 1px solid #b9cbe0;
+      background: #ffffff;
+      padding: 0 10px;
+      color: #1d4f7e;
+      font: 800 12px/1.25 Arial, "Noto Sans KR", sans-serif;
+      text-decoration: none;
+    }
+    .concept-links a:hover,
+    .concept-links a:focus-visible {
+      border-color: #1d4f7e;
+      background: #eaf3fc;
+      outline: 0;
+    }
     .key-points {
       margin: 9px 0 0;
       padding-left: 20px;
@@ -729,16 +763,17 @@
 
             <section class="knowledge-map">
               <h2>AI 엔지니어링 관계도</h2>
-              <div class="relation-flow"><div class="relation-step"><strong>사용자 요청</strong><span>업무 목표와 제약이 시작점입니다.</span></div><div class="relation-step"><strong>프롬프트 엔지니어링</strong><span>모델에게 무엇을 어떻게 요청할지 정의합니다.</span></div><div class="relation-step"><strong>컨텍스트 엔지니어링</strong><span>모델이 판단할 정보와 상태를 구성합니다.</span></div><div class="relation-step"><strong>LangChain</strong><span>모델, 프롬프트, 검색기, 도구를 애플리케이션으로 연결합니다.</span></div><div class="relation-step"><strong>LangGraph</strong><span>상태, 분기, 재시도, 승인 흐름을 그래프로 실행합니다.</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>도구, 권한, 샌드박스, 검증, 승인, 로그로 실행 환경을 통제합니다.</span></div><div class="relation-step"><strong>하네스 내부의 루프</strong><span>계획, 실행, 관찰, 평가를 반복하고 수정 또는 종료를 결정합니다.</span></div><div class="relation-step"><strong>그래프 엔지니어링</strong><span>작업, 데이터, 권한, 서비스, 의존 관계 전체를 그래프로 모델링합니다.</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>모델, 도구, 평가, 관측, 보안을 함께 운영해 실제 업무 환경에서 안정성을 관리합니다.</span></div></div>
+              <p class="knowledge-map-intro">AI 기능은 먼저 설계하고, 정한 규칙에 따라 실행한 뒤, 실제 업무에서 계속 운영합니다.</p>
+              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>프롬프트 엔지니어링</strong><span>AI에게 맡길 일과 결과 형식을 정합니다.</span></div><div class="relation-step"><strong>컨텍스트 엔지니어링</strong><span>AI가 판단할 때 참고할 자료와 상태를 고릅니다.</span></div><div class="relation-step"><strong>LangChain</strong><span>모델, 검색, 도구를 하나의 앱으로 연결합니다.</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>분기, 재시도, 승인처럼 긴 작업의 순서를 관리합니다.</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>도구, 권한, 검증, 기록으로 실행 범위를 제한합니다.</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>결과를 확인하고 수정하거나 멈추는 반복 규칙을 정합니다.</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>업무, 데이터, 권한의 연결 관계와 영향 범위를 모델링합니다.</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>모델, 도구, 평가, 관측, 보안을 함께 운영합니다.</span></div></div></section></div>
             </section>
 
             <section>
               <h2>개념 간 전체 비교표</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>설계 대상</th><th>대표 결과물</th><th>대표 실패</th><th>가장 적합한 상황</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델, 프롬프트, 검색기, 도구</td><td>AI 애플리케이션 파이프라인</td><td>프레임워크 복잡성, 종속성</td><td>모델 호출과 외부 기능 연결이 많을 때</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>State, Node, Edge, Checkpoint</td><td>상태 기반 워크플로</td><td>상태 설계 오류, 복잡한 흐름</td><td>장기 실행, 승인, 재시도가 필요할 때</td></tr><tr><td>프롬프트 엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>역할, 지시, 예시, 출력 형식</td><td>프롬프트 템플릿</td><td>모호한 요청, 출력 불안정</td><td>답변 형식과 판단 기준을 안정화할 때</td></tr><tr><td>컨텍스트 엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>검색 자료, 메모리, 권한, 최신성</td><td>컨텍스트 구성 파이프라인</td><td>관련 없는 정보, 오래된 정보</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 할 수 있게 허용할 것인가</td><td>도구, 권한, 샌드박스, 검증, 로그</td><td>실행 환경과 정책</td><td>위험한 실행, 감사 불가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>상태, 반복, 평가, 종료 조건</td><td>반복 제어 정책</td><td>무한 반복, 진전 없는 재시도</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>노드, 엣지, 속성, 계보</td><td>관계 모델과 영향도 그래프</td><td>지나치게 큰 그래프, 잘못된 관계</td><td>업무·데이터·권한 의존성을 추적할 때</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>무엇을 정하나</th><th>이럴 때 사용</th><th>주의할 점</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델 호출과 외부 기능 연결이 많을 때</td><td>프레임워크 복잡성, 종속성</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>장기 실행, 승인, 재시도가 필요할 때</td><td>상태 설계 오류, 복잡한 흐름</td></tr><tr><td>프롬프트 엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>답변 형식과 판단 기준을 안정화할 때</td><td>모호한 요청, 출력 불안정</td></tr><tr><td>컨텍스트 엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td><td>관련 없는 정보, 오래된 정보</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 할 수 있게 허용할 것인가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td><td>위험한 실행, 감사 불가</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td><td>무한 반복, 진전 없는 재시도</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>업무·데이터·권한 의존성을 추적할 때</td><td>지나치게 큰 그래프, 잘못된 관계</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td><td>품질 저하, 비용 증가, 권한 과다</td></tr></tbody></table></div>
             </section>
             <section>
               <h2>헷갈리기 쉬운 개념</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>비교</th><th>첫 번째 개념</th><th>두 번째 개념</th><th>관계</th></tr></thead><tbody><tr><td>프롬프트와 컨텍스트</td><td>모델에게 어떤 행동을 요구할지 정의</td><td>모델이 판단할 때 어떤 정보를 볼지 정의</td><td>좋은 프롬프트도 잘못된 컨텍스트를 받으면 틀릴 수 있고, 좋은 컨텍스트도 지시가 모호하면 일관된 결과를 만들기 어렵습니다.</td></tr><tr><td>LangChain과 LangGraph</td><td>구성요소 조합과 외부 통합</td><td>상태 기반 실행, 분기, 중단과 재개</td><td>LangChain은 앱 구성요소를 연결하고, LangGraph는 긴 작업의 상태와 실행 흐름을 제어합니다.</td></tr><tr><td>LangGraph와 그래프 엔지니어링</td><td>AI 워크플로 실행 프레임워크</td><td>관계 및 의존성 모델링 방법론</td><td>LangGraph는 실행 그래프이고, 그래프 엔지니어링은 시스템·데이터·권한 관계를 설계하는 더 넓은 방법입니다.</td></tr><tr><td>하네스와 루프</td><td>실행 환경, 도구, 권한과 안전장치</td><td>반복 행동, 평가, 전략 변경과 종료 결정</td><td>하네스가 루프를 감싸고 제한하며, 루프는 하네스가 제공하는 환경 안에서 실행됩니다.</td></tr><tr><td>컨텍스트와 하네스</td><td>모델이 볼 수 있는 정보</td><td>에이전트가 사용할 수 있는 실행 환경과 권한</td><td>컨텍스트는 판단 재료이고, 하네스는 실제 행동의 경계입니다.</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>비교</th><th>첫 번째 개념</th><th>두 번째 개념</th><th>관계</th></tr></thead><tbody><tr><td>프롬프트와 컨텍스트</td><td>모델에게 어떤 행동을 요구할지 정의</td><td>모델이 판단할 때 어떤 정보를 볼지 정의</td><td>좋은 프롬프트도 잘못된 컨텍스트를 받으면 틀릴 수 있고, 좋은 컨텍스트도 지시가 모호하면 일관된 결과를 만들기 어렵습니다.</td></tr><tr><td>LangChain과 LangGraph</td><td>구성요소 조합과 외부 통합</td><td>상태 기반 실행, 분기, 중단과 재개</td><td>LangChain은 앱 구성요소를 연결하고, LangGraph는 긴 작업의 상태와 실행 흐름을 제어합니다.</td></tr><tr><td>LangGraph와 그래프 엔지니어링</td><td>AI 워크플로 실행 프레임워크</td><td>관계 및 의존성 모델링 방법론</td><td>LangGraph는 실행 그래프이고, 그래프 엔지니어링은 시스템·데이터·권한 관계를 설계하는 더 넓은 방법입니다.</td></tr><tr><td>하네스와 루프</td><td>실행 환경, 도구, 권한과 안전장치</td><td>반복 행동, 평가, 전략 변경과 종료 결정</td><td>하네스가 루프를 감싸고 제한하며, 루프는 하네스가 제공하는 환경 안에서 실행됩니다.</td></tr><tr><td>컨텍스트와 하네스</td><td>모델이 볼 수 있는 정보</td><td>에이전트가 사용할 수 있는 실행 환경과 권한</td><td>컨텍스트는 판단 재료이고, 하네스는 실제 행동의 경계입니다.</td></tr><tr><td>그래프와 에이전트 엔지니어링</td><td>관계와 의존성을 모델링</td><td>도구 실행, 평가, 관측, 보안을 운영</td><td>그래프는 구조를 이해하는 방법이고, 에이전트 엔지니어링은 그 구조 안에서 AI를 안전하게 운영하는 전체 활동입니다.</td></tr></tbody></table></div>
             </section>
             <section class="definition-box">
               <h2>이 문서에서 사용하는 정의</h2>
@@ -750,10 +785,13 @@
                 <span>난이도: 중급~고급</span>
                 <span>주요 대상: 플랫폼 · 보안 · 백엔드 · AI 엔지니어</span>
                 <span>예상 읽기 시간: 13분</span>
-                <span>기술 성숙도: 이 사이트의 실무적 분류. 표준 학술 분류처럼 단정하지 않음</span>
-                <span>최종 검토 날짜: 2026-08-06</span>
-                <span>빠르게 변경될 수 있는 내용: Codex, Agents SDK, Claude Code, gstack 기능은 현재 문서 확인 필요</span>
               </div>
+              <details class="knowledge-facts">
+                <summary>문서 정보</summary>
+                <p><strong>기술 성숙도:</strong> 이 사이트의 실무적 분류. 표준 학술 분류처럼 단정하지 않음</p>
+                <p>최종 검토 날짜: 2026-08-06</p>
+                <p><strong>변경 가능성:</strong> Codex, Agents SDK, Claude Code, gstack 기능은 현재 문서 확인 필요</p>
+              </details>
               <h2>30초 요약</h2>
               <dl>
                 <dt>한 줄 정의</dt><dd>에이전트를 둘러싼 실행 환경, 도구, 권한, 샌드박스, 검증, 승인, 로그를 설계하는 분야입니다.</dd>

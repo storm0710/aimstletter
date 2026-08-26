@@ -359,12 +359,17 @@
     }
     .knowledge-map {
       border: 1px solid #d8dde5;
-      background: #fbfcfd;
-      padding: 16px;
+      background: #f8fafc;
+      padding: 22px;
       margin-bottom: 24px;
     }
     .knowledge-map h2 {
       margin-top: 0;
+    }
+    .knowledge-map-intro {
+      margin: -4px 0 18px;
+      color: #465161;
+      font: 14px/1.65 Arial, "Noto Sans KR", sans-serif;
     }
     .definition-box,
     .warning-box {
@@ -391,50 +396,43 @@
     }
     .relation-flow {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px 24px;
-      counter-reset: relation-step;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
     }
-    .relation-step {
-      position: relative;
+    .relation-stage {
       border: 1px solid #d7dde6;
       background: #ffffff;
-      padding: 12px 14px;
+      padding: 14px;
     }
-    .relation-step::before {
-      counter-increment: relation-step;
-      content: counter(relation-step);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      margin-right: 8px;
-      border: 1px solid #111111;
-      border-radius: 50%;
-      font: 800 11px/1 Arial, "Noto Sans KR", sans-serif;
+    .relation-stage h3 {
+      margin: 0;
+      color: #1d4f7e;
+      font: 900 14px/1.35 Arial, "Noto Sans KR", sans-serif;
     }
-    .relation-step::after {
-      content: "↓";
-      position: absolute;
-      right: -18px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6b7280;
-      font-weight: 900;
+    .relation-stage > p {
+      min-height: 44px;
+      margin: 6px 0 12px;
+      color: #556170;
+      font: 13px/1.55 Arial, "Noto Sans KR", sans-serif;
     }
-    .relation-step:nth-child(2n)::after,
-    .relation-step:last-child::after {
-      content: "";
+    .relation-stage-items {
+      display: grid;
+      gap: 8px;
+    }
+    .relation-step {
+      border-left: 3px solid #2f7fc0;
+      background: #f8fbff;
+      padding: 10px 11px;
     }
     .relation-step strong {
-      font: 900 13px/1.3 Arial, "Noto Sans KR", sans-serif;
+      display: block;
+      font: 900 13px/1.35 Arial, "Noto Sans KR", sans-serif;
     }
     .relation-step span {
       display: block;
-      margin-top: 7px;
+      margin-top: 4px;
       color: #4c5563;
-      font: 13px/1.55 Arial, "Noto Sans KR", sans-serif;
+      font: 12px/1.55 Arial, "Noto Sans KR", sans-serif;
     }
     .knowledge-quick {
       border: 1px solid #d8dde5;
@@ -448,18 +446,32 @@
     .knowledge-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 8px 10px;
       margin-bottom: 14px;
     }
     .knowledge-meta span,
     .keyword-list span {
       display: inline-flex;
       align-items: center;
-      min-height: 22px;
+      min-height: 26px;
       border: 1px solid #d7dde6;
       background: #ffffff;
-      padding: 0 8px;
+      padding: 0 9px;
       font: 800 11px/1 Arial, "Noto Sans KR", sans-serif;
+    }
+    .knowledge-facts {
+      margin: -4px 0 16px;
+      color: #4c5563;
+      font: 12px/1.6 Arial, "Noto Sans KR", sans-serif;
+    }
+    .knowledge-facts summary {
+      width: fit-content;
+      cursor: pointer;
+      color: #1d4f7e;
+      font-weight: 800;
+    }
+    .knowledge-facts p {
+      margin: 6px 0 0;
     }
     .knowledge-quick dl {
       display: grid;
@@ -487,7 +499,7 @@
     }
     .knowledge-table {
       width: 100%;
-      min-width: 680px;
+      min-width: 620px;
       border-collapse: collapse;
       font: 14px/1.6 Arial, "Noto Sans KR", sans-serif;
     }
@@ -622,6 +634,28 @@
       background: #f7f9fb;
       padding: 3px 7px;
       font: 800 11px/1.3 Arial, "Noto Sans KR", sans-serif;
+    }
+    .concept-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .concept-links a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border: 1px solid #b9cbe0;
+      background: #ffffff;
+      padding: 0 10px;
+      color: #1d4f7e;
+      font: 800 12px/1.25 Arial, "Noto Sans KR", sans-serif;
+      text-decoration: none;
+    }
+    .concept-links a:hover,
+    .concept-links a:focus-visible {
+      border-color: #1d4f7e;
+      background: #eaf3fc;
+      outline: 0;
     }
     .key-points {
       margin: 9px 0 0;
