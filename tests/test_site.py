@@ -224,6 +224,35 @@ def test_smart_insight_uses_specific_titles_for_latest_week_arxiv_items() -> Non
     assert "재시도와 복구" not in card.group(0)
 
 
+def test_smart_insight_recomputes_specific_paper_points_when_seed_points_are_mismatched() -> None:
+    item = SiteItem(
+        title="HPC 워크플로의 자연어 실행 오케스트레이션",
+        url="https://arxiv.org/abs/2607.10081v1",
+        source="arXiv 분산시스템 AI",
+        kind="논문",
+        published=datetime(2026, 7, 11, tzinfo=UTC),
+        summary="HPC 애플리케이션과 워크플로를 자연어 설명과 도구 호출로 실행하는 접근입니다.",
+        detail="HPC 애플리케이션과 워크플로를 자연어 설명과 도구 호출로 실행하는 접근입니다.",
+        key_points=(
+            "1. 한 줄 요약: 시간 이력이 함께 기록되는 그래프 데이터를 에이전트가 안정적으로 질의하도록 만든 bi-temporal 그래프 관리 시스템입니다.",
+            "2. 무엇이 바뀌었나: bi-temporal 그래프, 검증된 시간 연산자, 비용 제한, 결정적 도구 호출입니다.",
+            "3. 왜 중요한가: 이력 데이터나 감사 로그를 AI가 조회할 때는 자연어 답변보다 검증 가능한 연산 경계가 필요합니다.",
+            "4. 한계와 주의사항: 아직 논문 단계일 수 있습니다.",
+            "5. 이번 주 해볼 일: 작은 실험 1개를 정해보세요.",
+            "6. 누가 보면 좋은가: AI 엔지니어",
+            "7. 출처와 상태: arXiv 분산시스템 AI · 논문 · 2026-07-11",
+        ),
+        tags=("AI 에이전트",),
+    )
+
+    html = render_homepage([item] * 5, [], now=datetime(2026, 7, 14, tzinfo=UTC))
+
+    card = re.search(r'<button class="insight-card"[^>]+data-source="https://arxiv.org/abs/2607.10081v1"[^>]*>', html)
+    assert card
+    assert "HPC 애플리케이션과 워크플로" in card.group(0)
+    assert "bi-temporal 그래프 관리 시스템" not in card.group(0)
+
+
 def test_smart_insight_uses_paper_specific_summary_for_week_one_arxiv_items() -> None:
     item = SiteItem(
         title="데이터 에이전트 성능 벤치마크",
@@ -568,6 +597,67 @@ def test_quote_bench_localized_item_uses_command_path_specific_summary() -> None
     assert "Bash 명령 실행 성능" in site_item.summary
     assert "56개 one-shot Bash 작업" in site_item.key_points[1]
     assert "작업 상태, 실행 순서, 재시도와 복구" not in " ".join(site_item.key_points)
+
+
+def test_august_arxiv_items_use_source_specific_summaries_instead_of_domain_templates() -> None:
+    cases = (
+        (
+            "CTIFoundry: An Agent-Native Corpus Scaffold for Cyber Threat Intelligence",
+            "https://arxiv.org/abs/2608.18613v1",
+            "arXiv Security AI",
+            "Cyber threat intelligence is increasingly consumed by LLM agents that compose multi-step investigations.",
+            "CTIFoundry",
+            "CTI",
+        ),
+        (
+            "Walk Before You Run: The Importance of Data Exploration for Data Analysis Agents",
+            "https://arxiv.org/abs/2608.16045v1",
+            "arXiv Database AI",
+            "Reliable data analysis depends on understanding what the dataset contains before solving the requested task.",
+            "데이터 분석 에이전트",
+            "스프레드시트",
+        ),
+        (
+            "AI4AI-Bench: Benchmarking LLM Agents in Algorithmic Design for Recursive Self-Improvement",
+            "https://arxiv.org/abs/2608.20318v1",
+            "arXiv AI",
+            "Recursive self-improvement asks whether an AI system can improve the process that produces AI systems.",
+            "AI4AI-Bench",
+            "학습 알고리즘",
+        ),
+    )
+    generic_localized = {
+        "title": "데이터베이스 업무 AI 활용",
+        "summary": "AI가 데이터베이스와 쿼리 작업을 더 안전하고 정확하게 다루는 방법을 살펴봅니다. 스키마 이해, 쿼리 생성 또는 최적화, 실행 전 검토, 데이터 변경 위험 통제입니다.",
+        "detail": "AI가 데이터베이스와 쿼리 작업을 더 안전하고 정확하게 다루는 방법을 살펴봅니다. 스키마 이해, 쿼리 생성 또는 최적화, 실행 전 검토, 데이터 변경 위험 통제입니다.",
+        "key_points": [
+            "1. 한 줄 요약: AI가 데이터베이스와 쿼리 작업을 더 안전하고 정확하게 다루는 방법을 살펴봅니다.",
+            "2. 무엇이 바뀌었나: 스키마 이해, 쿼리 생성 또는 최적화, 실행 전 검토, 데이터 변경 위험 통제입니다.",
+            "3. 왜 중요한가: 데이터 에이전트나 자연어 질의 기능을 만들 때 읽기 전용 권한, 검증 절차, 감사 로그를 함께 설계해야 합니다.",
+            "4. 한계와 주의사항: 아직 논문 단계일 수 있습니다.",
+            "5. 이번 주 해볼 일: 작은 PoC를 만들어보세요.",
+            "6. 누가 보면 좋은가: AI 엔지니어",
+            "7. 출처와 상태: arXiv · 논문 · 2026-08-19",
+        ],
+        "tags": ["AI 에이전트"],
+    }
+
+    for title, url, source, summary, expected_title, expected_summary in cases:
+        item = DigestItem(
+            title=title,
+            url=url,
+            source=source,
+            kind="paper",
+            published=datetime(2026, 8, 20, tzinfo=UTC),
+            summary=summary,
+        )
+
+        site_item = _localized_site_item(item, generic_localized)
+
+        assert expected_title in site_item.title
+        assert expected_summary in site_item.summary
+        assert "스키마 이해, 쿼리 생성 또는 최적화" not in site_item.summary
+        assert "데이터 변경 위험 통제" not in " ".join(site_item.key_points)
 
 
 def test_smart_insight_points_render_answer_on_next_line_without_space_after_question() -> None:

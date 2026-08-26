@@ -2739,8 +2739,13 @@ def _smart_insight_card_detail(item: SiteItem, summary: str) -> str:
 def _smart_insight_points(item: SiteItem) -> tuple[str, ...]:
     points = item.key_points or (item.summary,)
     digest = _site_item_to_digest(item)
+    if _latest_week_specific_summary(re.sub(r"[-_]+", " ", _item_text(digest))):
+        return _fallback_card_points(digest, points)
     if _has_complete_card_points(points) and not any(
-        _needs_specific_insight_copy(point) or _contains_generic_display_title(point) for point in points
+        _needs_specific_insight_copy(point)
+        or _contains_generic_display_title(point)
+        or _uses_broad_domain_template(point)
+        for point in points
     ):
         return tuple(points[:7])
     return _fallback_card_points(digest, points)
@@ -2899,6 +2904,8 @@ def _site_item_to_digest(item: SiteItem) -> DigestItem:
 def _needs_specific_insight_copy(text: str) -> bool:
     clean = _clean_plain_text(text)
     if not clean:
+        return True
+    if _uses_broad_domain_template(clean):
         return True
     generic_snippets = (
         "원문에서 다루는 문제, 제안 방식, 변화 지점",
@@ -5462,6 +5469,60 @@ def _fallback_korean_item(item: DigestItem) -> SiteItem:
 def _latest_week_specific_summary(text: str) -> tuple[str, tuple[str, str, str]] | None:
     rules: tuple[tuple[tuple[str, ...], str, tuple[str, str, str]], ...] = (
         (
+            ("2608.20320",),
+            "교통 행동 연구에서 설문 수집, 데이터 처리, 날씨 민감 수요 예측을 세 에이전트 워크플로로 묶은 논문입니다. 챗봇 설문, 구조화 처리, 전통 통계 모델과 멀티모달 LLM 예측을 감사 가능한 흐름으로 연결합니다.",
+            (
+                "1. 무엇을 다루나요? 여행 행동 데이터 수집부터 날씨별 이동수단 수요 예측까지 이어지는 다중 에이전트 분석 워크플로입니다.",
+                "2. 핵심 구성 요소: 대화형 설문, 이미지 기반 날씨 시나리오, 구조화 데이터 처리, 로지스틱 회귀·랜덤포레스트·LLM 예측 비교입니다.",
+                "3. 업무 적용 포인트: 데이터 수집과 예측 모델을 따로 보지 말고 수집 방식, 맥락 정보, 검증 가능한 분석 절차를 한 흐름으로 설계해야 합니다.",
+            ),
+        ),
+        (
+            ("2608.20318",),
+            "AI4AI-Bench는 에이전트가 하이퍼파라미터 튜닝을 넘어 학습 알고리즘 자체를 개선할 수 있는지 측정하는 벤치마크입니다. 10개 연구 저장소에서 에이전트가 훈련 알고리즘을 고치고 숨겨진 평가기로 다시 실행해 실제 개선 폭을 봅니다.",
+            (
+                "1. 무엇을 다루나요? LLM 에이전트가 다음 AI 시스템을 더 잘 만들도록 훈련 알고리즘 자체를 설계·수정할 수 있는지 평가합니다.",
+                "2. 핵심 구성 요소: 10개 고정 연구 저장소, 4시간 코드 수정, 12시간 재훈련, 숨겨진 평가기, recursive self-improvement 점수화입니다.",
+                "3. 업무 적용 포인트: AI 연구 자동화 평가는 데이터 수집이나 파라미터 조정보다 모델이 실제로 학습 방식을 바꿨는지 분리해 봐야 합니다.",
+            ),
+        ),
+        (
+            ("2608.19741",),
+            "Thinkingbox는 에이전트가 상태가 남는 비즈니스 워크플로를 한 번 성공하는 수준이 아니라 반복적으로 정확히 완료하는지 평가하는 샌드박스와 벤치마크입니다. 도구 호출 성공보다 누락·과잉 부작용 없이 최종 업무 상태가 맞는지를 실행 검사로 확인합니다.",
+            (
+                "1. 무엇을 다루나요? 상태 변경이 남는 비즈니스 업무에서 에이전트가 여러 턴의 정보 수집, 정책 준수, 도구 조정을 안정적으로 끝내는지 평가합니다.",
+                "2. 핵심 구성 요소: MCP 호환 격리 세션, 실행 추적, 507개 정책 조건 워크플로, 최종 상태 기반 executable check입니다.",
+                "3. 업무 적용 포인트: 에이전트 신뢰성은 한 번의 성공 사례보다 반복 시도에서 잘못된 변경이나 누락 없이 같은 업무 상태를 재현하는지로 봐야 합니다.",
+            ),
+        ),
+        (
+            ("2608.19011",),
+            "AUTOSIGMA는 비정형 사이버 위협 인텔리전스 보고서를 SIEM에서 쓸 수 있는 Sigma 탐지 규칙으로 바꾸는 자동화 연구입니다. LLM만 쓰지 않고 지식 기반 보강, 기존 규칙 템플릿 접지, LLM-as-a-Judge 검증을 결합합니다.",
+            (
+                "1. 무엇을 다루나요? CTI 보고서에서 공격 기법과 맥락을 뽑아 운영 가능한 Sigma 탐지 규칙으로 변환하는 AUTOSIGMA입니다.",
+                "2. 핵심 구성 요소: 지식 기반 보강, Sigma 규칙 템플릿 매칭, MITRE ATT&CK 기법 커버리지, 반복 검증용 LLM-as-a-Judge입니다.",
+                "3. 업무 적용 포인트: 보안 탐지 자동화는 보고서 요약보다 규칙 유효성, 환경별 관련성, 기존 탐지 규칙과의 접지를 함께 검증해야 합니다.",
+            ),
+        ),
+        (
+            ("2608.18613",),
+            "CTIFoundry는 사이버 위협 인텔리전스 자료를 단순 임베딩 청크가 아니라 에이전트가 탐색할 수 있는 구조화 코퍼스로 바꾸는 논문입니다. CVE, CWE, CAPEC, ATT&CK 지식 그래프와 보고서 근거 레이어를 typed tools와 procedural skills로 노출합니다.",
+            (
+                "1. 무엇을 다루나요? LLM 보안 에이전트가 CTI 자료를 조사할 때 쓸 수 있는 agent-native corpus scaffold인 CTIFoundry입니다.",
+                "2. 핵심 구성 요소: CVE·CWE·CAPEC·ATT&CK 온톨로지 그래프, 출처가 붙은 보고서 span, hybrid retrieval, 7개 typed tools, 3개 procedural skills입니다.",
+                "3. 업무 적용 포인트: 보안 RAG는 모델 성능보다 위협 지식의 구조, 출처, 탐색 도구를 어떻게 제공하느냐가 조사 정확도를 크게 좌우합니다.",
+            ),
+        ),
+        (
+            ("2608.16045",),
+            "데이터 분석 에이전트가 답을 내기 전에 스프레드시트와 워크북의 구조를 먼저 탐색해야 한다는 논문입니다. 물리적 시트 뒤의 논리 테이블, 컬럼 의미, 키와 관계, 품질 문제를 사람이 검토 가능한 산출물로 만드는 단계를 평가 대상으로 올립니다.",
+            (
+                "1. 무엇을 다루나요? LLM 데이터 분석 도구에서 최종 답변 이전의 Data Exploration 단계를 독립적으로 평가해야 한다는 주장입니다.",
+                "2. 핵심 구성 요소: 다중 시트 워크북 이해, 논리 테이블 식별, 컬럼 의미 해석, 키·관계 복원, 품질 신호 프로파일링입니다.",
+                "3. 업무 적용 포인트: 데이터 에이전트는 바로 차트나 답을 만들기보다 먼저 데이터 구조 설명서를 만들고 도메인 담당자가 확인하는 체크포인트를 둬야 합니다.",
+            ),
+        ),
+        (
             ("2608.13547",),
             "QuoteBench는 LLM 코딩 에이전트의 Bash 명령 실행 성능을 모델 생성 품질과 실행 경로 변형 실패로 나누어 봐야 한다는 벤치마크 논문입니다. matched score 하나만으로는 모델이 명령을 잘못 만든 것인지, quoting·parser·transport 과정에서 실패가 생긴 것인지 구분하기 어렵다는 점을 보여줍니다.",
             (
@@ -6624,6 +6685,19 @@ def _contains_generic_display_title(text: str) -> bool:
     return any(title in clean for title in GENERIC_DISPLAY_TITLES)
 
 
+def _uses_broad_domain_template(text: str) -> bool:
+    clean = _clean_plain_text(text).lower()
+    templates = (
+        "ai가 데이터베이스와 쿼리 작업을 더 안전하고 정확하게 다루는 방법",
+        "스키마 이해, 쿼리 생성 또는 최적화, 실행 전 검토, 데이터 변경 위험 통제",
+        "여러 단계로 이어지는 ai 작업이나 분산 실행 흐름을 안정적으로 운영하는 방법",
+        "작업 상태, 실행 순서, 재시도와 복구, 비용과 성능 제약",
+        "ai 시스템이나 에이전트가 보안 위험을 어떻게 만들고 줄일 수 있는지",
+        "공격 시나리오, 탐지 방식, 권한 통제, 실행 기록과 검증 절차",
+    )
+    return any(template in clean for template in templates)
+
+
 def _has_source_title_prefix(title: str, source: str) -> bool:
     source = _clean_plain_text(source)
     if not source:
@@ -6643,6 +6717,12 @@ def _has_source_title_prefix(title: str, source: str) -> bool:
 def _fallback_specific_title(text: str) -> str:
     text = re.sub(r"[-_]+", " ", text.lower())
     title_rules = (
+        (("2608.20320",), "여행 행동 예측용 다중 에이전트 데이터 수집"),
+        (("2608.20318",), "AI4AI-Bench: 학습 알고리즘 개선 에이전트 평가"),
+        (("2608.19741",), "Thinkingbox: 상태 기반 비즈니스 워크플로 신뢰성 평가"),
+        (("2608.19011",), "AUTOSIGMA: CTI를 Sigma 탐지 규칙으로 변환"),
+        (("2608.18613",), "CTIFoundry: 보안 인텔리전스용 에이전트 코퍼스"),
+        (("2608.16045",), "데이터 분석 에이전트의 사전 탐색 단계"),
         (("2608.13547",), "QuoteBench: 명령 실행 경로 평가"),
         (("2607.03333",), "에이전트 LLM 추론을 빠르게 하는 SPORK"),
         (("2607.03859",), "저궤도 위성 자원 할당과 모델 공격 견고성"),
