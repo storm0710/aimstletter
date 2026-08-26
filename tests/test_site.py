@@ -579,6 +579,7 @@ def test_unknown_arxiv_database_item_keeps_its_source_specific_summary() -> None
 
     assert "AI가 데이터베이스와 쿼리 작업을 더 안전하고 정확하게" not in summary
     assert "스키마 이해, 쿼리 생성 또는 최적화" not in " ".join(points)
+    assert "한 번 쓰고 버리는 프롬프트" not in " ".join(points)
 
 
 def test_localization_repair_detects_reused_or_generic_summaries() -> None:

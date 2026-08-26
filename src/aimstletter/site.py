@@ -5449,6 +5449,8 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
         localized = _parse_json_array(_generate_openai_text(client, model, instructions, input_text))
         if _has_untranslated_items(localized) or _has_reused_or_generic_localizations(localized):
             localized = _repair_korean_translation(client, model, source_block, context)
+        if _has_untranslated_items(localized) or _has_reused_or_generic_localizations(localized):
+            localized = _repair_korean_translation(client, model, source_block, f"{context} (strict retry)")
     except Exception as exc:  # noqa: BLE001
         print(f"OpenAI localization failed for {context}: {exc}", file=sys.stderr)
         if _require_openai_localization():
@@ -5555,6 +5557,10 @@ def _repair_korean_translation(
         "'5. 이번 주 해볼 일:', '6. 누가 보면 좋은가:', and '7. 출처와 상태:'. "
         "Each key point must contain concrete content inferred from the source item, not broad placeholders "
         "such as '원문에서 다루는 문제, 제안 방식, 변화 지점'. "
+        "Never reuse category-level stock sentences such as '한 번 쓰고 버리는 프롬프트를 반복 가능한 "
+        "업무 절차로 바꾸기 위해 필요합니다', '반복되는 코드 수정, PR 보조', or 'AI가 데이터베이스와 "
+        "쿼리 작업을 더 안전하고 정확하게 다루는 방법'. Each summary must name the source item's "
+        "actual method, benchmark, product change, or finding. "
         "Do not tell readers to check source links in summary, detail, or key_points. tags must be an array of "
         "3 to 5 short Korean or product-name strings. comparisons must be 0 to 3 Korean strings. "
         "glossary must be 0 to 5 Korean strings formatted like 'Warp: ...'."
@@ -6626,12 +6632,6 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
             "1. 왜 필요한가요? AI 기능의 비용, 지연, 오류, 품질 문제를 운영 중에 빠르게 찾기 위해 필요합니다.",
             "2. 핵심 구성 요소: 로그, 메트릭, 트레이스, 알림, 대시보드입니다.",
             "3. 일반 모니터링과의 차이점: 모델 호출과 응답 품질 같은 AI 특화 신호까지 함께 봅니다.",
-        )
-    if any(keyword in text for keyword in ("prompt", "workflow migration")):
-        return (
-            "1. 왜 필요한가요? 한 번 쓰고 버리는 프롬프트를 반복 가능한 업무 절차로 바꾸기 위해 필요합니다.",
-            "2. 핵심 구성 요소: 입력 양식, 승인 단계, 실행 기록, 결과 검수 기준입니다.",
-            "3. 프롬프트 엔지니어링과의 차이점: 좋은 문장을 만드는 것보다 업무가 끝까지 굴러가게 만드는 데 초점이 있습니다.",
         )
     if any(keyword in text for keyword in ("database", "supabase", "guardrail")):
         return (
