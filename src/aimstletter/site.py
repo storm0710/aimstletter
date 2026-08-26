@@ -557,7 +557,11 @@ def _refresh_archive_source_summaries(output_dir: Path, settings: Settings) -> N
         }
         for match in cards:
             body = _archive_card_value(match, "data-body")
-            if body not in repeated_bodies and not _needs_specific_insight_copy(body):
+            if (
+                body not in repeated_bodies
+                and not _needs_specific_insight_copy(body)
+                and not _looks_untranslated(body)
+            ):
                 continue
             item = _archive_source_item(match)
             if item:
@@ -5864,6 +5868,15 @@ def _fallback_korean_item(item: DigestItem) -> SiteItem:
 def _latest_week_specific_summary(text: str) -> tuple[str, tuple[str, str, str]] | None:
     rules: tuple[tuple[tuple[str, ...], str, tuple[str, str, str]], ...] = (
         (
+            ("2608.21942",),
+            "TessIndex는 AI 에이전트가 어떤 능력을 갖고 누구 소유인지, 실제 실행 기록으로 증명할 수 있게 만드는 신원 시스템 연구입니다. 블록체인에는 신원·소유·검증 기록을 남기고, 중앙 서버에는 검색·평판·거래용 최신 정보를 두는 이중 구조를 제안합니다.",
+            (
+                "1. 무엇을 다루나요? 에이전트의 신원과 능력 주장을 실행 기록으로 검증하는 TessIndex 시스템입니다.",
+                "2. 핵심 구성 요소: 지속 신원, 능력 증명, 소유권 기록, 실행 평판, 블록체인과 중앙 서버의 이중 구조입니다.",
+                "3. 업무 적용 포인트: 여러 AI 에이전트를 운영할 때는 이름만 등록하기보다 누가 만들었고 어떤 권한으로 무엇을 실행했는지 확인할 수 있어야 합니다.",
+            ),
+        ),
+        (
             ("2608.22476",),
             "JetStream은 기존 데이터베이스를 교체하지 않고, 자주 쓰는 질의에 맞춘 가속기를 생성하는 연구입니다. 측정 기반 에이전트 워크플로가 질의별 실행 구조와 유지보수 방식을 만들고, 데이터가 바뀌면 증분 갱신·재구축·지연 복구 중 알맞은 방법을 선택합니다.",
             (
@@ -7119,6 +7132,7 @@ def _has_source_title_prefix(title: str, source: str) -> bool:
 def _fallback_specific_title(text: str) -> str:
     text = re.sub(r"[-_]+", " ", text.lower())
     title_rules = (
+        (("2608.21942",), "TessIndex: 에이전트 능력 검증 신원 시스템"),
         (("new github copilot experience in slack",), "Slack에서 쓰는 GitHub Copilot 에이전트"),
         (("shared agentic work", "microsoft teams"), "Microsoft Teams의 공동 Copilot 에이전트 작업"),
         (("better tools for managing blocked users",), "GitHub 차단 사용자 관리 도구 개선"),
@@ -7336,6 +7350,8 @@ def _source_evidence_summary(item: DigestItem) -> str:
         or title.lower() in summary.lower()
         or _needs_specific_insight_copy(summary)
     ):
+        return ""
+    if _looks_untranslated(summary):
         return ""
     return _clip(summary, 320)
 
