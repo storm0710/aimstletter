@@ -567,16 +567,17 @@ def test_fallback_summary_avoids_generic_placeholder_points() -> None:
 def test_unknown_arxiv_database_item_keeps_its_source_specific_summary() -> None:
     item = DigestItem(
         title="Self Prompting Cross",
-        url="https://arxiv.org/abs/2608.00001v1",
+        url="https://arxiv.org/abs/2608.19025v1",
         source="arXiv Database AI",
         kind="paper",
         published=datetime(2026, 8, 20, tzinfo=UTC),
-        summary="Self-generated prompts compare and improve database query plans.",
+        summary="Self-prompting and cross-model consensus enable reproducible data extraction from scientific literature.",
     )
 
     summary = _fallback_display_summary(item)
     points = _fallback_three_line_summary(item)
 
+    assert "과학 논문" in summary
     assert "AI가 데이터베이스와 쿼리 작업을 더 안전하고 정확하게" not in summary
     assert "스키마 이해, 쿼리 생성 또는 최적화" not in " ".join(points)
     assert "한 번 쓰고 버리는 프롬프트" not in " ".join(points)
