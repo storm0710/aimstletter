@@ -10,9 +10,11 @@ import os
 from pathlib import Path
 import re
 import sys
+import time
 import textwrap
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
+from xml.etree import ElementTree
 
 import feedparser
 import requests
@@ -44,6 +46,14 @@ class SiteItem:
     tags: tuple[str, ...]
     comparisons: tuple[str, ...] = ()
     glossary: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class PaperCardEvidence:
+    quantitative: tuple[str, ...] = ()
+    evaluation: tuple[str, ...] = ()
+    contrast: tuple[str, ...] = ()
+    benchmark: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -335,6 +345,7 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     _refresh_archive_navigation(output_dir, archive_entries)
     _refresh_archive_source_summaries(output_dir, settings)
     _write_secondary_pages(output_dir, ai_items, tool_items, _render_analytics(settings), archive_entries)
+    refresh_existing_cards(output_dir)
     return path
 
 
@@ -3033,6 +3044,10 @@ def _fallback_card_points(
     item: DigestItem,
     seed_points: tuple[str, ...] | tuple[str, str, str] = (),
 ) -> tuple[str, ...]:
+    paper_points = _paper_focused_card_points(item, seed_points)
+    if paper_points:
+        return paper_points
+
     three_points = _fallback_three_line_summary(item)
     title = _fallback_display_title(item)
     summary = _fallback_display_summary(item)
@@ -3153,6 +3168,303 @@ def _source_status(item: DigestItem) -> str:
     return _korean_kind_name(item.kind)
 
 
+def _is_paper_item(item: DigestItem | SiteItem) -> bool:
+    text = f"{item.kind} {item.source} {item.url}".lower()
+    return "paper" in text or "논문" in text or "arxiv.org" in text
+
+
+def _paper_card_evidence(item: DigestItem) -> PaperCardEvidence:
+    if not _is_paper_item(item):
+        return PaperCardEvidence()
+
+    sentences = _abstract_sentences(item.summary)
+    quantitative = _pick_evidence_sentences(sentences, _is_quantitative_result_sentence, limit=2)
+    benchmark = _pick_evidence_sentences(sentences, _is_benchmark_sentence, limit=1)
+    evaluation = _pick_evidence_sentences(sentences, _is_evaluation_sentence, limit=1)
+    contrast = _pick_evidence_sentences(sentences, _is_contrast_sentence, limit=1)
+    return PaperCardEvidence(
+        quantitative=quantitative,
+        evaluation=evaluation,
+        contrast=contrast,
+        benchmark=benchmark,
+    )
+
+
+def _has_paper_priority_evidence(item: DigestItem) -> bool:
+    evidence = _paper_card_evidence(item)
+    return bool(evidence.quantitative or evidence.benchmark or evidence.contrast)
+
+
+def _abstract_sentences(text: str) -> list[str]:
+    cleaned = _clean_plain_text(text)
+    if not cleaned:
+        return []
+    pieces = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9])", cleaned)
+    return [_clip(piece.strip(), 260) for piece in pieces if len(piece.strip()) >= 24]
+
+
+def _pick_evidence_sentences(
+    sentences: list[str],
+    predicate: object,
+    limit: int,
+) -> tuple[str, ...]:
+    picked: list[str] = []
+    for sentence in sentences:
+        if predicate(sentence) and sentence not in picked:
+            picked.append(sentence)
+        if len(picked) >= limit:
+            break
+    return tuple(picked)
+
+
+def _is_quantitative_result_sentence(sentence: str) -> bool:
+    lower = sentence.lower()
+    if not _contains_important_number(sentence):
+        return False
+    metric_words = (
+        "accuracy",
+        "success",
+        "reliability",
+        "reliable",
+        "failure",
+        "fail",
+        "improvement",
+        "improve",
+        "outperform",
+        "score",
+        "rate",
+        "reduction",
+        "latency",
+        "throughput",
+        "cost",
+        "faster",
+        "slower",
+        "better",
+        "worse",
+        "achieve",
+        "achieves",
+        "completed",
+        "correct",
+    )
+    return any(word in lower for word in metric_words)
+
+
+def _is_benchmark_sentence(sentence: str) -> bool:
+    lower = sentence.lower()
+    benchmark_words = (
+        "benchmark",
+        "dataset",
+        "tasks",
+        "workflows",
+        "cases",
+        "evaluation",
+        "evaluate",
+        "metrics",
+        "measure",
+        "experiments",
+    )
+    return any(word in lower for word in benchmark_words) and (
+        _contains_important_number(sentence) or "benchmark" in lower or "dataset" in lower
+    )
+
+
+def _is_evaluation_sentence(sentence: str) -> bool:
+    lower = sentence.lower()
+    return any(
+        word in lower
+        for word in (
+            "evaluate",
+            "evaluation",
+            "benchmark",
+            "metric",
+            "measure",
+            "validated",
+            "experiments",
+            "compare",
+            "compared",
+        )
+    )
+
+
+def _is_contrast_sentence(sentence: str) -> bool:
+    lower = sentence.lower()
+    return any(
+        marker in lower
+        for marker in (
+            "however",
+            "whereas",
+            "while",
+            "unlike",
+            "compared",
+            "instead",
+            "rather than",
+            "gap",
+            "versus",
+            "vs.",
+            "but",
+            "baseline",
+            "state-of-the-art",
+            "traditional",
+        )
+    )
+
+
+def _contains_important_number(text: str) -> bool:
+    return bool(
+        re.search(
+            r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*(?:%|percent|percentage points|x|×|fold|times|tasks?|workflows?|cases?|datasets?|models?|benchmarks?|queries|samples|trials?|runs?|hours?|seconds?|tokens?|parameters?)?\b",
+            text,
+            flags=re.IGNORECASE,
+        )
+    )
+
+
+def _evidence_numbers(sentences: tuple[str, ...]) -> tuple[str, ...]:
+    numbers: list[str] = []
+    for sentence in sentences:
+        for match in re.finditer(
+            r"\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?\s*(?:%|percent|percentage points|x|×|fold)?",
+            sentence,
+            flags=re.IGNORECASE,
+        ):
+            value = re.sub(r"\s+", " ", match.group(0)).strip()
+            if value and value not in numbers:
+                numbers.append(value)
+    return tuple(numbers[:2])
+
+
+def _paper_focused_summary(item: DigestItem, evidence: PaperCardEvidence | None = None) -> str:
+    evidence = evidence or _paper_card_evidence(item)
+    if not (evidence.quantitative or evidence.benchmark or evidence.contrast):
+        return ""
+
+    title = _fallback_display_title(item)
+    result = _first_evidence_text([*evidence.quantitative, *evidence.benchmark])
+    contrast = _first_evidence_text([*evidence.contrast])
+    evaluation = _first_evidence_text([*evidence.evaluation, *evidence.benchmark])
+
+    parts = [f"{title} 논문은 초록에서 확인되는 결과와 평가 기준을 중심으로 봐야 합니다."]
+    if contrast:
+        parts.append(f"기존 접근과의 차이는 “{contrast}”에 드러납니다.")
+    if result:
+        parts.append(f"핵심 정량 결과는 “{result}”입니다.")
+    elif evaluation:
+        parts.append(f"평가 방식은 “{evaluation}”입니다.")
+    return _clip(" ".join(parts), 260)
+
+
+def _paper_focused_card_points(
+    item: DigestItem,
+    seed_points: tuple[str, ...] | tuple[str, str, str] = (),
+) -> tuple[str, ...]:
+    evidence = _paper_card_evidence(item)
+    if not (evidence.quantitative or evidence.benchmark or evidence.contrast):
+        return ()
+
+    title = _fallback_display_title(item)
+    result = _first_evidence_text([*evidence.quantitative, *evidence.benchmark])
+    contrast = _first_evidence_text([*evidence.contrast])
+    evaluation = _first_evidence_text([*evidence.evaluation, *evidence.benchmark])
+    numbers = _evidence_numbers(evidence.quantitative)
+    result_message = result or evaluation or (_strip_point_prefix(seed_points[0]) if seed_points else title)
+    changed = contrast or evaluation or (_strip_point_prefix(seed_points[1]) if len(seed_points) > 1 else "")
+    if not changed:
+        changed = f"{title}가 기존 방식의 한계를 어떤 평가 방식으로 확인하는지 초록 기준으로 정리했습니다."
+    why = result_message
+    if numbers:
+        why = f"{', '.join(numbers[:2])} 같은 핵심 수치가 논문의 주장과 실제 효과를 판단하는 기준입니다. {result_message}"
+    action = _paper_weekly_action(item, evidence)
+    caution = _paper_caution_note(item, evidence)
+    roles = _recommended_reader_roles(item)
+    status = _source_status(item)
+
+    return (
+        f"1. 한 줄 요약: {title}는 {result_message}",
+        f"2. 무엇이 바뀌었나: {changed}",
+        f"3. 왜 중요한가: {why}",
+        f"4. 한계와 주의사항: {caution}",
+        f"5. 이번 주 해볼 일: {action}",
+        f"6. 누가 보면 좋은가: {roles}",
+        f"7. 출처와 상태: {_korean_source_name(item.source)} · {status} · {_format_date(item.published)}",
+    )
+
+
+def _first_evidence_text(candidates: list[str]) -> str:
+    for candidate in candidates:
+        clean = _clean_plain_text(candidate)
+        if clean:
+            return _clip(clean, 190)
+    return ""
+
+
+def _paper_weekly_action(item: DigestItem, evidence: PaperCardEvidence) -> str:
+    if evidence.benchmark:
+        return "논문 벤치마크의 태스크, 데이터 규모, 핵심 지표를 우리 업무 평가표의 첫 3개 컬럼으로 옮겨 적어보세요."
+    if evidence.quantitative:
+        return "초록의 핵심 수치 1~2개를 기준으로 우리 데이터에서 재현 가능한 작은 평가 조건을 정해보세요."
+    return _weekly_action(item, _fallback_display_title(item))
+
+
+def _paper_caution_note(item: DigestItem, evidence: PaperCardEvidence) -> str:
+    if evidence.quantitative:
+        return "초록의 수치는 해당 데이터와 평가 환경의 결과이므로, 우리 업무 데이터·실행 환경·반복 횟수에서 다시 확인해야 합니다."
+    return _caution_note(item)
+
+
+def _finalize_paper_site_item(original: DigestItem, site_item: SiteItem) -> SiteItem:
+    if not _is_paper_item(original):
+        return site_item
+    title = site_item.title
+    if _is_generic_display_title(title) or "최신 업데이트" in title:
+        title = _fallback_display_title(original)
+    if title != site_item.title:
+        site_item = SiteItem(
+            title=title,
+            url=site_item.url,
+            source=site_item.source,
+            kind=site_item.kind,
+            published=site_item.published,
+            summary=site_item.summary,
+            detail=site_item.detail,
+            key_points=site_item.key_points,
+            tags=site_item.tags,
+            comparisons=site_item.comparisons,
+            glossary=site_item.glossary,
+        )
+    return _enforce_paper_card_evidence(original, site_item)
+
+
+def _enforce_paper_card_evidence(original: DigestItem, site_item: SiteItem) -> SiteItem:
+    if not _is_paper_item(original):
+        return site_item
+    evidence = _paper_card_evidence(original)
+    if not (evidence.quantitative or evidence.benchmark or evidence.contrast):
+        return site_item
+
+    current_text = " ".join((site_item.summary, site_item.detail, " ".join(site_item.key_points)))
+    expected_numbers = _evidence_numbers(evidence.quantitative)
+    missing_key_number = bool(expected_numbers) and not any(number in current_text for number in expected_numbers)
+    needs_rewrite = missing_key_number or _needs_specific_insight_copy(current_text)
+    if not needs_rewrite:
+        return site_item
+
+    focused_summary = _paper_focused_summary(original, evidence) or site_item.summary
+    focused_points = _paper_focused_card_points(original) or site_item.key_points
+    return SiteItem(
+        title=site_item.title,
+        url=site_item.url,
+        source=site_item.source,
+        kind=site_item.kind,
+        published=site_item.published,
+        summary=focused_summary,
+        detail=focused_summary,
+        key_points=focused_points,
+        tags=site_item.tags,
+        comparisons=site_item.comparisons,
+        glossary=site_item.glossary,
+    )
+
+
 def _site_item_to_digest(item: SiteItem) -> DigestItem:
     return DigestItem(
         title=item.title,
@@ -3182,6 +3494,9 @@ def _needs_specific_insight_copy(text: str) -> bool:
         "업무 자동화, 운영 안정성",
         "오래 걸리는 AI 작업",
         "워크플로 상태 저장, 재시도 정책",
+        "관련된 변화가 실제 업무 흐름에 어떤 영향을",
+        "업무 흐름에 미치는 영향을 정리한 항목",
+        "대상 업무, 적용 방식, 도입 전 확인할",
         "주제를 다룹니다",
         "이슈, 커밋, PR에 흩어진 변경 내용",
         "변경 내역 수집, 영향 범위 요약",
@@ -5499,6 +5814,12 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "Do not use broad placeholders such as '원문에서 다루는 문제, 제안 방식, 변화 지점' or "
             "'관련 도구, 운영 조건, 리스크'. If the title is abstract, infer the concrete topic from the "
             "URL slug, source title, and summary. "
+            "For paper items only, treat summary as the paper abstract. If the abstract contains exact "
+            "performance numbers, success or failure rates, improvement percentages, benchmark size, "
+            "task count, or evaluation metrics, include at least one of the most important numbers in "
+            "summary or key_points. For paper key_points, prefer this structure: prior limitation, new "
+            "method, actual result, and practical meaning. For benchmark papers, prioritize task/data "
+            "scale and the main metric. Do not invent numbers or claims that are not in the abstract. "
             "Do not tell readers to check source links in summary, detail, or key_points. tags must be an array of "
             "3 to 5 short Korean or product-name strings. comparisons must be an array of 0 to 3 Korean "
             "strings comparing the item with adjacent tools or approaches when useful. For Endava items, "
@@ -5518,6 +5839,8 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "Key points should explain in plain Korean: one-line summary, what changed, why it matters, "
             "who should read it, one small action to try this week, limitations and cautions, and source/status. "
             "The key_points answer text must be specific to the item's content, not a generic template. "
+            "For papers, do not stop at the topic or concept. When the abstract provides quantitative "
+            "results or benchmark details, show the 1-2 numbers that best explain the paper's core message. "
             "Add comparison notes when the item could be confused with "
             "another tool or vendor, and add glossary notes for difficult words such as Warp, Harness, "
             "Agent tasks REST API, CI/CD, SDK, or orchestration.\n\n"
@@ -5567,7 +5890,7 @@ def _localized_site_item(item: DigestItem, localized_item: dict[str, object]) ->
     if specific and _localized_payload_needs_repair(localized_item):
         specific_title = _fallback_specific_title(item_text)
         summary, seed_points = specific
-        return SiteItem(
+        site_item = SiteItem(
             title=specific_title or _fallback_display_title(item),
             url=item.url,
             summary=summary,
@@ -5580,8 +5903,9 @@ def _localized_site_item(item: DigestItem, localized_item: dict[str, object]) ->
             comparisons=_safe_comparisons(localized_item, item),
             glossary=_safe_glossary(localized_item, item),
         )
+        return _finalize_paper_site_item(item, site_item)
 
-    return SiteItem(
+    site_item = SiteItem(
         title=_safe_korean_field(
             localized_item.get("title"),
             fallback=f"{_korean_source_name(item.source)}에서 확인한 최신 업데이트",
@@ -5603,6 +5927,7 @@ def _localized_site_item(item: DigestItem, localized_item: dict[str, object]) ->
         comparisons=_safe_comparisons(localized_item, item),
         glossary=_safe_glossary(localized_item, item),
     )
+    return _finalize_paper_site_item(item, site_item)
 
 
 def _localized_payload_needs_repair(localized_item: dict[str, object]) -> bool:
@@ -5708,6 +6033,10 @@ def _safe_key_points(localized_item: dict[str, object], original: DigestItem) ->
         for point in points
         if point and not _looks_untranslated(point) and not _needs_specific_insight_copy(point)
     )
+    if _has_paper_priority_evidence(original):
+        evidence_numbers = _evidence_numbers(_paper_card_evidence(original).quantitative)
+        if evidence_numbers and not any(number in " ".join(safe_points) for number in evidence_numbers):
+            return _fallback_card_points(original, safe_points)
     if _has_complete_card_points(safe_points):
         return safe_points[:7]
     return _fallback_card_points(original, safe_points)
@@ -5906,6 +6235,15 @@ def _latest_week_specific_summary(text: str) -> tuple[str, tuple[str, str, str]]
             ),
         ),
         (
+            ("agnost ai",),
+            "Agnost AI는 운영 중인 AI 에이전트와 챗봇의 실제 사용자 대화를 분석해 silent failure, 행동 drift, 환각, 사용자 불만, 숨은 기능 요청과 이탈 신호를 찾아주는 제품입니다. 반복 패턴을 묶고 각 인사이트의 실제 대화 근거를 보여주며 eval과 수정 작업으로 연결합니다.",
+            (
+                "1. 무엇을 다루나요? 운영 중인 AI 에이전트 대화에서 기존 eval이 놓치는 실패, drift, 환각, 사용자 불만과 이탈 신호를 찾는 제품입니다.",
+                "2. 핵심 구성 요소: 실제 대화 분석, 반복 패턴 클러스터링, 인사이트별 원문 대화 근거, eval과 수정 작업 연결입니다.",
+                "3. 업무 적용 포인트: 에이전트가 200 OK를 반환해도 사용자가 원하는 결과를 얻지 못할 수 있으므로 운영 로그와 대화를 함께 봐야 합니다.",
+            ),
+        ),
+        (
             ("2608.20320",),
             "교통 행동 연구에서 설문 수집, 데이터 처리, 날씨 민감 수요 예측을 세 에이전트 워크플로로 묶은 논문입니다. 챗봇 설문, 구조화 처리, 전통 통계 모델과 멀티모달 LLM 예측을 감사 가능한 흐름으로 연결합니다.",
             (
@@ -5925,11 +6263,11 @@ def _latest_week_specific_summary(text: str) -> tuple[str, tuple[str, str, str]]
         ),
         (
             ("2608.19741",),
-            "Thinkingbox는 에이전트가 상태가 남는 비즈니스 워크플로를 한 번 성공하는 수준이 아니라 반복적으로 정확히 완료하는지 평가하는 샌드박스와 벤치마크입니다. 도구 호출 성공보다 누락·과잉 부작용 없이 최종 업무 상태가 맞는지를 실행 검사로 확인합니다.",
+            "Thinkingbox는 상태가 남는 비즈니스 워크플로에서 한 번 성공하는 에이전트와 반복적으로 믿고 맡길 수 있는 에이전트 사이의 격차를 측정한 벤치마크입니다. 최고 모델도 단일 시도 성공률은 65.36%였지만 20회 반복 신뢰성은 25.25%에 그쳐, 최종 업무 상태를 실행 검사로 확인해야 함을 보여줍니다.",
             (
-                "1. 무엇을 다루나요? 상태 변경이 남는 비즈니스 업무에서 에이전트가 여러 턴의 정보 수집, 정책 준수, 도구 조정을 안정적으로 끝내는지 평가합니다.",
+                "1. 무엇을 다루나요? 상태 변경이 남는 비즈니스 업무에서 최고 모델도 단일 시도 65.36%, 20회 반복 신뢰성 25.25%에 머문다는 격차를 보여줍니다.",
                 "2. 핵심 구성 요소: MCP 호환 격리 세션, 실행 추적, 507개 정책 조건 워크플로, 최종 상태 기반 executable check입니다.",
-                "3. 업무 적용 포인트: 에이전트 신뢰성은 한 번의 성공 사례보다 반복 시도에서 잘못된 변경이나 누락 없이 같은 업무 상태를 재현하는지로 봐야 합니다.",
+                "3. 업무 적용 포인트: 에이전트 신뢰성은 한 번 성공했는지가 아니라 반복 시도에서 잘못된 변경이나 누락 없이 같은 업무 상태를 재현하는지로 봐야 합니다.",
             ),
         ),
         (
@@ -6422,6 +6760,13 @@ def _fallback_three_line_summary(item: DigestItem) -> tuple[str, str, str]:
     latest = _latest_week_specific_summary(text)
     if latest:
         return latest[1]
+    paper_points = _paper_focused_card_points(item)
+    if paper_points:
+        return (
+            paper_points[0].replace("1. 한 줄 요약:", "1. 무엇을 다루나요?", 1),
+            paper_points[1].replace("2. 무엇이 바뀌었나:", "2. 핵심 구성 요소:", 1),
+            paper_points[2].replace("3. 왜 중요한가:", "3. 업무 적용 포인트:", 1),
+        )
     if "new github copilot experience in slack" in text:
         return (
             "1. 무엇을 다루나요? Slack에서 @GitHub를 호출해 Copilot 에이전트 기능을 쓰는 공개 미리보기입니다.",
@@ -6814,14 +7159,17 @@ def _fallback_topic_answer(item: DigestItem, title: str) -> str:
     summary = _meaningful_item_summary(item, title)
     if summary:
         return summary
-    return f"{title}와 관련된 변화가 실제 업무 흐름에 어떤 영향을 주는지 다룹니다."
+    source = _korean_source_name(item.source)
+    kind = _korean_kind_name(item.kind)
+    return f"{title}는 {source}에서 확인한 {kind} 항목입니다."
 
 
 def _fallback_key_answer(item: DigestItem, title: str) -> str:
     summary = _meaningful_item_summary(item, title)
     if summary:
         return f"{summary} 이 항목은 그 변화가 왜 필요한지와 적용 시 확인할 조건을 함께 봅니다."
-    return f"{title}의 대상 업무, 적용 방식, 도입 전 확인할 제약을 함께 정리합니다."
+    source = _korean_source_name(item.source)
+    return f"수집된 본문 요약이 부족해 {title}의 세부 기능은 {source}의 제목과 출처 범위에서만 다룹니다."
 
 
 def _fallback_adoption_answer(item: DigestItem, title: str) -> str:
@@ -7367,6 +7715,9 @@ def _fallback_specific_summary(item: DigestItem) -> str:
     latest = _latest_week_specific_summary(text)
     if latest:
         return latest[0]
+    paper_summary = _paper_focused_summary(item)
+    if paper_summary:
+        return paper_summary
     if "new github copilot experience in slack" in text:
         return (
             "Slack에서 @GitHub를 호출해 GitHub Copilot CLI와 Copilot 앱의 에이전트 기능을 쓰는 공개 미리보기입니다. "
@@ -7862,10 +8213,400 @@ def _format_date(value: datetime) -> str:
     return value.astimezone(kst).strftime("%Y-%m-%d")
 
 
+def refresh_existing_paper_cards(output_dir: Path) -> int:
+    """Refresh generated HTML paper cards from arXiv abstracts."""
+    return refresh_existing_cards(output_dir)
+
+
+def refresh_existing_cards(output_dir: Path) -> int:
+    """Refresh generated HTML card data when source-specific evidence is available."""
+    paths = [output_dir / "index.html"]
+    paths.extend(sorted((output_dir / "archive").glob("*/*/week-*/index.html")))
+
+    cache: dict[str, DigestItem | None] = {}
+    updated = 0
+    for path in paths:
+        if not path.exists():
+            continue
+        html_text = path.read_text(encoding="utf-8")
+        refreshed, count = _refresh_paper_cards_in_html(html_text, cache)
+        refreshed, known_count = _refresh_known_specific_cards_in_html(refreshed)
+        if count or known_count:
+            path.write_text(refreshed, encoding="utf-8", newline="")
+            updated += count + known_count
+    return updated
+
+
+def _refresh_paper_cards_in_html(
+    html_text: str,
+    cache: dict[str, DigestItem | None],
+) -> tuple[str, int]:
+    button_pattern = re.compile(r'<button class="insight-card"[\s\S]*?</button>')
+    first_button_seen = False
+    first_button_refreshed: SiteItem | None = None
+    updated = 0
+
+    def replace_button(match: re.Match[str]) -> str:
+        nonlocal first_button_seen, first_button_refreshed, updated
+        button = match.group(0)
+        is_first_button = not first_button_seen
+        first_button_seen = True
+        attrs = _html_attrs(button)
+        source_url = unescape(attrs.get("data-source", ""))
+        category = unescape(attrs.get("data-category", ""))
+        if category != "논문" and "arxiv.org" not in source_url:
+            return button
+
+        existing_digest = _digest_from_existing_card_attrs(attrs)
+        if _latest_week_specific_summary(re.sub(r"[-_]+", " ", _item_text(existing_digest))):
+            site_item = _localized_site_item(existing_digest, {})
+            refreshed = _patch_insight_button(button, site_item)
+            if refreshed != button:
+                updated += 1
+                if is_first_button:
+                    first_button_refreshed = site_item
+            return refreshed
+
+        if "__arxiv_fetch_disabled__" in cache:
+            return button
+
+        digest = cache.get(source_url)
+        if source_url not in cache:
+            digest = _fetch_arxiv_digest_item(source_url, attrs)
+            cache[source_url] = digest
+            if digest is None:
+                cache["__arxiv_fetch_disabled__"] = None
+        if not digest:
+            return button
+
+        site_item = _localized_site_item(digest, {})
+        refreshed = _patch_insight_button(button, site_item)
+        if refreshed != button:
+            updated += 1
+            if is_first_button:
+                first_button_refreshed = site_item
+        return refreshed
+
+    refreshed_html = button_pattern.sub(replace_button, html_text)
+    if first_button_refreshed:
+        refreshed_html = _patch_initial_insight_detail(refreshed_html, first_button_refreshed)
+    return refreshed_html, updated
+
+
+def _refresh_known_specific_cards_in_html(html_text: str) -> tuple[str, int]:
+    button_pattern = re.compile(r'<button class="insight-card"[\s\S]*?</button>')
+    updated = 0
+
+    def replace_button(match: re.Match[str]) -> str:
+        nonlocal updated
+        button = match.group(0)
+        attrs = _html_attrs(button)
+        source_url = unescape(attrs.get("data-source", ""))
+        category = unescape(attrs.get("data-category", ""))
+        if category == "논문" or "arxiv.org" in source_url:
+            return button
+
+        digest = _digest_from_existing_card_attrs(attrs)
+        if not _latest_week_specific_summary(re.sub(r"[-_]+", " ", _item_text(digest))):
+            return button
+
+        site_item = _localized_site_item(digest, {})
+        refreshed = _patch_insight_button(button, site_item)
+        if refreshed != button:
+            updated += 1
+        return refreshed
+
+    return button_pattern.sub(replace_button, html_text), updated
+
+
+def _digest_from_existing_card_attrs(attrs: dict[str, str]) -> DigestItem:
+    category = unescape(attrs.get("data-category", ""))
+    kind = "paper" if category == "논문" else "tool" if category == "도구" else "news"
+    return DigestItem(
+        title=unescape(attrs.get("data-title", "")),
+        url=unescape(attrs.get("data-source", "")),
+        source=_english_source_name(unescape(attrs.get("data-subcategory", "")))
+        or unescape(attrs.get("data-subcategory", ""))
+        or unescape(attrs.get("data-meta", "")).split("·")[0].strip()
+        or "Source",
+        kind=kind,
+        published=_date_from_meta(attrs.get("data-meta", "")),
+        summary=unescape(attrs.get("data-body", "")),
+    )
+
+
+def _html_attrs(fragment: str) -> dict[str, str]:
+    return {
+        str(match.group(1)): str(match.group(2))
+        for match in re.finditer(r'([\w-]+)="([^"]*)"', fragment)
+    }
+
+
+def _fetch_arxiv_digest_item(source_url: str, attrs: dict[str, str]) -> DigestItem | None:
+    arxiv_id = _arxiv_id_from_url(source_url)
+    if not arxiv_id:
+        return None
+    cached = _read_source_cache(source_url)
+    if cached:
+        return DigestItem(
+            title=str(cached.get("title") or unescape(attrs.get("data-title", ""))),
+            url=source_url,
+            source=str(
+                cached.get("source")
+                or _english_source_name(unescape(attrs.get("data-subcategory", "")))
+                or "arXiv AI"
+            ),
+            kind=str(cached.get("kind") or "paper"),
+            published=_parse_cached_datetime(str(cached.get("published", "")))
+            or _date_from_meta(attrs.get("data-meta", "")),
+            summary=_clean_plain_text(str(cached.get("summary", ""))),
+        )
+
+    api_url = f"https://export.arxiv.org/api/query?id_list={arxiv_id}"
+    content = _fetch_with_retry(api_url, source_url)
+    if content is None:
+        return None
+
+    try:
+        root = ElementTree.fromstring(content)
+    except ElementTree.ParseError as exc:
+        print(f"Could not parse arXiv response for {source_url}: {exc}", file=sys.stderr)
+        return None
+
+    ns = {"atom": "http://www.w3.org/2005/Atom"}
+    entry = root.find("atom:entry", ns)
+    if entry is None:
+        return None
+    title = _clean_plain_text(entry.findtext("atom:title", default="", namespaces=ns))
+    summary = _clean_plain_text(entry.findtext("atom:summary", default="", namespaces=ns))
+    published_text = entry.findtext("atom:published", default="", namespaces=ns)
+    published = _parse_arxiv_datetime(published_text) or _date_from_meta(attrs.get("data-meta", ""))
+    source = _english_source_name(unescape(attrs.get("data-subcategory", ""))) or "arXiv AI"
+    item = DigestItem(
+        title=title or unescape(attrs.get("data-title", "")),
+        url=source_url,
+        source=source,
+        kind="paper",
+        published=published,
+        summary=summary,
+    )
+    _write_source_cache(item)
+    return item
+
+
+def _fetch_with_retry(url: str, source_url: str, attempts: int = 2) -> bytes | None:
+    from urllib.error import HTTPError, URLError
+    from urllib.request import urlopen
+
+    for attempt in range(attempts):
+        try:
+            with urlopen(url, timeout=20) as response:
+                return response.read()
+        except HTTPError as exc:
+            if exc.code == 429 and attempt + 1 < attempts:
+                time.sleep(3)
+                continue
+            print(f"Could not fetch arXiv abstract for {source_url}: {exc}", file=sys.stderr)
+            return None
+        except (URLError, TimeoutError, OSError) as exc:
+            if attempt + 1 < attempts:
+                time.sleep(2)
+                continue
+            print(f"Could not fetch arXiv abstract for {source_url}: {exc}", file=sys.stderr)
+            return None
+    return None
+
+
+def _source_cache_dir() -> Path:
+    return Path(os.environ.get("AIMSTLETTER_SOURCE_CACHE_DIR", ".cache/aimstletter/source-text"))
+
+
+def _source_cache_path(url: str) -> Path:
+    digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:24]
+    return _source_cache_dir() / f"{digest}.json"
+
+
+def _read_source_cache(url: str) -> dict[str, object] | None:
+    path = _source_cache_path(url)
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(data, dict) or not data.get("summary"):
+        return None
+    return data
+
+
+def _write_source_cache(item: DigestItem) -> None:
+    if not item.summary:
+        return
+    payload = {
+        "title": item.title,
+        "url": item.url,
+        "source": item.source,
+        "kind": item.kind,
+        "published": item.published.isoformat(),
+        "summary": item.summary,
+        "cached_at": datetime.now(UTC).isoformat(),
+    }
+    path = _source_cache_path(item.url)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    except OSError:
+        return
+
+
+def _parse_cached_datetime(value: str) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
+
+
+def _arxiv_id_from_url(url: str) -> str:
+    match = re.search(r"arxiv\.org/(?:abs|pdf)/([^?#/\s]+)", url)
+    if not match:
+        return ""
+    return match.group(1).removesuffix(".pdf")
+
+
+def _parse_arxiv_datetime(value: str) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
+
+
+def _date_from_meta(meta: str) -> datetime:
+    match = re.search(r"20\d{2}-\d{2}-\d{2}", unescape(meta))
+    if not match:
+        return datetime.now(UTC)
+    return datetime.fromisoformat(match.group(0)).replace(tzinfo=UTC)
+
+
+def _english_source_name(korean_source: str) -> str:
+    reverse = {
+        value: key
+        for key, value in {
+            "arXiv Database AI": "arXiv 데이터베이스 AI",
+            "arXiv Network AI": "arXiv 네트워크 AI",
+            "arXiv Distributed Systems AI": "arXiv 분산시스템 AI",
+            "arXiv Security AI": "arXiv 보안 AI",
+            "arXiv AI": "arXiv AI",
+        }.items()
+    }
+    return reverse.get(korean_source, korean_source if korean_source.startswith("arXiv") else "")
+
+
+def _patch_insight_button(button: str, item: SiteItem) -> str:
+    attrs = _html_attrs(button)
+    previous_title = unescape(attrs.get("data-title", ""))
+    title = _clip(_smart_insight_title(item), 78)
+    if previous_title and _is_generic_display_title(title):
+        title = previous_title
+    summary = _clip(_smart_insight_summary(item), 150)
+    detail = _smart_insight_card_detail(item, item.summary)
+    points = list(_smart_insight_points(item)[:7])
+
+    button = _replace_html_attr(button, "data-title", title)
+    button = _replace_html_attr(button, "data-body", summary)
+    button = _replace_html_attr(button, "data-detail", detail)
+    button = _replace_html_attr(button, "data-points", json.dumps(points, ensure_ascii=False))
+    button = re.sub(
+        r'<span class="card-title">[\s\S]*?</span>',
+        f'<span class="card-title">{escape(title)}</span>',
+        button,
+        count=1,
+    )
+    button = re.sub(r"<p>[\s\S]*?</p>", f"<p>{escape(summary)}</p>", button, count=1)
+    return button
+
+
+def _replace_html_attr(fragment: str, name: str, value: str) -> str:
+    replacement = f'{name}="{escape(value, quote=True)}"'
+    if re.search(rf'{re.escape(name)}="[^"]*"', fragment):
+        return re.sub(rf'{re.escape(name)}="[^"]*"', replacement, fragment, count=1)
+    return fragment
+
+
+def _patch_initial_insight_detail(html_text: str, item: SiteItem) -> str:
+    title = _clip(_smart_insight_title(item), 78)
+    detail = _smart_insight_card_detail(item, item.summary)
+    points = _render_detail_point_items(_smart_insight_points(item)[:7])
+    html_text = re.sub(
+        r"<h3 data-insight-title>[\s\S]*?</h3>",
+        f"<h3 data-insight-title>{escape(title)}</h3>",
+        html_text,
+        count=1,
+    )
+    html_text = re.sub(
+        r'<p class="detail-copy" data-insight-detail>[\s\S]*?</p>',
+        f'<p class="detail-copy" data-insight-detail>{escape(detail)}</p>',
+        html_text,
+        count=1,
+    )
+    html_text = re.sub(
+        r'<ul class="detail-points" data-insight-points>[\s\S]*?</ul>',
+        f'<ul class="detail-points" data-insight-points>{points}</ul>',
+        html_text,
+        count=1,
+    )
+    return html_text
+
+
+def _render_detail_point_items(points: tuple[str, ...]) -> str:
+    items = []
+    for point in points:
+        question, answer = _split_detail_point_question_answer(point)
+        number = ""
+        number_match = re.match(r"^(\d+\.)\s*(.*)$", question)
+        if number_match:
+            number = f'<span class="point-number">{escape(number_match.group(1))}</span> '
+            question = number_match.group(2)
+        items.append(
+            '<li><span class="point-question">'
+            f"{number}{escape(question)}"
+            '</span><span class="point-answer">'
+            f"{escape(answer)}"
+            "</span></li>"
+        )
+    return "".join(items)
+
+
+def _split_detail_point_question_answer(point: str) -> tuple[str, str]:
+    match = re.match(r"^(\d+\.\s*[^:：]+[:：])\s*(.*)$", point)
+    if not match:
+        return "", point
+    return match.group(1), match.group(2)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="인공지능 마스터 타임즈 깃허브 페이지 사이트를 생성합니다.")
     parser.add_argument("--output-dir", default="public", help="Directory where index.html is written.")
+    parser.add_argument(
+        "--refresh-paper-cards",
+        action="store_true",
+        help="Refresh existing generated cards in public HTML from source-specific evidence.",
+    )
     args = parser.parse_args()
+
+    if args.refresh_paper_cards:
+        count = refresh_existing_paper_cards(Path(args.output_dir))
+        print(f"Refreshed {count} paper cards in {args.output_dir}")
+        return 0
 
     path = build_site(Path(args.output_dir), Settings.from_env())
     print(f"Built {path}")
