@@ -649,33 +649,49 @@ def _arxiv_identifier(url: str) -> str:
 def _recover_arxiv_items(items: list[DigestItem]) -> dict[str, DigestItem]:
     by_id = {_arxiv_identifier(item.url): item for item in items if _arxiv_identifier(item.url)}
     recovered: dict[str, DigestItem] = {}
-    for start in range(0, len(by_id), 40):
-        identifiers = list(by_id)[start : start + 40]
-        try:
-            response = requests.get(
-                "https://export.arxiv.org/api/query",
-                params={"id_list": ",".join(identifiers)},
-                timeout=20,
-            )
-            response.raise_for_status()
-        except requests.RequestException:
+    for original in by_id.values():
+        cached = _read_source_cache(original.url)
+        if not cached:
             continue
-        for entry in feedparser.parse(response.content).entries:
+        title = _clean_plain_text(str(cached.get("title", ""))) or original.title
+        summary = _clean_plain_text(str(cached.get("summary", "")))
+        if not summary:
+            continue
+        recovered[original.url] = DigestItem(
+            title=title,
+            url=original.url,
+            source=original.source,
+            kind=original.kind,
+            published=_parse_cached_datetime(cached.get("published")) or original.published,
+            summary=summary,
+        )
+
+    pending = {identifier: item for identifier, item in by_id.items() if item.url not in recovered}
+    for start in range(0, len(pending), 40):
+        identifiers = list(pending)[start : start + 40]
+        api_url = f"https://export.arxiv.org/api/query?id_list={','.join(identifiers)}"
+        content = _fetch_with_retry(api_url, api_url, attempts=3)
+        if not content:
+            continue
+        for entry in feedparser.parse(content).entries:
             entry_id = _arxiv_identifier(str(getattr(entry, "id", "")))
-            original = by_id.get(entry_id)
+            original = pending.get(entry_id)
             if not original:
                 continue
             title = _clean_plain_text(str(getattr(entry, "title", "")))
             summary = _clean_plain_text(str(getattr(entry, "summary", "")))
-            if title and summary:
-                recovered[original.url] = DigestItem(
-                    title=title,
-                    url=original.url,
-                    source=original.source,
-                    kind=original.kind,
-                    published=original.published,
-                    summary=summary,
-                )
+            if not title or not summary:
+                continue
+            item = DigestItem(
+                title=title,
+                url=original.url,
+                source=original.source,
+                kind=original.kind,
+                published=original.published,
+                summary=summary,
+            )
+            recovered[original.url] = item
+            _write_source_cache(item)
     return recovered
 
 
