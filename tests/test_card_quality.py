@@ -4,11 +4,15 @@ import html
 import json
 from datetime import UTC, datetime
 
+import requests
+
 from aimstletter.fetchers import DigestItem
 from aimstletter.site import (
     _localized_site_item,
+    _recover_web_source_item,
     _refresh_known_specific_cards_in_html,
     _refresh_paper_cards_in_html,
+    _source_match_confidence,
 )
 
 
@@ -110,6 +114,64 @@ def test_missing_body_fallback_does_not_pose_as_source_summary() -> None:
     card_text = f"{site_item.summary} {' '.join(site_item.key_points)}"
 
     assert "related changes" not in card_text
+    assert "자동 실행 범위" not in card_text
+    assert "승인 지점" not in card_text
+
+
+def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:
+    original = DigestItem(
+        title="Purchase API Agentcard",
+        url="https://www.producthunt.com/products/agent-card",
+        source="Product Hunt Launches",
+        kind="tool",
+        published=datetime(2026, 8, 24, tzinfo=UTC),
+        summary="Purchase API Agentcard",
+    )
+
+    assert _source_match_confidence(
+        original,
+        "Completely Different Product",
+        "A calendar scheduling product for meetings and emails.",
+        "https://www.producthunt.com/products/different-product",
+    ) == 0
+
+
+def test_web_source_recovery_retries_before_fallback(monkeypatch, tmp_path) -> None:
+    item = DigestItem(
+        title="Agent Card",
+        url="https://www.producthunt.com/products/agent-card",
+        source="Product Hunt Launches",
+        kind="tool",
+        published=datetime(2026, 8, 24, tzinfo=UTC),
+        summary="Agent Card",
+    )
+    attempts = {"count": 0}
+    monkeypatch.setenv("AIMSTLETTER_SOURCE_CACHE_DIR", str(tmp_path))
+
+    class FakeResponse:
+        url = item.url
+        text = (
+            '<meta property="og:title" content="Agent Card | Product Hunt">'
+            '<meta property="og:description" content="Agent Card helps AI agents publish discoverable capability cards.">'
+        )
+
+        def raise_for_status(self) -> None:
+            return None
+
+    def fake_get(*args, **kwargs):
+        attempts["count"] += 1
+        if attempts["count"] < 3:
+            raise requests.RequestException("temporary network failure")
+        return FakeResponse()
+
+    monkeypatch.setattr("aimstletter.site.requests.get", fake_get)
+    monkeypatch.setattr("aimstletter.site.time.sleep", lambda _seconds: None)
+
+    recovered = _recover_web_source_item(item)
+
+    assert recovered is not None
+    assert attempts["count"] == 3
+    assert "discoverable capability cards" in recovered.summary
 
 
 def test_refresh_known_specific_cards_updates_existing_agnost_html() -> None:

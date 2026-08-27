@@ -557,7 +557,8 @@ _ARCHIVE_CARD_RE = re.compile(
 
 def _refresh_archive_source_summaries(output_dir: Path, settings: Settings) -> None:
     """Replace old category templates with summaries recovered from each paper's source."""
-    pages = list((output_dir / "archive").glob("*/*/week-*/index.html"))
+    pages = [output_dir / "index.html"]
+    pages.extend(sorted((output_dir / "archive").glob("*/*/week-*/index.html")))
     candidates: list[tuple[Path, re.Match[str], DigestItem]] = []
     for path in pages:
         html = path.read_text(encoding="utf-8")
@@ -722,14 +723,22 @@ def _source_text_needs_enrichment(item: DigestItem) -> bool:
 
 
 def _recover_web_source_item(item: DigestItem) -> DigestItem | None:
-    try:
-        response = requests.get(
-            item.url,
-            timeout=12,
-            headers={"User-Agent": "AI-Master-Times/1.0 (+https://storm0710.github.io/aimstletter/)"},
-        )
-        response.raise_for_status()
-    except requests.RequestException:
+    cached = _read_source_cache(item.url)
+    if cached:
+        title = _clean_plain_text(str(cached.get("title", ""))) or item.title
+        summary = _clean_plain_text(str(cached.get("summary", "")))
+        if summary and _source_match_confidence(item, title, summary, item.url):
+            return DigestItem(
+                title=title,
+                url=item.url,
+                source=item.source,
+                kind=item.kind,
+                published=_parse_cached_datetime(cached.get("published")) or item.published,
+                summary=summary,
+            )
+
+    response = _fetch_web_response_with_retry(item.url, attempts=3)
+    if response is None:
         return None
     description = _page_metadata_value(response.text, "og:description") or _page_metadata_value(
         response.text, "description"
@@ -737,14 +746,111 @@ def _recover_web_source_item(item: DigestItem) -> DigestItem | None:
     title = _page_metadata_value(response.text, "og:title") or _page_title(response.text)
     if not description:
         return None
-    return DigestItem(
+    title = _clean_plain_text(title) or item.title
+    summary = _clean_plain_text(description)
+    if not _source_match_confidence(item, title, summary, response.url):
+        return None
+    recovered = DigestItem(
         title=_clean_plain_text(title) or item.title,
         url=item.url,
         source=item.source,
         kind=item.kind,
         published=item.published,
-        summary=_clean_plain_text(description),
+        summary=summary,
     )
+    _write_source_cache(recovered)
+    return recovered
+
+
+def _fetch_web_response_with_retry(url: str, attempts: int = 3) -> requests.Response | None:
+    headers = {"User-Agent": "AI-Master-Times/1.0 (+https://storm0710.github.io/aimstletter/)"}
+    for attempt in range(attempts):
+        try:
+            response = requests.get(url, timeout=12, headers=headers, allow_redirects=True)
+            response.raise_for_status()
+            return response
+        except requests.RequestException as exc:
+            if attempt + 1 < attempts:
+                time.sleep(2 + attempt)
+                continue
+            print(f"Could not fetch source page for {url}: {exc}", file=sys.stderr)
+            return None
+    return None
+
+
+def _source_match_confidence(
+    original: DigestItem,
+    recovered_title: str,
+    recovered_summary: str,
+    final_url: str,
+) -> int:
+    original_host = _normalized_host(original.url)
+    final_host = _normalized_host(final_url)
+    if original_host and final_host and original_host != final_host:
+        return 0
+
+    original_tokens = _source_identity_tokens(f"{original.title} {original.url}")
+    recovered_tokens = _source_identity_tokens(f"{recovered_title} {recovered_summary} {final_url}")
+    if not original_tokens:
+        return 1 if recovered_summary else 0
+    overlap = original_tokens & recovered_tokens
+    if overlap:
+        return min(3, len(overlap))
+    if _normalized_slug(original.url) and _normalized_slug(original.url) in _normalize_identity_text(final_url):
+        return 1
+    return 0
+
+
+def _normalized_host(url: str) -> str:
+    host = urlparse(url).netloc.lower()
+    return host[4:] if host.startswith("www.") else host
+
+
+def _normalized_slug(url: str) -> str:
+    parsed = urlparse(url)
+    parts = [part for part in parsed.path.split("/") if part]
+    return _normalize_identity_text(parts[-1]) if parts else ""
+
+
+def _source_identity_tokens(text: str) -> set[str]:
+    normalized = _normalize_identity_text(text)
+    stopwords = {
+        "http",
+        "https",
+        "www",
+        "com",
+        "org",
+        "index",
+        "products",
+        "product",
+        "producthunt",
+        "launches",
+        "launch",
+        "openai",
+        "github",
+        "blog",
+        "changelog",
+        "and",
+        "for",
+        "with",
+        "from",
+    }
+    parts = [
+        token
+        for token in re.split(r"[^a-z0-9]+", normalized)
+        if len(token) >= 3 and token not in stopwords
+    ]
+    tokens = set(parts)
+    joined_pairs = {
+        "".join(pair)
+        for pair in zip(parts, parts[1:], strict=False)
+        if all(len(part) >= 2 for part in pair)
+    }
+    return tokens | {pair for pair in joined_pairs if pair not in stopwords}
+
+
+def _normalize_identity_text(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
 
 
 def _page_metadata_value(page: str, name: str) -> str:
@@ -3074,6 +3180,9 @@ def _fallback_card_points(
     seed_answers = [] if seed_is_generic else [_strip_point_prefix(point) for point in seed_points if point]
 
     one_line = _first_meaningful_text([summary, *seed_answers, title], title)
+    if _source_text_needs_enrichment(item) and not _has_source_grounded_fallback(item, title, seed_answers):
+        return _insufficient_source_card_points(item, title, one_line)
+
     changed = _first_meaningful_text(
         [
             seed_answers[1] if len(seed_answers) > 1 else "",
@@ -3103,6 +3212,33 @@ def _fallback_card_points(
         f"5. 이번 주 해볼 일: {action}",
         f"6. 누가 보면 좋은가: {roles}",
         f"7. 출처와 상태: {_korean_source_name(item.source)} · {status} · {_format_date(item.published)}",
+    )
+
+
+def _has_source_grounded_fallback(item: DigestItem, title: str, seed_answers: list[str]) -> bool:
+    text = re.sub(r"[-_]+", " ", _item_text(item))
+    if _latest_week_specific_summary(text):
+        return True
+    if _source_evidence_summary(item) or _meaningful_item_summary(item, title):
+        return True
+    return any(answer and not _needs_specific_insight_copy(answer) for answer in seed_answers)
+
+
+def _insufficient_source_card_points(item: DigestItem, title: str, one_line: str) -> tuple[str, ...]:
+    source = _korean_source_name(item.source)
+    kind = _korean_kind_name(item.kind)
+    status = _source_status(item)
+    source_limited = (
+        f"수집된 본문 요약이 부족해 {title}의 세부 기능은 {source}의 제목과 출처 범위에서만 다룹니다."
+    )
+    return (
+        f"1. 한 줄 요약: {one_line}",
+        f"2. 무엇이 바뀌었나: {source_limited}",
+        "3. 왜 중요한가: 원문 본문을 재수집해 확인하기 전까지 기능, 성능, 적용 효과를 추정하지 않습니다.",
+        "4. 한계와 주의사항: 현재 카드는 제목과 출처 메타데이터만 검증된 상태라 원문 확인 전 업무 적용 판단에 쓰면 안 됩니다.",
+        f"5. 이번 주 해볼 일: {title} 원문을 다시 열어 제품 설명, 대상 사용자, 핵심 기능을 확인한 뒤 카드 내용을 갱신하세요.",
+        f"6. 누가 보면 좋은가: {kind} 선별 담당자, AI 엔지니어",
+        f"7. 출처와 상태: {source} · {status} · {_format_date(item.published)}",
     )
 
 
@@ -3513,6 +3649,8 @@ def _needs_specific_insight_copy(text: str) -> bool:
         "관련된 변화가 실제 업무 흐름에 어떤 영향을",
         "업무 흐름에 미치는 영향을 정리한 항목",
         "대상 업무, 적용 방식, 도입 전 확인할",
+        "수집된 본문 요약이 부족",
+        "제목과 출처 범위에서만 다룹니다",
         "주제를 다룹니다",
         "이슈, 커밋, PR에 흩어진 변경 내용",
         "변경 내역 수집, 영향 범위 요약",
