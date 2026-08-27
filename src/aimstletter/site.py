@@ -346,6 +346,9 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     _refresh_archive_source_summaries(output_dir, settings)
     _write_secondary_pages(output_dir, ai_items, tool_items, _render_analytics(settings), archive_entries)
     refresh_existing_cards(output_dir)
+    archive_entries = _collect_archive_entries(output_dir, archive_entry)
+    _refresh_homepage_archive_navigation(path, archive_entries, archive_entry)
+    _refresh_archive_navigation(output_dir, archive_entries)
     return path
 
 
@@ -508,6 +511,24 @@ def _write_weekly_archive(
     archive_dir.mkdir(parents=True, exist_ok=True)
     archived_html = html.replace("<head>", '<head>\n  <base href="../../../../">', 1)
     archive_dir.joinpath("index.html").write_text(archived_html, encoding="utf-8")
+
+
+def _refresh_homepage_archive_navigation(
+    index_path: Path,
+    entries: list[dict[str, object]],
+    current_entry: dict[str, object],
+) -> None:
+    if not index_path.exists() or not entries:
+        return
+    html = index_path.read_text(encoding="utf-8")
+    updated = re.sub(
+        r'<aside class="archive-nav" aria-label="주간 아카이브">[\s\S]*?</aside>',
+        _render_archive_nav(entries, current_entry=current_entry),
+        html,
+        count=1,
+    )
+    if updated != html:
+        index_path.write_text(updated, encoding="utf-8")
 
 
 def _refresh_archive_navigation(output_dir: Path, entries: list[dict[str, object]]) -> None:

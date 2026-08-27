@@ -10,6 +10,7 @@ from aimstletter.fetchers import DigestItem
 from aimstletter.site import (
     _localized_site_item,
     _recover_web_source_item,
+    _refresh_homepage_archive_navigation,
     _refresh_known_specific_cards_in_html,
     _refresh_paper_cards_in_html,
     _source_match_confidence,
@@ -172,6 +173,32 @@ def test_web_source_recovery_retries_before_fallback(monkeypatch, tmp_path) -> N
     assert recovered is not None
     assert attempts["count"] == 3
     assert "discoverable capability cards" in recovered.summary
+
+
+def test_homepage_archive_navigation_uses_fresh_archive_search_text(tmp_path) -> None:
+    index_path = tmp_path / "index.html"
+    index_path.write_text(
+        '<aside class="archive-nav" aria-label="주간 아카이브">'
+        '<a data-archive-index="stale related changes">08월 4째주</a>'
+        "</aside>",
+        encoding="utf-8",
+    )
+    entry = {
+        "year": 2026,
+        "month": 8,
+        "week": 4,
+        "href": "archive/2026/08/week-4/",
+        "period_start": "2026-08-17",
+        "period_end": "2026-08-24",
+        "period_label": "2026-08-17~2026-08-24 데이터",
+        "search_text": "fresh source-backed summary",
+    }
+
+    _refresh_homepage_archive_navigation(index_path, [entry], entry)
+
+    html_text = index_path.read_text(encoding="utf-8")
+    assert "fresh source-backed summary" in html_text
+    assert "stale related changes" not in html_text
 
 
 def test_refresh_known_specific_cards_updates_existing_agnost_html() -> None:
