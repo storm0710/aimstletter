@@ -500,6 +500,10 @@ def _normalize_search_text(value: str) -> str:
 def _strip_generated_summary_artifacts(text: str) -> str:
     markers = (
         "근거 문장:",
+        "초록에서 확인되는 결과와 평가 기준을 중심으로 봐야 합니다",
+        "기존 접근과의 차이는 “",
+        "핵심 정량 결과는 “",
+        "평가 방식은 “",
         "초록의 대비 문장에 드러납니다:",
         "평가 방식은 초록의 근거 문장을 기준으로 확인됩니다:",
     )
@@ -3578,8 +3582,13 @@ def _paper_focused_card_points(
     contrast = _first_evidence_text([*evidence.contrast], title, "contrast")
     evaluation = _first_evidence_text([*evidence.evaluation, *evidence.benchmark], title, "evaluation")
     numbers = _evidence_numbers(evidence.quantitative)
-    result_message = result or evaluation or (_strip_point_prefix(seed_points[0]) if seed_points else title)
-    changed = contrast or evaluation or (_strip_point_prefix(seed_points[1]) if len(seed_points) > 1 else "")
+    seed_answers = [
+        _strip_point_prefix(point)
+        for point in seed_points
+        if point and not _needs_specific_insight_copy(point)
+    ]
+    result_message = result or evaluation or (seed_answers[0] if seed_answers else title)
+    changed = contrast or evaluation or (seed_answers[1] if len(seed_answers) > 1 else "")
     if not changed:
         changed = f"{title}가 기존 방식의 한계를 어떤 평가 방식으로 확인하는지 초록 기준으로 정리했습니다."
     why = result_message
@@ -3722,9 +3731,12 @@ def _enforce_paper_card_evidence(original: DigestItem, site_item: SiteItem) -> S
     if not (evidence.quantitative or evidence.benchmark or evidence.contrast):
         return site_item
 
-    current_text = " ".join((site_item.summary, site_item.detail, " ".join(site_item.key_points)))
+    summary_detail_text = " ".join((site_item.summary, site_item.detail))
+    current_text = " ".join((summary_detail_text, " ".join(site_item.key_points)))
     expected_numbers = _evidence_numbers(evidence.quantitative)
-    missing_key_number = bool(expected_numbers) and not any(number in current_text for number in expected_numbers)
+    missing_key_number = bool(expected_numbers) and not any(
+        number in summary_detail_text for number in expected_numbers
+    )
     needs_rewrite = missing_key_number or _needs_specific_insight_copy(current_text)
     if not needs_rewrite:
         return site_item

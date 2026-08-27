@@ -122,6 +122,48 @@ def test_existing_paper_summary_with_evidence_leak_is_regenerated() -> None:
     assert "126" in card_text
 
 
+def test_existing_recursive_paper_summary_is_regenerated() -> None:
+    item = DigestItem(
+        title="Ensi RAG Entity Retrieval Generation",
+        url="https://arxiv.org/abs/2608.21111v1",
+        source="arXiv Database AI",
+        kind="paper",
+        published=datetime(2026, 8, 22, tzinfo=UTC),
+        summary="Across Loong and Oolong, EnSI-RAG achieves an average accuracy of 78.24.",
+    )
+    recursive = (
+        "\ucd08\ub85d\uc5d0\uc11c \ud655\uc778\ub418\ub294 \uacb0\uacfc\uc640 \ud3c9\uac00 \uae30\uc900\uc744 "
+        "\uc911\uc2ec\uc73c\ub85c \ubd10\uc57c \ud569\ub2c8\ub2e4. "
+        "\uae30\uc874 \uc811\uadfc\uacfc\uc758 \ucc28\uc774\ub294 \u201cEnsi RAG Entity "
+        "\ucd08\ub85d\uc5d0\uc11c \ud655\uc778\ub418\ub294 \uacb0\uacfc\uc640 \ud3c9\uac00 "
+        "\uae30\uc900\uc744 \uc911\uc2ec\uc73c\ub85c \ubd10\uc57c \ud569\ub2c8\ub2e4\u201d"
+    )
+
+    site_item = _localized_site_item(
+        item,
+        {
+            "title": "Ensi RAG Entity",
+            "summary": recursive,
+            "detail": recursive,
+            "key_points": [
+                "1. \ud55c \uc904 \uc694\uc57d: " + recursive,
+                "2. \ubb34\uc5c7\uc774 \ubc14\ub00c\uc5c8\ub098: " + recursive,
+                "3. \uc65c \uc911\uc694\ud55c\uac00: " + recursive,
+                "4. \ud55c\uacc4\uc640 \uc8fc\uc758\uc0ac\ud56d: paper-stage result.",
+                "5. \uc774\ubc88 \uc8fc \ud574\ubcfc \uc77c: try a small evaluation.",
+                "6. \ub204\uac00 \ubcf4\uba74 \uc88b\uc740\uac00: AI engineers",
+                "7. \ucd9c\ucc98\uc640 \uc0c1\ud0dc: arXiv paper",
+            ],
+            "tags": ["AI agent"],
+        },
+    )
+
+    card_text = f"{site_item.summary} {site_item.detail} {' '.join(site_item.key_points)}"
+
+    assert "\uae30\uc874 \uc811\uadfc\uacfc\uc758 \ucc28\uc774\ub294 \u201c" not in card_text
+    assert "\ud3c9\uade0 \uc815\ud655\ub3c4 78.24" in card_text
+
+
 def test_archive_search_text_strips_generated_evidence_leaks() -> None:
     value = (
         "Agentic Data Cleaning "
