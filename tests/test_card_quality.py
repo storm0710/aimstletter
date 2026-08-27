@@ -77,6 +77,7 @@ def test_paper_focused_summary_rewrites_english_evidence_to_korean() -> None:
     assert "평균 정확도 78.24" in summary
     assert "Each record" not in summary
     assert "Across Loong and Oolong" not in summary
+    assert "an entity" not in summary
 
 
 def test_existing_paper_summary_with_evidence_leak_is_regenerated() -> None:

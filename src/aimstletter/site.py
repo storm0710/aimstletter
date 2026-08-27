@@ -3656,8 +3656,7 @@ def _korean_paper_evidence_text(sentence: str, title: str, role: str) -> str:
     record_schema = re.search(r"each record\s*\(([^)]+)\)\s*represents?\s+(.+)", text, flags=re.IGNORECASE)
     if record_schema:
         schema = record_schema.group(1)
-        meaning = _clip(_clean_plain_text(record_schema.group(2)), 180)
-        return f"새 접근은 각 기록을 ({schema}) 구조로 표현해 엔터티, 타입, 의미 범주, 값을 원문 passage와 연결합니다. ({meaning})"
+        return f"새 접근은 각 기록을 ({schema}) 구조로 표현해 엔터티, 타입, 의미 범주, 값을 원문 passage와 연결합니다."
 
     if re.search(r"existing .*do not guarantee|does not guarantee|however,", text, flags=re.IGNORECASE):
         return f"기존 방식의 한계는 {system}이 요구하는 조건을 충분히 보장하지 못한다는 점이며, 논문은 이 차이를 평가 기준으로 삼습니다."
