@@ -956,7 +956,7 @@ def _rewrite_archive_card(match: re.Match[str], item: SiteItem) -> str:
     )
     content = re.sub(
         r'(<p>)[\s\S]*?(</p>)',
-        rf'\1{escape(_clip(_smart_insight_summary(item), 320))}\2',
+        rf'\1{escape(_clip(_smart_insight_summary(item), 520))}\2',
         content,
         count=1,
     )
@@ -3825,7 +3825,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     for index, item in enumerate(unique_items):
         title = _clip(_smart_insight_title(item), 78)
         smart_summary = _smart_insight_summary(item)
-        body = _clip(smart_summary, 320)
+        body = _clip(smart_summary, 520)
         detail = _smart_insight_card_detail(item, smart_summary)
         points = _smart_insight_points(item)
         footnotes = item.glossary
@@ -7483,7 +7483,7 @@ def _meaningful_item_summary(item: DigestItem, title: str) -> str:
         return ""
     if summary in title or title in summary:
         return ""
-    return _clip(summary, 320)
+    return _clip(summary, 520)
 
 
 def _fallback_display_title(item: DigestItem) -> str:
@@ -7989,7 +7989,7 @@ def _source_evidence_summary(item: DigestItem) -> str:
         return ""
     if _looks_untranslated(summary):
         return ""
-    return _clip(summary, 320)
+    return _clip(summary, 520)
 
 
 def _strip_point_prefix(text: str) -> str:
@@ -8803,7 +8803,7 @@ def _patch_insight_button(button: str, item: SiteItem) -> str:
     title = _clip(_smart_insight_title(item), 78)
     if previous_title and _is_generic_display_title(title):
         title = previous_title
-    summary = _clip(_smart_insight_summary(item), 320)
+    summary = _clip(_smart_insight_summary(item), 520)
     detail = _smart_insight_card_detail(item, item.summary)
     points = list(_smart_insight_points(item)[:7])
 
