@@ -9,7 +9,10 @@ import requests
 from aimstletter.fetchers import DigestItem
 from aimstletter.site import (
     _localized_site_item,
+    _normalize_search_text,
+    _paper_focused_summary,
     _recover_web_source_item,
+    _render_smart_insight_cards,
     _refresh_homepage_archive_navigation,
     _refresh_known_specific_cards_in_html,
     _refresh_paper_cards_in_html,
@@ -53,6 +56,118 @@ def test_paper_cards_prioritize_quantitative_abstract_results() -> None:
     assert "25.25%" in card_text
     assert "single-attempt" in card_text or "single attempt" in card_text
     assert "20" in card_text
+
+
+def test_paper_focused_summary_rewrites_english_evidence_to_korean() -> None:
+    item = DigestItem(
+        title="Ensi RAG Entity Retrieval Generation",
+        url="https://arxiv.org/abs/2608.21111v1",
+        source="arXiv Database AI",
+        kind="paper",
+        published=datetime(2026, 8, 22, tzinfo=UTC),
+        summary=(
+            "Each record (e, t, k, v) represents an entity e, its type t, a semantic category k in "
+            "{property, relation, aspect}, and a value v, while retaining links to the original source passages. "
+            "Across Loong and Oolong, EnSI-RAG achieves an average accuracy of 78.24."
+        ),
+    )
+
+    summary = _paper_focused_summary(item)
+
+    assert "평균 정확도 78.24" in summary
+    assert "Each record" not in summary
+    assert "Across Loong and Oolong" not in summary
+
+
+def test_existing_paper_summary_with_evidence_leak_is_regenerated() -> None:
+    item = DigestItem(
+        title="Agentic Data Cleaning",
+        url="https://arxiv.org/abs/2608.19999v1",
+        source="arXiv Database AI",
+        kind="paper",
+        published=datetime(2026, 8, 14, tzinfo=UTC),
+        summary=(
+            "Seven configurations are evaluated across financial, clinical, and environmental-monitoring "
+            "datasets using controlled synthetic corruption and original-data descriptive analysis, resulting "
+            "in 126 completed runs."
+        ),
+    )
+    leaked = (
+        "\uadfc\uac70 \ubb38\uc7a5: seven configurations are evaluated across financial, clinical, and "
+        "environmental-monitoring datasets, resulting in 126 completed runs."
+    )
+
+    site_item = _localized_site_item(
+        item,
+        {
+            "title": "Agentic Data Cleaning",
+            "summary": leaked,
+            "detail": leaked,
+            "key_points": [
+                "1. \ud55c \uc904 \uc694\uc57d: " + leaked,
+                "2. \ubb34\uc5c7\uc774 \ubc14\ub00c\uc5c8\ub098: " + leaked,
+                "3. \uc65c \uc911\uc694\ud55c\uac00: " + leaked,
+                "4. \ud55c\uacc4\uc640 \uc8fc\uc758\uc0ac\ud56d: paper-stage result.",
+                "5. \uc774\ubc88 \uc8fc \ud574\ubcfc \uc77c: try a small evaluation.",
+                "6. \ub204\uac00 \ubcf4\uba74 \uc88b\uc740\uac00: AI engineers",
+                "7. \ucd9c\ucc98\uc640 \uc0c1\ud0dc: arXiv paper",
+            ],
+            "tags": ["AI agent"],
+        },
+    )
+
+    card_text = f"{site_item.summary} {site_item.detail} {' '.join(site_item.key_points)}"
+
+    assert "\uadfc\uac70 \ubb38\uc7a5:" not in card_text
+    assert "126" in card_text
+
+
+def test_archive_search_text_strips_generated_evidence_leaks() -> None:
+    value = (
+        "Agentic Data Cleaning "
+        "\uadfc\uac70 \ubb38\uc7a5: seven configurations are evaluated across datasets, resulting in 126 runs. "
+        "arxiv database ai"
+    )
+
+    search_text = _normalize_search_text(value)
+
+    assert "\uadfc\uac70 \ubb38\uc7a5:" not in search_text
+    assert "seven configurations" not in search_text
+    assert "agentic data cleaning" in search_text
+
+
+def test_smart_insight_card_keeps_long_detail_without_700_char_truncation() -> None:
+    long_detail = "요약 본문입니다. " + ("자세한 근거를 확인할 수 있습니다. " * 45)
+    item = _localized_site_item(
+        DigestItem(
+            title="Long Detail Tool",
+            url="https://example.com/long-detail-tool",
+            source="Example",
+            kind="tool",
+            published=datetime(2026, 8, 24, tzinfo=UTC),
+            summary=long_detail,
+        ),
+        {
+            "title": "Long Detail Tool",
+            "summary": long_detail,
+            "detail": long_detail,
+            "key_points": [
+                "1. 한 줄 요약: " + long_detail,
+                "2. 무엇이 바뀌었나: " + long_detail,
+                "3. 왜 중요한가: " + long_detail,
+                "4. 한계와 주의사항: " + long_detail,
+                "5. 이번 주 해볼 일: " + long_detail,
+                "6. 누가 보면 좋은가: AI 엔지니어",
+                "7. 출처와 상태: Example · 자료 · 2026-08-24",
+            ],
+            "tags": ["tool"],
+        },
+    )
+
+    html_text = _render_smart_insight_cards([item])
+
+    assert 'data-detail="' in html_text
+    assert "..." not in html_text.split('data-detail="', 1)[1].split('"', 1)[0]
 
 
 def test_quantitative_paper_logic_does_not_rewrite_tool_cards() -> None:

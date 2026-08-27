@@ -492,8 +492,26 @@ def _archive_page_search_text(path: Path) -> str:
 def _normalize_search_text(value: str) -> str:
     text = unescape(value)
     text = re.sub(r"<[^>]+>", " ", text)
+    text = _strip_generated_summary_artifacts(text)
     text = re.sub(r"\s+", " ", text)
     return text.strip().lower()
+
+
+def _strip_generated_summary_artifacts(text: str) -> str:
+    markers = (
+        "근거 문장:",
+        "초록의 대비 문장에 드러납니다:",
+        "평가 방식은 초록의 근거 문장을 기준으로 확인됩니다:",
+    )
+    cleaned = text
+    for marker in markers:
+        cleaned = re.sub(
+            rf"{re.escape(marker)}[^.?!。]{{0,520}}",
+            " ",
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+    return cleaned
 
 
 def _write_weekly_archive(
@@ -568,6 +586,27 @@ def _refresh_archive_navigation(output_dir: Path, entries: list[dict[str, object
         updated = _ensure_primary_nav_sources_link(updated)
         if updated != html:
             path.write_text(updated, encoding="utf-8")
+    knowledge_root = output_dir / "knowledge"
+    if knowledge_root.exists():
+        knowledge_pages = [knowledge_root / "index.html", *knowledge_root.glob("*/index.html")]
+        for path in knowledge_pages:
+            if not path.exists():
+                continue
+            link_prefix = "../" if path.parent == knowledge_root else "../../"
+            current_slug = None if path.parent == knowledge_root else path.parent.name
+            html = path.read_text(encoding="utf-8")
+            updated = re.sub(
+                r'<aside class="archive-nav" aria-label="주간 아카이브">[\s\S]*?</aside>',
+                _render_archive_nav(
+                    entries,
+                    link_prefix=link_prefix,
+                    current_knowledge_slug=current_slug,
+                ),
+                html,
+                count=1,
+            )
+            if updated != html:
+                path.write_text(updated, encoding="utf-8")
     return
 
 
@@ -917,7 +956,7 @@ def _rewrite_archive_card(match: re.Match[str], item: SiteItem) -> str:
     )
     content = re.sub(
         r'(<p>)[\s\S]*?(</p>)',
-        rf'\1{escape(_clip(_smart_insight_summary(item), 150))}\2',
+        rf'\1{escape(_clip(_smart_insight_summary(item), 320))}\2',
         content,
         count=1,
     )
@@ -3512,18 +3551,18 @@ def _paper_focused_summary(item: DigestItem, evidence: PaperCardEvidence | None 
         return ""
 
     title = _fallback_display_title(item)
-    result = _first_evidence_text([*evidence.quantitative, *evidence.benchmark])
-    contrast = _first_evidence_text([*evidence.contrast])
-    evaluation = _first_evidence_text([*evidence.evaluation, *evidence.benchmark])
+    result = _first_evidence_text([*evidence.quantitative, *evidence.benchmark], title, "result")
+    contrast = _first_evidence_text([*evidence.contrast], title, "contrast")
+    evaluation = _first_evidence_text([*evidence.evaluation, *evidence.benchmark], title, "evaluation")
 
-    parts = [f"{title} 논문은 초록에서 확인되는 결과와 평가 기준을 중심으로 봐야 합니다."]
-    if contrast:
-        parts.append(f"기존 접근과의 차이는 “{contrast}”에 드러납니다.")
+    parts = [f"{title} 논문은 초록에 나온 평가 방식과 결과를 중심으로 봐야 합니다."]
     if result:
-        parts.append(f"핵심 정량 결과는 “{result}”입니다.")
+        parts.append(result)
+    if contrast:
+        parts.append(contrast)
     elif evaluation:
-        parts.append(f"평가 방식은 “{evaluation}”입니다.")
-    return _clip(" ".join(parts), 260)
+        parts.append(evaluation)
+    return _clip(" ".join(parts), 520)
 
 
 def _paper_focused_card_points(
@@ -3535,9 +3574,9 @@ def _paper_focused_card_points(
         return ()
 
     title = _fallback_display_title(item)
-    result = _first_evidence_text([*evidence.quantitative, *evidence.benchmark])
-    contrast = _first_evidence_text([*evidence.contrast])
-    evaluation = _first_evidence_text([*evidence.evaluation, *evidence.benchmark])
+    result = _first_evidence_text([*evidence.quantitative, *evidence.benchmark], title, "result")
+    contrast = _first_evidence_text([*evidence.contrast], title, "contrast")
+    evaluation = _first_evidence_text([*evidence.evaluation, *evidence.benchmark], title, "evaluation")
     numbers = _evidence_numbers(evidence.quantitative)
     result_message = result or evaluation or (_strip_point_prefix(seed_points[0]) if seed_points else title)
     changed = contrast or evaluation or (_strip_point_prefix(seed_points[1]) if len(seed_points) > 1 else "")
@@ -3562,12 +3601,81 @@ def _paper_focused_card_points(
     )
 
 
-def _first_evidence_text(candidates: list[str]) -> str:
+def _first_evidence_text(candidates: list[str], title: str = "", role: str = "evidence") -> str:
     for candidate in candidates:
         clean = _clean_plain_text(candidate)
         if clean:
-            return _clip(clean, 190)
+            return _clip(_korean_paper_evidence_text(clean, title, role), 360)
     return ""
+
+
+def _korean_paper_evidence_text(sentence: str, title: str, role: str) -> str:
+    text = _clean_plain_text(sentence)
+    system = _paper_system_name(title, text)
+    quoted = re.findall(r"[\"“”']([^\"“”']{8,160})[\"“”']", text)
+    numbers = _evidence_numbers((text,))
+
+    accuracy = re.search(
+        r"across\s+(.+?),\s*([A-Za-z0-9\-]+)\s+achieves?\s+(?:an\s+)?average\s+accuracy\s+of\s+(\d+(?:\.\d+)?)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if accuracy:
+        tasks = _clean_plain_text(accuracy.group(1))
+        model = accuracy.group(2)
+        value = accuracy.group(3)
+        return f"{model}은 {tasks} 평가에서 평균 정확도 {value}를 기록해, 논문의 핵심 결과를 수치로 확인하게 합니다."
+
+    coverage = re.search(
+        r"achieves?\s+(\d+(?:\.\d+)?)%\s+and\s+(\d+(?:\.\d+)?)%\s+runnable\s+coverage\s+for\s+(.+?)(?:,|\s+respectively|$)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if coverage:
+        first, second, targets = coverage.groups()
+        return f"{system}은 {targets}에서 실행 가능한 파이프라인 커버리지 {first}%와 {second}%를 보여, 모델 저장소를 실제 실행 가능한 형태로 만드는 효과를 제시합니다."
+
+    best_model = re.search(
+        r"best model reaches\s+(\d+(?:\.\d+)?)%\s+(.+?),\s+but only\s+(\d+(?:\.\d+)?)%\s+(.+)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if best_model:
+        first, first_metric, second, second_metric = best_model.groups()
+        return f"최고 모델도 {first_metric}는 {first}%였지만 {second_metric}는 {second}%에 그쳐, 한 번 성공과 반복 신뢰성의 차이를 보여줍니다."
+
+    record_schema = re.search(r"each record\s*\(([^)]+)\)\s*represents?\s+(.+)", text, flags=re.IGNORECASE)
+    if record_schema:
+        schema = record_schema.group(1)
+        meaning = _clip(_clean_plain_text(record_schema.group(2)), 180)
+        return f"새 접근은 각 기록을 ({schema}) 구조로 표현해 엔터티, 타입, 의미 범주, 값을 원문 passage와 연결합니다. ({meaning})"
+
+    if re.search(r"existing .*do not guarantee|does not guarantee|however,", text, flags=re.IGNORECASE):
+        return f"기존 방식의 한계는 {system}이 요구하는 조건을 충분히 보장하지 못한다는 점이며, 논문은 이 차이를 평가 기준으로 삼습니다."
+
+    if re.search(r"while they host millions", text, flags=re.IGNORECASE):
+        return f"기존 저장소에는 모델이 많지만 실행 가능한 파이프라인 없이 가중치만 있는 경우가 많아, {system}은 실제 실행 가능성을 핵심 기준으로 봅니다."
+
+    if numbers:
+        return f"{system}은 {', '.join(numbers[:2])} 같은 핵심 수치를 통해 논문의 주장과 평가 결과를 확인하게 합니다."
+
+    if quoted:
+        return "기존 접근과의 차이는 초록의 대비 문장에서 확인되며, 원문이 제시한 비교 구조를 중심으로 봐야 합니다."
+
+    if role == "contrast":
+        return "기존 접근과의 차이는 초록의 대비 문장에서 확인되며, 원문 근거를 기준으로 기존 한계와 새 접근을 구분해야 합니다."
+    if role == "evaluation":
+        return "평가 방식은 초록의 근거 문장에서 확인되며, 태스크와 지표를 먼저 확인해야 합니다."
+    return f"{system}은 초록의 근거 문장을 통해 평가 방식과 결과를 확인해야 합니다."
+
+
+def _paper_system_name(title: str, sentence: str) -> str:
+    title = _clean_plain_text(title)
+    for candidate in (title.split(":")[0].strip(), title.split(" 논문")[0].strip()):
+        if candidate:
+            return candidate
+    match = re.search(r"\b([A-Z][A-Za-z0-9\-]{2,})\b", sentence)
+    return match.group(1) if match else "이 논문"
 
 
 def _paper_weekly_action(item: DigestItem, evidence: PaperCardEvidence) -> str:
@@ -3672,6 +3780,9 @@ def _needs_specific_insight_copy(text: str) -> bool:
         "대상 업무, 적용 방식, 도입 전 확인할",
         "수집된 본문 요약이 부족",
         "제목과 출처 범위에서만 다룹니다",
+        "근거 문장:",
+        "초록의 대비 문장에 드러납니다:",
+        "평가 방식은 초록의 근거 문장을 기준으로 확인됩니다:",
         "주제를 다룹니다",
         "이슈, 커밋, PR에 흩어진 변경 내용",
         "변경 내역 수집, 영향 범위 요약",
@@ -3714,7 +3825,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     for index, item in enumerate(unique_items):
         title = _clip(_smart_insight_title(item), 78)
         smart_summary = _smart_insight_summary(item)
-        body = _clip(smart_summary, 150)
+        body = _clip(smart_summary, 320)
         detail = _smart_insight_card_detail(item, smart_summary)
         points = _smart_insight_points(item)
         footnotes = item.glossary
@@ -3739,7 +3850,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             f'data-category="{escape(category, quote=True)}" '
             f'data-subcategory="{escape(subcategory, quote=True)}" '
             f'data-body="{escape(body, quote=True)}" '
-            f'data-detail="{escape(_clip(detail, 700), quote=True)}" '
+            f'data-detail="{escape(_clip(detail, 1600), quote=True)}" '
             f'data-meta="{escape(meta, quote=True)}" '
             f'data-points="{escape(json.dumps(list(points[:7]), ensure_ascii=False), quote=True)}" '
             f'data-tags="{escape(json.dumps(list(tags[:6]), ensure_ascii=False), quote=True)}" '
@@ -3770,7 +3881,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + f'<span class="topic-badge{first_badge_class}" data-insight-category>{escape(first_category)}</span>'
         + f'<span class="topic-badge sub" data-insight-subcategory>{escape(first_subcategory)}</span>'
         + '</div>'
-        + f'<p class="detail-copy" data-insight-detail>{escape(_clip(first_detail, 700))}</p>'
+        + f'<p class="detail-copy" data-insight-detail>{escape(_clip(first_detail, 1600))}</p>'
         + '<ul class="detail-points" data-insight-points>'
         + "".join(_render_point_item(point) for point in first_points[:7])
         + "</ul>"
@@ -7372,7 +7483,7 @@ def _meaningful_item_summary(item: DigestItem, title: str) -> str:
         return ""
     if summary in title or title in summary:
         return ""
-    return _clip(summary, 150)
+    return _clip(summary, 320)
 
 
 def _fallback_display_title(item: DigestItem) -> str:
@@ -8692,7 +8803,7 @@ def _patch_insight_button(button: str, item: SiteItem) -> str:
     title = _clip(_smart_insight_title(item), 78)
     if previous_title and _is_generic_display_title(title):
         title = previous_title
-    summary = _clip(_smart_insight_summary(item), 150)
+    summary = _clip(_smart_insight_summary(item), 320)
     detail = _smart_insight_card_detail(item, item.summary)
     points = list(_smart_insight_points(item)[:7])
 
