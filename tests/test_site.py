@@ -7,11 +7,13 @@ from pathlib import Path
 from aimstletter.fetchers import DigestItem
 from aimstletter.config import AI_TOOL_DISCOVERY_KEYWORDS, Settings, TOOL_UPDATE_FEEDS
 from aimstletter.site import (
+    KNOWLEDGE_FIRST_SCREEN,
     KNOWLEDGE_TOPICS,
     SiteItem,
     _fallback_display_summary,
     _fallback_korean_item,
     _fallback_three_line_summary,
+    _dedupe_insight_buttons_in_html,
     _has_reused_or_generic_localizations,
     _item_slug,
     _items_in_window,
@@ -961,11 +963,11 @@ def test_committed_knowledge_page_exists() -> None:
     assert 'target="_blank"' in html
     assert "code-details" in html
     assert "01. LangChain" in langchain
-    assert "회의록을 업무 등록 초안으로 바꾸기" in langchain
+    assert "회의록 자동 등록" in langchain
     assert "Prompt Template" in langchain
-    assert "서비스 장애 대응 에이전트" in langgraph
-    assert "테스트에 실패한 코드를 에이전트가 수정하는 반복 과정" in loop
-    assert "서비스 변경 시 영향 범위를 분석하는 시스템 의존성 그래프" in graph
+    assert "장애 원인 분석" in langgraph
+    assert "테스트 실패 자동 수정" in loop
+    assert "결제 API 변경 영향 분석" in graph
     assert "LangGraph와 그래프 엔지니어링의 차이" in graph
 
 
@@ -973,7 +975,11 @@ def test_knowledge_page_includes_practical_engineering_playbook() -> None:
     topic = next(topic for topic in KNOWLEDGE_TOPICS if topic.slug == "langgraph")
     html = _render_knowledge_topic_page(topic, analytics_html="", back_href="../../")
 
-    assert "30초 요약" in html
+    assert "핵심 정의" in html
+    assert "한눈에 보는 구조" in html
+    assert "장애 원인 분석" in html
+    assert "헷갈리는 개념과 차이" in html
+    assert "30초 요약" not in html
     assert "해결하려는 문제" in html
     assert "언제 사용하고 언제 사용하지 않는가" in html
     assert "실제 업무 사례" in html
@@ -996,6 +1002,48 @@ def test_knowledge_page_includes_practical_engineering_playbook() -> None:
     assert "최종 검토 날짜: 2026-08-06" in html
     assert "이 문서에서 사용하는 정의" in html
     assert "code-details" in html
+
+
+def test_knowledge_pages_01_to_07_start_with_refocused_first_screen() -> None:
+    slugs = {
+        "langchain",
+        "langgraph",
+        "prompt-engineering",
+        "context-engineering",
+        "harness-engineering",
+        "loop-engineering",
+        "graph-engineering",
+    }
+
+    for topic in KNOWLEDGE_TOPICS:
+        html = _render_knowledge_topic_page(topic, analytics_html="", back_href="../../")
+        if topic.slug in slugs:
+            assert topic.slug in KNOWLEDGE_FIRST_SCREEN
+            assert '<section class="knowledge-focus"' in html
+            assert "핵심 정의" in html
+            assert "한눈에 보는 구조" in html
+            assert "실제 업무 사례" in html
+            assert "헷갈리는 개념과 차이" in html
+            assert "핵심 구성요소" in html
+            assert html.index("knowledge-focus") < html.index("definition-box")
+            assert html.index("knowledge-focus") < html.index("더 알아보기: AI 엔지니어링 관계도")
+        elif topic.slug == "agent-engineering":
+            assert '<section class="knowledge-focus"' not in html
+
+
+def test_dedupe_insight_buttons_removes_repeated_source_urls() -> None:
+    html = (
+        '<button class="insight-card" data-title="A" data-source="https://example.com/a">A</button>'
+        '<button class="insight-card" data-title="B" data-source="https://example.com/b">B</button>'
+        '<button class="insight-card" data-title="A2" data-source="https://example.com/a">A2</button>'
+    )
+
+    refreshed, count = _dedupe_insight_buttons_in_html(html)
+
+    assert count == 1
+    assert 'data-title="A"' in refreshed
+    assert 'data-title="B"' in refreshed
+    assert 'data-title="A2"' not in refreshed
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
@@ -1031,10 +1079,10 @@ def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
     assert len(week_1_titles) == len(set(week_1_titles))
     assert len(may_4_titles) == len(set(may_4_titles))
     assert any("서드파티 코딩 에이전트 보안 검증" in title for title in week_2_titles)
-    assert any("프롬프트를 업무 워크플로로 전환" in title for title in week_1_titles)
-    assert any("Claude Code SDK 오케스트레이션 패턴" in title for title in may_4_titles)
-    assert any("Responses API 도구 호출 업데이트" in title for title in may_4_titles)
-    assert any("Copilot PR 리뷰 워크플로" in title for title in may_4_titles)
+    assert any("스프레드시트 업무 자동화" in title for title in week_1_titles)
+    assert any("Overview Claude Code" in title for title in may_4_titles)
+    assert any("Tools OpenAI API" in title for title in may_4_titles)
+    assert any("GitHub Changelog" in title for title in may_4_titles)
     assert "2026-05-20~2026-05-26" in may_4
     assert not any("프롬프트를 업무 워크플로로 전환" in title for title in may_4_titles)
     assert "Harness Engineering" not in week_2_titles

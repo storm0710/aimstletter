@@ -303,6 +303,59 @@ GENERAL_STORY_KEYWORDS = {
 }
 
 
+KNOWLEDGE_FIRST_SCREEN = {
+    "langchain": {
+        "definition": "AI 앱에 필요한 모델, 프롬프트, 검색, 도구 호출을 하나의 흐름으로 조립하는 개발 프레임워크입니다.",
+        "structure": ("Prompt", "Model", "Parser", "Retriever", "Tool"),
+        "case": ("회의록 자동 등록", "회의록을 붙여 넣으면 요약, 실행 항목, 담당자, 마감일을 구조화해 업무 도구 등록 초안으로 바꿉니다.", "프롬프트와 모델 호출을 따로 관리하던 코드를 입력 템플릿, 구조화 출력, 도구 연결로 나눠 바꿉니다.", "출력 형식이 흔들리거나 도구가 바뀌어도 각 부품만 교체해 유지보수할 수 있습니다."),
+        "contrast": ("LangChain은 컴포넌트를 연결합니다.", "LangGraph는 상태와 실행 순서를 제어합니다."),
+        "components": (("Prompt", "무엇을 요청할지 정합니다.", "회의록에서 결정 사항만 뽑으라고 지시합니다."), ("Model", "답을 생성합니다.", "요약과 실행 항목 초안을 만듭니다."), ("Parser", "출력을 정해진 형식으로 받습니다.", "담당자, 마감일, 우선순위를 필드로 검증합니다."), ("Tool", "외부 시스템과 연결합니다.", "업무 관리 도구에 등록 초안을 보냅니다.")),
+    },
+    "langgraph": {
+        "definition": "AI 작업의 순서, 상태, 분기, 재시도를 그래프로 관리하는 실행 흐름 설계 도구입니다.",
+        "structure": ("State", "Node", "Branch", "Checkpoint", "Resume"),
+        "case": ("장애 원인 분석", "로그 수집, 원인 추정, 추가 조회, 사람 승인, 조치 제안을 여러 단계로 나눠 실행합니다.", "한 번에 답을 내던 흐름을 상태가 남는 노드와 조건 분기로 바꿉니다.", "실패한 단계만 다시 실행하고, 승인 지점에서 멈췄다가 이어갈 수 있습니다."),
+        "contrast": ("일반 체인은 정해진 순서대로 실행합니다.", "LangGraph는 상태를 보고 다음 노드와 재시도를 결정합니다."),
+        "components": (("State", "현재까지의 정보와 결정을 저장합니다.", "수집한 로그, 가설, 승인 여부를 남깁니다."), ("Node", "하나의 작업 단계를 맡습니다.", "로그 조회, 원인 분석, 조치 생성이 각각 노드가 됩니다."), ("Branch", "조건에 따라 다음 경로를 고릅니다.", "확신이 낮으면 추가 조회로 보냅니다."), ("Checkpoint", "중간 상태를 저장합니다.", "중단 후 같은 지점에서 재개합니다.")),
+    },
+    "prompt-engineering": {
+        "definition": "AI에게 무엇을 어떤 기준과 형식으로 수행할지 지시문으로 설계하는 방법입니다.",
+        "structure": ("Role", "Goal", "Context", "Constraint", "Output"),
+        "case": ("계약 검토 요청", "막연히 검토해 달라는 요청 대신 위험 조항, 근거 문장, 수정 제안을 표로 뽑게 합니다.", "일반 질문을 역할, 판단 기준, 예시, 출력 형식이 있는 업무 지시로 바꿉니다.", "답변 품질이 개인 감각이 아니라 재사용 가능한 지시 기준에 가까워집니다."),
+        "contrast": ("프롬프트는 AI에게 할 일을 지시합니다.", "컨텍스트는 AI가 판단할 때 볼 정보를 고릅니다."),
+        "components": (("Role", "AI가 맡을 관점을 정합니다.", "계약 검토 담당자처럼 행동하게 합니다."), ("Goal", "최종 산출물을 정합니다.", "위험 조항 5개와 수정안을 요구합니다."), ("Constraint", "하지 말아야 할 일을 제한합니다.", "원문에 없는 법적 판단은 쓰지 않게 합니다."), ("Output", "답변 형식을 고정합니다.", "조항, 위험, 근거, 제안 컬럼으로 받습니다.")),
+    },
+    "context-engineering": {
+        "definition": "AI가 판단에 사용할 정보, 문서, 상태, 권한 범위를 고르는 설계 방법입니다.",
+        "structure": ("Question", "Retrieve", "Filter", "Assemble", "Answer"),
+        "case": ("사내 정책 챗봇", "사용자 질문에 맞는 최신 정책 문서만 찾고, 권한이 있는 내용만 모델에 전달합니다.", "문서를 많이 넣는 방식에서 필요한 근거를 정확히 골라 넣는 방식으로 바꿉니다.", "오래된 문서나 권한 밖 정보 때문에 답이 틀리는 위험을 줄입니다."),
+        "contrast": ("프롬프트는 지시입니다.", "컨텍스트는 판단 재료입니다."),
+        "components": (("Retriever", "관련 문서를 찾습니다.", "질문과 가까운 정책 문서를 검색합니다."), ("Metadata", "문서의 조건을 확인합니다.", "날짜, 부서, 권한 등으로 거릅니다."), ("Rerank", "가장 필요한 근거를 앞에 둡니다.", "핵심 문서를 우선 전달합니다."), ("Token Budget", "넣을 정보량을 조절합니다.", "불필요한 긴 문서를 줄입니다.")),
+    },
+    "harness-engineering": {
+        "definition": "AI가 무엇을 볼 수 있고 실행할 수 있는지 도구, 권한, 검증, 로그로 감싸는 운영 설계입니다.",
+        "structure": ("Tools", "Permissions", "Sandbox", "Validation", "Audit"),
+        "case": ("코딩 에이전트 운영", "에이전트가 읽을 파일, 수정할 범위, 실행할 테스트, 승인 필요한 명령을 미리 제한합니다.", "AI에게 자유 실행을 맡기던 방식에서 안전한 실행 환경과 검증 절차를 먼저 둡니다.", "실수로 위험한 파일을 바꾸거나 검증 없이 배포하는 일을 막을 수 있습니다."),
+        "contrast": ("하네스는 AI가 할 수 있는 범위를 정합니다.", "루프는 실행 후 다음에 무엇을 할지 정합니다."),
+        "components": (("Tool Registry", "사용 가능한 도구를 제한합니다.", "읽기, 테스트, 배포 도구를 구분합니다."), ("Permission", "권한과 승인 기준을 둡니다.", "삭제나 배포는 승인 뒤 실행합니다."), ("Sandbox", "실행 범위를 격리합니다.", "작업 디렉터리 밖 변경을 막습니다."), ("Audit Log", "행동 근거를 남깁니다.", "누가 어떤 명령을 왜 실행했는지 추적합니다.")),
+    },
+    "loop-engineering": {
+        "definition": "AI가 결과를 보고 다시 시도할지, 전략을 바꿀지, 멈출지를 정하는 반복 구조 설계입니다.",
+        "structure": ("Plan", "Act", "Observe", "Evaluate", "Stop"),
+        "case": ("테스트 실패 자동 수정", "테스트 실패를 읽고 원인을 가정한 뒤 코드를 고치고 다시 테스트하며 멈출 조건을 확인합니다.", "한 번 실행하고 끝내던 자동화를 관찰, 평가, 재계획이 있는 반복 흐름으로 바꿉니다.", "같은 실패를 반복하거나 무한 재시도하는 대신 종료 기준을 갖게 됩니다."),
+        "contrast": ("루프는 다음 행동과 종료를 결정합니다.", "하네스는 그 행동이 안전하게 실행되는 경계를 정합니다."),
+        "components": (("Plan", "다음 시도를 정합니다.", "어떤 테스트부터 볼지 고릅니다."), ("Act", "작업을 실행합니다.", "코드를 수정하거나 명령을 실행합니다."), ("Observe", "결과를 읽습니다.", "실패 로그와 변경 결과를 확인합니다."), ("Evaluate", "진전 여부를 판단합니다.", "같은 실패가 반복되는지 봅니다."), ("Stop", "종료 조건을 둡니다.", "통과, 승인 필요, 반복 실패에서 멈춥니다.")),
+    },
+    "graph-engineering": {
+        "definition": "업무, 데이터, 권한, 서비스가 무엇과 연결돼 있고 하나를 바꾸면 어디까지 영향이 가는지 구조화하는 방법입니다.",
+        "structure": ("Node", "Edge", "Property", "Direction", "Impact"),
+        "case": ("결제 API 변경 영향 분석", "결제 API, 주문 DB, 정산 서비스, 알림, 배포 파이프라인의 연결을 따라 영향 범위를 봅니다.", "목록으로 관리하던 의존성을 노드와 엣지 관계로 바꿔 추적합니다.", "변경 전에 어떤 서비스와 데이터가 같이 흔들리는지 빠르게 확인할 수 있습니다."),
+        "contrast": ("LangGraph는 AI 실행 흐름 그래프입니다.", "그래프 엔지니어링은 시스템 관계와 영향 범위를 모델링합니다."),
+        "components": (("Node", "대상을 표현합니다.", "서비스, DB, API, 팀을 하나의 점으로 둡니다."), ("Edge", "관계를 표현합니다.", "호출한다, 소유한다, 배포한다를 선으로 잇습니다."), ("Property", "관계의 속성을 붙입니다.", "중요도, 변경 빈도, 소유자를 기록합니다."), ("Direction", "영향 방향을 정합니다.", "API 변경이 어떤 소비자에게 전파되는지 봅니다.")),
+    },
+}
+
+
 def build_site(output_dir: Path, settings: Settings) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     kst = timezone(timedelta(hours=9), name="KST")
@@ -327,6 +380,8 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     )
     ai_items = _localize_items(ai_items, settings, "DBA, 네트워크, 서버 운영자가 업무에 적용할 AI 스킬 업데이트")
     tool_items = _localize_items(tool_items, settings, "인공지능 도구 업데이트")
+    ai_urls = {item.url for item in ai_items if item.url}
+    tool_items = [item for item in tool_items if not item.url or item.url not in ai_urls]
     archive_entry = _weekly_archive_entry(now)
     archive_entry["search_text"] = _items_archive_search_text([*ai_items, *tool_items])
     archive_entries = _collect_archive_entries(output_dir, archive_entry)
@@ -3199,8 +3254,9 @@ def _smart_insight_card_detail(item: SiteItem, summary: str) -> str:
 def _smart_insight_points(item: SiteItem) -> tuple[str, ...]:
     points = item.key_points or (item.summary,)
     digest = _site_item_to_digest(item)
-    if _latest_week_specific_summary(re.sub(r"[-_]+", " ", _item_text(digest))):
-        return _fallback_card_points(digest, points)
+    specific = _latest_week_specific_summary(re.sub(r"[-_]+", " ", _item_text(digest)))
+    if specific:
+        return _fallback_card_points(digest, specific[1])
     if _has_complete_card_points(points) and not any(
         _needs_specific_insight_copy(point)
         or _contains_generic_display_title(point)
@@ -3237,6 +3293,7 @@ def _fallback_card_points(
     three_points = _fallback_three_line_summary(item)
     title = _fallback_display_title(item)
     summary = _fallback_display_summary(item)
+    source_specific_fallback = _fallback_specific_summary(item)
     seed_is_generic = any(
         _needs_specific_insight_copy(point) or _contains_generic_display_title(point)
         for point in seed_points
@@ -3244,7 +3301,11 @@ def _fallback_card_points(
     seed_answers = [] if seed_is_generic else [_strip_point_prefix(point) for point in seed_points if point]
 
     one_line = _first_meaningful_text([summary, *seed_answers, title], title)
-    if _source_text_needs_enrichment(item) and not _has_source_grounded_fallback(item, title, seed_answers):
+    if (
+        _source_text_needs_enrichment(item)
+        and not source_specific_fallback
+        and not _has_source_grounded_fallback(item, title, seed_answers)
+    ):
         return _insufficient_source_card_points(item, title, one_line)
 
     changed = _first_meaningful_text(
@@ -4998,6 +5059,55 @@ def _render_real_world_case(case: dict[str, object]) -> str:
     """
 
 
+def _render_knowledge_first_screen(topic: KnowledgeTopic) -> str:
+    focus = KNOWLEDGE_FIRST_SCREEN.get(topic.slug)
+    if not focus:
+        return ""
+    case_title, case_body, case_change, case_result = tuple(str(value) for value in focus["case"])
+    contrast_left, contrast_right = tuple(str(value) for value in focus["contrast"])
+    structure = "".join(f"<span>{escape(str(step))}</span>" for step in focus["structure"])
+    components = "".join(
+        f"""
+        <div class="focus-component">
+          <strong>{escape(str(name))}</strong>
+          <span>{escape(str(core))}</span>
+          <p>{escape(str(role))}</p>
+        </div>
+        """
+        for name, core, role in focus["components"]
+    )
+    return f"""
+            <section class="knowledge-focus" aria-label="{escape(topic.title)} 핵심 요약">
+              <div class="focus-lead">
+                <span class="focus-label">핵심 정의</span>
+                <p>{escape(str(focus["definition"]))}</p>
+              </div>
+              <div class="focus-grid">
+                <div class="focus-panel focus-structure">
+                  <h2>한눈에 보는 구조</h2>
+                  <div class="focus-flow">{structure}</div>
+                </div>
+                <div class="focus-panel">
+                  <h2>실제 업무 사례</h2>
+                  <strong>{escape(case_title)}</strong>
+                  <p>{escape(case_body)}</p>
+                  <p>{escape(case_change)}</p>
+                  <p>{escape(case_result)}</p>
+                </div>
+                <div class="focus-panel focus-contrast">
+                  <h2>헷갈리는 개념과 차이</h2>
+                  <div><strong>{escape(contrast_left)}</strong></div>
+                  <div><strong>{escape(contrast_right)}</strong></div>
+                </div>
+                <div class="focus-panel focus-components">
+                  <h2>핵심 구성요소</h2>
+                  <div>{components}</div>
+                </div>
+              </div>
+            </section>
+    """
+
+
 def _render_code_example(page: dict[str, object]) -> str:
     notes = _render_checklist(tuple(str(note) for note in page["code_notes"]))
     return f"""
@@ -5035,28 +5145,10 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
     keywords = "".join(f"<span>{escape(keyword)}</span>" for keyword in page["keywords"])
     related_links = _render_related_links(tuple(str(slug) for slug in page["related"]), back_href)
     components_intro, component_steps = page["components"]
-    harness_loop_section = ""
-    if topic.slug in {"harness-engineering", "loop-engineering"}:
-        harness_loop_section = f"""
-            <section>
-              <h2>하네스와 루프에서 겹쳐 보이는 항목</h2>
-              <p>검증, 재시도, 로그, 비용 한도는 양쪽에 모두 등장하지만 맡은 역할이 다릅니다. 하네스는 실행 조건을 강제하고, 루프는 그 결과를 보고 다음 행동을 선택합니다.</p>
-              {_render_table(("항목", "하네스의 역할", "루프의 역할"), HARNESS_LOOP_ROWS)}
-            </section>
-        """
-    langgraph_graph_note = ""
-    if topic.slug in {"langgraph", "graph-engineering"}:
-        langgraph_graph_note = f"""
-            <section>
-              <h2>LangGraph와 그래프 엔지니어링의 차이</h2>
-              {_render_table(("구분", "LangGraph", "그래프 엔지니어링"), (
-                  ("정체", "상태 기반 AI 워크플로를 실행하는 구체적인 프레임워크입니다.", "업무와 시스템의 관계를 노드와 엣지로 설계하는 일반적인 방법론입니다."),
-                  ("중심 질문", "다음 단계로 어디를 실행하고, 언제 중단·재개할 것인가", "무엇이 무엇에 의존하고, 변경 영향이 어디까지 퍼지는가"),
-                  ("결과물", "실행 가능한 그래프 워크플로와 체크포인트", "관계 모델, 영향도 그래프, 데이터 계보"),
-              ))}
-            </section>
-        """
-    return f"""
+    focus_section = _render_knowledge_first_screen(topic)
+    overview_sections = ""
+    if not focus_section:
+        overview_sections = f"""
             {_render_knowledge_relation_map()}
             <section>
               <h2>개념 간 전체 비교표</h2>
@@ -5066,11 +5158,46 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
               <h2>헷갈리기 쉬운 개념</h2>
               {_render_table(("비교", "첫 번째 개념", "두 번째 개념", "관계"), CONFUSION_ROWS)}
             </section>
-            <section class="definition-box">
-              <h2>이 문서에서 사용하는 정의</h2>
-              <p><strong>{escape(topic.title)}</strong>: {escape(str(page["definition"]))}</p>
-              <p>{escape(_knowledge_definition_note(topic))}</p>
+        """
+    deeper_overview_sections = ""
+    if focus_section:
+        deeper_overview_sections = f"""
+            <section>
+              <h2>더 알아보기: AI 엔지니어링 관계도</h2>
+              {_render_knowledge_relation_map()}
             </section>
+            <section>
+              <h2>더 알아보기: 개념 간 전체 비교표</h2>
+              {_render_global_comparison()}
+            </section>
+            <section>
+              <h2>더 알아보기: 헷갈리기 쉬운 개념</h2>
+              {_render_table(("비교", "첫 번째 개념", "두 번째 개념", "관계"), CONFUSION_ROWS)}
+            </section>
+        """
+    if focus_section:
+        quick_section = f"""
+            <section class="knowledge-quick">
+              <div class="knowledge-meta">
+                <span>난이도: {escape(str(page["difficulty"]))}</span>
+                <span>주요 대상: {escape(str(page["audience"]))}</span>
+                <span>예상 읽기 시간: {escape(str(page["reading_time"]))}</span>
+              </div>
+              <details class="knowledge-facts">
+                <summary>문서 정보</summary>
+                <p><strong>기술 성숙도:</strong> {escape(str(page["maturity"]))}</p>
+                <p>최종 검토 날짜: {escape(str(page["updated_at"]))}</p>
+                <p><strong>변경 가능성:</strong> {escape(str(page["volatile"]))}</p>
+              </details>
+              <dl>
+                <dt>핵심 키워드</dt><dd class="keyword-list">{keywords}</dd>
+                <dt>관련 개념</dt><dd>{related_links}</dd>
+              </dl>
+            </section>
+        """
+        case_section = ""
+    else:
+        quick_section = f"""
             <section class="knowledge-quick">
               <div class="knowledge-meta">
                 <span>난이도: {escape(str(page["difficulty"]))}</span>
@@ -5093,6 +5220,43 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
                 <dt>관련 개념</dt><dd>{related_links}</dd>
               </dl>
             </section>
+        """
+        case_section = f"""
+            <section>
+              <h2>실제 업무 사례</h2>
+              {_render_real_world_case(page["case"])}
+            </section>
+        """
+    harness_loop_section = ""
+    if topic.slug in {"harness-engineering", "loop-engineering"}:
+        harness_loop_section = f"""
+            <section>
+              <h2>하네스와 루프에서 겹쳐 보이는 항목</h2>
+              <p>검증, 재시도, 로그, 비용 한도는 양쪽에 모두 등장하지만 맡은 역할이 다릅니다. 하네스는 실행 조건을 강제하고, 루프는 그 결과를 보고 다음 행동을 선택합니다.</p>
+              {_render_table(("항목", "하네스의 역할", "루프의 역할"), HARNESS_LOOP_ROWS)}
+            </section>
+        """
+    langgraph_graph_note = ""
+    if topic.slug in {"langgraph", "graph-engineering"}:
+        langgraph_graph_note = f"""
+            <section>
+              <h2>LangGraph와 그래프 엔지니어링의 차이</h2>
+              {_render_table(("구분", "LangGraph", "그래프 엔지니어링"), (
+                  ("정체", "상태 기반 AI 워크플로를 실행하는 구체적인 프레임워크입니다.", "업무와 시스템의 관계를 노드와 엣지로 설계하는 일반적인 방법론입니다."),
+                  ("중심 질문", "다음 단계로 어디를 실행하고, 언제 중단·재개할 것인가", "무엇이 무엇에 의존하고, 변경 영향이 어디까지 퍼지는가"),
+                  ("결과물", "실행 가능한 그래프 워크플로와 체크포인트", "관계 모델, 영향도 그래프, 데이터 계보"),
+              ))}
+            </section>
+        """
+    return f"""
+            {focus_section}
+            {overview_sections}
+            <section class="definition-box">
+              <h2>이 문서에서 사용하는 정의</h2>
+              <p><strong>{escape(topic.title)}</strong>: {escape(str(page["definition"]))}</p>
+              <p>{escape(_knowledge_definition_note(topic))}</p>
+            </section>
+            {quick_section}
             <section>
               <h2>등장 배경과 해결하려는 문제</h2>
               {_render_table(("구분", "내용"), tuple(tuple(row) for row in page["problem"]))}
@@ -5110,10 +5274,8 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
                 <p>{escape(str(page["volatile"]))} API, 요금제, 권한 제한, 지원 상태는 운영 전에 공식 문서에서 다시 확인해야 합니다.</p>
               </div>
             </section>
-            <section>
-              <h2>실제 업무 사례</h2>
-              {_render_real_world_case(page["case"])}
-            </section>
+            {case_section}
+            {deeper_overview_sections}
             <section>
               <h2>최소 구현 예제</h2>
               {_render_code_example(page)}
@@ -5696,6 +5858,93 @@ def _render_plain_page(
       color: #465161;
       font: 14px/1.65 Arial, "Noto Sans KR", sans-serif;
     }}
+    .knowledge-focus {{
+      border: 1px solid #cfd7e2;
+      background: #f8fafc;
+      padding: 18px;
+      margin-bottom: 26px;
+    }}
+    .focus-lead {{
+      border-left: 4px solid #111111;
+      background: #ffffff;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }}
+    .focus-label {{
+      display: inline-flex;
+      min-height: 24px;
+      align-items: center;
+      border: 1px solid #d8dde5;
+      background: #f4f7fb;
+      padding: 0 8px;
+      color: #1d4f7e;
+      font: 900 11px/1 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .focus-lead p {{
+      margin: 10px 0 0;
+      color: #111111;
+      font: 800 18px/1.55 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .focus-grid {{
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 12px;
+    }}
+    .focus-panel {{
+      border: 1px solid #d8dde5;
+      background: #ffffff;
+      padding: 14px;
+      min-width: 0;
+    }}
+    .focus-panel h2 {{
+      margin: 0 0 10px;
+      font: 900 15px/1.35 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .focus-panel strong {{
+      display: block;
+      color: #111111;
+      font: 900 14px/1.45 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .focus-panel p {{
+      margin: 7px 0 0;
+      color: #4c5563;
+      font: 13px/1.65 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .focus-flow {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }}
+    .focus-flow span {{
+      border: 1px solid #cad4df;
+      background: #f8fbff;
+      padding: 8px 10px;
+      font: 900 12px/1.2 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .focus-contrast div + div {{
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #e2e6ec;
+    }}
+    .focus-components > div {{
+      display: grid;
+      gap: 8px;
+    }}
+    .focus-component {{
+      border-left: 3px solid #2f7fc0;
+      background: #f8fbff;
+      padding: 9px 10px;
+    }}
+    .focus-component span {{
+      display: block;
+      margin-top: 3px;
+      color: #2f3a45;
+      font: 800 12px/1.45 Arial, "Noto Sans KR", sans-serif;
+    }}
+    .focus-component p {{
+      margin-top: 4px;
+      font-size: 12px;
+    }}
     .definition-box,
     .warning-box {{
       border: 1px solid #d8dde5;
@@ -6044,6 +6293,7 @@ def _render_plain_page(
         grid-template-columns: 1fr;
       }}
       .relation-flow,
+      .focus-grid,
       .knowledge-index-grid,
       .case-grid,
       .knowledge-quick dl {{
@@ -8579,10 +8829,33 @@ def refresh_existing_cards(output_dir: Path) -> int:
         html_text = path.read_text(encoding="utf-8")
         refreshed, count = _refresh_paper_cards_in_html(html_text, cache)
         refreshed, known_count = _refresh_known_specific_cards_in_html(refreshed)
-        if count or known_count:
+        refreshed, duplicate_count = _dedupe_insight_buttons_in_html(refreshed)
+        if count or known_count or duplicate_count:
             path.write_text(refreshed, encoding="utf-8", newline="")
-            updated += count + known_count
+            updated += count + known_count + duplicate_count
     return updated
+
+
+def _dedupe_insight_buttons_in_html(html_text: str) -> tuple[str, int]:
+    button_pattern = re.compile(r'<button class="insight-card"[\s\S]*?</button>')
+    seen_sources: set[str] = set()
+    removed = 0
+
+    def replace_button(match: re.Match[str]) -> str:
+        nonlocal removed
+        button = match.group(0)
+        attrs = _html_attrs(button)
+        source = unescape(attrs.get("data-source", "")).strip()
+        if not source:
+            return button
+        key = source.lower()
+        if key in seen_sources:
+            removed += 1
+            return ""
+        seen_sources.add(key)
+        return button
+
+    return button_pattern.sub(replace_button, html_text), removed
 
 
 def _refresh_paper_cards_in_html(

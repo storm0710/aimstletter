@@ -1,10 +1,10 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI 소스 · AI Master Times</title>
-  
+
   <style>
     body {
       margin: 0;
@@ -371,6 +371,93 @@
       color: #465161;
       font: 14px/1.65 Arial, "Noto Sans KR", sans-serif;
     }
+    .knowledge-focus {
+      border: 1px solid #cfd7e2;
+      background: #f8fafc;
+      padding: 18px;
+      margin-bottom: 26px;
+    }
+    .focus-lead {
+      border-left: 4px solid #111111;
+      background: #ffffff;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .focus-label {
+      display: inline-flex;
+      min-height: 24px;
+      align-items: center;
+      border: 1px solid #d8dde5;
+      background: #f4f7fb;
+      padding: 0 8px;
+      color: #1d4f7e;
+      font: 900 11px/1 Arial, "Noto Sans KR", sans-serif;
+    }
+    .focus-lead p {
+      margin: 10px 0 0;
+      color: #111111;
+      font: 800 18px/1.55 Arial, "Noto Sans KR", sans-serif;
+    }
+    .focus-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 12px;
+    }
+    .focus-panel {
+      border: 1px solid #d8dde5;
+      background: #ffffff;
+      padding: 14px;
+      min-width: 0;
+    }
+    .focus-panel h2 {
+      margin: 0 0 10px;
+      font: 900 15px/1.35 Arial, "Noto Sans KR", sans-serif;
+    }
+    .focus-panel strong {
+      display: block;
+      color: #111111;
+      font: 900 14px/1.45 Arial, "Noto Sans KR", sans-serif;
+    }
+    .focus-panel p {
+      margin: 7px 0 0;
+      color: #4c5563;
+      font: 13px/1.65 Arial, "Noto Sans KR", sans-serif;
+    }
+    .focus-flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .focus-flow span {
+      border: 1px solid #cad4df;
+      background: #f8fbff;
+      padding: 8px 10px;
+      font: 900 12px/1.2 Arial, "Noto Sans KR", sans-serif;
+    }
+    .focus-contrast div + div {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #e2e6ec;
+    }
+    .focus-components > div {
+      display: grid;
+      gap: 8px;
+    }
+    .focus-component {
+      border-left: 3px solid #2f7fc0;
+      background: #f8fbff;
+      padding: 9px 10px;
+    }
+    .focus-component span {
+      display: block;
+      margin-top: 3px;
+      color: #2f3a45;
+      font: 800 12px/1.45 Arial, "Noto Sans KR", sans-serif;
+    }
+    .focus-component p {
+      margin-top: 4px;
+      font-size: 12px;
+    }
     .definition-box,
     .warning-box {
       border: 1px solid #d8dde5;
@@ -719,6 +806,7 @@
         grid-template-columns: 1fr;
       }
       .relation-flow,
+      .focus-grid,
       .knowledge-index-grid,
       .case-grid,
       .knowledge-quick dl {
@@ -749,8 +837,8 @@
 </head>
 <body>
   <main class="page">
-    
-    
+
+
         <a class="back-link" href="../">← 첫 화면</a>
         <header class="simple-header tool-page-header">
           <div class="kicker">AI 소스</div>
@@ -761,8 +849,8 @@
 <article class="source-card"><div><h3>GitHub Copilot 변경 이력</h3><p>GitHub Copilot과 개발 워크플로 자동화 변경 사항을 확인하는 출처입니다.</p></div><a class="source-action" href="https://github.blog/changelog/" target="_blank" rel="noopener noreferrer">github.blog</a></article>
 <article class="source-card"><div><h3>OpenAI 소식</h3><p>OpenAI 제품, API, Codex, 에이전트 관련 업데이트를 확인하는 출처입니다.</p></div><a class="source-action" href="https://developers.openai.com/codex/cli" target="_blank" rel="noopener noreferrer">developers.openai.com</a></article>
 <article class="source-card"><div><h3>OpenAI 소식</h3><p>OpenAI API 도구 호출과 에이전트 기능을 확인하는 개발자 문서입니다.</p></div><a class="source-action" href="https://platform.openai.com/docs/guides/tools" target="_blank" rel="noopener noreferrer">platform.openai.com</a></article></section>
-        
+
   </main>
-  
+
 </body>
 </html>
