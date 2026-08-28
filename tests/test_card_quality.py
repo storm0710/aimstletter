@@ -80,6 +80,73 @@ def test_paper_focused_summary_rewrites_english_evidence_to_korean() -> None:
     assert "an entity" not in summary
 
 
+def test_bolo_metrics_are_labeled_instead_of_forced_numeric_fallback() -> None:
+    item = DigestItem(
+        title="Bolo: Verified Model Hub for Next-Generation AI Databases",
+        url="https://arxiv.org/abs/2608.20525v1",
+        source="arXiv Database AI",
+        kind="paper",
+        published=datetime(2026, 8, 21, tzinfo=UTC),
+        summary=(
+            "While they host millions of model repositories, many contain only raw weights without runnable pipelines. "
+            "In preliminary experiments, Bolo achieves 97.27\\% and 86.08\\% runnable coverage for "
+            "Type~II and Type~III models, respectively, demonstrating that agentic synthesis with targeted "
+            "verification can make model repositories directly usable."
+        ),
+    )
+
+    site_item = _localized_site_item(
+        item,
+        {
+            "title": "Bolo Verified 모델 생성 AI",
+            "summary": "Generic paper summary.",
+            "detail": "Generic paper summary.",
+            "key_points": [],
+            "tags": ["paper"],
+        },
+    )
+    card_text = f"{site_item.summary} {' '.join(site_item.key_points)}"
+
+    assert "Type-II" in card_text
+    assert "Type-III" in card_text
+    assert "커버리지 97.27%" in card_text
+    assert "86.08%" in card_text
+    assert "97.27, 86.08 같은 핵심 수치" not in card_text
+    assert "같은 핵심 수치" not in card_text
+
+
+def test_dagsmith_metrics_are_labeled_instead_of_forced_numeric_fallback() -> None:
+    item = DigestItem(
+        title="Dagsmith Dependency Aware Query Rewriting",
+        url="https://arxiv.org/abs/2608.22551v1",
+        source="arXiv Database AI",
+        kind="paper",
+        published=datetime(2026, 8, 24, tzinfo=UTC),
+        summary=(
+            "On the open-source Tuva dbt project, DAGSmith reduces elapsed time by 42.6% and "
+            "warehouse compute cost by 67.7%, substantially outperforming single-query rewriting."
+        ),
+    )
+
+    site_item = _localized_site_item(
+        item,
+        {
+            "title": "Dagsmith Dependency Aware",
+            "summary": "Generic paper summary.",
+            "detail": "Generic paper summary.",
+            "key_points": [],
+            "tags": ["paper"],
+        },
+    )
+    card_text = f"{site_item.summary} {' '.join(site_item.key_points)}"
+
+    assert "실행 시간을 42.6%" in card_text
+    assert "비용을 67.7%" in card_text
+    assert "파이프라인 전체 의존성" in card_text
+    assert "42.6%, 67.7% 같은 핵심 수치" not in card_text
+    assert "같은 핵심 수치" not in card_text
+
+
 def test_existing_paper_summary_with_evidence_leak_is_regenerated() -> None:
     item = DigestItem(
         title="Agentic Data Cleaning",
@@ -421,4 +488,36 @@ def test_refresh_paper_cards_in_html_updates_existing_card_data() -> None:
     assert count == 1
     assert "65.36%" in refreshed
     assert "25.25%" in refreshed
+    assert old_body not in refreshed
+
+
+def test_refresh_paper_cards_removes_forced_metric_fallback_without_fetch() -> None:
+    old_body = (
+        "Ratrain Resource Aware 논문은 초록에 나온 평가 방식과 결과를 중심으로 봐야 합니다. "
+        "Ratrain Resource Aware는 1.35, 3000 같은 핵심 수치를 통해 논문의 주장과 평가 결과를 확인하게 합니다."
+    )
+    points = [
+        "1. 한 줄 요약: Ratrain Resource Aware는 1.35, 3000 같은 핵심 수치를 통해 논문의 주장과 평가 결과를 확인하게 합니다.",
+        "2. 무엇이 바뀌었나: 기존 접근과의 차이는 초록의 대비 문장에서 확인됩니다.",
+        "3. 왜 중요한가: 1.35, 3000 같은 핵심 수치가 논문의 주장과 실제 효과를 판단하는 기준입니다.",
+        "4. 한계와 주의사항: Paper-stage result.",
+        "5. 이번 주 해볼 일: Try a small evaluation.",
+        "6. 누가 보면 좋은가: AI engineers",
+        "7. 출처와 상태: arXiv",
+    ]
+    html_text = (
+        '<button class="insight-card" type="button" data-insight-card data-number="1" '
+        'data-title="Ratrain Resource Aware" data-category="paper" data-subcategory="arXiv Distributed AI" '
+        f'data-body="{html.escape(old_body)}" data-detail="{html.escape(old_body)}" '
+        f'data-points="{html.escape(json.dumps(points, ensure_ascii=False))}" '
+        'data-meta="arXiv Distributed AI 쨌 paper 쨌 2026-06-09" '
+        'data-tags="[]" data-source="https://arxiv.org/abs/2606.00000v1">'
+        '<span><span class="card-heading"><span class="card-title">Ratrain Resource Aware</span></span>'
+        f"<p>{html.escape(old_body)}</p></span></button>"
+    )
+
+    refreshed, count = _refresh_paper_cards_in_html(html_text, {"__arxiv_fetch_disabled__": None})
+
+    assert count == 1
+    assert "같은 핵심 수치" not in refreshed
     assert old_body not in refreshed

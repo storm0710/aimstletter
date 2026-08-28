@@ -3581,7 +3581,6 @@ def _paper_focused_card_points(
     result = _first_evidence_text([*evidence.quantitative, *evidence.benchmark], title, "result")
     contrast = _first_evidence_text([*evidence.contrast], title, "contrast")
     evaluation = _first_evidence_text([*evidence.evaluation, *evidence.benchmark], title, "evaluation")
-    numbers = _evidence_numbers(evidence.quantitative)
     seed_answers = [
         _strip_point_prefix(point)
         for point in seed_points
@@ -3592,8 +3591,10 @@ def _paper_focused_card_points(
     if not changed:
         changed = f"{title}가 기존 방식의 한계를 어떤 평가 방식으로 확인하는지 초록 기준으로 정리했습니다."
     why = result_message
-    if numbers:
-        why = f"{', '.join(numbers[:2])} 같은 핵심 수치가 논문의 주장과 실제 효과를 판단하는 기준입니다. {result_message}"
+    if result and _evidence_numbers((result,)):
+        why = f"{result} 이 지표는 초록의 평가 환경 안에서 새 접근의 실제 효과를 판단하는 기준입니다."
+    elif evaluation:
+        why = evaluation
     action = _paper_weekly_action(item, evidence)
     caution = _paper_caution_note(item, evidence)
     roles = _recommended_reader_roles(item)
@@ -3614,12 +3615,22 @@ def _first_evidence_text(candidates: list[str], title: str = "", role: str = "ev
     for candidate in candidates:
         clean = _clean_plain_text(candidate)
         if clean:
-            return _clip(_korean_paper_evidence_text(clean, title, role), 360)
+            converted = _korean_paper_evidence_text(clean, title, role)
+            if converted:
+                return _clip(converted, 360)
     return ""
 
 
+def _clean_metric_text(value: str) -> str:
+    text = _clean_plain_text(value)
+    text = text.replace("\\%", "%").replace("\\&", "and")
+    text = re.sub(r"(?<=Type)~(?=[IVX])", "-", text)
+    text = text.replace("~", " ")
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def _korean_paper_evidence_text(sentence: str, title: str, role: str) -> str:
-    text = _clean_plain_text(sentence)
+    text = _clean_metric_text(sentence)
     system = _paper_system_name(title, text)
     quoted = re.findall(r"[\"“”']([^\"“”']{8,160})[\"“”']", text)
     numbers = _evidence_numbers((text,))
@@ -3635,6 +3646,33 @@ def _korean_paper_evidence_text(sentence: str, title: str, role: str) -> str:
         value = accuracy.group(3)
         return f"{model}은 {tasks} 평가에서 평균 정확도 {value}를 기록해, 논문의 핵심 결과를 수치로 확인하게 합니다."
 
+    dag_reduction = re.search(
+        r"on\s+(.+?),\s*([A-Za-z0-9\-]+)\s+reduces\s+elapsed\s+time\s+by\s+(\d+(?:\.\d+)?)%\s+and\s+warehouse\s+compute\s+cost\s+by\s+(\d+(?:\.\d+)?)%",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if dag_reduction:
+        project, model, elapsed, cost = dag_reduction.groups()
+        project = _clean_plain_text(project)
+        return (
+            f"{model}는 {project}에서 실행 시간을 {elapsed}% 줄이고 warehouse compute 비용을 {cost}% 줄여, "
+            "단일 쿼리 최적화보다 파이프라인 전체 의존성을 보는 접근의 효과를 보여줍니다."
+        )
+
+    completed_runs = re.search(
+        r"(.+?)\s+are\s+evaluated\s+across\s+(.+?),\s+resulting\s+in\s+(\d+(?:,\d{3})*)\s+completed\s+runs",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if completed_runs:
+        configs, domains, runs = completed_runs.groups()
+        configs = _clean_plain_text(configs)
+        domains = _clean_plain_text(domains)
+        return (
+            f"{system}은 {domains} 데이터셋에서 {configs}을 평가해 {runs}회 완료 실행을 만들었고, "
+            "여러 조건에서 결과를 비교할 수 있게 했습니다."
+        )
+
     coverage = re.search(
         r"achieves?\s+(\d+(?:\.\d+)?)%\s+and\s+(\d+(?:\.\d+)?)%\s+runnable\s+coverage\s+for\s+(.+?)(?:,|\s+respectively|$)",
         text,
@@ -3642,7 +3680,17 @@ def _korean_paper_evidence_text(sentence: str, title: str, role: str) -> str:
     )
     if coverage:
         first, second, targets = coverage.groups()
-        return f"{system}은 {targets}에서 실행 가능한 파이프라인 커버리지 {first}%와 {second}%를 보여, 모델 저장소를 실제 실행 가능한 형태로 만드는 효과를 제시합니다."
+        targets = _clean_plain_text(targets)
+        if "Type-II" in targets and "Type-III" in targets:
+            return (
+                f"{system}은 Type-II 모델에서 실행 가능한 추론 파이프라인 커버리지 {first}%, "
+                f"Type-III 모델에서 {second}%를 달성해, 검증된 모델 허브가 원시 가중치를 "
+                "실제 사용 가능한 파이프라인으로 바꿀 수 있음을 보여줍니다."
+            )
+        return (
+            f"{system}은 {targets}의 실행 가능한 파이프라인 커버리지 {first}%와 {second}%를 보여, "
+            "모델 저장소를 실제 실행 가능한 형태로 만드는 효과를 제시합니다."
+        )
 
     best_model = re.search(
         r"best model reaches\s+(\d+(?:\.\d+)?)%\s+(.+?),\s+but only\s+(\d+(?:\.\d+)?)%\s+(.+)",
@@ -3664,8 +3712,10 @@ def _korean_paper_evidence_text(sentence: str, title: str, role: str) -> str:
     if re.search(r"while they host millions", text, flags=re.IGNORECASE):
         return f"기존 저장소에는 모델이 많지만 실행 가능한 파이프라인 없이 가중치만 있는 경우가 많아, {system}은 실제 실행 가능성을 핵심 기준으로 봅니다."
 
+    if numbers and role in {"contrast", "evaluation"}:
+        return f"{system}은 초록의 평가 문장을 기준으로 지표의 의미와 적용 범위를 함께 확인해야 합니다."
     if numbers:
-        return f"{system}은 {', '.join(numbers[:2])} 같은 핵심 수치를 통해 논문의 주장과 평가 결과를 확인하게 합니다."
+        return ""
 
     if quoted:
         return "기존 접근과의 차이는 초록의 대비 문장에서 확인되며, 원문이 제시한 비교 구조를 중심으로 봐야 합니다."
@@ -3794,6 +3844,7 @@ def _needs_specific_insight_copy(text: str) -> bool:
         "근거 문장:",
         "초록의 대비 문장에 드러납니다:",
         "평가 방식은 초록의 근거 문장을 기준으로 확인됩니다:",
+        "같은 핵심 수치",
         "주제를 다룹니다",
         "이슈, 커밋, PR에 흩어진 변경 내용",
         "변경 내역 수집, 영향 범위 요약",
@@ -8555,6 +8606,14 @@ def _refresh_paper_cards_in_html(
             return button
 
         existing_digest = _digest_from_existing_card_attrs(attrs)
+        existing_text = " ".join(
+            (
+                existing_digest.title,
+                existing_digest.summary,
+                unescape(attrs.get("data-detail", "")),
+                unescape(attrs.get("data-points", "")),
+            )
+        )
         if _latest_week_specific_summary(re.sub(r"[-_]+", " ", _item_text(existing_digest))):
             site_item = _localized_site_item(existing_digest, {})
             refreshed = _patch_insight_button(button, site_item)
@@ -8565,7 +8624,15 @@ def _refresh_paper_cards_in_html(
             return refreshed
 
         if "__arxiv_fetch_disabled__" in cache:
-            return button
+            if not _needs_specific_insight_copy(existing_text):
+                return button
+            site_item = _localized_site_item(existing_digest, {})
+            refreshed = _patch_insight_button(button, site_item)
+            if refreshed != button:
+                updated += 1
+                if is_first_button:
+                    first_button_refreshed = site_item
+            return refreshed
 
         digest = cache.get(source_url)
         if source_url not in cache:
@@ -8574,7 +8641,15 @@ def _refresh_paper_cards_in_html(
             if digest is None:
                 cache["__arxiv_fetch_disabled__"] = None
         if not digest:
-            return button
+            if not _needs_specific_insight_copy(existing_text):
+                return button
+            site_item = _localized_site_item(existing_digest, {})
+            refreshed = _patch_insight_button(button, site_item)
+            if refreshed != button:
+                updated += 1
+                if is_first_button:
+                    first_button_refreshed = site_item
+            return refreshed
 
         site_item = _localized_site_item(digest, {})
         refreshed = _patch_insight_button(button, site_item)
