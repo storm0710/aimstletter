@@ -85,9 +85,10 @@
     }
     .archive-year,
     .archive-month-summary {
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
       padding: 12px 12px 6px;
       color: #555555;
@@ -996,7 +997,7 @@ risk = score_impact(impact, factors=(&quot;criticality&quot;, &quot;sensitivity&
             </section>
             <section>
               <h2>비슷한 개념과 비교</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>워크플로 그래프</td><td>업무 단계가 어떻게 흘러가는가</td><td>작업 노드와 전이</td><td>업무 흐름도</td><td>승인 프로세스</td><td>데이터 계보 부족</td><td>실행 순서가 핵심이면 워크플로 그래프</td></tr><tr><td>지식 그래프</td><td>개념과 사실이 어떻게 연결되는가</td><td>엔티티와 관계</td><td>지식 질의 모델</td><td>검색·추천</td><td>운영 영향도 부족</td><td>질문 답변 근거가 핵심이면 지식 그래프</td></tr><tr><td>시스템 의존성 그래프</td><td>서비스 변경이 어디에 영향을 주는가</td><td>서비스·DB·팀·정책</td><td>영향도 그래프</td><td>변경·배포</td><td>갱신 비용</td><td>변경 위험 분석이면 의존성 그래프</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>워크플로 그래프</td><td>업무 단계가 어떻게 흘러가는가</td><td>작업 노드와 전이</td><td>업무 흐름도</td><td>승인 프로세스</td><td>데이터 계보 부족</td><td>실행 순서가 핵심이면 워크플로 그래프</td></tr><tr><td>지식 그래프</td><td>개념과 사실이 어떻게 연결되는가</td><td>엔티티와 관계</td><td>지식 질의 모델</td><td>검색·추천</td><td>운영 영향도 부족</td><td>질문 답변 근거가 핵심이면 지식 그래프</td></tr><tr><td>시스템 의존성 그래프</td><td>서비스 변경이 어디에 영향을 주는가</td><td>서비스·DB·팀·정책</td><td>영향도 그래프</td><td>변경·배포</td><td>갱신 비용</td><td>변경 위험 분석이면 의존성 그래프</td></tr></tbody></table></div>
             </section>
 
             <section>

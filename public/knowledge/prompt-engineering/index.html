@@ -85,9 +85,10 @@
     }
     .archive-year,
     .archive-month-summary {
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
       padding: 12px 12px 6px;
       color: #555555;
@@ -993,7 +994,7 @@
             </section>
             <section>
               <h2>비슷한 개념과 비교</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>컨텍스트 엔지니어링</td><td>어떤 정보를 볼 것인가</td><td>문서·메모리·권한</td><td>컨텍스트 구성</td><td>내부 자료 기반 답변</td><td>정보 과다/오래됨</td><td>자료 품질 문제가 크면 컨텍스트가 우선입니다.</td></tr><tr><td>파인튜닝</td><td>모델 행동을 학습으로 바꿀 것인가</td><td>학습 데이터</td><td>새 모델 또는 어댑터</td><td>대량 반복 패턴</td><td>비용과 갱신 부담</td><td>프롬프트로 한계가 명확할 때 고려합니다.</td></tr><tr><td>애플리케이션 코드 검증</td><td>출력을 어떻게 강제할 것인가</td><td>스키마와 validator</td><td>검증 로직</td><td>시스템 입력 보호</td><td>사용자 경험 저하</td><td>실패를 허용할 수 없으면 코드 검증이 필수입니다.</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>컨텍스트 엔지니어링</td><td>어떤 정보를 볼 것인가</td><td>문서·메모리·권한</td><td>컨텍스트 구성</td><td>내부 자료 기반 답변</td><td>정보 과다/오래됨</td><td>자료 품질 문제가 크면 컨텍스트가 우선입니다.</td></tr><tr><td>파인튜닝</td><td>모델 행동을 학습으로 바꿀 것인가</td><td>학습 데이터</td><td>새 모델 또는 어댑터</td><td>대량 반복 패턴</td><td>비용과 갱신 부담</td><td>프롬프트로 한계가 명확할 때 고려합니다.</td></tr><tr><td>애플리케이션 코드 검증</td><td>출력을 어떻게 강제할 것인가</td><td>스키마와 validator</td><td>검증 로직</td><td>시스템 입력 보호</td><td>사용자 경험 저하</td><td>실패를 허용할 수 없으면 코드 검증이 필수입니다.</td></tr></tbody></table></div>
             </section>
 
 

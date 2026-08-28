@@ -85,9 +85,10 @@
     }
     .archive-year,
     .archive-month-summary {
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
       padding: 12px 12px 6px;
       color: #555555;
@@ -996,7 +997,7 @@ if context.has_weak_evidence:
             </section>
             <section>
               <h2>비슷한 개념과 비교</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>프롬프트 엔지니어링</td><td>어떻게 지시할 것인가</td><td>역할·형식·예시</td><td>프롬프트 템플릿</td><td>형식 안정화</td><td>자료 부족</td><td>정보가 충분하면 프롬프트부터 봅니다.</td></tr><tr><td>RAG</td><td>검색 자료를 어떻게 붙일 것인가</td><td>검색 인덱스와 문서 조각</td><td>검색 증강 답변</td><td>문서 기반 QA</td><td>검색 품질 의존</td><td>컨텍스트 엔지니어링의 한 구성요소로 봅니다.</td></tr><tr><td>메모리/파인튜닝</td><td>무엇을 저장하거나 학습할 것인가</td><td>사용자 선호·학습 데이터</td><td>장기 기억 또는 모델 변경</td><td>반복 패턴</td><td>오래된 기억과 갱신 비용</td><td>자주 바뀌는 정책은 검색 컨텍스트가 낫습니다.</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>프롬프트 엔지니어링</td><td>어떻게 지시할 것인가</td><td>역할·형식·예시</td><td>프롬프트 템플릿</td><td>형식 안정화</td><td>자료 부족</td><td>정보가 충분하면 프롬프트부터 봅니다.</td></tr><tr><td>RAG</td><td>검색 자료를 어떻게 붙일 것인가</td><td>검색 인덱스와 문서 조각</td><td>검색 증강 답변</td><td>문서 기반 QA</td><td>검색 품질 의존</td><td>컨텍스트 엔지니어링의 한 구성요소로 봅니다.</td></tr><tr><td>메모리/파인튜닝</td><td>무엇을 저장하거나 학습할 것인가</td><td>사용자 선호·학습 데이터</td><td>장기 기억 또는 모델 변경</td><td>반복 패턴</td><td>오래된 기억과 갱신 비용</td><td>자주 바뀌는 정책은 검색 컨텍스트가 낫습니다.</td></tr></tbody></table></div>
             </section>
 
 

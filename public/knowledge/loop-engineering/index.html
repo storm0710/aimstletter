@@ -85,9 +85,10 @@
     }
     .archive-year,
     .archive-month-summary {
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
       padding: 12px 12px 6px;
       color: #555555;
@@ -1010,7 +1011,7 @@ while state[&quot;attempt&quot;] &lt; 3 and state[&quot;cost&quot;] &lt; 3.0:
             </section>
             <section>
               <h2>비슷한 개념과 비교</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>하네스 엔지니어링</td><td>무엇을 허용할 것인가</td><td>도구·권한·검증</td><td>실행 정책</td><td>안전한 실행</td><td>권한 과다</td><td>실행 경계가 문제면 하네스입니다.</td></tr><tr><td>LangGraph</td><td>상태 흐름을 어디에 저장하고 재개할 것인가</td><td>State, Node, Edge</td><td>워크플로 그래프</td><td>장기 실행</td><td>상태 복잡성</td><td>루프가 여러 단계와 승인으로 커지면 LangGraph를 씁니다.</td></tr><tr><td>프롬프트 엔지니어링</td><td>어떻게 지시할 것인가</td><td>지시문·예시</td><td>프롬프트</td><td>첫 시도 품질</td><td>모호한 지시</td><td>반복 이전에 지시가 문제인지 확인합니다.</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>하네스 엔지니어링</td><td>무엇을 허용할 것인가</td><td>도구·권한·검증</td><td>실행 정책</td><td>안전한 실행</td><td>권한 과다</td><td>실행 경계가 문제면 하네스입니다.</td></tr><tr><td>LangGraph</td><td>상태 흐름을 어디에 저장하고 재개할 것인가</td><td>State, Node, Edge</td><td>워크플로 그래프</td><td>장기 실행</td><td>상태 복잡성</td><td>루프가 여러 단계와 승인으로 커지면 LangGraph를 씁니다.</td></tr><tr><td>프롬프트 엔지니어링</td><td>어떻게 지시할 것인가</td><td>지시문·예시</td><td>프롬프트</td><td>첫 시도 품질</td><td>모호한 지시</td><td>반복 이전에 지시가 문제인지 확인합니다.</td></tr></tbody></table></div>
             </section>
 
 

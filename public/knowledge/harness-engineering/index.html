@@ -85,9 +85,10 @@
     }
     .archive-year,
     .archive-month-summary {
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
       padding: 12px 12px 6px;
       color: #555555;
@@ -994,7 +995,7 @@
             </section>
             <section>
               <h2>비슷한 개념과 비교</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>상태, 관찰, 평가</td><td>반복 정책</td><td>테스트 실패 수정</td><td>무한 반복</td><td>행동 전략이 문제면 루프입니다.</td></tr><tr><td>LangGraph</td><td>상태 기반 흐름을 어떻게 실행할 것인가</td><td>State, Node, Edge</td><td>워크플로 런타임</td><td>승인·재개</td><td>상태 복잡성</td><td>실행 흐름 자체가 복잡하면 LangGraph입니다.</td></tr><tr><td>보안 정책</td><td>무엇을 금지할 것인가</td><td>규정과 통제</td><td>정책 문서</td><td>조직 리스크 관리</td><td>개발 흐름과 분리</td><td>에이전트 실행에 붙이면 하네스가 됩니다.</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>상태, 관찰, 평가</td><td>반복 정책</td><td>테스트 실패 수정</td><td>무한 반복</td><td>행동 전략이 문제면 루프입니다.</td></tr><tr><td>LangGraph</td><td>상태 기반 흐름을 어떻게 실행할 것인가</td><td>State, Node, Edge</td><td>워크플로 런타임</td><td>승인·재개</td><td>상태 복잡성</td><td>실행 흐름 자체가 복잡하면 LangGraph입니다.</td></tr><tr><td>보안 정책</td><td>무엇을 금지할 것인가</td><td>규정과 통제</td><td>정책 문서</td><td>조직 리스크 관리</td><td>개발 흐름과 분리</td><td>에이전트 실행에 붙이면 하네스가 됩니다.</td></tr></tbody></table></div>
             </section>
 
 

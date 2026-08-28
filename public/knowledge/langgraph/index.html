@@ -85,9 +85,10 @@
     }
     .archive-year,
     .archive-month-summary {
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
       padding: 12px 12px 6px;
       color: #555555;
@@ -996,7 +997,7 @@ app.invoke(Command(resume=&quot;approved&quot;), config={&quot;configurable&quot
             </section>
             <section>
               <h2>비슷한 개념과 비교</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>LangChain 선형 체인</td><td>컴포넌트를 어떤 순서로 연결할 것인가</td><td>입력과 출력</td><td>체인</td><td>고정 순서 처리</td><td>중단 후 재개가 약함</td><td>분기·승인이 적으면 충분합니다.</td></tr><tr><td>일반 상태 머신</td><td>상태 전이를 어떻게 정의할 것인가</td><td>상태와 이벤트</td><td>상태 전이표</td><td>결정적 업무 흐름</td><td>LLM·도구 통합을 직접 구현</td><td>AI 호출이 부가 기능이면 고려합니다.</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>업무·데이터·권한 관계</td><td>영향도 그래프</td><td>시스템 분석</td><td>실행 런타임이 아님</td><td>실행보다 관계 분석이 핵심이면 별개로 설계합니다.</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>LangChain 선형 체인</td><td>컴포넌트를 어떤 순서로 연결할 것인가</td><td>입력과 출력</td><td>체인</td><td>고정 순서 처리</td><td>중단 후 재개가 약함</td><td>분기·승인이 적으면 충분합니다.</td></tr><tr><td>일반 상태 머신</td><td>상태 전이를 어떻게 정의할 것인가</td><td>상태와 이벤트</td><td>상태 전이표</td><td>결정적 업무 흐름</td><td>LLM·도구 통합을 직접 구현</td><td>AI 호출이 부가 기능이면 고려합니다.</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>업무·데이터·권한 관계</td><td>영향도 그래프</td><td>시스템 분석</td><td>실행 런타임이 아님</td><td>실행보다 관계 분석이 핵심이면 별개로 설계합니다.</td></tr></tbody></table></div>
             </section>
 
             <section>

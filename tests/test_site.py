@@ -1031,6 +1031,29 @@ def test_knowledge_pages_01_to_07_start_with_refocused_first_screen() -> None:
             assert '<section class="knowledge-focus"' not in html
 
 
+def test_knowledge_layout_keeps_sidebar_toggles_and_compare_table_aligned() -> None:
+    topic = next(topic for topic in KNOWLEDGE_TOPICS if topic.slug == "prompt-engineering")
+    html = _render_knowledge_topic_page(topic, analytics_html="", back_href="../../")
+
+    sidebar_rule = re.search(
+        r"\.archive-year,\s*\.archive-month-summary\s*\{(?P<body>.*?)\}",
+        html,
+        flags=re.S,
+    )
+    assert sidebar_rule
+    assert "box-sizing: border-box;" in sidebar_rule.group("body")
+    assert "justify-content: flex-start;" in sidebar_rule.group("body")
+    assert "justify-content: space-between;" not in sidebar_rule.group("body")
+
+    compare_section = html.split("<h2>비슷한 개념과 비교</h2>", 1)[1]
+    compare_table = compare_section.split("</table>", 1)[0]
+    assert "<th>개념</th>" in compare_table
+    assert compare_table.count("<th>") == 7
+
+    for row in re.findall(r"<tr>(.*?)</tr>", compare_table, flags=re.S)[1:]:
+        assert row.count("<td>") == compare_table.count("<th>")
+
+
 def test_dedupe_insight_buttons_removes_repeated_source_urls() -> None:
     html = (
         '<button class="insight-card" data-title="A" data-source="https://example.com/a">A</button>'

@@ -85,9 +85,10 @@
     }
     .archive-year,
     .archive-month-summary {
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
       padding: 12px 12px 6px;
       color: #555555;
@@ -947,7 +948,7 @@ alert_if(metrics.error_rate &gt; 0.03 or metrics.cost_today &gt; budget)</code><
             </section>
             <section>
               <h2>비슷한 개념과 비교</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>하네스 엔지니어링</td><td>실행을 어떻게 안전하게 제한할 것인가</td><td>권한·도구·검증</td><td>안전 경계</td><td>도구 실행</td><td>정책 누락</td><td>실행 경계가 핵심이면 하네스입니다.</td></tr><tr><td>루프 엔지니어링</td><td>실패 뒤 다음 행동을 어떻게 정할 것인가</td><td>반복·평가·종료</td><td>반복 제어</td><td>수정과 재시도</td><td>무한 반복</td><td>반복 전략이 핵심이면 루프입니다.</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>노드·엣지·영향도</td><td>관계 모델</td><td>복잡한 시스템</td><td>오래된 관계</td><td>구조 파악이 핵심이면 그래프입니다.</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>하네스 엔지니어링</td><td>실행을 어떻게 안전하게 제한할 것인가</td><td>권한·도구·검증</td><td>안전 경계</td><td>도구 실행</td><td>정책 누락</td><td>실행 경계가 핵심이면 하네스입니다.</td></tr><tr><td>루프 엔지니어링</td><td>실패 뒤 다음 행동을 어떻게 정할 것인가</td><td>반복·평가·종료</td><td>반복 제어</td><td>수정과 재시도</td><td>무한 반복</td><td>반복 전략이 핵심이면 루프입니다.</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>노드·엣지·영향도</td><td>관계 모델</td><td>복잡한 시스템</td><td>오래된 관계</td><td>구조 파악이 핵심이면 그래프입니다.</td></tr></tbody></table></div>
             </section>
 
 

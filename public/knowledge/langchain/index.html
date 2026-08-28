@@ -85,9 +85,10 @@
     }
     .archive-year,
     .archive-month-summary {
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
       padding: 12px 12px 6px;
       color: #555555;
@@ -993,7 +994,7 @@ preview = task_tool.preview_create(tool_payload)</code></pre>
             </section>
             <section>
               <h2>비슷한 개념과 비교</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>모델 SDK 직접 호출</td><td>어떻게 호출할 것인가</td><td>요청·응답 JSON</td><td>간단한 호출 함수</td><td>초소형 기능</td><td>파싱과 검증이 흩어짐</td><td>연결 요소가 적으면 직접 호출이 낫습니다.</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>State, Node, Edge</td><td>재개 가능한 워크플로</td><td>승인·재시도가 많은 장기 작업</td><td>상태 설계 복잡성</td><td>흐름 제어가 핵심이면 LangGraph를 봅니다.</td></tr><tr><td>단순 스크립트</td><td>정해진 순서를 어떻게 자동화할 것인가</td><td>함수와 순차 로직</td><td>작업 스크립트</td><td>도구 1~2개 연결</td><td>확장 시 조건문 폭증</td><td>프로토타입이면 충분할 수 있습니다.</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>관리 대상</th><th>대표 결과물</th><th>적합한 상황</th><th>대표 위험</th><th>선택 기준</th></tr></thead><tbody><tr><td>모델 SDK 직접 호출</td><td>어떻게 호출할 것인가</td><td>요청·응답 JSON</td><td>간단한 호출 함수</td><td>초소형 기능</td><td>파싱과 검증이 흩어짐</td><td>연결 요소가 적으면 직접 호출이 낫습니다.</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>State, Node, Edge</td><td>재개 가능한 워크플로</td><td>승인·재시도가 많은 장기 작업</td><td>상태 설계 복잡성</td><td>흐름 제어가 핵심이면 LangGraph를 봅니다.</td></tr><tr><td>단순 스크립트</td><td>정해진 순서를 어떻게 자동화할 것인가</td><td>함수와 순차 로직</td><td>작업 스크립트</td><td>도구 1~2개 연결</td><td>확장 시 조건문 폭증</td><td>프로토타입이면 충분할 수 있습니다.</td></tr></tbody></table></div>
             </section>
 
 

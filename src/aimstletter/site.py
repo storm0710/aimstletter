@@ -1362,9 +1362,10 @@ def _render_editorial_homepage(
     }}
     .archive-year,
     .archive-month-summary {{
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
       padding: 12px 12px 6px;
       color: #555;
@@ -5282,7 +5283,7 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
             </section>
             <section>
               <h2>비슷한 개념과 비교</h2>
-              {_render_table(("핵심 질문", "관리 대상", "대표 결과물", "적합한 상황", "대표 위험", "선택 기준"), tuple(tuple(row) for row in page["compare"]))}
+              {_render_table(("개념", "핵심 질문", "관리 대상", "대표 결과물", "적합한 상황", "대표 위험", "선택 기준"), tuple(tuple(row) for row in page["compare"]))}
             </section>
             {langgraph_graph_note}
             {harness_loop_section}
@@ -5572,9 +5573,10 @@ def _render_plain_page(
     }}
     .archive-year,
     .archive-month-summary {{
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       width: 100%;
       padding: 12px 12px 6px;
       color: #555555;
