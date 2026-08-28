@@ -52,73 +52,6 @@ OFFICIAL_SOURCES = {
 }
 
 
-GLOBAL_COMPARISON_ROWS = (
-    (
-        "LangChain",
-        "컴포넌트를 어떻게 연결할 것인가",
-        "모델, 프롬프트, 검색기, 도구",
-        "AI 애플리케이션 파이프라인",
-        "프레임워크 복잡성, 종속성",
-        "모델 호출과 외부 기능 연결이 많을 때",
-    ),
-    (
-        "LangGraph",
-        "상태와 분기를 어떻게 실행할 것인가",
-        "State, Node, Edge, Checkpoint",
-        "상태 기반 워크플로",
-        "상태 설계 오류, 복잡한 흐름",
-        "장기 실행, 승인, 재시도가 필요할 때",
-    ),
-    (
-        "프롬프트 엔지니어링",
-        "무엇을 어떻게 지시할 것인가",
-        "역할, 지시, 예시, 출력 형식",
-        "프롬프트 템플릿",
-        "모호한 요청, 출력 불안정",
-        "답변 형식과 판단 기준을 안정화할 때",
-    ),
-    (
-        "컨텍스트 엔지니어링",
-        "어떤 정보를 제공할 것인가",
-        "검색 자료, 메모리, 권한, 최신성",
-        "컨텍스트 구성 파이프라인",
-        "관련 없는 정보, 오래된 정보",
-        "근거와 내부 자료가 답변 품질을 좌우할 때",
-    ),
-    (
-        "하네스 엔지니어링",
-        "무엇을 할 수 있게 허용할 것인가",
-        "도구, 권한, 샌드박스, 검증, 로그",
-        "실행 환경과 정책",
-        "위험한 실행, 감사 불가",
-        "AI가 실제 시스템을 읽거나 수정할 때",
-    ),
-    (
-        "루프 엔지니어링",
-        "다음 행동과 종료를 어떻게 결정할 것인가",
-        "상태, 반복, 평가, 종료 조건",
-        "반복 제어 정책",
-        "무한 반복, 진전 없는 재시도",
-        "실패 결과를 보고 전략을 바꿔야 할 때",
-    ),
-    (
-        "그래프 엔지니어링",
-        "관계와 의존성을 어떻게 모델링할 것인가",
-        "노드, 엣지, 속성, 계보",
-        "관계 모델과 영향도 그래프",
-        "지나치게 큰 그래프, 잘못된 관계",
-        "업무·데이터·권한 의존성을 추적할 때",
-    ),
-    (
-        "에이전트 엔지니어링",
-        "AI 에이전트를 어떻게 안정적으로 운영할 것인가",
-        "모델, 도구, 평가, 관측, 보안",
-        "운영 기준과 품질 지표",
-        "품질 저하, 비용 증가, 권한 과다",
-        "AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때",
-    ),
-)
-
 
 CONFUSION_ROWS = (
     (
@@ -842,3 +775,332 @@ OFFICIAL_SOURCES["agent-engineering"] = (
     ("OpenAI Agents SDK", "https://openai.github.io/openai-agents-python/"),
     ("LangChain State of Agent Engineering", "https://www.langchain.com/state-of-agent-engineering"),
 )
+
+
+REQUIRED_KNOWLEDGE_METADATA = (
+    "id",
+    "slug",
+    "title",
+    "oneLineDefinition",
+    "coreQuestion",
+    "summary",
+    "difficulty",
+    "audience",
+    "readingTime",
+    "maturity",
+    "updatedAt",
+    "keywords",
+    "relatedConcepts",
+    "confusingConcepts",
+    "officialSources",
+    "volatileSections",
+    "representativeUseCase",
+)
+
+
+NEW_KNOWLEDGE_DECISION_RULES = (
+    ("신규 후보", "독립적인 설계 원칙이나 엔지니어링 방법론이면 신규 Knowledge 후보로 검토합니다."),
+    ("기존 하위 기술", "기존 개념의 세부 구현이면 관련 Knowledge의 더 알아보기나 하위 주제로 포함합니다."),
+    ("제품·라이브러리", "특정 제품이나 라이브러리는 별도 Knowledge보다 관련 개념의 실제 사례로 우선 다룹니다."),
+    ("일시적 트렌드", "마케팅 용어이거나 지속성이 불명확하면 주간 뉴스레터 카드로만 다룹니다."),
+    ("중복 방지", "기존 Knowledge와 핵심 질문이 같으면 새 페이지를 만들지 않고 기존 문서를 보강합니다."),
+)
+
+
+_KNOWLEDGE_METADATA = {
+    "langchain": {
+        "id": "01",
+        "title": "LangChain",
+        "summary": "LLM 앱을 만들 때 모델 호출, 프롬프트, 도구 연결, 검색, 메모리 같은 부품을 한 흐름으로 묶는 개발 프레임워크입니다.",
+        "coreQuestion": "컴포넌트를 어떻게 연결할 것인가",
+        "designTarget": "모델, 프롬프트, 검색기, 도구",
+        "representativeOutput": "AI 애플리케이션 파이프라인",
+        "representativeFailure": "프레임워크 복잡성, 종속성",
+        "bestFit": "모델 호출과 외부 기능 연결이 많을 때",
+        "relationshipStage": "1. 설계",
+        "relationships": ("프롬프트와 컨텍스트를 실행 가능한 앱 구성요소로 연결", "LangGraph로 복잡한 상태 흐름을 확장"),
+        "atAGlance": ("Prompt", "Model", "Parser", "Retriever", "Tool"),
+        "coreComponents": (
+            ("Prompt", "무엇을 요청할지 정합니다.", "회의록에서 결정 사항만 뽑으라고 지시합니다."),
+            ("Model", "답을 생성합니다.", "요약과 실행 항목 초안을 만듭니다."),
+            ("Parser", "출력을 정해진 형식으로 받습니다.", "담당자, 마감일, 우선순위를 필드로 검증합니다."),
+            ("Tool", "외부 시스템과 연결합니다.", "업무 관리 도구에 등록 초안을 보냅니다."),
+        ),
+        "confusingConcepts": (("LangChain", "LangGraph", "LangChain은 컴포넌트를 연결하고 LangGraph는 상태와 실행 순서를 제어합니다."),),
+        "representativeUseCase": {
+            "title": "회의록 자동 등록",
+            "situation": "회의록을 붙여 넣으면 요약, 실행 항목, 담당자, 마감일을 구조화합니다.",
+            "oldProblem": "프롬프트, 모델 호출, 업무 도구 등록 코드가 한 덩어리로 얽힙니다.",
+            "process": "입력 템플릿, 구조화 출력, 검색기, 도구 호출을 분리해 연결합니다.",
+            "result": "도구나 출력 형식이 바뀌어도 해당 구성요소만 교체해 유지보수합니다.",
+            "limit": "프레임워크 추상화가 과하면 작은 기능도 복잡해질 수 있습니다.",
+        },
+    },
+    "langgraph": {
+        "id": "02",
+        "title": "LangGraph",
+        "summary": "AI 에이전트가 여러 단계를 오가며 판단해야 할 때, 작업 흐름을 그래프 구조로 설계하고 제어하는 도구입니다.",
+        "coreQuestion": "상태와 분기를 어떻게 실행할 것인가",
+        "designTarget": "State, Node, Edge, Checkpoint",
+        "representativeOutput": "상태 기반 워크플로",
+        "representativeFailure": "상태 설계 오류, 복잡한 흐름",
+        "bestFit": "장기 실행, 승인, 재시도가 필요한 작업",
+        "relationshipStage": "2. 실행",
+        "relationships": ("LangChain 구성요소를 상태 기반 흐름으로 실행", "루프 엔지니어링의 반복 규칙을 구현"),
+        "atAGlance": ("State", "Node", "Branch", "Checkpoint", "Resume"),
+        "coreComponents": (
+            ("State", "현재까지의 정보와 결정을 저장합니다.", "수집한 로그, 가설, 승인 여부를 남깁니다."),
+            ("Node", "하나의 작업 단계를 맡습니다.", "로그 조회, 원인 분석, 조치 생성이 각각 노드가 됩니다."),
+            ("Branch", "조건에 따라 다음 경로를 고릅니다.", "확신이 낮으면 추가 조회로 보냅니다."),
+            ("Checkpoint", "중간 상태를 저장합니다.", "중단 후 같은 지점에서 재개합니다."),
+        ),
+        "confusingConcepts": (("LangGraph", "그래프 엔지니어링", "LangGraph는 실행 그래프이고 그래프 엔지니어링은 관계와 의존성 모델링입니다."),),
+        "representativeUseCase": {
+            "title": "장애 원인 분석",
+            "situation": "로그 수집, 원인 추정, 추가 조회, 사람 승인, 조치 제안을 여러 단계로 실행합니다.",
+            "oldProblem": "한 번에 답을 내면 중간 근거와 재시도 지점을 잃습니다.",
+            "process": "작업을 상태가 남는 노드와 조건 분기로 나누고 승인 지점에서 멈춥니다.",
+            "result": "실패한 단계만 다시 실행하고 같은 지점에서 이어갈 수 있습니다.",
+            "limit": "상태 스키마가 모호하면 분기와 재개가 불안정해집니다.",
+        },
+    },
+    "prompt-engineering": {
+        "id": "03",
+        "title": "프롬프트엔지니어링",
+        "summary": "AI가 원하는 방식으로 답하도록 지시문, 역할, 예시, 출력 형식을 설계하는 방법입니다.",
+        "coreQuestion": "무엇을 어떻게 지시할 것인가",
+        "designTarget": "역할, 목표, 제약, 출력 형식",
+        "representativeOutput": "재사용 가능한 프롬프트",
+        "representativeFailure": "모호한 요청, 출력 불안정",
+        "bestFit": "답변 기준과 형식을 안정화해야 할 때",
+        "relationshipStage": "1. 설계",
+        "relationships": ("컨텍스트 엔지니어링이 제공한 판단 재료를 어떻게 사용할지 지시", "하네스의 검증 기준으로 확장"),
+        "atAGlance": ("Role", "Goal", "Context", "Constraint", "Output"),
+        "coreComponents": (
+            ("Role", "AI가 맡을 관점을 정합니다.", "계약 검토 담당자처럼 행동하게 합니다."),
+            ("Goal", "최종 산출물을 정합니다.", "위험 조항 5개와 수정안을 요구합니다."),
+            ("Constraint", "하지 말아야 할 일을 제한합니다.", "원문에 없는 법적 판단은 쓰지 않게 합니다."),
+            ("Output", "답변 형식을 고정합니다.", "조항, 위험, 근거, 제안 컬럼으로 받습니다."),
+        ),
+        "confusingConcepts": (("프롬프트", "컨텍스트", "프롬프트는 할 일을 지시하고 컨텍스트는 판단 재료를 고릅니다."),),
+        "representativeUseCase": {
+            "title": "계약 검토 요청",
+            "situation": "위험 조항, 근거 문장, 수정 제안을 표로 뽑아야 합니다.",
+            "oldProblem": "막연한 검토 요청은 담당자마다 답변 범위와 형식이 흔들립니다.",
+            "process": "역할, 판단 기준, 금지 범위, 출력 컬럼을 명시한 업무 지시로 바꿉니다.",
+            "result": "답변 품질이 개인 감각이 아니라 재사용 가능한 기준에 가까워집니다.",
+            "limit": "원문에 없는 법률 판단이나 최신 규정은 별도 검증이 필요합니다.",
+        },
+    },
+    "context-engineering": {
+        "id": "04",
+        "title": "컨텍스트엔지니어링",
+        "summary": "AI가 답을 만들 때 참고해야 할 문서, 데이터, 대화 이력, 규칙을 알맞게 골라 넣는 설계 방법입니다.",
+        "coreQuestion": "어떤 정보를 제공할 것인가",
+        "designTarget": "검색 자료, 메모리, 권한, 최신성",
+        "representativeOutput": "컨텍스트 구성 파이프라인",
+        "representativeFailure": "관련 없는 정보, 오래된 정보",
+        "bestFit": "근거와 내부 자료가 답변 품질을 좌우할 때",
+        "relationshipStage": "1. 설계",
+        "relationships": ("프롬프트가 사용할 판단 재료를 선별", "RAG와 권한 필터링의 기반"),
+        "atAGlance": ("Question", "Retrieve", "Filter", "Assemble", "Answer"),
+        "coreComponents": (
+            ("Retriever", "관련 문서를 찾습니다.", "질문과 가까운 정책 문서를 검색합니다."),
+            ("Metadata", "문서의 조건을 확인합니다.", "날짜, 부서, 권한 등으로 거릅니다."),
+            ("Rerank", "가장 필요한 근거를 앞에 둡니다.", "핵심 문서를 우선 전달합니다."),
+            ("Token Budget", "넣을 정보량을 조절합니다.", "불필요한 긴 문서를 줄입니다."),
+        ),
+        "confusingConcepts": (("컨텍스트", "하네스", "컨텍스트는 모델이 보는 정보이고 하네스는 실행 경계와 권한입니다."),),
+        "representativeUseCase": {
+            "title": "사내 정책 챗봇",
+            "situation": "사용자 질문에 맞는 최신 정책 문서와 권한이 허용된 내용만 전달합니다.",
+            "oldProblem": "문서를 많이 넣으면 오래된 문서나 권한 밖 정보가 답변을 오염시킵니다.",
+            "process": "검색, 날짜·부서·권한 필터, 재정렬, 토큰 예산 조절을 거칩니다.",
+            "result": "근거가 명확한 최신 답변을 만들고 권한 밖 정보 노출을 줄입니다.",
+            "limit": "원본 문서 품질과 메타데이터가 낮으면 검색 품질도 낮아집니다.",
+        },
+    },
+    "harness-engineering": {
+        "id": "05",
+        "title": "하네스 엔지니어링",
+        "summary": "AI 에이전트가 실제 업무 도구를 사용할 때 실행 순서, 권한, 검증, 기록을 한곳에서 관리하는 운영 구조입니다.",
+        "coreQuestion": "무엇을 얼마나 안전하게 허용할 것인가",
+        "designTarget": "도구, 권한, 샌드박스, 검증, 로그",
+        "representativeOutput": "실행 환경과 안전 장치",
+        "representativeFailure": "위험한 실행, 감사 불가",
+        "bestFit": "AI가 실제 시스템을 읽거나 수정할 때",
+        "relationshipStage": "2. 실행",
+        "relationships": ("루프가 선택한 행동을 안전한 권한 안에서 실행", "에이전트 엔지니어링의 운영 경계 역할"),
+        "atAGlance": ("Tools", "Permissions", "Sandbox", "Validation", "Audit"),
+        "coreComponents": (
+            ("Tool Registry", "사용 가능한 도구를 제한합니다.", "읽기, 테스트, 배포 도구를 구분합니다."),
+            ("Permission", "권한과 승인 기준을 둡니다.", "삭제나 배포는 승인 뒤 실행합니다."),
+            ("Sandbox", "실행 범위를 격리합니다.", "작업 디렉터리 밖 변경을 막습니다."),
+            ("Audit Log", "행동 근거를 남깁니다.", "누가 어떤 명령을 왜 실행했는지 추적합니다."),
+        ),
+        "confusingConcepts": (("하네스", "루프", "하네스는 실행 경계를 강제하고 루프는 다음 행동과 종료를 결정합니다."),),
+        "representativeUseCase": {
+            "title": "코딩 에이전트 운영",
+            "situation": "읽을 파일, 수정 범위, 실행 테스트, 승인 필요한 명령을 제한합니다.",
+            "oldProblem": "자유 실행을 맡기면 위험한 파일 변경이나 검증 없는 배포가 발생할 수 있습니다.",
+            "process": "도구 레지스트리, 권한 정책, 샌드박스, 검증 명령, 감사 로그를 둡니다.",
+            "result": "실행 범위와 검증 근거가 남아 운영 중 사고 대응이 쉬워집니다.",
+            "limit": "권한 모델이 너무 느슨하면 안전 장치가 우회되고 너무 엄격하면 작업이 막힙니다.",
+        },
+    },
+    "loop-engineering": {
+        "id": "06",
+        "title": "루프 엔지니어링",
+        "summary": "AI가 한 번 답하고 끝나는 것이 아니라 실행, 관찰, 평가, 수정 과정을 반복하며 결과를 개선하도록 설계하는 방법입니다.",
+        "coreQuestion": "다음 행동과 종료를 어떻게 결정할 것인가",
+        "designTarget": "상태, 반복, 평가, 종료 조건",
+        "representativeOutput": "반복 제어 정책",
+        "representativeFailure": "무한 반복, 진전 없는 재시도",
+        "bestFit": "실패 결과를 보고 전략을 바꿔야 할 때",
+        "relationshipStage": "2. 실행",
+        "relationships": ("LangGraph로 구현될 수 있는 반복 판단 규칙", "하네스가 제공한 실행 결과를 평가"),
+        "atAGlance": ("Plan", "Act", "Observe", "Evaluate", "Stop"),
+        "coreComponents": (
+            ("Plan", "다음 시도를 정합니다.", "어떤 테스트부터 볼지 고릅니다."),
+            ("Act", "작업을 실행합니다.", "코드를 수정하거나 명령을 실행합니다."),
+            ("Observe", "결과를 읽습니다.", "실패 로그와 변경 결과를 확인합니다."),
+            ("Evaluate", "진전 여부를 판단합니다.", "같은 실패가 반복되는지 봅니다."),
+            ("Stop", "종료 조건을 둡니다.", "통과, 승인 필요, 반복 실패에서 멈춥니다."),
+        ),
+        "confusingConcepts": (("루프", "하네스", "루프는 반복 판단이고 하네스는 실제 실행을 제한하는 환경입니다."),),
+        "representativeUseCase": {
+            "title": "테스트 실패 자동 수정",
+            "situation": "테스트 실패를 읽고 코드를 고친 뒤 다시 테스트하며 멈출 조건을 확인합니다.",
+            "oldProblem": "한 번 실행하고 끝나면 실패 로그를 다음 행동에 활용하지 못합니다.",
+            "process": "계획, 실행, 관찰, 평가, 종료 조건을 명시한 반복 흐름을 둡니다.",
+            "result": "같은 실패를 반복하거나 무한 재시도하는 대신 진전 여부를 기준으로 멈춥니다.",
+            "limit": "평가 기준이 약하면 잘못된 방향으로 여러 번 반복할 수 있습니다.",
+        },
+    },
+    "graph-engineering": {
+        "id": "07",
+        "title": "그래프 엔지니어링",
+        "summary": "AI 업무 흐름, 지식, 권한, 도구 의존성을 노드와 엣지로 표현해 복잡한 에이전트 시스템을 제어하는 설계 방법입니다.",
+        "coreQuestion": "관계와 의존성을 어떻게 모델링할 것인가",
+        "designTarget": "노드, 엣지, 속성, 계보",
+        "representativeOutput": "관계 모델과 영향도 그래프",
+        "representativeFailure": "지나치게 큰 그래프, 잘못된 관계",
+        "bestFit": "업무·데이터·권한의 의존성을 추적할 때",
+        "relationshipStage": "3. 운영",
+        "relationships": ("컨텍스트의 출처와 권한 관계를 구조화", "에이전트 운영에서 영향도와 감사 경로를 제공"),
+        "atAGlance": ("Node", "Edge", "Property", "Direction", "Impact"),
+        "coreComponents": (
+            ("Node", "대상을 표현합니다.", "서비스, DB, API, 팀을 하나의 점으로 둡니다."),
+            ("Edge", "관계를 표현합니다.", "호출한다, 소유한다, 배포한다를 선으로 잇습니다."),
+            ("Property", "관계의 속성을 붙입니다.", "중요도, 변경 빈도, 소유자를 기록합니다."),
+            ("Direction", "영향 방향을 정합니다.", "API 변경이 어떤 소비자에게 전파되는지 봅니다."),
+        ),
+        "confusingConcepts": (("그래프 엔지니어링", "LangGraph", "그래프 엔지니어링은 관계 모델링이고 LangGraph는 AI 실행 흐름 도구입니다."),),
+        "representativeUseCase": {
+            "title": "결제 API 변경 영향 분석",
+            "situation": "결제 API, 주문 DB, 정산 서비스, 알림, 배포 파이프라인의 연결을 따라 영향 범위를 봅니다.",
+            "oldProblem": "목록형 문서만 있으면 간접 의존성과 담당자를 놓치기 쉽습니다.",
+            "process": "서비스, DB, 팀, 정책을 노드로 두고 호출·소유·배포 관계를 엣지로 연결합니다.",
+            "result": "변경 전에 어떤 서비스와 데이터가 같이 흔들리는지 빠르게 확인합니다.",
+            "limit": "그래프가 최신 호출 로그와 소유권 정보를 반영하지 않으면 오판합니다.",
+        },
+    },
+    "agent-engineering": {
+        "id": "08",
+        "title": "에이전트 엔지니어링",
+        "summary": "모델, 도구, 데이터, 평가, 관측, 보안을 함께 설계해 AI 에이전트를 실제 업무 환경에서 안정적으로 운영하는 분야입니다.",
+        "coreQuestion": "AI 에이전트를 어떻게 안정적으로 운영할 것인가",
+        "designTarget": "모델, 도구, 평가, 관측, 보안",
+        "representativeOutput": "운영 기준과 안전 지침",
+        "representativeFailure": "품질 저하, 비용 증가, 권한 과다",
+        "bestFit": "AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때",
+        "relationshipStage": "3. 운영",
+        "relationships": ("하네스, 루프, 그래프를 포함하는 상위 운영 관점", "평가와 관측으로 배포 후 품질을 관리"),
+        "atAGlance": ("Goal", "Tools", "Evaluation", "Observability", "Approval"),
+        "coreComponents": (
+            ("Goal", "업무 성공 기준을 정합니다.", "문의 처리 정확도와 승인 기준을 수치로 둡니다."),
+            ("Tools", "에이전트가 사용할 기능을 제한합니다.", "주문 조회는 읽기 전용으로 둡니다."),
+            ("Evaluation", "실제 입력으로 품질을 검증합니다.", "대표 문의 세트로 회귀를 확인합니다."),
+            ("Observability", "실행 상태를 기록합니다.", "오류, 비용, 지연, 도구 호출을 추적합니다."),
+            ("Approval", "위험한 결정을 사람이 확인합니다.", "환불이나 계정 변경은 승인 뒤 처리합니다."),
+        ),
+        "confusingConcepts": (("에이전트 엔지니어링", "하네스 엔지니어링", "에이전트 엔지니어링은 운영 전체이고 하네스는 실행 경계와 권한에 집중합니다."),),
+        "representativeUseCase": {
+            "title": "고객 지원 에이전트 운영",
+            "situation": "고객 문의를 분류하고 근거 링크가 있는 답변 초안을 만듭니다.",
+            "oldProblem": "데모는 잘 보여도 배포 뒤 품질, 비용, 권한, 승인 책임이 관리되지 않습니다.",
+            "process": "평가셋, 읽기 전용 도구, 정책 검사, 승인 화면, 추적 로그를 함께 설계합니다.",
+            "result": "답변 품질과 비용 변화를 운영 지표로 보고 위험 결정은 사람에게 넘깁니다.",
+            "limit": "업무 목표와 책임자가 불명확하면 기술 장치만으로 안정성을 보장할 수 없습니다.",
+        },
+    },
+}
+
+
+def _apply_knowledge_metadata() -> None:
+    for slug, metadata in _KNOWLEDGE_METADATA.items():
+        page = KNOWLEDGE_PAGES[slug]
+        page.update(metadata)
+        page["slug"] = slug
+        page["oneLineDefinition"] = page["definition"]
+        page["readingTime"] = page["reading_time"]
+        page["updatedAt"] = page["updated_at"]
+        page["relatedConcepts"] = tuple(page["related"])
+        page["officialSources"] = tuple(OFFICIAL_SOURCES.get(slug, ()))
+        page["volatileSections"] = (page["volatile"],)
+
+
+def validate_knowledge_pages() -> tuple[str, ...]:
+    errors: list[str] = []
+    known_slugs = set(KNOWLEDGE_PAGES)
+    seen_definitions: dict[str, str] = {}
+    seen_cases: dict[str, str] = {}
+    seen_code: dict[str, str] = {}
+
+    for slug, page in KNOWLEDGE_PAGES.items():
+        missing = [field for field in REQUIRED_KNOWLEDGE_METADATA if not page.get(field)]
+        if missing:
+            errors.append(f"{slug}: missing required metadata {', '.join(missing)}")
+
+        components = tuple(page.get("coreComponents", ()))
+        if not 3 <= len(components) <= 5:
+            errors.append(f"{slug}: coreComponents must contain 3 to 5 items")
+
+        case = page.get("representativeUseCase")
+        if not isinstance(case, dict):
+            errors.append(f"{slug}: representativeUseCase must be a dict")
+        else:
+            case_missing = [
+                field
+                for field in ("title", "situation", "oldProblem", "process", "result", "limit")
+                if not case.get(field)
+            ]
+            if case_missing:
+                errors.append(f"{slug}: representativeUseCase missing {', '.join(case_missing)}")
+
+        for related_slug in tuple(page.get("relatedConcepts", ())):
+            if related_slug not in known_slugs:
+                errors.append(f"{slug}: unknown relatedConcept {related_slug}")
+
+        definition = str(page.get("oneLineDefinition", "")).strip()
+        if definition in seen_definitions:
+            errors.append(f"{slug}: duplicate oneLineDefinition with {seen_definitions[definition]}")
+        elif definition:
+            seen_definitions[definition] = slug
+
+        case_title = str(case.get("title", "")).strip() if isinstance(case, dict) else ""
+        if case_title in seen_cases:
+            errors.append(f"{slug}: duplicate representativeUseCase title with {seen_cases[case_title]}")
+        elif case_title:
+            seen_cases[case_title] = slug
+
+        code = str(page.get("code", "")).strip()
+        if code in seen_code:
+            errors.append(f"{slug}: duplicate code example with {seen_code[code]}")
+        elif code:
+            seen_code[code] = slug
+
+    return tuple(errors)
+
+
+_apply_knowledge_metadata()

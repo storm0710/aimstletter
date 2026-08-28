@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
@@ -850,25 +850,69 @@
           <article class="knowledge-body">
 
 
+            <section class="knowledge-focus" aria-label="에이전트 엔지니어링 핵심 요약">
+              <div class="focus-lead">
+                <span class="focus-label">한 줄 정의</span>
+                <p>모델, 도구, 데이터, 평가, 관측, 보안을 함께 설계해 AI 에이전트를 실제 업무 환경에서 안정적으로 운영하는 분야입니다.</p>
+              </div>
+              <div class="focus-grid">
+                <div class="focus-panel focus-structure">
+                  <h2>한눈에 보는 구조</h2>
+                  <div class="focus-flow"><span>Goal</span><span>Tools</span><span>Evaluation</span><span>Observability</span><span>Approval</span></div>
+                </div>
+                <div class="focus-panel">
+                  <h2>실제 업무 사례</h2>
+                  <strong>고객 지원 에이전트 운영</strong>
+                  <p>고객 문의를 분류하고 근거 링크가 있는 답변 초안을 만듭니다.</p>
+                  <p>평가셋, 읽기 전용 도구, 정책 검사, 승인 화면, 추적 로그를 함께 설계합니다.</p>
+                  <p>답변 품질과 비용 변화를 운영 지표로 보고 위험 결정은 사람에게 넘깁니다.</p>
+                </div>
+                <div class="focus-panel focus-contrast">
+                  <h2>헷갈리는 개념과 차이</h2>
+                  <div><strong>에이전트 엔지니어링</strong></div>
+                  <div><strong>하네스 엔지니어링</strong></div>
+                  <p>에이전트 엔지니어링은 운영 전체이고 하네스는 실행 경계와 권한에 집중합니다.</p>
+                </div>
+                <div class="focus-panel focus-components">
+                  <h2>핵심 구성요소</h2>
+                  <div>
+        <div class="focus-component">
+          <strong>Goal</strong>
+          <span>업무 성공 기준을 정합니다.</span>
+          <p>문의 처리 정확도와 승인 기준을 수치로 둡니다.</p>
+        </div>
 
+        <div class="focus-component">
+          <strong>Tools</strong>
+          <span>에이전트가 사용할 기능을 제한합니다.</span>
+          <p>주문 조회는 읽기 전용으로 둡니다.</p>
+        </div>
 
-            <section class="knowledge-map">
-              <h2>AI 엔지니어링 관계도</h2>
-              <p class="knowledge-map-intro">AI 기능은 먼저 설계하고, 정한 규칙에 따라 실행한 뒤, 실제 업무에서 계속 운영합니다.</p>
-              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>프롬프트 엔지니어링</strong><span>AI에게 맡길 일과 결과 형식을 정합니다.</span></div><div class="relation-step"><strong>컨텍스트 엔지니어링</strong><span>AI가 판단할 때 참고할 자료와 상태를 고릅니다.</span></div><div class="relation-step"><strong>LangChain</strong><span>모델, 검색, 도구를 하나의 앱으로 연결합니다.</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>분기, 재시도, 승인처럼 긴 작업의 순서를 관리합니다.</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>도구, 권한, 검증, 기록으로 실행 범위를 제한합니다.</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>결과를 확인하고 수정하거나 멈추는 반복 규칙을 정합니다.</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>업무, 데이터, 권한의 연결 관계와 영향 범위를 모델링합니다.</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>모델, 도구, 평가, 관측, 보안을 함께 운영합니다.</span></div></div></section></div>
+        <div class="focus-component">
+          <strong>Evaluation</strong>
+          <span>실제 입력으로 품질을 검증합니다.</span>
+          <p>대표 문의 세트로 회귀를 확인합니다.</p>
+        </div>
+
+        <div class="focus-component">
+          <strong>Observability</strong>
+          <span>실행 상태를 기록합니다.</span>
+          <p>오류, 비용, 지연, 도구 호출을 추적합니다.</p>
+        </div>
+
+        <div class="focus-component">
+          <strong>Approval</strong>
+          <span>위험한 결정을 사람이 확인합니다.</span>
+          <p>환불이나 계정 변경은 승인 뒤 처리합니다.</p>
+        </div>
+        </div>
+                </div>
+              </div>
             </section>
 
-            <section>
-              <h2>개념 간 전체 비교표</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>무엇을 정하나</th><th>이럴 때 사용</th><th>주의할 점</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델 호출과 외부 기능 연결이 많을 때</td><td>프레임워크 복잡성, 종속성</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>장기 실행, 승인, 재시도가 필요할 때</td><td>상태 설계 오류, 복잡한 흐름</td></tr><tr><td>프롬프트 엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>답변 형식과 판단 기준을 안정화할 때</td><td>모호한 요청, 출력 불안정</td></tr><tr><td>컨텍스트 엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td><td>관련 없는 정보, 오래된 정보</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 할 수 있게 허용할 것인가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td><td>위험한 실행, 감사 불가</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td><td>무한 반복, 진전 없는 재시도</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>업무·데이터·권한 의존성을 추적할 때</td><td>지나치게 큰 그래프, 잘못된 관계</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td><td>품질 저하, 비용 증가, 권한 과다</td></tr></tbody></table></div>
-            </section>
-            <section>
-              <h2>헷갈리기 쉬운 개념</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>비교</th><th>첫 번째 개념</th><th>두 번째 개념</th><th>관계</th></tr></thead><tbody><tr><td>프롬프트와 컨텍스트</td><td>모델에게 어떤 행동을 요구할지 정의</td><td>모델이 판단할 때 어떤 정보를 볼지 정의</td><td>좋은 프롬프트도 잘못된 컨텍스트를 받으면 틀릴 수 있고, 좋은 컨텍스트도 지시가 모호하면 일관된 결과를 만들기 어렵습니다.</td></tr><tr><td>LangChain과 LangGraph</td><td>구성요소 조합과 외부 통합</td><td>상태 기반 실행, 분기, 중단과 재개</td><td>LangChain은 앱 구성요소를 연결하고, LangGraph는 긴 작업의 상태와 실행 흐름을 제어합니다.</td></tr><tr><td>LangGraph와 그래프 엔지니어링</td><td>AI 워크플로 실행 프레임워크</td><td>관계 및 의존성 모델링 방법론</td><td>LangGraph는 실행 그래프이고, 그래프 엔지니어링은 시스템·데이터·권한 관계를 설계하는 더 넓은 방법입니다.</td></tr><tr><td>하네스와 루프</td><td>실행 환경, 도구, 권한과 안전장치</td><td>반복 행동, 평가, 전략 변경과 종료 결정</td><td>하네스가 루프를 감싸고 제한하며, 루프는 하네스가 제공하는 환경 안에서 실행됩니다.</td></tr><tr><td>컨텍스트와 하네스</td><td>모델이 볼 수 있는 정보</td><td>에이전트가 사용할 수 있는 실행 환경과 권한</td><td>컨텍스트는 판단 재료이고, 하네스는 실제 행동의 경계입니다.</td></tr><tr><td>그래프와 에이전트 엔지니어링</td><td>관계와 의존성을 모델링</td><td>도구 실행, 평가, 관측, 보안을 운영</td><td>그래프는 구조를 이해하는 방법이고, 에이전트 엔지니어링은 그 구조 안에서 AI를 안전하게 운영하는 전체 활동입니다.</td></tr></tbody></table></div>
-            </section>
 
             <section class="definition-box">
-              <h2>이 문서에서 사용하는 정의</h2>
+              <h2>한 줄 정의</h2>
               <p><strong>에이전트 엔지니어링</strong>: 모델, 도구, 데이터, 평가, 관측, 보안을 함께 설계해 AI 에이전트를 실제 업무 환경에서 안정적으로 운영하는 분야입니다.</p>
               <p>이 문서에서는 실제 AI 애플리케이션 설계에서 구분해야 하는 책임과 선택 기준을 중심으로 정의합니다.</p>
             </section>
@@ -885,19 +929,14 @@
                 <p>최종 검토 날짜: 2026-08-06</p>
                 <p><strong>변경 가능성:</strong> 에이전트 프레임워크와 관측 도구의 기능은 빠르게 바뀔 수 있음</p>
               </details>
-              <h2>30초 요약</h2>
               <dl>
-                <dt>한 줄 정의</dt><dd>모델, 도구, 데이터, 평가, 관측, 보안을 함께 설계해 AI 에이전트를 실제 업무 환경에서 안정적으로 운영하는 분야입니다.</dd>
-                <dt>해결하는 문제</dt><dd>비용 증가, 잘못된 도구 실행, 품질 저하, 보안 사고가 배포 후에야 발견됩니다.</dd>
-                <dt>이럴 때 사용</dt><dd>AI가 읽기뿐 아니라 업무 도구를 실행함</dd>
-                <dt>사용하지 않아도 되는 경우</dt><dd>답변 생성만 하는 단순 챗봇</dd>
                 <dt>핵심 키워드</dt><dd class="keyword-list"><span>Evaluation</span><span>Observability</span><span>Guardrails</span><span>Tool Use</span><span>Human Approval</span></dd>
                 <dt>관련 개념</dt><dd><div class="concept-links"><a href="../../knowledge/harness-engineering/">05. 하네스 엔지니어링</a><a href="../../knowledge/loop-engineering/">06. 루프 엔지니어링</a><a href="../../knowledge/graph-engineering/">07. 그래프 엔지니어링</a><a href="../../knowledge/langgraph/">02. LangGraph</a></div></dd>
               </dl>
             </section>
 
             <section>
-              <h2>등장 배경과 해결하려는 문제</h2>
+              <h2>왜 필요한가</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>구분</th><th>내용</th></tr></thead><tbody><tr><td>기존 방식</td><td>프롬프트나 데모 품질만 확인한 뒤 에이전트를 바로 업무에 연결합니다.</td></tr><tr><td>발생하는 문제</td><td>비용 증가, 잘못된 도구 실행, 품질 저하, 보안 사고가 배포 후에야 발견됩니다.</td></tr><tr><td>해결 방식</td><td>평가셋, 도구 권한, 승인 절차, 실행 로그, 비용 한도, 장애 대응을 제품 운영 과정에 포함합니다.</td></tr><tr><td>해결하지 못하는 부분</td><td>업무 목표와 책임 범위가 불명확하면 기술만으로 안전한 자동화를 만들 수 없습니다.</td></tr></tbody></table></div>
             </section>
             <section>
@@ -906,7 +945,7 @@
               <div class="flow-box"><span>업무 목표</span><span>도구·권한 설계</span><span>평가셋</span><span>에이전트 실행</span><span>관측·로그</span><span>승인·복구</span><span>지속 개선</span></div>
             </section>
             <section>
-              <h2>언제 사용하고 언제 사용하지 않는가</h2>
+              <h2>언제 쓰는가</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>적합한 상황</th><th>과한 선택이 될 수 있는 상황</th><th>도입 전 확인할 조건</th><th>대안이 될 수 있는 더 단순한 방법</th></tr></thead><tbody><tr><td>AI가 읽기뿐 아니라 업무 도구를 실행함</td><td>답변 생성만 하는 단순 챗봇</td><td>성공 기준과 실패 비용을 정할 수 있는가</td><td>단일 모델 호출과 사람 검토</td></tr><tr><td>배포 뒤 품질·비용·오류를 계속 추적해야 함</td><td>일회성 분석이나 실험</td><td>평가 데이터와 로그를 보관할 수 있는가</td><td>짧은 프로토타입</td></tr><tr><td>여러 팀이 같은 에이전트를 운영함</td><td>한 명이 제한된 범위에서만 사용함</td><td>승인자와 책임자가 정해졌는가</td><td>명시적인 수동 절차</td></tr></tbody></table></div>
               <div class="warning-box">
                 <strong>주의</strong>
@@ -915,7 +954,7 @@
             </section>
 
             <section>
-              <h2>실제 업무 사례</h2>
+              <h2>대표 실제 사례</h2>
 
               <div class="example-box">
                 <strong>고객 문의를 분류하고 답변 초안을 만드는 지원 에이전트</strong>
@@ -924,6 +963,25 @@
 
             </section>
 
+
+            <section>
+              <h2>더 알아보기: AI 엔지니어링 관계도</h2>
+
+            <section class="knowledge-map">
+              <h2>AI 엔지니어링 관계도</h2>
+              <p class="knowledge-map-intro">AI 기능은 먼저 설계하고, 정한 규칙에 따라 실행한 뒤, 실제 업무에서 계속 운영합니다.</p>
+              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangChain</strong><span>프롬프트와 컨텍스트를 실행 가능한 앱 구성요소로 연결</span></div><div class="relation-step"><strong>프롬프트엔지니어링</strong><span>컨텍스트 엔지니어링이 제공한 판단 재료를 어떻게 사용할지 지시</span></div><div class="relation-step"><strong>컨텍스트엔지니어링</strong><span>프롬프트가 사용할 판단 재료를 선별</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>LangChain 구성요소를 상태 기반 흐름으로 실행</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>루프가 선택한 행동을 안전한 권한 안에서 실행</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>LangGraph로 구현될 수 있는 반복 판단 규칙</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>컨텍스트의 출처와 권한 관계를 구조화</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>하네스, 루프, 그래프를 포함하는 상위 운영 관점</span></div></div></section></div>
+            </section>
+
+            </section>
+            <section>
+              <h2>더 알아보기: 개념 간 전체 비교표</h2>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>설계 대상</th><th>대표 결과물</th><th>대표 실패</th><th>가장 적합한 상황</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델, 프롬프트, 검색기, 도구</td><td>AI 애플리케이션 파이프라인</td><td>프레임워크 복잡성, 종속성</td><td>모델 호출과 외부 기능 연결이 많을 때</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>State, Node, Edge, Checkpoint</td><td>상태 기반 워크플로</td><td>상태 설계 오류, 복잡한 흐름</td><td>장기 실행, 승인, 재시도가 필요한 작업</td></tr><tr><td>프롬프트엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>역할, 목표, 제약, 출력 형식</td><td>재사용 가능한 프롬프트</td><td>모호한 요청, 출력 불안정</td><td>답변 기준과 형식을 안정화해야 할 때</td></tr><tr><td>컨텍스트엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>검색 자료, 메모리, 권한, 최신성</td><td>컨텍스트 구성 파이프라인</td><td>관련 없는 정보, 오래된 정보</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 얼마나 안전하게 허용할 것인가</td><td>도구, 권한, 샌드박스, 검증, 로그</td><td>실행 환경과 안전 장치</td><td>위험한 실행, 감사 불가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>상태, 반복, 평가, 종료 조건</td><td>반복 제어 정책</td><td>무한 반복, 진전 없는 재시도</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>노드, 엣지, 속성, 계보</td><td>관계 모델과 영향도 그래프</td><td>지나치게 큰 그래프, 잘못된 관계</td><td>업무·데이터·권한의 의존성을 추적할 때</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>모델, 도구, 평가, 관측, 보안</td><td>운영 기준과 안전 지침</td><td>품질 저하, 비용 증가, 권한 과다</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td></tr></tbody></table></div>
+            </section>
+            <section>
+              <h2>더 알아보기: 헷갈리기 쉬운 개념</h2>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>비교</th><th>첫 번째 개념</th><th>두 번째 개념</th><th>관계</th></tr></thead><tbody><tr><td>프롬프트와 컨텍스트</td><td>모델에게 어떤 행동을 요구할지 정의</td><td>모델이 판단할 때 어떤 정보를 볼지 정의</td><td>좋은 프롬프트도 잘못된 컨텍스트를 받으면 틀릴 수 있고, 좋은 컨텍스트도 지시가 모호하면 일관된 결과를 만들기 어렵습니다.</td></tr><tr><td>LangChain과 LangGraph</td><td>구성요소 조합과 외부 통합</td><td>상태 기반 실행, 분기, 중단과 재개</td><td>LangChain은 앱 구성요소를 연결하고, LangGraph는 긴 작업의 상태와 실행 흐름을 제어합니다.</td></tr><tr><td>LangGraph와 그래프 엔지니어링</td><td>AI 워크플로 실행 프레임워크</td><td>관계 및 의존성 모델링 방법론</td><td>LangGraph는 실행 그래프이고, 그래프 엔지니어링은 시스템·데이터·권한 관계를 설계하는 더 넓은 방법입니다.</td></tr><tr><td>하네스와 루프</td><td>실행 환경, 도구, 권한과 안전장치</td><td>반복 행동, 평가, 전략 변경과 종료 결정</td><td>하네스가 루프를 감싸고 제한하며, 루프는 하네스가 제공하는 환경 안에서 실행됩니다.</td></tr><tr><td>컨텍스트와 하네스</td><td>모델이 볼 수 있는 정보</td><td>에이전트가 사용할 수 있는 실행 환경과 권한</td><td>컨텍스트는 판단 재료이고, 하네스는 실제 행동의 경계입니다.</td></tr><tr><td>그래프와 에이전트 엔지니어링</td><td>관계와 의존성을 모델링</td><td>도구 실행, 평가, 관측, 보안을 운영</td><td>그래프는 구조를 이해하는 방법이고, 에이전트 엔지니어링은 그 구조 안에서 AI를 안전하게 운영하는 전체 활동입니다.</td></tr></tbody></table></div>
+            </section>
 
             <section>
               <h2>최소 구현 예제</h2>
@@ -953,7 +1011,7 @@ alert_if(metrics.error_rate &gt; 0.03 or metrics.cost_today &gt; budget)</code><
 
 
             <section>
-              <h2>실패 사례와 주의사항</h2>
+              <h2>주의할 점</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>문제</th><th>발생 원인</th><th>발견 방법</th><th>대응 방법</th></tr></thead><tbody><tr><td>데모 품질만 확인</td><td>대표적이지 않은 예시만 사용</td><td>실사용에서 오류 유형이 급증</td><td>실제 문의와 실패 사례로 평가셋을 유지</td></tr><tr><td>과도한 권한</td><td>쓰기 도구를 기본 허용</td><td>의도하지 않은 변경 로그</td><td>읽기·쓰기 권한 분리와 사람 승인</td></tr><tr><td>관측 부재</td><td>실행 결과와 비용을 기록하지 않음</td><td>품질 하락 시점을 알 수 없음</td><td>트레이스·평가·비용 지표와 경보 설정</td></tr></tbody></table></div>
             </section>
             <section>
@@ -965,7 +1023,7 @@ alert_if(metrics.error_rate &gt; 0.03 or metrics.cost_today &gt; budget)</code><
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>역할</th><th>실제로 해야 할 일</th></tr></thead><tbody><tr><td>기획자</td><td>자동화 범위, 성공 기준, 사람이 결정할 업무를 정의합니다.</td></tr><tr><td>디자이너</td><td>신뢰도, 근거, 승인 대기, 오류 상태를 이해하기 쉽게 설계합니다.</td></tr><tr><td>프론트엔드</td><td>승인 화면, 실행 이력, 피드백 수집 UI를 구현합니다.</td></tr><tr><td>백엔드</td><td>도구 권한, 정책 검사, 로그 저장, 오류 복구를 구현합니다.</td></tr><tr><td>데이터·AI 엔지니어</td><td>평가셋, 품질 지표, 회귀 테스트를 관리합니다.</td></tr><tr><td>플랫폼·보안 담당자</td><td>비밀정보, 접근 권한, 감사 로그, 비용 한도를 관리합니다.</td></tr></tbody></table></div>
             </section>
             <section>
-              <h2>학습 정보</h2>
+              <h2>더 알아보기</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>읽기 전에</td><td>프롬프트, 도구 호출, 권한, 테스트 기본 개념</td></tr><tr><td>다음 문서</td><td>하네스 엔지니어링, 루프 엔지니어링, 그래프 엔지니어링</td></tr><tr><td>빠르게 바뀔 수 있는 부분</td><td>에이전트 SDK, 관측·평가 도구, 모델별 도구 호출 방식</td></tr></tbody></table></div>
               <h3>공식 문서와 참고 출처</h3>
               <p class="source-verified">확인 날짜: 2026-08-06 · 외부 출처는 새 창에서 열립니다.</p><ul class="source-list"><li><a href="https://openai.github.io/openai-agents-python/" target="_blank" rel="noopener noreferrer">OpenAI Agents SDK</a></li><li><a href="https://www.langchain.com/state-of-agent-engineering" target="_blank" rel="noopener noreferrer">LangChain State of Agent Engineering</a></li></ul>

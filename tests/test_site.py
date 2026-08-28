@@ -6,8 +6,12 @@ from pathlib import Path
 
 from aimstletter.fetchers import DigestItem
 from aimstletter.config import AI_TOOL_DISCOVERY_KEYWORDS, Settings, TOOL_UPDATE_FEEDS
+from aimstletter.knowledge_content import (
+    KNOWLEDGE_PAGES,
+    REQUIRED_KNOWLEDGE_METADATA,
+    validate_knowledge_pages,
+)
 from aimstletter.site import (
-    KNOWLEDGE_FIRST_SCREEN,
     KNOWLEDGE_TOPICS,
     SiteItem,
     _fallback_display_summary,
@@ -957,7 +961,7 @@ def test_committed_knowledge_page_exists() -> None:
     assert "Tool Registry" in html
     assert "Audit Log" in html
     assert "검증 필요" in html
-    assert "이 문서에서 사용하는 정의" in html
+    assert "한 줄 정의" in html
     assert "주의" in html
     assert "확인 날짜: 2026-08-06" in html
     assert 'target="_blank"' in html
@@ -975,20 +979,20 @@ def test_knowledge_page_includes_practical_engineering_playbook() -> None:
     topic = next(topic for topic in KNOWLEDGE_TOPICS if topic.slug == "langgraph")
     html = _render_knowledge_topic_page(topic, analytics_html="", back_href="../../")
 
-    assert "핵심 정의" in html
+    assert "한 줄 정의" in html
     assert "한눈에 보는 구조" in html
     assert "장애 원인 분석" in html
     assert "헷갈리는 개념과 차이" in html
     assert "30초 요약" not in html
-    assert "해결하려는 문제" in html
-    assert "언제 사용하고 언제 사용하지 않는가" in html
+    assert "왜 필요한가" in html
+    assert "언제 쓰는가" in html
     assert "실제 업무 사례" in html
     assert "최소 구현 예제" in html
     assert "비슷한 개념과 비교" in html
-    assert "실패 사례와 주의사항" in html
+    assert "주의할 점" in html
     assert "운영 체크리스트" in html
     assert "역할별 업무 적용" in html
-    assert "학습 정보" in html
+    assert "더 알아보기" in html
     assert "AI 엔지니어링 관계도" in html
     assert "개념 간 전체 비교표" in html
     assert "헷갈리기 쉬운 개념" in html
@@ -1000,35 +1004,39 @@ def test_knowledge_page_includes_practical_engineering_playbook() -> None:
     assert "기획자" in html
     assert "백엔드" in html
     assert "최종 검토 날짜: 2026-08-06" in html
-    assert "이 문서에서 사용하는 정의" in html
+    assert "한 줄 정의" in html
     assert "code-details" in html
 
 
-def test_knowledge_pages_01_to_07_start_with_refocused_first_screen() -> None:
-    slugs = {
-        "langchain",
-        "langgraph",
-        "prompt-engineering",
-        "context-engineering",
-        "harness-engineering",
-        "loop-engineering",
-        "graph-engineering",
-    }
-
+def test_all_knowledge_pages_start_with_metadata_first_screen() -> None:
     for topic in KNOWLEDGE_TOPICS:
         html = _render_knowledge_topic_page(topic, analytics_html="", back_href="../../")
-        if topic.slug in slugs:
-            assert topic.slug in KNOWLEDGE_FIRST_SCREEN
-            assert '<section class="knowledge-focus"' in html
-            assert "핵심 정의" in html
-            assert "한눈에 보는 구조" in html
-            assert "실제 업무 사례" in html
-            assert "헷갈리는 개념과 차이" in html
-            assert "핵심 구성요소" in html
-            assert html.index("knowledge-focus") < html.index("definition-box")
-            assert html.index("knowledge-focus") < html.index("더 알아보기: AI 엔지니어링 관계도")
-        elif topic.slug == "agent-engineering":
-            assert '<section class="knowledge-focus"' not in html
+        assert '<section class="knowledge-focus"' in html
+        assert "한 줄 정의" in html
+        assert "한눈에 보는 구조" in html
+        assert "실제 업무 사례" in html
+        assert "헷갈리는 개념과 차이" in html
+        assert "핵심 구성요소" in html
+        assert html.index("knowledge-focus") < html.index("definition-box")
+        assert html.index("knowledge-focus") < html.index("더 알아보기: AI 엔지니어링 관계도")
+
+
+def test_knowledge_metadata_schema_is_complete_and_unique() -> None:
+    assert validate_knowledge_pages() == ()
+    known_slugs = set(KNOWLEDGE_PAGES)
+
+    for topic in KNOWLEDGE_TOPICS:
+        page = KNOWLEDGE_PAGES[topic.slug]
+        for field in REQUIRED_KNOWLEDGE_METADATA:
+            assert page.get(field), f"{topic.slug} missing {field}"
+        assert page["id"] == topic.order
+        assert 3 <= len(page["coreComponents"]) <= 5
+        assert page["officialSources"]
+        assert page["confusingConcepts"]
+        assert set(page["relatedConcepts"]).issubset(known_slugs)
+        assert {"title", "situation", "oldProblem", "process", "result", "limit"}.issubset(
+            page["representativeUseCase"]
+        )
 
 
 def test_knowledge_layout_keeps_sidebar_toggles_and_compare_table_aligned() -> None:

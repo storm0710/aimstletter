@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
@@ -24,11 +24,12 @@ from aimstletter.config import AI_TOOL_DISCOVERY_KEYWORDS, Settings
 from aimstletter.fetchers import DigestItem, fetch_recent_items
 from aimstletter.knowledge_content import (
     CONFUSION_ROWS,
-    GLOBAL_COMPARISON_ROWS,
     HARNESS_LOOP_ROWS,
     KNOWLEDGE_PAGES,
+    NEW_KNOWLEDGE_DECISION_RULES,
     OFFICIAL_SOURCES,
     REVIEW_DATE,
+    validate_knowledge_pages,
 )
 from aimstletter.ranking import rank_items
 
@@ -66,199 +67,23 @@ class KnowledgeTopic:
     notes: tuple[str, ...]
 
 
-KNOWLEDGE_TOPICS = (
-    KnowledgeTopic(
-        order="01",
-        slug="langchain",
-        title="LangChain",
-        summary="LLM 앱을 만들 때 모델 호출, 프롬프트, 도구 연결, 검색, 메모리 같은 부품을 한 흐름으로 묶는 개발 프레임워크입니다.",
-        sections=(
-            (
-                "왜 알아야 하나요?",
-                "LangChain은 AI에게 질문만 던지는 수준을 넘어, 사내 문서 검색, API 호출, 결과 정리처럼 여러 단계를 이어 붙이는 데 자주 쓰입니다. 업무 자동화나 챗봇을 만들 때 반복되는 연결 코드를 줄여 줍니다.",
-            ),
-            (
-                "어디에 쓰나요?",
-                "문서 기반 질의응답, 보고서 초안 생성, 데이터 조회 도우미, 고객 문의 분류처럼 모델과 외부 데이터를 함께 써야 하는 작업에 적합합니다.",
-            ),
-            (
-                "업무 적용 포인트",
-                "처음에는 작은 검색형 챗봇이나 사내 절차 안내 봇처럼 범위가 좁은 곳에서 시작하는 것이 좋습니다. 연결되는 데이터 출처와 답변 검증 기준을 함께 정해야 안정적으로 운영할 수 있습니다.",
-            ),
-        ),
-        notes=(
-            "LLM: 문장을 이해하고 생성하는 대규모 언어 모델입니다.",
-            "프레임워크: 자주 쓰는 기능과 구조를 미리 묶어 둔 개발 도구 모음입니다.",
-            "메모리: 대화나 작업 중 필요한 이전 정보를 저장해 다음 단계에서 참고하게 하는 기능입니다.",
-        ),
-    ),
-    KnowledgeTopic(
-        order="02",
-        slug="langgraph",
-        title="LangGraph",
-        summary="AI 에이전트가 여러 단계를 오가며 판단해야 할 때, 작업 흐름을 그래프 구조로 설계하고 제어하는 도구입니다.",
-        sections=(
-            (
-                "LangChain과 무엇이 다른가요?",
-                "LangChain이 여러 AI 기능을 연결하는 부품 상자에 가깝다면, LangGraph는 그 부품들이 어떤 순서로 움직이고 언제 되돌아가야 하는지를 더 명확히 설계합니다.",
-            ),
-            (
-                "어디에 쓰나요?",
-                "장애 원인 분석, 코드 리뷰 보조, 문서 검토처럼 한 번의 답변으로 끝나지 않고 확인, 수정, 재검토가 필요한 업무에 잘 맞습니다.",
-            ),
-            (
-                "업무 적용 포인트",
-                "각 단계의 입력과 출력, 실패했을 때 돌아갈 위치, 사람이 승인해야 하는 지점을 먼저 그려 두면 에이전트 흐름을 안전하게 만들 수 있습니다.",
-            ),
-        ),
-        notes=(
-            "그래프: 여러 작업 단계를 점과 선처럼 연결해 흐름을 표현하는 구조입니다.",
-            "에이전트: 목표를 받고 여러 단계를 스스로 진행하는 AI 시스템입니다.",
-            "상태: 현재 작업이 어디까지 진행됐고 어떤 정보가 남아 있는지를 나타내는 기록입니다.",
-        ),
-    ),
-    KnowledgeTopic(
-        order="03",
-        slug="prompt-engineering",
-        title="프롬프트엔지니어링",
-        summary="AI가 원하는 방식으로 답하도록 지시문, 역할, 예시, 출력 형식을 설계하는 방법입니다.",
-        sections=(
-            (
-                "핵심은 무엇인가요?",
-                "좋은 프롬프트는 AI에게 역할, 목표, 참고 자료, 답변 형식을 분명하게 알려 줍니다. 막연히 요청하는 대신 무엇을 기준으로 판단해야 하는지까지 적어야 결과가 안정적입니다.",
-            ),
-            (
-                "어디에 쓰나요?",
-                "회의록 요약, 장애 보고서 초안, SQL 설명, 정책 문서 정리처럼 답변 형식이 중요한 업무에서 효과가 큽니다.",
-            ),
-            (
-                "업무 적용 포인트",
-                "자주 쓰는 업무는 프롬프트 템플릿으로 만들어 두고, 좋은 결과와 나쁜 결과 예시를 함께 저장하면 팀 전체의 품질을 맞추기 쉽습니다.",
-            ),
-        ),
-        notes=(
-            "프롬프트: AI에게 전달하는 지시문입니다.",
-            "템플릿: 매번 바뀌는 부분만 채워 넣을 수 있게 만든 기본 양식입니다.",
-            "출력 형식: 표, bullet, JSON처럼 답변이 나와야 하는 모양입니다.",
-        ),
-    ),
-    KnowledgeTopic(
-        order="04",
-        slug="context-engineering",
-        title="컨텍스트엔지니어링",
-        summary="AI가 답을 만들 때 참고해야 할 문서, 데이터, 대화 이력, 규칙을 알맞게 골라 넣는 설계 방법입니다.",
-        sections=(
-            (
-                "왜 중요한가요?",
-                "AI는 필요한 자료를 보지 못하면 그럴듯하지만 틀린 답을 만들 수 있습니다. 컨텍스트 엔지니어링은 어떤 정보를 넣고, 어떤 정보는 빼야 하는지 정해 답변의 정확도를 높입니다.",
-            ),
-            (
-                "어디에 쓰나요?",
-                "사내 매뉴얼 검색, 고객 이슈 분석, 코드베이스 질문, 운영 절차 안내처럼 최신 자료나 조직 내부 지식이 필요한 업무에 쓰입니다.",
-            ),
-            (
-                "업무 적용 포인트",
-                "자료를 많이 넣는 것보다 질문과 관련 있는 자료를 정확히 넣는 것이 중요합니다. 문서 출처, 갱신일, 권한 범위도 함께 관리해야 합니다.",
-            ),
-        ),
-        notes=(
-            "컨텍스트: AI가 답변을 만들 때 참고하는 주변 정보입니다.",
-            "검색 증강 생성(RAG): 외부 문서를 검색해 AI 답변에 함께 넣는 방식입니다.",
-            "권한 범위: 사용자가 볼 수 있는 자료와 AI가 참고해도 되는 자료의 한계입니다.",
-        ),
-    ),
-    KnowledgeTopic(
-        order="05",
-        slug="harness-engineering",
-        title="하네스 엔지니어링",
-        summary="AI 에이전트가 실제 업무 도구를 사용할 때 실행 순서, 권한, 검증, 기록을 한곳에서 관리하는 운영 구조입니다.",
-        sections=(
-            (
-                "하네스 엔지니어링이 필요한 이유",
-                "프롬프트는 AI에게 일을 시키는 지시문이고, 컨텍스트는 AI가 참고해야 할 자료와 상황입니다. 하네스 엔지니어링은 여기에 실제 도구 실행 규칙을 더해, AI가 말만 하는 단계에서 업무를 수행하는 단계로 넘어가도록 돕습니다.",
-            ),
-            (
-                "에이전트를 안전하게 움직이는 운영 장치",
-                "에이전트는 목표를 받고 여러 단계를 스스로 진행하는 AI입니다. 하네스는 에이전트가 아무 도구나 바로 실행하지 않도록 중간에서 권한, 입력값, 결과 검증을 관리합니다.",
-            ),
-            (
-                "실제 업무에서는 이렇게 씁니다",
-                "보고서 생성, 배포 점검, 장애 대응 초안 작성처럼 반복되는 업무를 자동화할 때 어떤 도구를 쓸 수 있는지, 누가 승인해야 하는지, 실패하면 어떻게 되돌릴지를 미리 정합니다.",
-            ),
-        ),
-        notes=(
-            "권한: AI가 접근할 수 있는 저장소, 파일, API 범위를 제한하는 기준입니다.",
-            "검증: AI가 만든 결과를 테스트, 규칙, 사람 승인으로 확인하는 절차입니다.",
-            "기록: 어떤 입력으로 어떤 도구를 실행했고 어떤 결과가 나왔는지 남기는 로그입니다.",
-        ),
-    ),
-    KnowledgeTopic(
-        order="06",
-        slug="loop-engineering",
-        title="루프 엔지니어링",
-        summary="AI가 한 번 답하고 끝나는 것이 아니라 실행, 관찰, 평가, 수정 과정을 반복하며 결과를 개선하도록 설계하는 방법입니다.",
-        sections=(
-            (
-                "정의와 등장 배경",
-                "초기 프롬프트 엔지니어링은 좋은 답변을 한 번 얻는 데 집중했습니다. 하지만 코딩, 운영 점검, 리서치처럼 실제 업무는 초안 생성 뒤 검증과 수정이 반복됩니다. 루프 엔지니어링은 이 반복 과정을 명시적으로 설계해 AI가 결과를 보고 다시 고치게 만드는 접근입니다.",
-            ),
-            (
-                "어떻게 사용하나요?",
-                "작업 목표, 실행 도구, 관찰할 지표, 재시도 조건, 종료 기준을 정합니다. 예를 들어 코드 수정 에이전트라면 테스트 실패 내용을 읽고 수정안을 만들고 다시 테스트하는 루프를 둡니다. 운영 업무에서는 알림 확인, 원인 후보 생성, 로그 재조회, 조치안 검토를 순환시킬 수 있습니다.",
-            ),
-            (
-                "기존 엔지니어링과의 차이점 및 개선점",
-                "프롬프트 엔지니어링이 지시문 품질에 집중하고, 컨텍스트 엔지니어링이 참고 자료 선별에 집중한다면 루프 엔지니어링은 결과를 어떻게 다시 평가하고 고칠지에 초점을 둡니다. 장점은 복잡한 업무의 정확도와 재현성이 높아진다는 점이고, 주의점은 무한 반복을 막기 위한 비용 한도와 사람 승인 지점을 반드시 둬야 한다는 점입니다.",
-            ),
-        ),
-        notes=(
-            "루프: 실행 결과를 다시 입력으로 넣어 다음 행동을 정하는 반복 구조입니다.",
-            "종료 기준: 반복을 멈출 조건입니다. 테스트 통과, 승인 완료, 비용 한도 도달 등이 될 수 있습니다.",
-            "관찰: AI가 실행 결과, 로그, 오류 메시지, 사용자 피드백을 읽는 단계입니다.",
-        ),
-    ),
-    KnowledgeTopic(
-        order="07",
-        slug="graph-engineering",
-        title="그래프 엔지니어링",
-        summary="AI 업무 흐름, 지식, 권한, 도구 의존성을 노드와 엣지로 표현해 복잡한 에이전트 시스템을 제어하는 설계 방법입니다.",
-        sections=(
-            (
-                "정의와 등장 배경",
-                "에이전트가 여러 도구와 데이터를 오가면 단순한 순서도만으로는 상태와 의존성을 파악하기 어렵습니다. 그래프 엔지니어링은 작업 단계, 데이터 출처, 권한, 실패 경로를 그래프 구조로 모델링해 어떤 정보가 어디서 왔고 다음에 무엇을 해야 하는지 추적하게 합니다.",
-            ),
-            (
-                "어떻게 사용하나요?",
-                "업무 단계를 노드로 두고, 입력·출력·승인·실패 복구 관계를 엣지로 연결합니다. 지식 검색에서는 문서, 엔티티, 정책, 사용자 권한을 그래프로 묶어 AI가 근거와 접근 가능 범위를 함께 확인하게 할 수 있습니다. 에이전트 개발에서는 실행 상태 그래프를 만들어 어느 단계에서 멈췄는지, 어느 도구 호출이 다음 행동을 만들었는지 기록합니다.",
-            ),
-            (
-                "기존 엔지니어링과의 차이점 및 개선점",
-                "컨텍스트 엔지니어링이 필요한 자료를 고르는 일이라면, 그래프 엔지니어링은 자료와 작업 사이의 관계를 구조화합니다. 루프 엔지니어링이 반복 제어에 강하다면, 그래프 엔지니어링은 분기, 의존성, 권한 추적에 강합니다. 복잡한 업무를 시각화하고 감사할 수 있지만, 처음부터 너무 큰 그래프를 만들면 운영 부담이 커지므로 핵심 경로부터 작게 시작하는 것이 좋습니다.",
-            ),
-        ),
-        notes=(
-            "노드: 그래프에서 하나의 작업, 문서, 도구, 상태를 나타내는 점입니다.",
-            "엣지: 노드 사이의 관계입니다. 다음 단계, 참조, 권한, 의존성을 표현합니다.",
-            "상태 그래프: 에이전트가 지금 어디에 있고 어떤 경로로 왔는지 기록하는 구조입니다.",
-        ),
-    ),
-    KnowledgeTopic(
-        order="08",
-        slug="agent-engineering",
-        title="에이전트 엔지니어링",
-        summary="모델, 도구, 데이터, 평가, 관측, 보안을 함께 설계해 AI 에이전트를 실제 업무 환경에서 안정적으로 운영하는 분야입니다.",
-        sections=(
-            ("왜 별도로 다루나요?", "에이전트 엔지니어링은 프롬프트, 컨텍스트, 하네스, 루프, 그래프 설계를 모두 포함하는 넓은 운영 관점입니다. AI가 실제 업무를 수행하면 답변 품질뿐 아니라 비용, 속도, 보안, 장애 대응까지 함께 관리해야 합니다."),
-            ("무엇을 확인하나요?", "실제 사용자 질문으로 품질을 평가하고, 도구 호출과 오류를 추적하며, 민감한 데이터 접근을 제한합니다. 배포 뒤에도 결과가 나빠지지 않는지 계속 관찰해야 합니다."),
-            ("업무 적용 포인트", "처음에는 반복이 많고 위험이 낮은 업무 하나를 선택해 성공 기준을 숫자로 정하는 것이 좋습니다. 그 뒤 테스트 데이터, 승인 절차, 로그를 추가하며 적용 범위를 넓히면 됩니다."),
-        ),
-        notes=(
-            "평가: AI가 업무 기준에 맞는 결과를 내는지 시험하는 과정입니다.",
-            "관측: 에이전트의 도구 호출, 오류, 시간, 비용을 기록해 상태를 파악하는 일입니다.",
-            "회귀: 수정 뒤에 예전에 잘 되던 기능이나 품질이 나빠지는 현상입니다.",
-        ),
-    ),
-)
+
+
+def _build_knowledge_topics() -> tuple[KnowledgeTopic, ...]:
+    return tuple(
+        KnowledgeTopic(
+            order=str(page["id"]),
+            slug=slug,
+            title=str(page["title"]),
+            summary=str(page["summary"]),
+            sections=tuple((str(title), str(body)) for title, body in tuple(page["problem"])[:3]),
+            notes=tuple(str(note) for note in page["code_notes"]),
+        )
+        for slug, page in sorted(KNOWLEDGE_PAGES.items(), key=lambda item: str(item[1]["id"]))
+    )
+
+
+KNOWLEDGE_TOPICS = _build_knowledge_topics()
 
 
 WORK_SKILL_KEYWORDS = {
@@ -303,60 +128,12 @@ GENERAL_STORY_KEYWORDS = {
 }
 
 
-KNOWLEDGE_FIRST_SCREEN = {
-    "langchain": {
-        "definition": "AI 앱에 필요한 모델, 프롬프트, 검색, 도구 호출을 하나의 흐름으로 조립하는 개발 프레임워크입니다.",
-        "structure": ("Prompt", "Model", "Parser", "Retriever", "Tool"),
-        "case": ("회의록 자동 등록", "회의록을 붙여 넣으면 요약, 실행 항목, 담당자, 마감일을 구조화해 업무 도구 등록 초안으로 바꿉니다.", "프롬프트와 모델 호출을 따로 관리하던 코드를 입력 템플릿, 구조화 출력, 도구 연결로 나눠 바꿉니다.", "출력 형식이 흔들리거나 도구가 바뀌어도 각 부품만 교체해 유지보수할 수 있습니다."),
-        "contrast": ("LangChain은 컴포넌트를 연결합니다.", "LangGraph는 상태와 실행 순서를 제어합니다."),
-        "components": (("Prompt", "무엇을 요청할지 정합니다.", "회의록에서 결정 사항만 뽑으라고 지시합니다."), ("Model", "답을 생성합니다.", "요약과 실행 항목 초안을 만듭니다."), ("Parser", "출력을 정해진 형식으로 받습니다.", "담당자, 마감일, 우선순위를 필드로 검증합니다."), ("Tool", "외부 시스템과 연결합니다.", "업무 관리 도구에 등록 초안을 보냅니다.")),
-    },
-    "langgraph": {
-        "definition": "AI 작업의 순서, 상태, 분기, 재시도를 그래프로 관리하는 실행 흐름 설계 도구입니다.",
-        "structure": ("State", "Node", "Branch", "Checkpoint", "Resume"),
-        "case": ("장애 원인 분석", "로그 수집, 원인 추정, 추가 조회, 사람 승인, 조치 제안을 여러 단계로 나눠 실행합니다.", "한 번에 답을 내던 흐름을 상태가 남는 노드와 조건 분기로 바꿉니다.", "실패한 단계만 다시 실행하고, 승인 지점에서 멈췄다가 이어갈 수 있습니다."),
-        "contrast": ("일반 체인은 정해진 순서대로 실행합니다.", "LangGraph는 상태를 보고 다음 노드와 재시도를 결정합니다."),
-        "components": (("State", "현재까지의 정보와 결정을 저장합니다.", "수집한 로그, 가설, 승인 여부를 남깁니다."), ("Node", "하나의 작업 단계를 맡습니다.", "로그 조회, 원인 분석, 조치 생성이 각각 노드가 됩니다."), ("Branch", "조건에 따라 다음 경로를 고릅니다.", "확신이 낮으면 추가 조회로 보냅니다."), ("Checkpoint", "중간 상태를 저장합니다.", "중단 후 같은 지점에서 재개합니다.")),
-    },
-    "prompt-engineering": {
-        "definition": "AI에게 무엇을 어떤 기준과 형식으로 수행할지 지시문으로 설계하는 방법입니다.",
-        "structure": ("Role", "Goal", "Context", "Constraint", "Output"),
-        "case": ("계약 검토 요청", "막연히 검토해 달라는 요청 대신 위험 조항, 근거 문장, 수정 제안을 표로 뽑게 합니다.", "일반 질문을 역할, 판단 기준, 예시, 출력 형식이 있는 업무 지시로 바꿉니다.", "답변 품질이 개인 감각이 아니라 재사용 가능한 지시 기준에 가까워집니다."),
-        "contrast": ("프롬프트는 AI에게 할 일을 지시합니다.", "컨텍스트는 AI가 판단할 때 볼 정보를 고릅니다."),
-        "components": (("Role", "AI가 맡을 관점을 정합니다.", "계약 검토 담당자처럼 행동하게 합니다."), ("Goal", "최종 산출물을 정합니다.", "위험 조항 5개와 수정안을 요구합니다."), ("Constraint", "하지 말아야 할 일을 제한합니다.", "원문에 없는 법적 판단은 쓰지 않게 합니다."), ("Output", "답변 형식을 고정합니다.", "조항, 위험, 근거, 제안 컬럼으로 받습니다.")),
-    },
-    "context-engineering": {
-        "definition": "AI가 판단에 사용할 정보, 문서, 상태, 권한 범위를 고르는 설계 방법입니다.",
-        "structure": ("Question", "Retrieve", "Filter", "Assemble", "Answer"),
-        "case": ("사내 정책 챗봇", "사용자 질문에 맞는 최신 정책 문서만 찾고, 권한이 있는 내용만 모델에 전달합니다.", "문서를 많이 넣는 방식에서 필요한 근거를 정확히 골라 넣는 방식으로 바꿉니다.", "오래된 문서나 권한 밖 정보 때문에 답이 틀리는 위험을 줄입니다."),
-        "contrast": ("프롬프트는 지시입니다.", "컨텍스트는 판단 재료입니다."),
-        "components": (("Retriever", "관련 문서를 찾습니다.", "질문과 가까운 정책 문서를 검색합니다."), ("Metadata", "문서의 조건을 확인합니다.", "날짜, 부서, 권한 등으로 거릅니다."), ("Rerank", "가장 필요한 근거를 앞에 둡니다.", "핵심 문서를 우선 전달합니다."), ("Token Budget", "넣을 정보량을 조절합니다.", "불필요한 긴 문서를 줄입니다.")),
-    },
-    "harness-engineering": {
-        "definition": "AI가 무엇을 볼 수 있고 실행할 수 있는지 도구, 권한, 검증, 로그로 감싸는 운영 설계입니다.",
-        "structure": ("Tools", "Permissions", "Sandbox", "Validation", "Audit"),
-        "case": ("코딩 에이전트 운영", "에이전트가 읽을 파일, 수정할 범위, 실행할 테스트, 승인 필요한 명령을 미리 제한합니다.", "AI에게 자유 실행을 맡기던 방식에서 안전한 실행 환경과 검증 절차를 먼저 둡니다.", "실수로 위험한 파일을 바꾸거나 검증 없이 배포하는 일을 막을 수 있습니다."),
-        "contrast": ("하네스는 AI가 할 수 있는 범위를 정합니다.", "루프는 실행 후 다음에 무엇을 할지 정합니다."),
-        "components": (("Tool Registry", "사용 가능한 도구를 제한합니다.", "읽기, 테스트, 배포 도구를 구분합니다."), ("Permission", "권한과 승인 기준을 둡니다.", "삭제나 배포는 승인 뒤 실행합니다."), ("Sandbox", "실행 범위를 격리합니다.", "작업 디렉터리 밖 변경을 막습니다."), ("Audit Log", "행동 근거를 남깁니다.", "누가 어떤 명령을 왜 실행했는지 추적합니다.")),
-    },
-    "loop-engineering": {
-        "definition": "AI가 결과를 보고 다시 시도할지, 전략을 바꿀지, 멈출지를 정하는 반복 구조 설계입니다.",
-        "structure": ("Plan", "Act", "Observe", "Evaluate", "Stop"),
-        "case": ("테스트 실패 자동 수정", "테스트 실패를 읽고 원인을 가정한 뒤 코드를 고치고 다시 테스트하며 멈출 조건을 확인합니다.", "한 번 실행하고 끝내던 자동화를 관찰, 평가, 재계획이 있는 반복 흐름으로 바꿉니다.", "같은 실패를 반복하거나 무한 재시도하는 대신 종료 기준을 갖게 됩니다."),
-        "contrast": ("루프는 다음 행동과 종료를 결정합니다.", "하네스는 그 행동이 안전하게 실행되는 경계를 정합니다."),
-        "components": (("Plan", "다음 시도를 정합니다.", "어떤 테스트부터 볼지 고릅니다."), ("Act", "작업을 실행합니다.", "코드를 수정하거나 명령을 실행합니다."), ("Observe", "결과를 읽습니다.", "실패 로그와 변경 결과를 확인합니다."), ("Evaluate", "진전 여부를 판단합니다.", "같은 실패가 반복되는지 봅니다."), ("Stop", "종료 조건을 둡니다.", "통과, 승인 필요, 반복 실패에서 멈춥니다.")),
-    },
-    "graph-engineering": {
-        "definition": "업무, 데이터, 권한, 서비스가 무엇과 연결돼 있고 하나를 바꾸면 어디까지 영향이 가는지 구조화하는 방법입니다.",
-        "structure": ("Node", "Edge", "Property", "Direction", "Impact"),
-        "case": ("결제 API 변경 영향 분석", "결제 API, 주문 DB, 정산 서비스, 알림, 배포 파이프라인의 연결을 따라 영향 범위를 봅니다.", "목록으로 관리하던 의존성을 노드와 엣지 관계로 바꿔 추적합니다.", "변경 전에 어떤 서비스와 데이터가 같이 흔들리는지 빠르게 확인할 수 있습니다."),
-        "contrast": ("LangGraph는 AI 실행 흐름 그래프입니다.", "그래프 엔지니어링은 시스템 관계와 영향 범위를 모델링합니다."),
-        "components": (("Node", "대상을 표현합니다.", "서비스, DB, API, 팀을 하나의 점으로 둡니다."), ("Edge", "관계를 표현합니다.", "호출한다, 소유한다, 배포한다를 선으로 잇습니다."), ("Property", "관계의 속성을 붙입니다.", "중요도, 변경 빈도, 소유자를 기록합니다."), ("Direction", "영향 방향을 정합니다.", "API 변경이 어떤 소비자에게 전파되는지 봅니다.")),
-    },
-}
-
 
 def build_site(output_dir: Path, settings: Settings) -> Path:
+    knowledge_errors = validate_knowledge_pages()
+    if knowledge_errors:
+        raise ValueError("Invalid Knowledge metadata: " + "; ".join(knowledge_errors))
+
     output_dir.mkdir(parents=True, exist_ok=True)
     kst = timezone(timedelta(hours=9), name="KST")
     now = datetime.now(UTC).astimezone(kst)
@@ -4888,7 +4665,7 @@ def _render_knowledge_index_page(
         <header class="simple-header tool-page-header">
           <div class="kicker">Knowledge</div>
           <h1>AI 엔지니어링 Knowledge</h1>
-          <p>AI 애플리케이션을 설계할 때 자주 섞이는 8개 개념을 관계, 선택 기준, 실제 업무 사례 중심으로 정리했습니다.</p>
+          <p>AI 애플리케이션을 설계할 때 자주 섞이는 {len(KNOWLEDGE_TOPICS)}개 개념을 관계, 선택 기준, 실제 업무 사례 중심으로 정리했습니다.</p>
         </header>
         <section class="knowledge-article">
           <article class="knowledge-body">
@@ -4900,6 +4677,10 @@ def _render_knowledge_index_page(
             <section>
               <h2>헷갈리기 쉬운 개념</h2>
               {_render_table(("비교", "첫 번째 개념", "두 번째 개념", "관계"), CONFUSION_ROWS)}
+            </section>
+            <section>
+              <h2>신규 Knowledge 추가 기준</h2>
+              {_render_new_knowledge_rules()}
             </section>
             <section>
               <h2>문서 목록</h2>
@@ -4928,45 +4709,45 @@ def _render_table(headers: tuple[str, ...], rows: tuple[tuple[str, ...], ...]) -
     return _render_simple_table(headers, rows)
 
 
+def _render_new_knowledge_rules() -> str:
+    return _render_table(("판단", "적용 기준"), tuple(tuple(row) for row in NEW_KNOWLEDGE_DECISION_RULES))
+
+
 def _render_global_comparison() -> str:
     rows = tuple(
-        (concept, question, suitable, risk)
-        for concept, question, _target, _output, risk, suitable in GLOBAL_COMPARISON_ROWS
+        (
+            str(KNOWLEDGE_PAGES[topic.slug]["title"]),
+            str(KNOWLEDGE_PAGES[topic.slug]["coreQuestion"]),
+            str(KNOWLEDGE_PAGES[topic.slug]["designTarget"]),
+            str(KNOWLEDGE_PAGES[topic.slug]["representativeOutput"]),
+            str(KNOWLEDGE_PAGES[topic.slug]["representativeFailure"]),
+            str(KNOWLEDGE_PAGES[topic.slug]["bestFit"]),
+        )
+        for topic in KNOWLEDGE_TOPICS
     )
     return _render_table(
-        ("개념", "무엇을 정하나", "이럴 때 사용", "주의할 점"),
+        ("개념", "핵심 질문", "설계 대상", "대표 결과물", "대표 실패", "가장 적합한 상황"),
         rows,
     )
 
 
 def _render_knowledge_relation_map() -> str:
-    stages = (
-        (
-            "1. 설계",
-            "AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.",
-            (
-                ("프롬프트 엔지니어링", "AI에게 맡길 일과 결과 형식을 정합니다."),
-                ("컨텍스트 엔지니어링", "AI가 판단할 때 참고할 자료와 상태를 고릅니다."),
-                ("LangChain", "모델, 검색, 도구를 하나의 앱으로 연결합니다."),
-            ),
-        ),
-        (
-            "2. 실행",
-            "AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.",
-            (
-                ("LangGraph", "분기, 재시도, 승인처럼 긴 작업의 순서를 관리합니다."),
-                ("하네스 엔지니어링", "도구, 권한, 검증, 기록으로 실행 범위를 제한합니다."),
-                ("루프 엔지니어링", "결과를 확인하고 수정하거나 멈추는 반복 규칙을 정합니다."),
-            ),
-        ),
-        (
-            "3. 운영",
-            "관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.",
-            (
-                ("그래프 엔지니어링", "업무, 데이터, 권한의 연결 관계와 영향 범위를 모델링합니다."),
-                ("에이전트 엔지니어링", "모델, 도구, 평가, 관측, 보안을 함께 운영합니다."),
-            ),
-        ),
+    stage_summaries = {
+        "1. 설계": "AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.",
+        "2. 실행": "AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.",
+        "3. 운영": "관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.",
+    }
+    grouped: dict[str, list[tuple[str, str]]] = {}
+    for topic in KNOWLEDGE_TOPICS:
+        page = KNOWLEDGE_PAGES[topic.slug]
+        stage = str(page["relationshipStage"])
+        relationships = tuple(str(item) for item in page["relationships"])
+        body = relationships[0] if relationships else str(page["oneLineDefinition"])
+        grouped.setdefault(stage, []).append((str(page["title"]), body))
+
+    stages = tuple(
+        (stage, stage_summaries.get(stage, "신규 Knowledge 메타데이터에서 자동 생성된 관계입니다."), tuple(steps))
+        for stage, steps in grouped.items()
     )
     stage_html = "".join(
         '<section class="relation-stage">'
@@ -5008,9 +4789,10 @@ def _render_related_links(slugs: tuple[str, ...], back_href: str) -> str:
 
 
 def _render_source_links(slug: str) -> str:
+    page = KNOWLEDGE_PAGES.get(slug, {})
     links = "".join(
         f'<li><a href="{escape(url)}" target="_blank" rel="noopener noreferrer">{escape(label)}</a></li>'
-        for label, url in OFFICIAL_SOURCES.get(slug, ())
+        for label, url in tuple(page.get("officialSources", OFFICIAL_SOURCES.get(slug, ())))
     )
     return (
         f'<p class="source-verified">확인 날짜: {escape(REVIEW_DATE)} · '
@@ -5061,12 +4843,11 @@ def _render_real_world_case(case: dict[str, object]) -> str:
 
 
 def _render_knowledge_first_screen(topic: KnowledgeTopic) -> str:
-    focus = KNOWLEDGE_FIRST_SCREEN.get(topic.slug)
-    if not focus:
-        return ""
-    case_title, case_body, case_change, case_result = tuple(str(value) for value in focus["case"])
-    contrast_left, contrast_right = tuple(str(value) for value in focus["contrast"])
-    structure = "".join(f"<span>{escape(str(step))}</span>" for step in focus["structure"])
+    page = KNOWLEDGE_PAGES[topic.slug]
+    case = page["representativeUseCase"]
+    contrast = tuple(page["confusingConcepts"])[0]
+    contrast_left, contrast_right, contrast_body = tuple(str(value) for value in contrast)
+    structure = "".join(f"<span>{escape(str(step))}</span>" for step in page["atAGlance"])
     components = "".join(
         f"""
         <div class="focus-component">
@@ -5075,13 +4856,13 @@ def _render_knowledge_first_screen(topic: KnowledgeTopic) -> str:
           <p>{escape(str(role))}</p>
         </div>
         """
-        for name, core, role in focus["components"]
+        for name, core, role in page["coreComponents"]
     )
     return f"""
             <section class="knowledge-focus" aria-label="{escape(topic.title)} 핵심 요약">
               <div class="focus-lead">
-                <span class="focus-label">핵심 정의</span>
-                <p>{escape(str(focus["definition"]))}</p>
+                <span class="focus-label">한 줄 정의</span>
+                <p>{escape(str(page["oneLineDefinition"]))}</p>
               </div>
               <div class="focus-grid">
                 <div class="focus-panel focus-structure">
@@ -5090,15 +4871,16 @@ def _render_knowledge_first_screen(topic: KnowledgeTopic) -> str:
                 </div>
                 <div class="focus-panel">
                   <h2>실제 업무 사례</h2>
-                  <strong>{escape(case_title)}</strong>
-                  <p>{escape(case_body)}</p>
-                  <p>{escape(case_change)}</p>
-                  <p>{escape(case_result)}</p>
+                  <strong>{escape(str(case["title"]))}</strong>
+                  <p>{escape(str(case["situation"]))}</p>
+                  <p>{escape(str(case["process"]))}</p>
+                  <p>{escape(str(case["result"]))}</p>
                 </div>
                 <div class="focus-panel focus-contrast">
                   <h2>헷갈리는 개념과 차이</h2>
                   <div><strong>{escape(contrast_left)}</strong></div>
                   <div><strong>{escape(contrast_right)}</strong></div>
+                  <p>{escape(contrast_body)}</p>
                 </div>
                 <div class="focus-panel focus-components">
                   <h2>핵심 구성요소</h2>
@@ -5144,25 +4926,11 @@ def _render_prev_next(topic: KnowledgeTopic, back_href: str) -> str:
 def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
     page = KNOWLEDGE_PAGES[topic.slug]
     keywords = "".join(f"<span>{escape(keyword)}</span>" for keyword in page["keywords"])
-    related_links = _render_related_links(tuple(str(slug) for slug in page["related"]), back_href)
+    related_links = _render_related_links(tuple(str(slug) for slug in page["relatedConcepts"]), back_href)
     components_intro, component_steps = page["components"]
     focus_section = _render_knowledge_first_screen(topic)
     overview_sections = ""
-    if not focus_section:
-        overview_sections = f"""
-            {_render_knowledge_relation_map()}
-            <section>
-              <h2>개념 간 전체 비교표</h2>
-              {_render_global_comparison()}
-            </section>
-            <section>
-              <h2>헷갈리기 쉬운 개념</h2>
-              {_render_table(("비교", "첫 번째 개념", "두 번째 개념", "관계"), CONFUSION_ROWS)}
-            </section>
-        """
-    deeper_overview_sections = ""
-    if focus_section:
-        deeper_overview_sections = f"""
+    deeper_overview_sections = f"""
             <section>
               <h2>더 알아보기: AI 엔지니어링 관계도</h2>
               {_render_knowledge_relation_map()}
@@ -5176,19 +4944,18 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
               {_render_table(("비교", "첫 번째 개념", "두 번째 개념", "관계"), CONFUSION_ROWS)}
             </section>
         """
-    if focus_section:
-        quick_section = f"""
+    quick_section = f"""
             <section class="knowledge-quick">
               <div class="knowledge-meta">
                 <span>난이도: {escape(str(page["difficulty"]))}</span>
                 <span>주요 대상: {escape(str(page["audience"]))}</span>
-                <span>예상 읽기 시간: {escape(str(page["reading_time"]))}</span>
+                <span>예상 읽기 시간: {escape(str(page["readingTime"]))}</span>
               </div>
               <details class="knowledge-facts">
                 <summary>문서 정보</summary>
                 <p><strong>기술 성숙도:</strong> {escape(str(page["maturity"]))}</p>
-                <p>최종 검토 날짜: {escape(str(page["updated_at"]))}</p>
-                <p><strong>변경 가능성:</strong> {escape(str(page["volatile"]))}</p>
+                <p>최종 검토 날짜: {escape(str(page["updatedAt"]))}</p>
+                <p><strong>변경 가능성:</strong> {escape(str(page["volatileSections"][0]))}</p>
               </details>
               <dl>
                 <dt>핵심 키워드</dt><dd class="keyword-list">{keywords}</dd>
@@ -5196,35 +4963,9 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
               </dl>
             </section>
         """
-        case_section = ""
-    else:
-        quick_section = f"""
-            <section class="knowledge-quick">
-              <div class="knowledge-meta">
-                <span>난이도: {escape(str(page["difficulty"]))}</span>
-                <span>주요 대상: {escape(str(page["audience"]))}</span>
-                <span>예상 읽기 시간: {escape(str(page["reading_time"]))}</span>
-              </div>
-              <details class="knowledge-facts">
-                <summary>문서 정보</summary>
-                <p><strong>기술 성숙도:</strong> {escape(str(page["maturity"]))}</p>
-                <p>최종 검토 날짜: {escape(str(page["updated_at"]))}</p>
-                <p><strong>변경 가능성:</strong> {escape(str(page["volatile"]))}</p>
-              </details>
-              <h2>30초 요약</h2>
-              <dl>
-                <dt>한 줄 정의</dt><dd>{escape(str(page["definition"]))}</dd>
-                <dt>해결하는 문제</dt><dd>{escape(str(page["problem"][1][1]))}</dd>
-                <dt>이럴 때 사용</dt><dd>{escape(str(page["use_table"][0][0]))}</dd>
-                <dt>사용하지 않아도 되는 경우</dt><dd>{escape(str(page["use_table"][0][1]))}</dd>
-                <dt>핵심 키워드</dt><dd class="keyword-list">{keywords}</dd>
-                <dt>관련 개념</dt><dd>{related_links}</dd>
-              </dl>
-            </section>
-        """
-        case_section = f"""
+    case_section = f"""
             <section>
-              <h2>실제 업무 사례</h2>
+              <h2>대표 실제 사례</h2>
               {_render_real_world_case(page["case"])}
             </section>
         """
@@ -5253,13 +4994,13 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
             {focus_section}
             {overview_sections}
             <section class="definition-box">
-              <h2>이 문서에서 사용하는 정의</h2>
-              <p><strong>{escape(topic.title)}</strong>: {escape(str(page["definition"]))}</p>
+              <h2>한 줄 정의</h2>
+              <p><strong>{escape(topic.title)}</strong>: {escape(str(page["oneLineDefinition"]))}</p>
               <p>{escape(_knowledge_definition_note(topic))}</p>
             </section>
             {quick_section}
             <section>
-              <h2>등장 배경과 해결하려는 문제</h2>
+              <h2>왜 필요한가</h2>
               {_render_table(("구분", "내용"), tuple(tuple(row) for row in page["problem"]))}
             </section>
             <section>
@@ -5268,7 +5009,7 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
               {_render_flow_steps(tuple(str(step) for step in component_steps))}
             </section>
             <section>
-              <h2>언제 사용하고 언제 사용하지 않는가</h2>
+              <h2>언제 쓰는가</h2>
               {_render_table(("적합한 상황", "과한 선택이 될 수 있는 상황", "도입 전 확인할 조건", "대안이 될 수 있는 더 단순한 방법"), tuple(tuple(row) for row in page["use_table"]))}
               <div class="warning-box">
                 <strong>주의</strong>
@@ -5288,7 +5029,7 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
             {langgraph_graph_note}
             {harness_loop_section}
             <section>
-              <h2>실패 사례와 주의사항</h2>
+              <h2>주의할 점</h2>
               {_render_table(("문제", "발생 원인", "발견 방법", "대응 방법"), tuple(tuple(row) for row in page["failures"]))}
             </section>
             <section>
@@ -5300,7 +5041,7 @@ def _render_knowledge_playbook(topic: KnowledgeTopic, back_href: str) -> str:
               {_render_table(("역할", "실제로 해야 할 일"), tuple(tuple(row) for row in page["roles"]))}
             </section>
             <section>
-              <h2>학습 정보</h2>
+              <h2>더 알아보기</h2>
               {_render_table(("항목", "내용"), tuple(tuple(row) for row in page["learning"]))}
               <h3>공식 문서와 참고 출처</h3>
               {_render_source_links(topic.slug)}

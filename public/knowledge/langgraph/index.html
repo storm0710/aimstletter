@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
@@ -852,8 +852,8 @@
 
             <section class="knowledge-focus" aria-label="LangGraph 핵심 요약">
               <div class="focus-lead">
-                <span class="focus-label">핵심 정의</span>
-                <p>AI 작업의 순서, 상태, 분기, 재시도를 그래프로 관리하는 실행 흐름 설계 도구입니다.</p>
+                <span class="focus-label">한 줄 정의</span>
+                <p>상태를 가진 AI 워크플로를 그래프 구조로 실행하고, 분기·재시도·중단·재개를 관리하는 프레임워크입니다.</p>
               </div>
               <div class="focus-grid">
                 <div class="focus-panel focus-structure">
@@ -863,14 +863,15 @@
                 <div class="focus-panel">
                   <h2>실제 업무 사례</h2>
                   <strong>장애 원인 분석</strong>
-                  <p>로그 수집, 원인 추정, 추가 조회, 사람 승인, 조치 제안을 여러 단계로 나눠 실행합니다.</p>
-                  <p>한 번에 답을 내던 흐름을 상태가 남는 노드와 조건 분기로 바꿉니다.</p>
-                  <p>실패한 단계만 다시 실행하고, 승인 지점에서 멈췄다가 이어갈 수 있습니다.</p>
+                  <p>로그 수집, 원인 추정, 추가 조회, 사람 승인, 조치 제안을 여러 단계로 실행합니다.</p>
+                  <p>작업을 상태가 남는 노드와 조건 분기로 나누고 승인 지점에서 멈춥니다.</p>
+                  <p>실패한 단계만 다시 실행하고 같은 지점에서 이어갈 수 있습니다.</p>
                 </div>
                 <div class="focus-panel focus-contrast">
                   <h2>헷갈리는 개념과 차이</h2>
-                  <div><strong>일반 체인은 정해진 순서대로 실행합니다.</strong></div>
-                  <div><strong>LangGraph는 상태를 보고 다음 노드와 재시도를 결정합니다.</strong></div>
+                  <div><strong>LangGraph</strong></div>
+                  <div><strong>그래프 엔지니어링</strong></div>
+                  <p>LangGraph는 실행 그래프이고 그래프 엔지니어링은 관계와 의존성 모델링입니다.</p>
                 </div>
                 <div class="focus-panel focus-components">
                   <h2>핵심 구성요소</h2>
@@ -905,7 +906,7 @@
 
 
             <section class="definition-box">
-              <h2>이 문서에서 사용하는 정의</h2>
+              <h2>한 줄 정의</h2>
               <p><strong>LangGraph</strong>: 상태를 가진 AI 워크플로를 그래프 구조로 실행하고, 분기·재시도·중단·재개를 관리하는 프레임워크입니다.</p>
               <p>이 문서에서는 실제 AI 애플리케이션 설계에서 구분해야 하는 책임과 선택 기준을 중심으로 정의합니다.</p>
             </section>
@@ -929,7 +930,7 @@
             </section>
 
             <section>
-              <h2>등장 배경과 해결하려는 문제</h2>
+              <h2>왜 필요한가</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>구분</th><th>내용</th></tr></thead><tbody><tr><td>기존 방식</td><td>장애 대응 절차를 긴 체인이나 if 문으로 이어 붙입니다.</td></tr><tr><td>발생하는 문제</td><td>어느 단계에서 실패했는지, 어떤 로그를 이미 조회했는지, 승인 후 어디서 재개할지 추적하기 어렵습니다.</td></tr><tr><td>해결 방식</td><td>State를 중심으로 Node가 일을 하고 Edge가 다음 단계를 정하며, Checkpoint와 Interrupt가 재개 가능한 흐름을 만듭니다.</td></tr><tr><td>해결하지 못하는 부분</td><td>좋은 상태 스키마와 안전한 진단 명령 목록은 사용자가 직접 설계해야 합니다.</td></tr></tbody></table></div>
             </section>
             <section>
@@ -938,12 +939,22 @@
               <div class="flow-box"><span>Alert</span><span>Classify Node</span><span>Log Node</span><span>Conditional Edge</span><span>Approval Interrupt</span><span>Resume</span><span>Resolve/Escalate</span></div>
             </section>
             <section>
-              <h2>언제 사용하고 언제 사용하지 않는가</h2>
+              <h2>언제 쓰는가</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>적합한 상황</th><th>과한 선택이 될 수 있는 상황</th><th>도입 전 확인할 조건</th><th>대안이 될 수 있는 더 단순한 방법</th></tr></thead><tbody><tr><td>중간 승인 후 같은 상태에서 재개해야 함</td><td>실패하면 처음부터 다시 실행해도 되는 짧은 작업</td><td>thread_id와 체크포인터 저장소를 운영할 수 있는가</td><td>일반 함수 체인</td></tr><tr><td>분기와 재시도가 업무 규칙의 핵심임</td><td>항상 같은 순서로 실행되는 ETL</td><td>State 스키마를 버전 관리할 수 있는가</td><td>상태 머신 라이브러리</td></tr><tr><td>LLM 판단과 결정적 코드를 섞어야 함</td><td>단순 챗봇 답변</td><td>노드별 테스트와 관측 로그가 있는가</td><td>LangChain agent</td></tr></tbody></table></div>
               <div class="warning-box">
                 <strong>주의</strong>
                 <p>체크포인터, interrupt/resume API는 버전 확인 필요 API, 요금제, 권한 제한, 지원 상태는 운영 전에 공식 문서에서 다시 확인해야 합니다.</p>
               </div>
+            </section>
+
+            <section>
+              <h2>대표 실제 사례</h2>
+
+              <div class="example-box">
+                <strong>서비스 장애 대응 에이전트</strong>
+                <div class="case-grid"><div class="kv-card"><strong>업무 목표</strong><p>장애 알림을 받아 심각도를 분류하고 로그를 조회한 뒤 안전한 진단 명령만 실행해 담당자 승인으로 이어갑니다.</p></div><div class="kv-card"><strong>기존 방식의 문제</strong><p>운영자가 알림, 대시보드, 로그, 런북을 오가며 같은 확인 절차를 반복합니다.</p></div><div class="kv-card"><strong>입력</strong><p>장애 알림, 서비스명, 최근 배포 정보, 로그 조회 권한, 런북</p></div><div class="kv-card"><strong>처리 단계</strong><p>(&#x27;장애 알림 수신&#x27;, &#x27;심각도 분류&#x27;, &#x27;관련 로그 조회&#x27;, &#x27;원인 후보 생성&#x27;, &#x27;안전한 진단 명령 실행&#x27;, &#x27;결과 평가&#x27;, &#x27;담당자 승인 요청&#x27;, &#x27;해결 또는 에스컬레이션&#x27;, &#x27;중단된 작업 재개&#x27;)</p></div><div class="kv-card"><strong>사용 기술 또는 도구</strong><p>StateGraph, Conditional Edge, Checkpoint, interrupt/resume, Human-in-the-loop 승인, 읽기 전용 로그 도구</p></div><div class="kv-card"><strong>사람의 개입 지점</strong><p>재시작, 트래픽 차단, 롤백 같은 영향 있는 조치 전 담당자 승인을 요청합니다.</p></div><div class="kv-card"><strong>실패 상황</strong><p>로그 도구가 실패하면 같은 노드만 재시도하고, 심각도 high이면 즉시 에스컬레이션합니다.</p></div><div class="kv-card"><strong>최종 출력</strong><p>원인 후보, 실행한 진단, 승인 요청 메시지, 재개 가능한 thread id</p></div><div class="kv-card"><strong>이 기술을 적용한 이유</strong><p>승인 대기와 장애 재개가 핵심이므로 상태 기반 그래프가 선형 체인보다 적합합니다.</p></div><div class="kv-card"><strong>적용하지 않았을 때와의 차이</strong><p>긴 체인은 승인 후 어디서 이어갈지 애플리케이션 코드가 별도로 기억해야 합니다.</p></div></div>
+              </div>
+
             </section>
 
 
@@ -953,13 +964,13 @@
             <section class="knowledge-map">
               <h2>AI 엔지니어링 관계도</h2>
               <p class="knowledge-map-intro">AI 기능은 먼저 설계하고, 정한 규칙에 따라 실행한 뒤, 실제 업무에서 계속 운영합니다.</p>
-              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>프롬프트 엔지니어링</strong><span>AI에게 맡길 일과 결과 형식을 정합니다.</span></div><div class="relation-step"><strong>컨텍스트 엔지니어링</strong><span>AI가 판단할 때 참고할 자료와 상태를 고릅니다.</span></div><div class="relation-step"><strong>LangChain</strong><span>모델, 검색, 도구를 하나의 앱으로 연결합니다.</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>분기, 재시도, 승인처럼 긴 작업의 순서를 관리합니다.</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>도구, 권한, 검증, 기록으로 실행 범위를 제한합니다.</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>결과를 확인하고 수정하거나 멈추는 반복 규칙을 정합니다.</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>업무, 데이터, 권한의 연결 관계와 영향 범위를 모델링합니다.</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>모델, 도구, 평가, 관측, 보안을 함께 운영합니다.</span></div></div></section></div>
+              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangChain</strong><span>프롬프트와 컨텍스트를 실행 가능한 앱 구성요소로 연결</span></div><div class="relation-step"><strong>프롬프트엔지니어링</strong><span>컨텍스트 엔지니어링이 제공한 판단 재료를 어떻게 사용할지 지시</span></div><div class="relation-step"><strong>컨텍스트엔지니어링</strong><span>프롬프트가 사용할 판단 재료를 선별</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>LangChain 구성요소를 상태 기반 흐름으로 실행</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>루프가 선택한 행동을 안전한 권한 안에서 실행</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>LangGraph로 구현될 수 있는 반복 판단 규칙</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>컨텍스트의 출처와 권한 관계를 구조화</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>하네스, 루프, 그래프를 포함하는 상위 운영 관점</span></div></div></section></div>
             </section>
 
             </section>
             <section>
               <h2>더 알아보기: 개념 간 전체 비교표</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>무엇을 정하나</th><th>이럴 때 사용</th><th>주의할 점</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델 호출과 외부 기능 연결이 많을 때</td><td>프레임워크 복잡성, 종속성</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>장기 실행, 승인, 재시도가 필요할 때</td><td>상태 설계 오류, 복잡한 흐름</td></tr><tr><td>프롬프트 엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>답변 형식과 판단 기준을 안정화할 때</td><td>모호한 요청, 출력 불안정</td></tr><tr><td>컨텍스트 엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td><td>관련 없는 정보, 오래된 정보</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 할 수 있게 허용할 것인가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td><td>위험한 실행, 감사 불가</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td><td>무한 반복, 진전 없는 재시도</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>업무·데이터·권한 의존성을 추적할 때</td><td>지나치게 큰 그래프, 잘못된 관계</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td><td>품질 저하, 비용 증가, 권한 과다</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>설계 대상</th><th>대표 결과물</th><th>대표 실패</th><th>가장 적합한 상황</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델, 프롬프트, 검색기, 도구</td><td>AI 애플리케이션 파이프라인</td><td>프레임워크 복잡성, 종속성</td><td>모델 호출과 외부 기능 연결이 많을 때</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>State, Node, Edge, Checkpoint</td><td>상태 기반 워크플로</td><td>상태 설계 오류, 복잡한 흐름</td><td>장기 실행, 승인, 재시도가 필요한 작업</td></tr><tr><td>프롬프트엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>역할, 목표, 제약, 출력 형식</td><td>재사용 가능한 프롬프트</td><td>모호한 요청, 출력 불안정</td><td>답변 기준과 형식을 안정화해야 할 때</td></tr><tr><td>컨텍스트엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>검색 자료, 메모리, 권한, 최신성</td><td>컨텍스트 구성 파이프라인</td><td>관련 없는 정보, 오래된 정보</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 얼마나 안전하게 허용할 것인가</td><td>도구, 권한, 샌드박스, 검증, 로그</td><td>실행 환경과 안전 장치</td><td>위험한 실행, 감사 불가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>상태, 반복, 평가, 종료 조건</td><td>반복 제어 정책</td><td>무한 반복, 진전 없는 재시도</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>노드, 엣지, 속성, 계보</td><td>관계 모델과 영향도 그래프</td><td>지나치게 큰 그래프, 잘못된 관계</td><td>업무·데이터·권한의 의존성을 추적할 때</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>모델, 도구, 평가, 관측, 보안</td><td>운영 기준과 안전 지침</td><td>품질 저하, 비용 증가, 권한 과다</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td></tr></tbody></table></div>
             </section>
             <section>
               <h2>더 알아보기: 헷갈리기 쉬운 개념</h2>
@@ -1007,7 +1018,7 @@ app.invoke(Command(resume=&quot;approved&quot;), config={&quot;configurable&quot
 
 
             <section>
-              <h2>실패 사례와 주의사항</h2>
+              <h2>주의할 점</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>문제</th><th>발생 원인</th><th>발견 방법</th><th>대응 방법</th></tr></thead><tbody><tr><td>State가 너무 큼</td><td>모든 로그와 원문을 상태에 저장</td><td>체크포인트 크기와 재개 시간이 증가</td><td>요약과 참조 ID만 저장</td></tr><tr><td>노드가 너무 큼</td><td>여러 외부 호출을 한 노드에 몰아넣음</td><td>실패 시 처음부터 재실행</td><td>외부 서비스별 노드로 분리</td></tr><tr><td>Interrupt 후 재개 실패</td><td>thread_id나 체크포인터 구성이 빠짐</td><td>승인 후 새 실행처럼 시작됨</td><td>체크포인터와 thread_id를 필수 운영값으로 관리</td></tr></tbody></table></div>
             </section>
             <section>
@@ -1019,7 +1030,7 @@ app.invoke(Command(resume=&quot;approved&quot;), config={&quot;configurable&quot
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>역할</th><th>실제로 해야 할 일</th></tr></thead><tbody><tr><td>기획자</td><td>장애 등급, 승인 필요 조치, 에스컬레이션 기준을 정의합니다.</td></tr><tr><td>디자이너</td><td>진행 단계, 승인 대기, 재개 상태를 운영자가 이해할 수 있게 설계합니다.</td></tr><tr><td>프론트엔드</td><td>실행 상태 스트림, 승인 버튼, 재개 결과 표시를 구현합니다.</td></tr><tr><td>백엔드</td><td>StateGraph 노드, 체크포인터, 로그 도구, 에스컬레이션 API를 연결합니다.</td></tr><tr><td>데이터·AI 엔지니어</td><td>원인 후보 생성 품질과 오탐/미탐 평가셋을 만듭니다.</td></tr><tr><td>플랫폼·보안 담당자</td><td>진단 명령 allowlist와 쓰기 조치 승인 정책을 관리합니다.</td></tr></tbody></table></div>
             </section>
             <section>
-              <h2>학습 정보</h2>
+              <h2>더 알아보기</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>읽기 전에</td><td>상태 머신, 비동기 작업, 장애 대응 런북</td></tr><tr><td>다음 문서</td><td>하네스 엔지니어링, 루프 엔지니어링, 그래프 엔지니어링</td></tr><tr><td>빠르게 바뀔 수 있는 부분</td><td>LangGraph persistence, interrupt/resume, 배포 런타임 API</td></tr></tbody></table></div>
               <h3>공식 문서와 참고 출처</h3>
               <p class="source-verified">확인 날짜: 2026-08-06 · 외부 출처는 새 창에서 열립니다.</p><ul class="source-list"><li><a href="https://docs.langchain.com/oss/python/langgraph/overview" target="_blank" rel="noopener noreferrer">LangGraph overview</a></li><li><a href="https://docs.langchain.com/oss/python/langgraph/graph-api" target="_blank" rel="noopener noreferrer">LangGraph Graph API</a></li><li><a href="https://docs.langchain.com/oss/python/langgraph/persistence" target="_blank" rel="noopener noreferrer">LangGraph persistence</a></li><li><a href="https://docs.langchain.com/oss/python/langgraph/interrupts" target="_blank" rel="noopener noreferrer">LangGraph interrupts</a></li><li><a href="https://docs.langchain.com/oss/python/langgraph/checkpointers" target="_blank" rel="noopener noreferrer">LangGraph checkpointers</a></li></ul>

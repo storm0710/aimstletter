@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
@@ -852,8 +852,8 @@
 
             <section class="knowledge-focus" aria-label="프롬프트엔지니어링 핵심 요약">
               <div class="focus-lead">
-                <span class="focus-label">핵심 정의</span>
-                <p>AI에게 무엇을 어떤 기준과 형식으로 수행할지 지시문으로 설계하는 방법입니다.</p>
+                <span class="focus-label">한 줄 정의</span>
+                <p>모델이 어떤 기준과 형식으로 답해야 하는지 지시문의 품질과 구조를 설계하는 분야입니다.</p>
               </div>
               <div class="focus-grid">
                 <div class="focus-panel focus-structure">
@@ -863,14 +863,15 @@
                 <div class="focus-panel">
                   <h2>실제 업무 사례</h2>
                   <strong>계약 검토 요청</strong>
-                  <p>막연히 검토해 달라는 요청 대신 위험 조항, 근거 문장, 수정 제안을 표로 뽑게 합니다.</p>
-                  <p>일반 질문을 역할, 판단 기준, 예시, 출력 형식이 있는 업무 지시로 바꿉니다.</p>
-                  <p>답변 품질이 개인 감각이 아니라 재사용 가능한 지시 기준에 가까워집니다.</p>
+                  <p>위험 조항, 근거 문장, 수정 제안을 표로 뽑아야 합니다.</p>
+                  <p>역할, 판단 기준, 금지 범위, 출력 컬럼을 명시한 업무 지시로 바꿉니다.</p>
+                  <p>답변 품질이 개인 감각이 아니라 재사용 가능한 기준에 가까워집니다.</p>
                 </div>
                 <div class="focus-panel focus-contrast">
                   <h2>헷갈리는 개념과 차이</h2>
-                  <div><strong>프롬프트는 AI에게 할 일을 지시합니다.</strong></div>
-                  <div><strong>컨텍스트는 AI가 판단할 때 볼 정보를 고릅니다.</strong></div>
+                  <div><strong>프롬프트</strong></div>
+                  <div><strong>컨텍스트</strong></div>
+                  <p>프롬프트는 할 일을 지시하고 컨텍스트는 판단 재료를 고릅니다.</p>
                 </div>
                 <div class="focus-panel focus-components">
                   <h2>핵심 구성요소</h2>
@@ -905,7 +906,7 @@
 
 
             <section class="definition-box">
-              <h2>이 문서에서 사용하는 정의</h2>
+              <h2>한 줄 정의</h2>
               <p><strong>프롬프트엔지니어링</strong>: 모델이 어떤 기준과 형식으로 답해야 하는지 지시문의 품질과 구조를 설계하는 분야입니다.</p>
               <p>이 문서에서는 실제 AI 애플리케이션 설계에서 구분해야 하는 책임과 선택 기준을 중심으로 정의합니다.</p>
             </section>
@@ -929,7 +930,7 @@
             </section>
 
             <section>
-              <h2>등장 배경과 해결하려는 문제</h2>
+              <h2>왜 필요한가</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>구분</th><th>내용</th></tr></thead><tbody><tr><td>기존 방식</td><td>회의록을 붙여 넣고 &#x27;할 일 정리해줘&#x27;처럼 막연히 요청합니다.</td></tr><tr><td>발생하는 문제</td><td>담당자 없는 항목, 추측한 마감일, 다른 출력 형식이 반복됩니다.</td></tr><tr><td>해결 방식</td><td>역할, 목표, 제약 조건, 예시, 출력 스키마, 평가 기준을 지시문에 명시합니다.</td></tr><tr><td>해결하지 못하는 부분</td><td>모델이 볼 자료가 부족하거나 악성 입력이 섞인 문제는 컨텍스트와 코드 검증이 필요합니다.</td></tr></tbody></table></div>
             </section>
             <section>
@@ -938,12 +939,22 @@
               <div class="flow-box"><span>Role</span><span>Goal</span><span>Constraints</span><span>Examples</span><span>Schema</span><span>Eval Cases</span></div>
             </section>
             <section>
-              <h2>언제 사용하고 언제 사용하지 않는가</h2>
+              <h2>언제 쓰는가</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>적합한 상황</th><th>과한 선택이 될 수 있는 상황</th><th>도입 전 확인할 조건</th><th>대안이 될 수 있는 더 단순한 방법</th></tr></thead><tbody><tr><td>답변 형식과 판단 기준이 흔들림</td><td>모델이 모르는 내부 정보가 필요한 질문</td><td>좋은/나쁜 예시와 평가 기준이 있는가</td><td>UI 폼 검증 또는 코드 후처리</td></tr><tr><td>같은 업무를 여러 사람이 반복 요청함</td><td>정확한 최신 문서 검색이 핵심인 업무</td><td>프롬프트 버전을 저장할 위치가 있는가</td><td>컨텍스트 엔지니어링</td></tr><tr><td>모델 출력이 후속 시스템 입력으로 쓰임</td><td>정답이 규칙 엔진으로 충분히 결정됨</td><td>스키마 검증 실패를 처리할 수 있는가</td><td>규칙 기반 파서</td></tr></tbody></table></div>
               <div class="warning-box">
                 <strong>주의</strong>
                 <p>모델별 권장 프롬프트 패턴은 변경될 수 있음 API, 요금제, 권한 제한, 지원 상태는 운영 전에 공식 문서에서 다시 확인해야 합니다.</p>
               </div>
+            </section>
+
+            <section>
+              <h2>대표 실제 사례</h2>
+
+              <div class="example-box">
+                <strong>회의록에서 실행 항목 추출 프롬프트 개선</strong>
+                <div class="case-grid"><div class="kv-card"><strong>업무 목표</strong><p>회의록에서 실행 항목, 담당자, 마감일, 의존성을 안정적으로 뽑습니다.</p></div><div class="kv-card"><strong>기존 방식의 문제</strong><p>모호한 프롬프트는 논의 주제와 실제 할 일을 섞고, 없는 담당자를 추측합니다.</p></div><div class="kv-card"><strong>입력</strong><p>회의록 원문, 참석자 목록, 오늘 날짜, 출력 JSON 스키마</p></div><div class="kv-card"><strong>처리 단계</strong><p>(&#x27;모호한 프롬프트로 기준선 생성&#x27;, &#x27;역할·제약·출력 형식 추가&#x27;, &#x27;Few-shot 예시 추가&#x27;, &#x27;나쁜 결과 예시로 평가&#x27;, &#x27;버전 저장&#x27;)</p></div><div class="kv-card"><strong>사용 기술 또는 도구</strong><p>프롬프트 템플릿, 구조화 출력 스키마, 프롬프트 테스트 fixture, 버전 로그</p></div><div class="kv-card"><strong>사람의 개입 지점</strong><p>불확실한 담당자와 상대 날짜는 회의 주관자가 확인합니다.</p></div><div class="kv-card"><strong>실패 상황</strong><p>프롬프트 인젝션 문구가 회의록 안에 있어도 시스템 지시를 덮어쓰지 않아야 합니다.</p></div><div class="kv-card"><strong>최종 출력</strong><p>action_items JSON, confidence, needs_review 플래그, 누락 이유</p></div><div class="kv-card"><strong>이 기술을 적용한 이유</strong><p>문제는 도구 연결보다 지시 품질과 출력 기준의 불안정성이므로 프롬프트 개선이 먼저입니다.</p></div><div class="kv-card"><strong>적용하지 않았을 때와의 차이</strong><p>컨텍스트를 많이 넣어도 지시가 모호하면 결과 형식은 계속 흔들립니다.</p></div></div>
+              </div>
+
             </section>
 
 
@@ -953,13 +964,13 @@
             <section class="knowledge-map">
               <h2>AI 엔지니어링 관계도</h2>
               <p class="knowledge-map-intro">AI 기능은 먼저 설계하고, 정한 규칙에 따라 실행한 뒤, 실제 업무에서 계속 운영합니다.</p>
-              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>프롬프트 엔지니어링</strong><span>AI에게 맡길 일과 결과 형식을 정합니다.</span></div><div class="relation-step"><strong>컨텍스트 엔지니어링</strong><span>AI가 판단할 때 참고할 자료와 상태를 고릅니다.</span></div><div class="relation-step"><strong>LangChain</strong><span>모델, 검색, 도구를 하나의 앱으로 연결합니다.</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>분기, 재시도, 승인처럼 긴 작업의 순서를 관리합니다.</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>도구, 권한, 검증, 기록으로 실행 범위를 제한합니다.</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>결과를 확인하고 수정하거나 멈추는 반복 규칙을 정합니다.</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>업무, 데이터, 권한의 연결 관계와 영향 범위를 모델링합니다.</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>모델, 도구, 평가, 관측, 보안을 함께 운영합니다.</span></div></div></section></div>
+              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangChain</strong><span>프롬프트와 컨텍스트를 실행 가능한 앱 구성요소로 연결</span></div><div class="relation-step"><strong>프롬프트엔지니어링</strong><span>컨텍스트 엔지니어링이 제공한 판단 재료를 어떻게 사용할지 지시</span></div><div class="relation-step"><strong>컨텍스트엔지니어링</strong><span>프롬프트가 사용할 판단 재료를 선별</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>LangChain 구성요소를 상태 기반 흐름으로 실행</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>루프가 선택한 행동을 안전한 권한 안에서 실행</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>LangGraph로 구현될 수 있는 반복 판단 규칙</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>컨텍스트의 출처와 권한 관계를 구조화</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>하네스, 루프, 그래프를 포함하는 상위 운영 관점</span></div></div></section></div>
             </section>
 
             </section>
             <section>
               <h2>더 알아보기: 개념 간 전체 비교표</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>무엇을 정하나</th><th>이럴 때 사용</th><th>주의할 점</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델 호출과 외부 기능 연결이 많을 때</td><td>프레임워크 복잡성, 종속성</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>장기 실행, 승인, 재시도가 필요할 때</td><td>상태 설계 오류, 복잡한 흐름</td></tr><tr><td>프롬프트 엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>답변 형식과 판단 기준을 안정화할 때</td><td>모호한 요청, 출력 불안정</td></tr><tr><td>컨텍스트 엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td><td>관련 없는 정보, 오래된 정보</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 할 수 있게 허용할 것인가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td><td>위험한 실행, 감사 불가</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td><td>무한 반복, 진전 없는 재시도</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>업무·데이터·권한 의존성을 추적할 때</td><td>지나치게 큰 그래프, 잘못된 관계</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td><td>품질 저하, 비용 증가, 권한 과다</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>설계 대상</th><th>대표 결과물</th><th>대표 실패</th><th>가장 적합한 상황</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델, 프롬프트, 검색기, 도구</td><td>AI 애플리케이션 파이프라인</td><td>프레임워크 복잡성, 종속성</td><td>모델 호출과 외부 기능 연결이 많을 때</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>State, Node, Edge, Checkpoint</td><td>상태 기반 워크플로</td><td>상태 설계 오류, 복잡한 흐름</td><td>장기 실행, 승인, 재시도가 필요한 작업</td></tr><tr><td>프롬프트엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>역할, 목표, 제약, 출력 형식</td><td>재사용 가능한 프롬프트</td><td>모호한 요청, 출력 불안정</td><td>답변 기준과 형식을 안정화해야 할 때</td></tr><tr><td>컨텍스트엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>검색 자료, 메모리, 권한, 최신성</td><td>컨텍스트 구성 파이프라인</td><td>관련 없는 정보, 오래된 정보</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 얼마나 안전하게 허용할 것인가</td><td>도구, 권한, 샌드박스, 검증, 로그</td><td>실행 환경과 안전 장치</td><td>위험한 실행, 감사 불가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>상태, 반복, 평가, 종료 조건</td><td>반복 제어 정책</td><td>무한 반복, 진전 없는 재시도</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>노드, 엣지, 속성, 계보</td><td>관계 모델과 영향도 그래프</td><td>지나치게 큰 그래프, 잘못된 관계</td><td>업무·데이터·권한의 의존성을 추적할 때</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>모델, 도구, 평가, 관측, 보안</td><td>운영 기준과 안전 지침</td><td>품질 저하, 비용 증가, 권한 과다</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td></tr></tbody></table></div>
             </section>
             <section>
               <h2>더 알아보기: 헷갈리기 쉬운 개념</h2>
@@ -999,7 +1010,7 @@
 
 
             <section>
-              <h2>실패 사례와 주의사항</h2>
+              <h2>주의할 점</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>문제</th><th>발생 원인</th><th>발견 방법</th><th>대응 방법</th></tr></thead><tbody><tr><td>출력 형식이 매번 달라짐</td><td>스키마와 예시가 없음</td><td>JSON 파싱 실패율 증가</td><td>구조화 출력과 fixture 테스트 추가</td></tr><tr><td>모델이 없는 정보를 추측</td><td>추측 금지와 불확실성 처리 규칙이 없음</td><td>원문에 없는 담당자·날짜 생성</td><td>null과 needs_review 규칙 명시</td></tr><tr><td>프롬프트 인젝션에 흔들림</td><td>입력 문서 안의 지시를 구분하지 않음</td><td>회의록 문구가 시스템 규칙을 바꿈</td><td>데이터와 지시를 구분하고 코드 검증 적용</td></tr></tbody></table></div>
             </section>
             <section>
@@ -1011,7 +1022,7 @@
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>역할</th><th>실제로 해야 할 일</th></tr></thead><tbody><tr><td>기획자</td><td>추출해야 할 업무 기준과 예외 처리 정책을 정의합니다.</td></tr><tr><td>디자이너</td><td>불확실한 항목을 사용자가 수정하는 흐름을 설계합니다.</td></tr><tr><td>프론트엔드</td><td>스키마 오류와 검토 필요 상태를 UI에 표시합니다.</td></tr><tr><td>백엔드</td><td>프롬프트 버전, structured output, validator를 연결합니다.</td></tr><tr><td>데이터·AI 엔지니어</td><td>평가 fixture와 회귀 테스트를 운영합니다.</td></tr><tr><td>플랫폼·보안 담당자</td><td>프롬프트 인젝션 테스트와 민감정보 마스킹 정책을 점검합니다.</td></tr></tbody></table></div>
             </section>
             <section>
-              <h2>학습 정보</h2>
+              <h2>더 알아보기</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>읽기 전에</td><td>LLM 기본 동작, JSON, 테스트 fixture</td></tr><tr><td>다음 문서</td><td>컨텍스트 엔지니어링, LangChain</td></tr><tr><td>빠르게 바뀔 수 있는 부분</td><td>모델별 권장 지시 형식, structured output 지원 방식</td></tr></tbody></table></div>
               <h3>공식 문서와 참고 출처</h3>
               <p class="source-verified">확인 날짜: 2026-08-06 · 외부 출처는 새 창에서 열립니다.</p><ul class="source-list"><li><a href="https://developers.openai.com/api/docs/guides/prompt-engineering" target="_blank" rel="noopener noreferrer">OpenAI prompt engineering guide</a></li><li><a href="https://developers.openai.com/api/docs/guides/structured-outputs" target="_blank" rel="noopener noreferrer">OpenAI structured outputs</a></li><li><a href="https://developers.openai.com/cookbook/examples/gpt4-1_prompting_guide" target="_blank" rel="noopener noreferrer">OpenAI GPT-4.1 prompting guide</a></li></ul>

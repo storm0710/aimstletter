@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
@@ -852,8 +852,8 @@
 
             <section class="knowledge-focus" aria-label="루프 엔지니어링 핵심 요약">
               <div class="focus-lead">
-                <span class="focus-label">핵심 정의</span>
-                <p>AI가 결과를 보고 다시 시도할지, 전략을 바꿀지, 멈출지를 정하는 반복 구조 설계입니다.</p>
+                <span class="focus-label">한 줄 정의</span>
+                <p>에이전트가 실행 결과를 관찰하고 수정과 재시도를 반복하는 제어 구조를 설계하는 분야입니다.</p>
               </div>
               <div class="focus-grid">
                 <div class="focus-panel focus-structure">
@@ -863,14 +863,15 @@
                 <div class="focus-panel">
                   <h2>실제 업무 사례</h2>
                   <strong>테스트 실패 자동 수정</strong>
-                  <p>테스트 실패를 읽고 원인을 가정한 뒤 코드를 고치고 다시 테스트하며 멈출 조건을 확인합니다.</p>
-                  <p>한 번 실행하고 끝내던 자동화를 관찰, 평가, 재계획이 있는 반복 흐름으로 바꿉니다.</p>
-                  <p>같은 실패를 반복하거나 무한 재시도하는 대신 종료 기준을 갖게 됩니다.</p>
+                  <p>테스트 실패를 읽고 코드를 고친 뒤 다시 테스트하며 멈출 조건을 확인합니다.</p>
+                  <p>계획, 실행, 관찰, 평가, 종료 조건을 명시한 반복 흐름을 둡니다.</p>
+                  <p>같은 실패를 반복하거나 무한 재시도하는 대신 진전 여부를 기준으로 멈춥니다.</p>
                 </div>
                 <div class="focus-panel focus-contrast">
                   <h2>헷갈리는 개념과 차이</h2>
-                  <div><strong>루프는 다음 행동과 종료를 결정합니다.</strong></div>
-                  <div><strong>하네스는 그 행동이 안전하게 실행되는 경계를 정합니다.</strong></div>
+                  <div><strong>루프</strong></div>
+                  <div><strong>하네스</strong></div>
+                  <p>루프는 반복 판단이고 하네스는 실제 실행을 제한하는 환경입니다.</p>
                 </div>
                 <div class="focus-panel focus-components">
                   <h2>핵심 구성요소</h2>
@@ -911,7 +912,7 @@
 
 
             <section class="definition-box">
-              <h2>이 문서에서 사용하는 정의</h2>
+              <h2>한 줄 정의</h2>
               <p><strong>루프 엔지니어링</strong>: 에이전트가 실행 결과를 관찰하고 수정과 재시도를 반복하는 제어 구조를 설계하는 분야입니다.</p>
               <p>이 문서는 해당 용어를 업계 전체의 완전한 표준 분류로 단정하지 않고, 이 사이트에서 AI 업무 설계와 운영을 설명하기 위한 실무적 정의로 사용합니다.</p>
             </section>
@@ -935,7 +936,7 @@
             </section>
 
             <section>
-              <h2>등장 배경과 해결하려는 문제</h2>
+              <h2>왜 필요한가</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>구분</th><th>내용</th></tr></thead><tbody><tr><td>기존 방식</td><td>AI가 한 번 수정안을 만들고 사람이 테스트 실패를 다시 설명합니다.</td></tr><tr><td>발생하는 문제</td><td>같은 실패를 반복하거나, 언제 멈춰야 할지 몰라 비용과 시간이 늘어납니다.</td></tr><tr><td>해결 방식</td><td>Goal, State, Plan, Act, Observe, Evaluate, Repair, Re-plan, Stop Condition을 명시합니다.</td></tr><tr><td>해결하지 못하는 부분</td><td>허용 도구, 권한, 샌드박스 같은 안전 경계는 하네스가 제공해야 합니다.</td></tr></tbody></table></div>
             </section>
             <section>
@@ -944,12 +945,22 @@
               <div class="flow-box"><span>Goal</span><span>Plan</span><span>Act</span><span>Observe</span><span>Evaluate</span><span>Repair/Re-plan</span><span>Stop/Escalate</span></div>
             </section>
             <section>
-              <h2>언제 사용하고 언제 사용하지 않는가</h2>
+              <h2>언제 쓰는가</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>적합한 상황</th><th>과한 선택이 될 수 있는 상황</th><th>도입 전 확인할 조건</th><th>대안이 될 수 있는 더 단순한 방법</th></tr></thead><tbody><tr><td>테스트 결과를 보고 코드를 고쳐야 함</td><td>정답이 한 번에 계산되는 작업</td><td>성공 기준과 관찰 신호가 명확한가</td><td>단일 프롬프트 또는 스크립트</td></tr><tr><td>실패 원인에 따라 전략을 바꿔야 함</td><td>실패 시 사람이 바로 판단해야 하는 고위험 업무</td><td>최대 반복과 비용 한도가 있는가</td><td>수동 디버깅</td></tr><tr><td>진전 없는 반복을 감지해야 함</td><td>평가 신호가 없는 창작 업무</td><td>동일 실패 signature를 기록하는가</td><td>사람 검토 중심 흐름</td></tr></tbody></table></div>
               <div class="warning-box">
                 <strong>주의</strong>
                 <p>에이전트 런타임의 loop/approval 처리 방식은 도구별로 바뀔 수 있음 API, 요금제, 권한 제한, 지원 상태는 운영 전에 공식 문서에서 다시 확인해야 합니다.</p>
               </div>
+            </section>
+
+            <section>
+              <h2>대표 실제 사례</h2>
+
+              <div class="example-box">
+                <strong>테스트에 실패한 코드를 에이전트가 수정하는 반복 과정</strong>
+                <div class="case-grid"><div class="kv-card"><strong>업무 목표</strong><p>실패한 테스트를 통과시키되, 같은 실패 반복과 비용 초과를 막습니다.</p></div><div class="kv-card"><strong>기존 방식의 문제</strong><p>에이전트가 오류 메시지를 보고 계속 비슷한 수정을 하거나, 전체 테스트를 너무 자주 실행합니다.</p></div><div class="kv-card"><strong>입력</strong><p>실패 로그, 변경 diff, 관련 파일, 테스트 명령, 최대 반복 3회, 비용 예산</p></div><div class="kv-card"><strong>처리 단계</strong><p>(&#x27;1회차 Plan/Act/Observe/Evaluate&#x27;, &#x27;2회차 실패 반영 전략 변경&#x27;, &#x27;관련 테스트 재실행&#x27;, &#x27;회귀 문제 확인&#x27;, &#x27;3회차 전체 테스트&#x27;, &#x27;성공 기준 확인&#x27;, &#x27;종료 또는 사람 전달&#x27;)</p></div><div class="kv-card"><strong>사용 기술 또는 도구</strong><p>테스트 실행기, diff reader, 실패 signature 저장소, 비용 카운터</p></div><div class="kv-card"><strong>사람의 개입 지점</strong><p>3회 반복 후 같은 오류가 남거나 설계 변경이 필요하면 개발자에게 전달합니다.</p></div><div class="kv-card"><strong>실패 상황</strong><p>동일 실패 signature가 2회 이상 반복되거나 테스트 수가 줄지 않는 경우입니다.</p></div><div class="kv-card"><strong>최종 출력</strong><p>수정 diff, 테스트 결과, 시도별 전략 변경 기록, 종료 사유</p></div><div class="kv-card"><strong>이 기술을 적용한 이유</strong><p>핵심은 도구 권한보다 관찰 결과를 보고 다음 전략과 종료를 정하는 것입니다.</p></div><div class="kv-card"><strong>적용하지 않았을 때와의 차이</strong><p>하네스만 있으면 안전하게 실행할 수는 있지만, 실패 후 무엇을 바꿀지는 정해주지 않습니다.</p></div></div>
+              </div>
+
             </section>
 
 
@@ -959,13 +970,13 @@
             <section class="knowledge-map">
               <h2>AI 엔지니어링 관계도</h2>
               <p class="knowledge-map-intro">AI 기능은 먼저 설계하고, 정한 규칙에 따라 실행한 뒤, 실제 업무에서 계속 운영합니다.</p>
-              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>프롬프트 엔지니어링</strong><span>AI에게 맡길 일과 결과 형식을 정합니다.</span></div><div class="relation-step"><strong>컨텍스트 엔지니어링</strong><span>AI가 판단할 때 참고할 자료와 상태를 고릅니다.</span></div><div class="relation-step"><strong>LangChain</strong><span>모델, 검색, 도구를 하나의 앱으로 연결합니다.</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>분기, 재시도, 승인처럼 긴 작업의 순서를 관리합니다.</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>도구, 권한, 검증, 기록으로 실행 범위를 제한합니다.</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>결과를 확인하고 수정하거나 멈추는 반복 규칙을 정합니다.</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>업무, 데이터, 권한의 연결 관계와 영향 범위를 모델링합니다.</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>모델, 도구, 평가, 관측, 보안을 함께 운영합니다.</span></div></div></section></div>
+              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangChain</strong><span>프롬프트와 컨텍스트를 실행 가능한 앱 구성요소로 연결</span></div><div class="relation-step"><strong>프롬프트엔지니어링</strong><span>컨텍스트 엔지니어링이 제공한 판단 재료를 어떻게 사용할지 지시</span></div><div class="relation-step"><strong>컨텍스트엔지니어링</strong><span>프롬프트가 사용할 판단 재료를 선별</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>LangChain 구성요소를 상태 기반 흐름으로 실행</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>루프가 선택한 행동을 안전한 권한 안에서 실행</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>LangGraph로 구현될 수 있는 반복 판단 규칙</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>컨텍스트의 출처와 권한 관계를 구조화</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>하네스, 루프, 그래프를 포함하는 상위 운영 관점</span></div></div></section></div>
             </section>
 
             </section>
             <section>
               <h2>더 알아보기: 개념 간 전체 비교표</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>무엇을 정하나</th><th>이럴 때 사용</th><th>주의할 점</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델 호출과 외부 기능 연결이 많을 때</td><td>프레임워크 복잡성, 종속성</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>장기 실행, 승인, 재시도가 필요할 때</td><td>상태 설계 오류, 복잡한 흐름</td></tr><tr><td>프롬프트 엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>답변 형식과 판단 기준을 안정화할 때</td><td>모호한 요청, 출력 불안정</td></tr><tr><td>컨텍스트 엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td><td>관련 없는 정보, 오래된 정보</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 할 수 있게 허용할 것인가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td><td>위험한 실행, 감사 불가</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td><td>무한 반복, 진전 없는 재시도</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>업무·데이터·권한 의존성을 추적할 때</td><td>지나치게 큰 그래프, 잘못된 관계</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td><td>품질 저하, 비용 증가, 권한 과다</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>설계 대상</th><th>대표 결과물</th><th>대표 실패</th><th>가장 적합한 상황</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델, 프롬프트, 검색기, 도구</td><td>AI 애플리케이션 파이프라인</td><td>프레임워크 복잡성, 종속성</td><td>모델 호출과 외부 기능 연결이 많을 때</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>State, Node, Edge, Checkpoint</td><td>상태 기반 워크플로</td><td>상태 설계 오류, 복잡한 흐름</td><td>장기 실행, 승인, 재시도가 필요한 작업</td></tr><tr><td>프롬프트엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>역할, 목표, 제약, 출력 형식</td><td>재사용 가능한 프롬프트</td><td>모호한 요청, 출력 불안정</td><td>답변 기준과 형식을 안정화해야 할 때</td></tr><tr><td>컨텍스트엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>검색 자료, 메모리, 권한, 최신성</td><td>컨텍스트 구성 파이프라인</td><td>관련 없는 정보, 오래된 정보</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 얼마나 안전하게 허용할 것인가</td><td>도구, 권한, 샌드박스, 검증, 로그</td><td>실행 환경과 안전 장치</td><td>위험한 실행, 감사 불가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>상태, 반복, 평가, 종료 조건</td><td>반복 제어 정책</td><td>무한 반복, 진전 없는 재시도</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>노드, 엣지, 속성, 계보</td><td>관계 모델과 영향도 그래프</td><td>지나치게 큰 그래프, 잘못된 관계</td><td>업무·데이터·권한의 의존성을 추적할 때</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>모델, 도구, 평가, 관측, 보안</td><td>운영 기준과 안전 지침</td><td>품질 저하, 비용 증가, 권한 과다</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td></tr></tbody></table></div>
             </section>
             <section>
               <h2>더 알아보기: 헷갈리기 쉬운 개념</h2>
@@ -1022,7 +1033,7 @@ while state[&quot;attempt&quot;] &lt; 3 and state[&quot;cost&quot;] &lt; 3.0:
             </section>
 
             <section>
-              <h2>실패 사례와 주의사항</h2>
+              <h2>주의할 점</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>문제</th><th>발생 원인</th><th>발견 방법</th><th>대응 방법</th></tr></thead><tbody><tr><td>무한 반복</td><td>종료 조건과 비용 한도가 없음</td><td>시도 횟수와 비용 증가</td><td>max_attempts, max_cost, stop condition 강제</td></tr><tr><td>진전 없는 재시도</td><td>동일 실패 signature를 기록하지 않음</td><td>같은 테스트가 같은 이유로 실패</td><td>no-progress detection과 전략 변경</td></tr><tr><td>과도한 전체 테스트</td><td>관찰 범위가 항상 넓음</td><td>시간이 급증</td><td>관련 테스트 후 전체 테스트 순서로 분리</td></tr></tbody></table></div>
             </section>
             <section>
@@ -1034,7 +1045,7 @@ while state[&quot;attempt&quot;] &lt; 3 and state[&quot;cost&quot;] &lt; 3.0:
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>역할</th><th>실제로 해야 할 일</th></tr></thead><tbody><tr><td>기획자</td><td>자동 수정이 멈춰야 하는 업무 기준과 사람 전달 조건을 정합니다.</td></tr><tr><td>디자이너</td><td>시도별 진행, 실패 반복, 사람 전달 상태를 보여주는 흐름을 설계합니다.</td></tr><tr><td>프론트엔드</td><td>실행 로그 타임라인과 retry/stop/escalate 상태를 구현합니다.</td></tr><tr><td>백엔드</td><td>테스트 실행 결과 수집, 실패 signature, 비용 카운터를 구현합니다.</td></tr><tr><td>데이터·AI 엔지니어</td><td>반복 전략별 성공률과 평균 시도 횟수를 평가합니다.</td></tr><tr><td>플랫폼·보안 담당자</td><td>루프가 하네스 한도 안에서만 실행되는지 감시합니다.</td></tr></tbody></table></div>
             </section>
             <section>
-              <h2>학습 정보</h2>
+              <h2>더 알아보기</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>읽기 전에</td><td>테스트 자동화, 실패 로그, 에이전트 기본 구조</td></tr><tr><td>다음 문서</td><td>하네스 엔지니어링, LangGraph</td></tr><tr><td>빠르게 바뀔 수 있는 부분</td><td>에이전트 런타임의 자동 tool loop, 승인 중단, trace 포맷</td></tr></tbody></table></div>
               <h3>공식 문서와 참고 출처</h3>
               <p class="source-verified">확인 날짜: 2026-08-06 · 외부 출처는 새 창에서 열립니다.</p><ul class="source-list"><li><a href="https://developers.openai.com/api/docs/guides/agents" target="_blank" rel="noopener noreferrer">OpenAI Agents SDK guide</a></li><li><a href="https://docs.langchain.com/oss/python/langgraph/overview" target="_blank" rel="noopener noreferrer">LangGraph overview</a></li><li><a href="https://docs.langchain.com/oss/python/langgraph/thinking-in-langgraph" target="_blank" rel="noopener noreferrer">LangGraph thinking guide</a></li><li><a href="https://developers.openai.com/api/docs/guides/prompt-engineering" target="_blank" rel="noopener noreferrer">OpenAI prompt engineering guide</a></li></ul>

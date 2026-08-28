@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
@@ -852,8 +852,8 @@
 
             <section class="knowledge-focus" aria-label="컨텍스트엔지니어링 핵심 요약">
               <div class="focus-lead">
-                <span class="focus-label">핵심 정의</span>
-                <p>AI가 판단에 사용할 정보, 문서, 상태, 권한 범위를 고르는 설계 방법입니다.</p>
+                <span class="focus-label">한 줄 정의</span>
+                <p>모델이 답변을 만들 때 필요한 정보와 상태를 어떤 순서와 범위로 제공할지 설계하는 분야입니다.</p>
               </div>
               <div class="focus-grid">
                 <div class="focus-panel focus-structure">
@@ -863,14 +863,15 @@
                 <div class="focus-panel">
                   <h2>실제 업무 사례</h2>
                   <strong>사내 정책 챗봇</strong>
-                  <p>사용자 질문에 맞는 최신 정책 문서만 찾고, 권한이 있는 내용만 모델에 전달합니다.</p>
-                  <p>문서를 많이 넣는 방식에서 필요한 근거를 정확히 골라 넣는 방식으로 바꿉니다.</p>
-                  <p>오래된 문서나 권한 밖 정보 때문에 답이 틀리는 위험을 줄입니다.</p>
+                  <p>사용자 질문에 맞는 최신 정책 문서와 권한이 허용된 내용만 전달합니다.</p>
+                  <p>검색, 날짜·부서·권한 필터, 재정렬, 토큰 예산 조절을 거칩니다.</p>
+                  <p>근거가 명확한 최신 답변을 만들고 권한 밖 정보 노출을 줄입니다.</p>
                 </div>
                 <div class="focus-panel focus-contrast">
                   <h2>헷갈리는 개념과 차이</h2>
-                  <div><strong>프롬프트는 지시입니다.</strong></div>
-                  <div><strong>컨텍스트는 판단 재료입니다.</strong></div>
+                  <div><strong>컨텍스트</strong></div>
+                  <div><strong>하네스</strong></div>
+                  <p>컨텍스트는 모델이 보는 정보이고 하네스는 실행 경계와 권한입니다.</p>
                 </div>
                 <div class="focus-panel focus-components">
                   <h2>핵심 구성요소</h2>
@@ -905,7 +906,7 @@
 
 
             <section class="definition-box">
-              <h2>이 문서에서 사용하는 정의</h2>
+              <h2>한 줄 정의</h2>
               <p><strong>컨텍스트엔지니어링</strong>: 모델이 답변을 만들 때 필요한 정보와 상태를 어떤 순서와 범위로 제공할지 설계하는 분야입니다.</p>
               <p>이 문서에서는 실제 AI 애플리케이션 설계에서 구분해야 하는 책임과 선택 기준을 중심으로 정의합니다.</p>
             </section>
@@ -929,7 +930,7 @@
             </section>
 
             <section>
-              <h2>등장 배경과 해결하려는 문제</h2>
+              <h2>왜 필요한가</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>구분</th><th>내용</th></tr></thead><tbody><tr><td>기존 방식</td><td>사용자 질문과 검색 결과 몇 개를 그대로 프롬프트에 붙입니다.</td></tr><tr><td>발생하는 문제</td><td>권한 없는 문서, 오래된 정책, 관련 없는 긴 문서가 답변을 오염시킵니다.</td></tr><tr><td>해결 방식</td><td>질문 분석, 권한 필터, 메타데이터 검색, 최신성 우선, 재정렬, 요약, 토큰 예산 관리를 적용합니다.</td></tr><tr><td>해결하지 못하는 부분</td><td>잘못 작성된 원문 문서나 없는 정책은 컨텍스트 설계만으로 해결되지 않습니다.</td></tr></tbody></table></div>
             </section>
             <section>
@@ -938,12 +939,22 @@
               <div class="flow-box"><span>질문 분석</span><span>권한 확인</span><span>문서 검색</span><span>메타데이터 필터</span><span>재정렬</span><span>토큰 예산</span><span>근거 답변</span></div>
             </section>
             <section>
-              <h2>언제 사용하고 언제 사용하지 않는가</h2>
+              <h2>언제 쓰는가</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>적합한 상황</th><th>과한 선택이 될 수 있는 상황</th><th>도입 전 확인할 조건</th><th>대안이 될 수 있는 더 단순한 방법</th></tr></thead><tbody><tr><td>사내 정책, 매뉴얼, 고객 이력 등 근거가 필요함</td><td>상식적 답변이나 간단한 문장 변환</td><td>문서 메타데이터와 권한 체계가 있는가</td><td>프롬프트만 개선</td></tr><tr><td>사용자별로 볼 수 있는 자료가 다름</td><td>모든 사용자가 같은 공개 문서를 봄</td><td>권한 필터를 검색 전에 적용할 수 있는가</td><td>정적 FAQ</td></tr><tr><td>최신 문서와 오래된 문서가 섞임</td><td>정책 변경이 거의 없음</td><td>최종 수정일과 버전이 관리되는가</td><td>고정 문서 링크 제공</td></tr></tbody></table></div>
               <div class="warning-box">
                 <strong>주의</strong>
                 <p>모델 컨텍스트 한도, 검색·재정렬 모델, 권한 정책은 자주 바뀜 API, 요금제, 권한 제한, 지원 상태는 운영 전에 공식 문서에서 다시 확인해야 합니다.</p>
               </div>
+            </section>
+
+            <section>
+              <h2>대표 실제 사례</h2>
+
+              <div class="example-box">
+                <strong>사내 정책·매뉴얼 업무 지원 챗봇</strong>
+                <div class="case-grid"><div class="kv-card"><strong>업무 목표</strong><p>직원이 휴가, 구매, 보안 정책을 질문하면 권한에 맞는 최신 문서 근거로 답합니다.</p></div><div class="kv-card"><strong>기존 방식의 문제</strong><p>키워드 검색은 오래된 매뉴얼을 먼저 보여주고, 사용자는 자신에게 적용되는 정책인지 판단하기 어렵습니다.</p></div><div class="kv-card"><strong>입력</strong><p>사용자 질문, 부서·직급·지역 권한, 문서 메타데이터, 대화 요약</p></div><div class="kv-card"><strong>처리 단계</strong><p>(&#x27;질문 의도 분석&#x27;, &#x27;사용자 권한 확인&#x27;, &#x27;문서 검색&#x27;, &#x27;메타데이터 필터&#x27;, &#x27;최신 문서 우선 재정렬&#x27;, &#x27;대화 내용 요약&#x27;, &#x27;토큰 예산 배분&#x27;, &#x27;근거 부족 시 답변 제한&#x27;)</p></div><div class="kv-card"><strong>사용 기술 또는 도구</strong><p>검색 인덱스, 권한 서비스, reranker, 대화 요약기, 출처 표시 컴포넌트</p></div><div class="kv-card"><strong>사람의 개입 지점</strong><p>근거가 부족하거나 정책 충돌이 있으면 담당 부서 문의로 전환합니다.</p></div><div class="kv-card"><strong>실패 상황</strong><p>오래된 정책이 높은 점수를 받거나 권한 없는 문서가 컨텍스트에 들어가는 상황입니다.</p></div><div class="kv-card"><strong>최종 출력</strong><p>짧은 답변, 적용 조건, 출처 문서, 문서 날짜, 추가 확인 필요 여부</p></div><div class="kv-card"><strong>이 기술을 적용한 이유</strong><p>문제는 지시문보다 모델이 볼 자료의 품질과 순서입니다.</p></div><div class="kv-card"><strong>적용하지 않았을 때와의 차이</strong><p>프롬프트가 좋아도 오래된 문서를 넣으면 답변은 오래된 정책을 따릅니다.</p></div></div>
+              </div>
+
             </section>
 
 
@@ -953,13 +964,13 @@
             <section class="knowledge-map">
               <h2>AI 엔지니어링 관계도</h2>
               <p class="knowledge-map-intro">AI 기능은 먼저 설계하고, 정한 규칙에 따라 실행한 뒤, 실제 업무에서 계속 운영합니다.</p>
-              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>프롬프트 엔지니어링</strong><span>AI에게 맡길 일과 결과 형식을 정합니다.</span></div><div class="relation-step"><strong>컨텍스트 엔지니어링</strong><span>AI가 판단할 때 참고할 자료와 상태를 고릅니다.</span></div><div class="relation-step"><strong>LangChain</strong><span>모델, 검색, 도구를 하나의 앱으로 연결합니다.</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>분기, 재시도, 승인처럼 긴 작업의 순서를 관리합니다.</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>도구, 권한, 검증, 기록으로 실행 범위를 제한합니다.</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>결과를 확인하고 수정하거나 멈추는 반복 규칙을 정합니다.</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>업무, 데이터, 권한의 연결 관계와 영향 범위를 모델링합니다.</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>모델, 도구, 평가, 관측, 보안을 함께 운영합니다.</span></div></div></section></div>
+              <div class="relation-flow"><section class="relation-stage"><h3>1. 설계</h3><p>AI가 무엇을 알고 어떤 결과를 내야 하는지 정합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangChain</strong><span>프롬프트와 컨텍스트를 실행 가능한 앱 구성요소로 연결</span></div><div class="relation-step"><strong>프롬프트엔지니어링</strong><span>컨텍스트 엔지니어링이 제공한 판단 재료를 어떻게 사용할지 지시</span></div><div class="relation-step"><strong>컨텍스트엔지니어링</strong><span>프롬프트가 사용할 판단 재료를 선별</span></div></div></section><section class="relation-stage"><h3>2. 실행</h3><p>AI가 여러 단계를 안전하게 처리하도록 흐름을 만듭니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>LangGraph</strong><span>LangChain 구성요소를 상태 기반 흐름으로 실행</span></div><div class="relation-step"><strong>하네스 엔지니어링</strong><span>루프가 선택한 행동을 안전한 권한 안에서 실행</span></div><div class="relation-step"><strong>루프 엔지니어링</strong><span>LangGraph로 구현될 수 있는 반복 판단 규칙</span></div></div></section><section class="relation-stage"><h3>3. 운영</h3><p>관계를 파악하고, 실제 업무에서 품질과 안전을 계속 관리합니다.</p><div class="relation-stage-items"><div class="relation-step"><strong>그래프 엔지니어링</strong><span>컨텍스트의 출처와 권한 관계를 구조화</span></div><div class="relation-step"><strong>에이전트 엔지니어링</strong><span>하네스, 루프, 그래프를 포함하는 상위 운영 관점</span></div></div></section></div>
             </section>
 
             </section>
             <section>
               <h2>더 알아보기: 개념 간 전체 비교표</h2>
-              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>무엇을 정하나</th><th>이럴 때 사용</th><th>주의할 점</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델 호출과 외부 기능 연결이 많을 때</td><td>프레임워크 복잡성, 종속성</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>장기 실행, 승인, 재시도가 필요할 때</td><td>상태 설계 오류, 복잡한 흐름</td></tr><tr><td>프롬프트 엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>답변 형식과 판단 기준을 안정화할 때</td><td>모호한 요청, 출력 불안정</td></tr><tr><td>컨텍스트 엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td><td>관련 없는 정보, 오래된 정보</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 할 수 있게 허용할 것인가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td><td>위험한 실행, 감사 불가</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td><td>무한 반복, 진전 없는 재시도</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>업무·데이터·권한 의존성을 추적할 때</td><td>지나치게 큰 그래프, 잘못된 관계</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td><td>품질 저하, 비용 증가, 권한 과다</td></tr></tbody></table></div>
+              <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>개념</th><th>핵심 질문</th><th>설계 대상</th><th>대표 결과물</th><th>대표 실패</th><th>가장 적합한 상황</th></tr></thead><tbody><tr><td>LangChain</td><td>컴포넌트를 어떻게 연결할 것인가</td><td>모델, 프롬프트, 검색기, 도구</td><td>AI 애플리케이션 파이프라인</td><td>프레임워크 복잡성, 종속성</td><td>모델 호출과 외부 기능 연결이 많을 때</td></tr><tr><td>LangGraph</td><td>상태와 분기를 어떻게 실행할 것인가</td><td>State, Node, Edge, Checkpoint</td><td>상태 기반 워크플로</td><td>상태 설계 오류, 복잡한 흐름</td><td>장기 실행, 승인, 재시도가 필요한 작업</td></tr><tr><td>프롬프트엔지니어링</td><td>무엇을 어떻게 지시할 것인가</td><td>역할, 목표, 제약, 출력 형식</td><td>재사용 가능한 프롬프트</td><td>모호한 요청, 출력 불안정</td><td>답변 기준과 형식을 안정화해야 할 때</td></tr><tr><td>컨텍스트엔지니어링</td><td>어떤 정보를 제공할 것인가</td><td>검색 자료, 메모리, 권한, 최신성</td><td>컨텍스트 구성 파이프라인</td><td>관련 없는 정보, 오래된 정보</td><td>근거와 내부 자료가 답변 품질을 좌우할 때</td></tr><tr><td>하네스 엔지니어링</td><td>무엇을 얼마나 안전하게 허용할 것인가</td><td>도구, 권한, 샌드박스, 검증, 로그</td><td>실행 환경과 안전 장치</td><td>위험한 실행, 감사 불가</td><td>AI가 실제 시스템을 읽거나 수정할 때</td></tr><tr><td>루프 엔지니어링</td><td>다음 행동과 종료를 어떻게 결정할 것인가</td><td>상태, 반복, 평가, 종료 조건</td><td>반복 제어 정책</td><td>무한 반복, 진전 없는 재시도</td><td>실패 결과를 보고 전략을 바꿔야 할 때</td></tr><tr><td>그래프 엔지니어링</td><td>관계와 의존성을 어떻게 모델링할 것인가</td><td>노드, 엣지, 속성, 계보</td><td>관계 모델과 영향도 그래프</td><td>지나치게 큰 그래프, 잘못된 관계</td><td>업무·데이터·권한의 의존성을 추적할 때</td></tr><tr><td>에이전트 엔지니어링</td><td>AI 에이전트를 어떻게 안정적으로 운영할 것인가</td><td>모델, 도구, 평가, 관측, 보안</td><td>운영 기준과 안전 지침</td><td>품질 저하, 비용 증가, 권한 과다</td><td>AI가 실제 업무 도구를 실행하고 여러 사람이 함께 운영할 때</td></tr></tbody></table></div>
             </section>
             <section>
               <h2>더 알아보기: 헷갈리기 쉬운 개념</h2>
@@ -1002,7 +1013,7 @@ if context.has_weak_evidence:
 
 
             <section>
-              <h2>실패 사례와 주의사항</h2>
+              <h2>주의할 점</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>문제</th><th>발생 원인</th><th>발견 방법</th><th>대응 방법</th></tr></thead><tbody><tr><td>컨텍스트가 길수록 좋아진다고 믿음</td><td>관련 없는 문서까지 모두 주입</td><td>답변이 장황하고 근거가 흐려짐</td><td>재정렬과 토큰 예산으로 줄임</td></tr><tr><td>권한 없는 문서 노출</td><td>검색 후 필터링 또는 필터 누락</td><td>출처에 접근 불가 문서가 표시됨</td><td>검색 단계에서 권한 필터 강제</td></tr><tr><td>오래된 정책 답변</td><td>최신성 메타데이터가 없음</td><td>폐기 문서를 출처로 인용</td><td>문서 상태와 updated_at 필드 필수화</td></tr></tbody></table></div>
             </section>
             <section>
@@ -1014,7 +1025,7 @@ if context.has_weak_evidence:
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>역할</th><th>실제로 해야 할 일</th></tr></thead><tbody><tr><td>기획자</td><td>정책 답변에서 반드시 보여야 할 적용 조건과 출처 표시 기준을 정합니다.</td></tr><tr><td>디자이너</td><td>출처, 최신성, 근거 부족, 담당 부서 문의 UI를 설계합니다.</td></tr><tr><td>프론트엔드</td><td>출처 펼침, 문서 권한 오류, 대화 요약 표시를 구현합니다.</td></tr><tr><td>백엔드</td><td>검색 API, 권한 필터, 캐시, 문서 버전 관리를 연결합니다.</td></tr><tr><td>데이터·AI 엔지니어</td><td>검색 평가셋, reranker 품질, hallucination 사례를 관리합니다.</td></tr><tr><td>플랫폼·보안 담당자</td><td>문서 접근권한과 로그의 민감정보 저장 여부를 점검합니다.</td></tr></tbody></table></div>
             </section>
             <section>
-              <h2>학습 정보</h2>
+              <h2>더 알아보기</h2>
               <div class="knowledge-table-wrap"><table class="knowledge-table"><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>읽기 전에</td><td>검색 인덱스, 임베딩, 토큰, 권한 모델</td></tr><tr><td>다음 문서</td><td>LangChain, 그래프 엔지니어링, 하네스 엔지니어링</td></tr><tr><td>빠르게 바뀔 수 있는 부분</td><td>컨텍스트 윈도 크기, reranker 모델, 문서 권한 시스템</td></tr></tbody></table></div>
               <h3>공식 문서와 참고 출처</h3>
               <p class="source-verified">확인 날짜: 2026-08-06 · 외부 출처는 새 창에서 열립니다.</p><ul class="source-list"><li><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener noreferrer">Anthropic context engineering for agents</a></li><li><a href="https://docs.langchain.com/oss/python/langchain/middleware/built-in" target="_blank" rel="noopener noreferrer">LangChain middleware</a></li><li><a href="https://docs.langchain.com/oss/python/langchain/mcp" target="_blank" rel="noopener noreferrer">LangChain MCP resources</a></li></ul>
