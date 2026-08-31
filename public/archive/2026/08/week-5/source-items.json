@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "build_at": "2026-08-31T16:20:19.549667+09:00",
+  "build_at": "2026-08-31T16:47:39.402674+09:00",
   "period_start": "2026-08-24",
   "period_end": "2026-08-31",
   "ai_items": [
@@ -101,6 +101,14 @@
       "kind": "tool",
       "published": "2026-08-29T20:17:05+00:00",
       "summary": "Mac LLM server that cuts agent wait times from 90s to 5s Discussion | Link"
+    },
+    {
+      "title": "Orato",
+      "url": "https://www.producthunt.com/products/orato-speech-coach",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-29T17:02:44+00:00",
+      "summary": "Practice speaking with AI. Discussion | Link"
     },
     {
       "title": "Maritime",
