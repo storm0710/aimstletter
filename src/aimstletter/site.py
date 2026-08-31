@@ -841,8 +841,8 @@ def _rewrite_archive_card(match: re.Match[str], item: SiteItem) -> str:
     attributes = match.group("attributes")
     values = {
         "data-title": item.title,
-        "data-body": _smart_insight_summary(item),
-        "data-detail": _smart_insight_card_detail(item, item.summary),
+        "data-body": _clip(_smart_insight_summary(item), 520),
+        "data-detail": _clip(_smart_insight_card_detail(item, item.summary), 1600),
         "data-points": json.dumps(list(_smart_insight_points(item)), ensure_ascii=False),
         "data-tags": json.dumps(list(item.tags[:6]), ensure_ascii=False),
         "data-footnotes": json.dumps(list(item.glossary[:5]), ensure_ascii=False),
