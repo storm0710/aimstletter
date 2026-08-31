@@ -57,7 +57,10 @@ jobs:
           cp -a public/. "$staging_dir/"
           build_log="$RUNNER_TEMP/aimstletter-site.log"
           set +e
-          timeout 1000s aimstletter-site --output-dir "$staging_dir" 2>&1 | tee "$build_log"
+          timeout 1000s bash -c '
+            aimstletter-site --output-dir "$1" --build-date 2026-08-24
+            aimstletter-site --output-dir "$1" --build-date 2026-08-31
+          ' _ "$staging_dir" 2>&1 | tee "$build_log"
           build_status=${PIPESTATUS[0]}
           set -e
           if [ "$build_status" -ne 0 ]; then

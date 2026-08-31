@@ -18,6 +18,7 @@ from aimstletter.site import (
     _localized_site_item,
     _load_latest_verified_korean_archive,
     _load_verified_korean_archive_items,
+    _load_week_source_items,
     _localize_items,
     _normalize_search_text,
     _paper_focused_summary,
@@ -29,6 +30,8 @@ from aimstletter.site import (
     _refresh_known_specific_cards_in_html,
     _refresh_paper_cards_in_html,
     _source_match_confidence,
+    _weekly_archive_entry,
+    _write_week_source_items,
 )
 
 
@@ -649,12 +652,40 @@ def test_localize_items_preserves_korean_archive_after_connection_retries(monkey
     monkeypatch.setenv("AIMSTLETTER_REQUIRE_OPENAI_LOCALIZATION", "1")
     monkeypatch.setattr("aimstletter.site._make_client", lambda **_kwargs: (object(), "test-model"))
     monkeypatch.setattr("aimstletter.site._generate_openai_text", fail_connection)
+    monkeypatch.setattr("aimstletter.site.requests.post", fail_connection)
     monkeypatch.setattr("aimstletter.site.time.sleep", lambda _seconds: None)
 
     localized = _localize_items([item] * 4, Settings(openai_api_key="test-key"), "test")
 
-    assert calls["count"] == 5
+    assert calls["count"] == 10
     assert localized == []
+
+
+def test_week_source_items_survive_between_build_retries(tmp_path) -> None:
+    build_at = datetime(2026, 8, 31, 8, tzinfo=UTC)
+    archive_entry = _weekly_archive_entry(build_at)
+    paper = DigestItem(
+        title="Reliable agent benchmark",
+        url="https://arxiv.org/abs/2608.99999",
+        source="arXiv AI",
+        kind="paper",
+        published=datetime(2026, 8, 29, tzinfo=UTC),
+        summary="The benchmark evaluates repeated reliability across 200 tasks.",
+    )
+    tool = DigestItem(
+        title="Deployment approvals",
+        url="https://example.com/deployment-approvals",
+        source="GitHub Copilot Changelog",
+        kind="tool",
+        published=datetime(2026, 8, 28, tzinfo=UTC),
+        summary="Named reviewers approve deployments before execution.",
+    )
+
+    _write_week_source_items(tmp_path, archive_entry, [paper], [tool], build_at)
+    ai_items, tool_items = _load_week_source_items(tmp_path, archive_entry)
+
+    assert ai_items == [paper]
+    assert tool_items == [tool]
 
 
 def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:

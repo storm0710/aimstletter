@@ -129,14 +129,19 @@ GENERAL_STORY_KEYWORDS = {
 
 
 
-def build_site(output_dir: Path, settings: Settings) -> Path:
+def build_site(
+    output_dir: Path,
+    settings: Settings,
+    build_at: datetime | None = None,
+) -> Path:
     knowledge_errors = validate_knowledge_pages()
     if knowledge_errors:
         raise ValueError("Invalid Knowledge metadata: " + "; ".join(knowledge_errors))
 
     output_dir.mkdir(parents=True, exist_ok=True)
     kst = timezone(timedelta(hours=9), name="KST")
-    now = datetime.now(UTC).astimezone(kst)
+    now = build_at.astimezone(kst) if build_at else datetime.now(UTC).astimezone(kst)
+    archive_entry = _weekly_archive_entry(now)
 
     week_start, week_end = _weekly_window(now)
     raw_feed_items = fetch_recent_items(settings.feeds, settings.lookback_days)
@@ -154,30 +159,41 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     skill_items = _rank_work_skill_updates(source_items, 5)
     skill_urls = {item.url for item in skill_items}
     other_source_items = [item for item in source_items if item.url not in skill_urls]
-    ai_items = [*skill_items, *_latest_digest_items(rank_items(other_source_items, 12), 5)]
-    tool_items = _rank_tool_updates(
+    ai_source_items = [*skill_items, *_latest_digest_items(rank_items(other_source_items, 12), 5)]
+    tool_source_items = _rank_tool_updates(
         _filter_publishable_source_items(
             _enrich_items_from_source_pages(_items_in_window(raw_tool_items, week_start, week_end)),
             "weekly tool items",
         ),
         10,
     )
+    cached_ai_items, cached_tool_items = _load_week_source_items(output_dir, archive_entry)
+    ai_source_items = _filter_publishable_source_items(
+        _enrich_items_from_source_pages(_dedupe_items([*ai_source_items, *cached_ai_items])),
+        "persisted weekly AI source items",
+    )
+    tool_source_items = _filter_publishable_source_items(
+        _enrich_items_from_source_pages(_dedupe_items([*tool_source_items, *cached_tool_items])),
+        "persisted weekly tool source items",
+    )
+    if ai_source_items or tool_source_items:
+        _write_week_source_items(output_dir, archive_entry, ai_source_items, tool_source_items, now)
+
     localization_state: dict[str, bool] = {}
     ai_items = _localize_items(
-        ai_items,
+        ai_source_items,
         settings,
         "DBA, 네트워크, 서버 운영자가 업무에 적용할 AI 스킬 업데이트",
         localization_state,
     )
     tool_items = _localize_items(
-        tool_items,
+        tool_source_items,
         settings,
         "인공지능 도구 업데이트",
         localization_state,
     )
     ai_urls = {item.url for item in ai_items if item.url}
     tool_items = [item for item in tool_items if not item.url or item.url not in ai_urls]
-    archive_entry = _weekly_archive_entry(now)
     generated_current_week = bool(ai_items or tool_items)
     if not ai_items and not tool_items:
         archived_items, verified_archive_entry = _load_latest_verified_korean_archive(output_dir)
@@ -6321,23 +6337,10 @@ def _localize_items(
                     if attempt
                     else ""
                 )
-                localized = _parse_json_array(
-                    _generate_openai_text(client, model, instructions, input_text + retry_note)
+                return _validated_localized_site_items(
+                    items,
+                    _generate_openai_text(client, model, instructions, input_text + retry_note),
                 )
-                if len(localized) != len(items):
-                    raise ValueError(
-                        f"OpenAI returned {len(localized)} localized items for {len(items)} source items."
-                    )
-                if _has_untranslated_items(localized) or _has_reused_or_generic_localizations(localized):
-                    raise ValueError("OpenAI returned untranslated, repeated, or generic localization copy.")
-
-                localized_items = [
-                    _localized_site_item(item, localized_item)
-                    for item, localized_item in zip(items, localized, strict=True)
-                ]
-                if not all(_has_publishable_localized_copy(item) for item in localized_items):
-                    raise ValueError("Localized cards still contained unpublishable fallback copy.")
-                return localized_items
             except Exception as exc:  # noqa: BLE001
                 last_error = exc
                 if attempt + 1 < 5:
@@ -6347,9 +6350,29 @@ def _localize_items(
                     )
                     time.sleep(2 + attempt)
         if last_error and _is_provider_connection_error(last_error):
+            for attempt in range(5):
+                try:
+                    return _validated_localized_site_items(
+                        items,
+                        _generate_direct_localization_text(
+                            settings,
+                            instructions,
+                            input_text
+                            + "\n\nThis is a direct HTTP retry. Return grounded Korean JSON only.",
+                            attempt,
+                        ),
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    last_error = exc
+                    if attempt + 1 < 5:
+                        print(
+                            f"Direct localization attempt {attempt + 1}/5 failed for {context}: {exc}",
+                            file=sys.stderr,
+                        )
+                        time.sleep(2 + attempt)
             provider_state["unavailable"] = True
             print(
-                f"Localization providers were unreachable after 5 attempts for {context}; "
+                f"Localization providers were unreachable after SDK and HTTP retries for {context}; "
                 "preserving the latest verified Korean archive instead of publishing source text.",
                 file=sys.stderr,
             )
@@ -6395,6 +6418,79 @@ def _make_localization_clients(settings: Settings) -> list[tuple[object, str]]:
         detail = "; ".join(errors) or "no provider credentials were configured"
         raise ValueError(f"No usable localization provider: {detail}")
     return clients
+
+
+def _validated_localized_site_items(
+    source_items: list[DigestItem],
+    response_text: str,
+) -> list[SiteItem]:
+    localized = _parse_json_array(response_text)
+    if len(localized) != len(source_items):
+        raise ValueError(
+            f"OpenAI returned {len(localized)} localized items for {len(source_items)} source items."
+        )
+    if _has_untranslated_items(localized) or _has_reused_or_generic_localizations(localized):
+        raise ValueError("OpenAI returned untranslated, repeated, or generic localization copy.")
+    localized_items = [
+        _localized_site_item(item, localized_item)
+        for item, localized_item in zip(source_items, localized, strict=True)
+    ]
+    if not all(_has_publishable_localized_copy(item) for item in localized_items):
+        raise ValueError("Localized cards still contained unpublishable fallback copy.")
+    return localized_items
+
+
+def _generate_direct_localization_text(
+    settings: Settings,
+    instructions: str,
+    input_text: str,
+    attempt: int,
+) -> str:
+    providers: list[tuple[str, str, str]] = []
+    if settings.openai_api_key:
+        providers.append(
+            (
+                "https://api.openai.com/v1/responses",
+                settings.openai_api_key,
+                settings.openai_model,
+            )
+        )
+    if settings.azure_openai_api_key and settings.azure_openai_endpoint:
+        providers.append(
+            (
+                f"{settings.azure_openai_endpoint.rstrip('/')}/openai/v1/responses",
+                settings.azure_openai_api_key,
+                settings.azure_openai_deployment,
+            )
+        )
+    if not providers:
+        raise ValueError("No direct localization provider is configured.")
+
+    url, api_key, model = providers[attempt % len(providers)]
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "api-key": api_key,
+        "Content-Type": "application/json",
+    }
+    response = requests.post(
+        url,
+        headers=headers,
+        json={"model": model, "instructions": instructions, "input": input_text},
+        timeout=90,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if isinstance(payload.get("output_text"), str) and payload["output_text"].strip():
+        return str(payload["output_text"])
+    for output in payload.get("output", []):
+        if not isinstance(output, dict):
+            continue
+        for content in output.get("content", []):
+            if isinstance(content, dict) and content.get("type") == "output_text":
+                text = str(content.get("text") or "").strip()
+                if text:
+                    return text
+    raise ValueError("Direct Responses API returned no output text.")
 
 
 def _is_provider_connection_error(error: Exception) -> bool:
@@ -8960,6 +9056,87 @@ def _archive_entry_from_path(path: Path) -> dict[str, object] | None:
     }
 
 
+def _week_source_path(output_dir: Path, archive_entry: dict[str, object]) -> Path:
+    return output_dir / str(archive_entry["href"]) / "source-items.json"
+
+
+def _digest_item_payload(item: DigestItem) -> dict[str, object]:
+    return {
+        "title": item.title,
+        "url": item.url,
+        "source": item.source,
+        "kind": item.kind,
+        "published": item.published.isoformat(),
+        "summary": item.summary,
+    }
+
+
+def _digest_item_from_payload(payload: object) -> DigestItem | None:
+    if not isinstance(payload, dict):
+        return None
+    try:
+        title = str(payload["title"]).strip()
+        url = str(payload["url"]).strip()
+        published = datetime.fromisoformat(str(payload["published"]))
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not title or not url:
+        return None
+    if published.tzinfo is None:
+        published = published.replace(tzinfo=UTC)
+    return DigestItem(
+        title=title,
+        url=url,
+        source=str(payload.get("source") or "Source"),
+        kind=str(payload.get("kind") or "news"),
+        published=published.astimezone(UTC),
+        summary=str(payload.get("summary") or "").strip(),
+    )
+
+
+def _load_week_source_items(
+    output_dir: Path,
+    archive_entry: dict[str, object],
+) -> tuple[list[DigestItem], list[DigestItem]]:
+    path = _week_source_path(output_dir, archive_entry)
+    if not path.exists():
+        return [], []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return [], []
+    if not isinstance(payload, dict):
+        return [], []
+
+    def load_group(name: str) -> list[DigestItem]:
+        values = payload.get(name, [])
+        if not isinstance(values, list):
+            return []
+        return [item for value in values if (item := _digest_item_from_payload(value))]
+
+    return load_group("ai_items"), load_group("tool_items")
+
+
+def _write_week_source_items(
+    output_dir: Path,
+    archive_entry: dict[str, object],
+    ai_items: list[DigestItem],
+    tool_items: list[DigestItem],
+    build_at: datetime,
+) -> None:
+    path = _week_source_path(output_dir, archive_entry)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema_version": 1,
+        "build_at": build_at.isoformat(),
+        "period_start": archive_entry["period_start"],
+        "period_end": archive_entry["period_end"],
+        "ai_items": [_digest_item_payload(item) for item in ai_items],
+        "tool_items": [_digest_item_payload(item) for item in tool_items],
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def _load_latest_verified_korean_archive(
     output_dir: Path,
 ) -> tuple[list[SiteItem], dict[str, object] | None]:
@@ -9361,6 +9538,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="인공지능 마스터 타임즈 깃허브 페이지 사이트를 생성합니다.")
     parser.add_argument("--output-dir", default="public", help="Directory where index.html is written.")
     parser.add_argument(
+        "--build-date",
+        help="Build a specific KST archive date (YYYY-MM-DD) using its persisted source items.",
+    )
+    parser.add_argument(
         "--refresh-paper-cards",
         action="store_true",
         help="Refresh existing generated cards in public HTML from source-specific evidence.",
@@ -9372,7 +9553,14 @@ def main() -> int:
         print(f"Refreshed {count} paper cards in {args.output_dir}")
         return 0
 
-    path = build_site(Path(args.output_dir), Settings.from_env())
+    build_at = None
+    if args.build_date:
+        kst = timezone(timedelta(hours=9), name="KST")
+        try:
+            build_at = datetime.fromisoformat(args.build_date).replace(hour=8, tzinfo=kst)
+        except ValueError as exc:
+            parser.error(f"Invalid --build-date value: {exc}")
+    path = build_site(Path(args.output_dir), Settings.from_env(), build_at=build_at)
     print(f"Built {path}")
     return 0
 
