@@ -55,7 +55,22 @@ jobs:
           staging_dir="$(mktemp -d)"
           trap 'rm -rf "$staging_dir"' EXIT
           cp -a public/. "$staging_dir/"
-          timeout 1000s aimstletter-site --output-dir "$staging_dir"
+          build_log="$RUNNER_TEMP/aimstletter-site.log"
+          set +e
+          timeout 1000s aimstletter-site --output-dir "$staging_dir" 2>&1 | tee "$build_log"
+          build_status=${PIPESTATUS[0]}
+          set -e
+          if [ "$build_status" -ne 0 ]; then
+            {
+              echo "### Site generation failure"
+              echo '```text'
+              tail -n 80 "$build_log"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            last_error="$(tail -n 1 "$build_log" | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')"
+            echo "::error::Site generation failed after retries: $last_error"
+            exit "$build_status"
+          fi
           rsync -a --delete "$staging_dir/" public/
           echo "Site generated and validated successfully."
 
