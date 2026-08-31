@@ -29,12 +29,12 @@
       "summary": "Turn a Microsoft Teams discussion into a collaborative agent session everyone can see and help direct. Mention @GitHub in a channel, thread, or direct message to start a GitHub Copilot… The post Shared agentic work with GitHub Copilot in Microsoft Teams appeared first on The GitHub Blog ."
     },
     {
-      "title": "Caddi",
-      "url": "https://www.producthunt.com/products/caddi-3",
+      "title": "Interactive Sessions",
+      "url": "https://www.producthunt.com/products/revolte",
       "source": "Product Hunt launches",
       "kind": "tool",
-      "published": "2026-08-17T16:16:01+00:00",
-      "summary": "Agent that builds agents by only showing your work only once Discussion | Link"
+      "published": "2026-08-17T23:17:20+00:00",
+      "summary": "Drive the full SDLC with AI agents, step by step Discussion | Link"
     },
     {
       "title": "Pacing model development in an era of cyber-critical capabilities",
@@ -61,14 +61,6 @@
       "summary": "Custom Mac cursors, rebuilt for v2 Discussion | Link"
     },
     {
-      "title": "Tiles",
-      "url": "https://www.producthunt.com/products/tiles-5",
-      "source": "Product Hunt launches",
-      "kind": "tool",
-      "published": "2026-08-22T19:41:41+00:00",
-      "summary": "Turning desktop chaos into curated spaces. Discussion | Link"
-    },
-    {
       "title": "PageIndex",
       "url": "https://www.producthunt.com/products/pageindexai",
       "source": "Product Hunt launches",
@@ -87,10 +79,26 @@
     {
       "title": "Introducing Intelligence Age",
       "url": "https://openai.com/index/introducing-ai-futures",
-      "source": "OpenAI",
-      "kind": "news",
+      "source": "OpenAI News",
+      "kind": "tool",
       "published": "2026-08-20T07:00:00+00:00",
       "summary": "Introducing Intelligence Age, a new OpenAI blog exploring how transformative AI could reshape power, governance, the economy, and individual freedom."
+    },
+    {
+      "title": "Caddi",
+      "url": "https://www.producthunt.com/products/caddi-3",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-17T16:16:01+00:00",
+      "summary": "Agent that builds agents by only showing your work only once Discussion | Link"
+    },
+    {
+      "title": "Tiles",
+      "url": "https://www.producthunt.com/products/tiles-5",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-22T19:41:41+00:00",
+      "summary": "Turning desktop chaos into curated spaces. Discussion | Link"
     },
     {
       "title": "Stampli Cuts Launch",
