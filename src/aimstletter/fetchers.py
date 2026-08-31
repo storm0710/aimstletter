@@ -9,6 +9,8 @@ import json
 import os
 from pathlib import Path
 import re
+import sys
+import time
 
 from dateutil import parser as date_parser
 import feedparser
@@ -34,10 +36,8 @@ def fetch_recent_items(feeds: tuple[FeedSource, ...], lookback_days: int) -> lis
     seen_urls: set[str] = set()
 
     for feed in feeds:
-        try:
-            response = requests.get(feed.url, timeout=20)
-            response.raise_for_status()
-        except requests.RequestException:
+        response = _fetch_feed_response(feed.url)
+        if response is None:
             continue
 
         parsed = feedparser.parse(response.content)
@@ -49,6 +49,21 @@ def fetch_recent_items(feeds: tuple[FeedSource, ...], lookback_days: int) -> lis
             items.append(item)
 
     return items
+
+
+def _fetch_feed_response(url: str, attempts: int = 5) -> requests.Response | None:
+    last_error: requests.RequestException | None = None
+    for attempt in range(attempts):
+        try:
+            response = requests.get(url, timeout=20)
+            response.raise_for_status()
+            return response
+        except requests.RequestException as exc:
+            last_error = exc
+            if attempt + 1 < attempts:
+                time.sleep(2 + attempt)
+    print(f"Could not fetch feed {url} after {attempts} attempts: {last_error}", file=sys.stderr)
+    return None
 
 
 def _entry_to_item(feed: FeedSource, entry: object) -> DigestItem | None:

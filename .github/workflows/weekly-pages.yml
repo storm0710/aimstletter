@@ -46,15 +46,18 @@ jobs:
           AZURE_OPENAI_ENDPOINT: ${{ vars.AZURE_OPENAI_ENDPOINT }}
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_DEPLOYMENT: ${{ vars.AZURE_OPENAI_DEPLOYMENT || 'gpt-5-mini' }}
+          AIMSTLETTER_REQUIRE_OPENAI_LOCALIZATION: "1"
           SITE_ANALYTICS_PROVIDER: ${{ vars.SITE_ANALYTICS_PROVIDER }}
           SITE_ANALYTICS_ID: ${{ vars.SITE_ANALYTICS_ID }}
           SITE_ANALYTICS_DOMAIN: ${{ vars.SITE_ANALYTICS_DOMAIN }}
         run: |
-          if timeout 900s aimstletter-site --output-dir public; then
-            echo "Site generated successfully."
-          else
-            echo "Site generation did not finish within 15 minutes; deploying committed public files."
-          fi
+          set -euo pipefail
+          staging_dir="$(mktemp -d)"
+          trap 'rm -rf "$staging_dir"' EXIT
+          cp -a public/. "$staging_dir/"
+          timeout 1000s aimstletter-site --output-dir "$staging_dir"
+          rsync -a --delete "$staging_dir/" public/
+          echo "Site generated and validated successfully."
 
       - name: Preserve weekly archive
         run: |

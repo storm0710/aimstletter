@@ -2,8 +2,30 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import requests
+
 from aimstletter.config import FeedSource
-from aimstletter.fetchers import _entry_to_item
+from aimstletter.fetchers import _entry_to_item, _fetch_feed_response
+
+
+def test_feed_fetch_retries_transient_failure(monkeypatch) -> None:
+    attempts = {"count": 0}
+
+    class FakeResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+    def fake_get(*_args, **_kwargs):
+        attempts["count"] += 1
+        if attempts["count"] < 3:
+            raise requests.RequestException("temporary feed failure")
+        return FakeResponse()
+
+    monkeypatch.setattr("aimstletter.fetchers.requests.get", fake_get)
+    monkeypatch.setattr("aimstletter.fetchers.time.sleep", lambda _seconds: None)
+
+    assert _fetch_feed_response("https://example.com/feed.xml") is not None
+    assert attempts["count"] == 3
 
 
 def test_feed_source_cache_reuses_previous_summary_when_feed_body_is_empty(

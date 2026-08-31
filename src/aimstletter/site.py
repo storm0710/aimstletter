@@ -166,6 +166,11 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     tool_items = _localize_items(tool_items, settings, "인공지능 도구 업데이트")
     ai_urls = {item.url for item in ai_items if item.url}
     tool_items = [item for item in tool_items if not item.url or item.url not in ai_urls]
+    if not ai_items and not tool_items:
+        raise RuntimeError(
+            "Site generation produced no verified cards after source and localization retries. "
+            "The previously deployed site must be preserved instead of publishing an empty page."
+        )
     archive_entry = _weekly_archive_entry(now)
     archive_entry["search_text"] = _items_archive_search_text([*ai_items, *tool_items])
     archive_entries = _collect_archive_entries(output_dir, archive_entry)
@@ -638,7 +643,7 @@ def _source_text_needs_enrichment(item: DigestItem) -> bool:
     return not summary or _needs_specific_insight_copy(summary) or summary.lower() == _clean_plain_text(item.title).lower()
 
 
-def _recover_web_source_item(item: DigestItem) -> DigestItem | None:
+def _recover_web_source_item(item: DigestItem, attempts: int = 5) -> DigestItem | None:
     cached = _read_source_cache(item.url)
     if cached:
         title = _clean_plain_text(str(cached.get("title", ""))) or item.title
@@ -653,29 +658,40 @@ def _recover_web_source_item(item: DigestItem) -> DigestItem | None:
                 summary=summary,
             )
 
-    response = _fetch_web_response_with_retry(item.url, attempts=5)
-    if response is None:
-        return None
-    description = _page_metadata_value(response.text, "og:description") or _page_metadata_value(
-        response.text, "description"
+    last_reason = "no response"
+    for attempt in range(attempts):
+        response = _fetch_web_response_with_retry(item.url, attempts=1)
+        if response is not None:
+            description = (
+                _page_metadata_value(response.text, "og:description")
+                or _page_metadata_value(response.text, "description")
+                or _page_json_ld_description(response.text)
+            )
+            title = _page_metadata_value(response.text, "og:title") or _page_title(response.text)
+            title = _clean_plain_text(title) or item.title
+            summary = _clean_plain_text(description)
+            if not summary:
+                last_reason = "the page did not contain a usable description"
+            elif not _source_match_confidence(item, title, summary, response.url):
+                last_reason = "the recovered content did not match the source item"
+            else:
+                recovered = DigestItem(
+                    title=title,
+                    url=item.url,
+                    source=item.source,
+                    kind=item.kind,
+                    published=item.published,
+                    summary=summary,
+                )
+                _write_source_cache(recovered)
+                return recovered
+        if attempt + 1 < attempts:
+            time.sleep(2 + attempt)
+    print(
+        f"Could not recover verified source text for {item.url} after {attempts} attempts: {last_reason}",
+        file=sys.stderr,
     )
-    title = _page_metadata_value(response.text, "og:title") or _page_title(response.text)
-    if not description:
-        return None
-    title = _clean_plain_text(title) or item.title
-    summary = _clean_plain_text(description)
-    if not _source_match_confidence(item, title, summary, response.url):
-        return None
-    recovered = DigestItem(
-        title=_clean_plain_text(title) or item.title,
-        url=item.url,
-        source=item.source,
-        kind=item.kind,
-        published=item.published,
-        summary=summary,
-    )
-    _write_source_cache(recovered)
-    return recovered
+    return None
 
 
 def _fetch_web_response_with_retry(url: str, attempts: int = 5) -> requests.Response | None:
@@ -779,6 +795,29 @@ def _page_metadata_value(page: str, name: str) -> str:
         match = re.search(pattern, page, flags=re.IGNORECASE)
         if match:
             return unescape(match.group(1))
+    return ""
+
+
+def _page_json_ld_description(page: str) -> str:
+    for raw_value in re.findall(
+        r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>([\s\S]*?)</script>',
+        page,
+        flags=re.IGNORECASE,
+    ):
+        try:
+            payload = json.loads(unescape(raw_value).strip())
+        except json.JSONDecodeError:
+            continue
+        candidates = payload if isinstance(payload, list) else [payload]
+        for candidate in candidates:
+            if not isinstance(candidate, dict):
+                continue
+            graph = candidate.get("@graph")
+            if isinstance(graph, list):
+                candidates.extend(graph)
+            description = candidate.get("description")
+            if isinstance(description, str) and _clean_plain_text(description):
+                return description
     return ""
 
 
@@ -6211,40 +6250,47 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
             "Agent tasks REST API, CI/CD, SDK, or orchestration.\n\n"
             f"{source_block}"
         )
-        localized = _parse_json_array(_generate_openai_text(client, model, instructions, input_text))
-        if _has_untranslated_items(localized) or _has_reused_or_generic_localizations(localized):
-            localized = _repair_korean_translation(client, model, source_block, context)
-        if _has_untranslated_items(localized) or _has_reused_or_generic_localizations(localized):
-            localized = _repair_korean_translation(client, model, source_block, f"{context} (strict retry)")
+        last_error: Exception | None = None
+        for attempt in range(5):
+            try:
+                retry_note = (
+                    "\n\nThis is a retry because the previous response failed structural or content "
+                    "validation. Return every source item exactly once and ground every claim in its "
+                    "corresponding source block."
+                    if attempt
+                    else ""
+                )
+                localized = _parse_json_array(
+                    _generate_openai_text(client, model, instructions, input_text + retry_note)
+                )
+                if len(localized) != len(items):
+                    raise ValueError(
+                        f"OpenAI returned {len(localized)} localized items for {len(items)} source items."
+                    )
+                if _has_untranslated_items(localized) or _has_reused_or_generic_localizations(localized):
+                    raise ValueError("OpenAI returned untranslated, repeated, or generic localization copy.")
+
+                localized_items = [
+                    _localized_site_item(item, localized_item)
+                    for item, localized_item in zip(items, localized, strict=True)
+                ]
+                if not all(_has_publishable_localized_copy(item) for item in localized_items):
+                    raise ValueError("Localized cards still contained unpublishable fallback copy.")
+                return localized_items
+            except Exception as exc:  # noqa: BLE001
+                last_error = exc
+                if attempt + 1 < 5:
+                    print(
+                        f"Localization attempt {attempt + 1}/5 failed for {context}: {exc}",
+                        file=sys.stderr,
+                    )
+                    time.sleep(2 + attempt)
+        raise RuntimeError(f"Localization failed after 5 attempts for {context}: {last_error}") from last_error
     except Exception as exc:  # noqa: BLE001
         print(f"OpenAI localization failed for {context}: {exc}", file=sys.stderr)
         if _require_openai_localization():
             raise
         return []
-
-    if len(localized) != len(items):
-        if _require_openai_localization():
-            raise ValueError(
-                f"OpenAI returned {len(localized)} localized items for {len(items)} source items."
-            )
-        print(
-            f"Skipped {len(items)} {context} items because OpenAI returned {len(localized)} results.",
-            file=sys.stderr,
-        )
-        return []
-
-    localized_items = [
-        _localized_site_item(item, localized_item)
-        for item, localized_item in zip(items, localized, strict=True)
-    ]
-    publishable_items = [item for item in localized_items if _has_publishable_localized_copy(item)]
-    skipped_count = len(localized_items) - len(publishable_items)
-    if skipped_count:
-        print(
-            f"Skipped {skipped_count} {context} items because localization still contained fallback or generic copy.",
-            file=sys.stderr,
-        )
-    return publishable_items
 
 
 def _has_publishable_localized_copy(item: SiteItem) -> bool:
@@ -8791,14 +8837,6 @@ def _refresh_paper_cards_in_html(
             return button
 
         existing_digest = _digest_from_existing_card_attrs(attrs)
-        existing_text = " ".join(
-            (
-                existing_digest.title,
-                existing_digest.summary,
-                unescape(attrs.get("data-detail", "")),
-                unescape(attrs.get("data-points", "")),
-            )
-        )
         if _latest_week_specific_summary(re.sub(r"[-_]+", " ", _item_text(existing_digest))):
             site_item = _localized_site_item(existing_digest, {})
             refreshed = _patch_insight_button(button, site_item)
@@ -8935,7 +8973,7 @@ def _fetch_arxiv_digest_item(source_url: str, attrs: dict[str, str]) -> DigestIt
     return item
 
 
-def _fetch_with_retry(url: str, source_url: str, attempts: int = 2) -> bytes | None:
+def _fetch_with_retry(url: str, source_url: str, attempts: int = 5) -> bytes | None:
     from urllib.error import HTTPError, URLError
     from urllib.request import urlopen
 

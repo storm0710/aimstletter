@@ -4,12 +4,14 @@ import html
 import json
 from datetime import UTC, datetime
 
+import pytest
 import requests
 
 from aimstletter.fetchers import DigestItem
 from aimstletter.config import Settings
 from aimstletter.site import (
     SiteItem,
+    build_site,
     _clean_unpublishable_archive_indexes,
     _clean_unpublishable_intro_copy,
     _filter_publishable_source_items,
@@ -435,6 +437,69 @@ def test_localize_items_without_openai_does_not_emit_fallback_cards() -> None:
     assert _localize_items([item], Settings(openai_api_key=""), "test") == []
 
 
+def test_build_does_not_overwrite_homepage_when_no_verified_cards(monkeypatch, tmp_path) -> None:
+    index_path = tmp_path / "index.html"
+    index_path.write_text("previous verified homepage", encoding="utf-8")
+    monkeypatch.setattr("aimstletter.site.fetch_recent_items", lambda *_args, **_kwargs: [])
+
+    with pytest.raises(RuntimeError, match="no verified cards"):
+        build_site(tmp_path, Settings(openai_api_key=""))
+
+    assert index_path.read_text(encoding="utf-8") == "previous verified homepage"
+
+
+def test_localize_items_retries_structurally_invalid_response(monkeypatch) -> None:
+    item = DigestItem(
+        title="Copilot deployment approvals",
+        url="https://example.com/copilot-deployment-approvals",
+        source="GitHub Copilot Changelog",
+        kind="tool",
+        published=datetime(2026, 8, 28, tzinfo=UTC),
+        summary="GitHub Copilot adds repository deployment approvals with named reviewers.",
+    )
+    responses = [
+        "[]",
+        json.dumps(
+            [
+                {
+                    "title": "GitHub Copilot 배포 승인 기능",
+                    "summary": "GitHub Copilot이 저장소 배포 전에 지정 검토자의 승인을 받는 기능을 추가했습니다.",
+                    "detail": "배포 요청을 지정 검토자에게 보내고 승인 이후에만 실행합니다.",
+                    "key_points": [
+                        "1. 한 줄 요약: 저장소 배포 전에 지정 검토자의 승인을 받습니다.",
+                        "2. 무엇이 바뀌었나: 자동 배포 흐름에 명시적인 승인 단계를 추가했습니다.",
+                        "3. 왜 중요한가: 승인되지 않은 변경의 운영 반영을 막을 수 있습니다.",
+                        "4. 한계와 주의사항: 저장소 권한과 검토자 구성을 먼저 확인해야 합니다.",
+                        "5. 이번 주 해볼 일: 시험 저장소에서 승인 규칙 하나를 설정합니다.",
+                        "6. 누가 보면 좋은가: 배포를 관리하는 개발자와 운영 담당자입니다.",
+                        "7. 출처와 상태: GitHub Copilot 변경 이력에서 공개된 기능입니다.",
+                    ],
+                    "tags": ["GitHub Copilot", "배포 승인", "저장소"],
+                    "comparisons": [],
+                    "glossary": [],
+                }
+            ],
+            ensure_ascii=False,
+        ),
+    ]
+    calls = {"count": 0}
+
+    def fake_generate(*_args, **_kwargs):
+        value = responses[calls["count"]]
+        calls["count"] += 1
+        return value
+
+    monkeypatch.setattr("aimstletter.site._make_client", lambda **_kwargs: (object(), "test-model"))
+    monkeypatch.setattr("aimstletter.site._generate_openai_text", fake_generate)
+    monkeypatch.setattr("aimstletter.site.time.sleep", lambda _seconds: None)
+
+    localized = _localize_items([item], Settings(openai_api_key="test-key"), "test")
+
+    assert calls["count"] == 2
+    assert len(localized) == 1
+    assert "지정 검토자의 승인" in localized[0].summary
+
+
 def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:
     original = DigestItem(
         title="Purchase API Agentcard",
@@ -489,6 +554,48 @@ def test_web_source_recovery_retries_before_fallback(monkeypatch, tmp_path) -> N
     assert recovered is not None
     assert attempts["count"] == 3
     assert "discoverable capability cards" in recovered.summary
+
+
+def test_web_source_recovery_retries_successful_but_empty_page(monkeypatch, tmp_path) -> None:
+    item = DigestItem(
+        title="Agent Card",
+        url="https://www.producthunt.com/products/agent-card",
+        source="Product Hunt Launches",
+        kind="tool",
+        published=datetime(2026, 8, 24, tzinfo=UTC),
+        summary="Agent Card",
+    )
+    attempts = {"count": 0}
+    monkeypatch.setenv("AIMSTLETTER_SOURCE_CACHE_DIR", str(tmp_path))
+
+    class FakeResponse:
+        url = item.url
+
+        @property
+        def text(self) -> str:
+            if attempts["count"] == 1:
+                return '<meta property="og:title" content="Agent Card | Product Hunt">'
+            return (
+                '<script type="application/ld+json">'
+                '{"name":"Agent Card","description":"Agent Card publishes verified capability cards for AI agents."}'
+                "</script>"
+            )
+
+        def raise_for_status(self) -> None:
+            return None
+
+    def fake_get(*_args, **_kwargs):
+        attempts["count"] += 1
+        return FakeResponse()
+
+    monkeypatch.setattr("aimstletter.site.requests.get", fake_get)
+    monkeypatch.setattr("aimstletter.site.time.sleep", lambda _seconds: None)
+
+    recovered = _recover_web_source_item(item)
+
+    assert recovered is not None
+    assert attempts["count"] == 2
+    assert "verified capability cards" in recovered.summary
 
 
 def test_homepage_archive_navigation_uses_fresh_archive_search_text(tmp_path) -> None:
