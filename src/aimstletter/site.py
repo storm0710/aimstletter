@@ -162,8 +162,19 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
         ),
         10,
     )
-    ai_items = _localize_items(ai_items, settings, "DBA, 네트워크, 서버 운영자가 업무에 적용할 AI 스킬 업데이트")
-    tool_items = _localize_items(tool_items, settings, "인공지능 도구 업데이트")
+    localization_state: dict[str, bool] = {}
+    ai_items = _localize_items(
+        ai_items,
+        settings,
+        "DBA, 네트워크, 서버 운영자가 업무에 적용할 AI 스킬 업데이트",
+        localization_state,
+    )
+    tool_items = _localize_items(
+        tool_items,
+        settings,
+        "인공지능 도구 업데이트",
+        localization_state,
+    )
     ai_urls = {item.url for item in ai_items if item.url}
     tool_items = [item for item in tool_items if not item.url or item.url not in ai_urls]
     if not ai_items and not tool_items:
@@ -6186,9 +6197,17 @@ def _render_analytics(settings: Settings) -> str:
     return ""
 
 
-def _localize_items(items: list[DigestItem], settings: Settings, context: str) -> list[SiteItem]:
+def _localize_items(
+    items: list[DigestItem],
+    settings: Settings,
+    context: str,
+    provider_state: dict[str, bool] | None = None,
+) -> list[SiteItem]:
     if not items:
         return []
+    provider_state = provider_state if provider_state is not None else {}
+    if provider_state.get("unavailable"):
+        return [_source_snapshot_site_item(item) for item in items]
     if not settings.openai_api_key and not settings.azure_openai_api_key:
         print(f"Skipped {len(items)} {context} items because OpenAI localization is not configured.", file=sys.stderr)
         return []
@@ -6200,6 +6219,7 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
                 chunk,
                 settings,
                 f"{context} (items {start + 1}-{start + len(chunk)})",
+                provider_state,
             )
             if len(localized_chunk) != len(chunk):
                 message = (
@@ -6313,6 +6333,7 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
                     )
                     time.sleep(2 + attempt)
         if last_error and _is_provider_connection_error(last_error):
+            provider_state["unavailable"] = True
             print(
                 f"Localization providers were unreachable after 5 attempts for {context}; "
                 "publishing verified source snapshots.",

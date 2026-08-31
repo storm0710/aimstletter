@@ -582,11 +582,11 @@ def test_localize_items_uses_verified_source_snapshot_after_connection_retries(m
     monkeypatch.setattr("aimstletter.site._generate_openai_text", fail_connection)
     monkeypatch.setattr("aimstletter.site.time.sleep", lambda _seconds: None)
 
-    localized = _localize_items([item], Settings(openai_api_key="test-key"), "test")
+    localized = _localize_items([item] * 4, Settings(openai_api_key="test-key"), "test")
     rendered = _render_smart_insight_cards(localized)
 
     assert calls["count"] == 5
-    assert len(localized) == 1
+    assert len(localized) == 4
     assert localized[0].summary == item.summary
     assert "원문 스냅샷" in localized[0].tags
     assert item.summary in rendered
