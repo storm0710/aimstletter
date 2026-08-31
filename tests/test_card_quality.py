@@ -28,6 +28,7 @@ from aimstletter.site import (
     _render_smart_insight_cards,
     _refresh_homepage_archive_navigation,
     _refresh_known_specific_cards_in_html,
+    _renumber_insight_buttons_in_html,
     _refresh_paper_cards_in_html,
     _source_match_confidence,
     _weekly_archive_entry,
@@ -91,6 +92,21 @@ def test_render_smart_insights_skips_unpublishable_fallback_item() -> None:
     )
 
     assert _render_smart_insight_cards([item]) == ""
+
+
+def test_removed_cards_are_renumbered_without_gaps() -> None:
+    html_text = (
+        '<button class="insight-card" data-number="8"><span class="card-icon">8</span></button>'
+        '<button class="insight-card" data-number="12"><span class="card-icon">12</span></button>'
+    )
+
+    refreshed, count = _renumber_insight_buttons_in_html(html_text)
+
+    assert count == 2
+    assert 'data-number="1"' in refreshed
+    assert 'data-number="2"' in refreshed
+    assert '<span class="card-icon">1</span>' in refreshed
+    assert '<span class="card-icon">2</span>' in refreshed
 
 
 def test_paper_cards_prioritize_quantitative_abstract_results() -> None:

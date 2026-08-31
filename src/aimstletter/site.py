@@ -8895,9 +8895,10 @@ def refresh_existing_cards(output_dir: Path) -> int:
         refreshed, archive_index_count = _clean_unpublishable_archive_indexes(refreshed)
         refreshed, intro_count = _clean_unpublishable_intro_copy(refreshed)
         refreshed, duplicate_count = _dedupe_insight_buttons_in_html(refreshed)
-        if count or known_count or removed_count or archive_index_count or intro_count or duplicate_count:
+        refreshed, renumber_count = _renumber_insight_buttons_in_html(refreshed)
+        if count or known_count or removed_count or archive_index_count or intro_count or duplicate_count or renumber_count:
             path.write_text(refreshed, encoding="utf-8", newline="")
-            updated += count + known_count + removed_count + archive_index_count + intro_count + duplicate_count
+            updated += count + known_count + removed_count + archive_index_count + intro_count + duplicate_count + renumber_count
     return updated
 
 
@@ -8921,6 +8922,31 @@ def _dedupe_insight_buttons_in_html(html_text: str) -> tuple[str, int]:
         return button
 
     return button_pattern.sub(replace_button, html_text), removed
+
+
+def _renumber_insight_buttons_in_html(html_text: str) -> tuple[str, int]:
+    button_pattern = re.compile(r'<button class="insight-card"[\s\S]*?</button>')
+    number = 0
+
+    def replace_button(match: re.Match[str]) -> str:
+        nonlocal number
+        number += 1
+        button = _replace_html_attr(match.group(0), "data-number", str(number))
+        return re.sub(
+            r'(<span class="card-icon">)\d+(</span>)',
+            lambda found: f"{found.group(1)}{number}{found.group(2)}",
+            button,
+            count=1,
+        )
+
+    refreshed = button_pattern.sub(replace_button, html_text)
+    refreshed = re.sub(
+        r'(<div class="detail-number" data-insight-number>)\d+(</div>)',
+        lambda found: f"{found.group(1)}1{found.group(2)}" if number else "",
+        refreshed,
+        count=1,
+    )
+    return refreshed, number
 
 
 def _remove_unpublishable_cards_in_html(html_text: str) -> tuple[str, int]:
