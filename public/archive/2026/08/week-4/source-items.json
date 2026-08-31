@@ -5,28 +5,92 @@
   "period_end": "2026-08-24",
   "ai_items": [
     {
-      "title": "Nvidia 확장 Expertise",
+      "title": "How NVIDIA scales expertise with ChatGPT Work",
       "url": "https://openai.com/index/nvidia/chatgpt-work",
-      "source": "OpenAI",
-      "kind": "news",
+      "source": "OpenAI News",
+      "kind": "tool",
       "published": "2026-08-18T00:00:00+00:00",
-      "summary": "Nvidia 확장 Expertise는 OpenAI 소식에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Nvidia 확장 Expertise의 세부 기능은 OpenAI 소식의 제목과 출처 범위에서만 다룹니다."
+      "summary": "NVIDIA teams use ChatGPT Work to reduce manual tasks, connect fast-moving signals, and scale successful workflows globally."
+    },
+    {
+      "title": "The new GitHub Copilot experience in Slack",
+      "url": "https://github.blog/changelog/2026-08-21-the-new-github-copilot-experience-in-slack",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-08-21T16:07:15+00:00",
+      "summary": "The GitHub integration in Slack now brings the agentic capabilities of GitHub Copilot CLI and the GitHub Copilot app into Slack in public preview. You can work with @GitHub to… The post The new GitHub Copilot experience in Slack appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Shared agentic work with GitHub Copilot in Microsoft Teams",
+      "url": "https://github.blog/changelog/2026-08-21-shared-agentic-work-with-github-copilot-in-microsoft-teams",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-08-21T16:03:36+00:00",
+      "summary": "Turn a Microsoft Teams discussion into a collaborative agent session everyone can see and help direct. Mention @GitHub in a channel, thread, or direct message to start a GitHub Copilot… The post Shared agentic work with GitHub Copilot in Microsoft Teams appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Caddi",
+      "url": "https://www.producthunt.com/products/caddi-3",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-17T16:16:01+00:00",
+      "summary": "Agent that builds agents by only showing your work only once Discussion | Link"
+    },
+    {
+      "title": "Pacing model development in an era of cyber-critical capabilities",
+      "url": "https://openai.com/index/pacing-model-development-cyber-capabilities",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-08-18T11:00:00+00:00",
+      "summary": "OpenAI is strengthening monitoring, alignment, and security for frontier AI models. See how new safeguards are guiding the pace of model development."
+    },
+    {
+      "title": "Edge Drop",
+      "url": "https://www.producthunt.com/products/edge-drop",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-23T08:18:08+00:00",
+      "summary": "Clipboard on your screen edge. Hover to open, drag to drop Discussion | Link"
+    },
+    {
+      "title": "Cursor Craft v2",
+      "url": "https://www.producthunt.com/products/cursor-craft",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-22T22:04:25+00:00",
+      "summary": "Custom Mac cursors, rebuilt for v2 Discussion | Link"
+    },
+    {
+      "title": "Tiles",
+      "url": "https://www.producthunt.com/products/tiles-5",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-22T19:41:41+00:00",
+      "summary": "Turning desktop chaos into curated spaces. Discussion | Link"
+    },
+    {
+      "title": "PageIndex",
+      "url": "https://www.producthunt.com/products/pageindexai",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-21T10:03:58+00:00",
+      "summary": "Accurate, trustworthy answers across professional documents Discussion | Link"
+    },
+    {
+      "title": "Introducing Intelligence Age",
+      "url": "https://openai.com/index/introducing-intelligence-age",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-08-20T07:00:00+00:00",
+      "summary": "Introducing Intelligence Age, a new OpenAI blog exploring how transformative AI could reshape power, governance, the economy, and individual freedom."
     },
     {
       "title": "Introducing Intelligence Age",
       "url": "https://openai.com/index/introducing-ai-futures",
       "source": "OpenAI",
       "kind": "news",
-      "published": "2026-08-20T00:00:00+00:00",
-      "summary": "Introducing Intelligence Age는 OpenAI 소식에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Introducing Intelligence Age의 세부 기능은 OpenAI 소식의 제목과 출처 범위에서만 다룹니다."
-    },
-    {
-      "title": "Introducing Intelligence Age",
-      "url": "https://openai.com/index/introducing-intelligence-age",
-      "source": "OpenAI",
-      "kind": "news",
-      "published": "2026-08-20T00:00:00+00:00",
-      "summary": "Introducing Intelligence Age는 OpenAI 소식에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Introducing Intelligence Age의 세부 기능은 OpenAI 소식의 제목과 출처 범위에서만 다룹니다."
+      "published": "2026-08-20T07:00:00+00:00",
+      "summary": "Introducing Intelligence Age, a new OpenAI blog exploring how transformative AI could reshape power, governance, the economy, and individual freedom."
     },
     {
       "title": "Stampli Cuts Launch",
@@ -37,46 +101,110 @@
       "summary": "코드 변경, 테스트, 리뷰 준비를 한 번의 업무 흐름으로 묶기 위해 필요합니다. 저장소 이해, 파일 편집, 테스트 실행, 변경 요약과 PR 준비입니다."
     },
     {
-      "title": "Offering Zero 데이터 모델",
+      "title": "Offering Zero Data Retention for frontier models",
       "url": "https://openai.com/index/offering-zero-data-retention-for-frontier-models",
       "source": "OpenAI",
       "kind": "news",
-      "published": "2026-08-20T00:00:00+00:00",
-      "summary": "Offering Zero 데이터 모델는 OpenAI 소식에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Offering Zero 데이터 모델의 세부 기능은 OpenAI 소식의 제목과 출처 범위에서만 다룹니다."
+      "published": "2026-08-19T19:00:00+00:00",
+      "summary": "OpenAI reaffirms Zero Data Retention for eligible API customers and previews Private Safety Processing for advanced AI safety without compromising data privacy."
     },
     {
-      "title": "Launching Meta Startup",
+      "title": "Launching ‘Meta Startup School’ to Accelerate Growth For Early-Stage Startups",
       "url": "https://about.fb.com/news/2026/08/launching-meta-startup-school-to-accelerate-growth-for-early-stage-startups/",
       "source": "Meta AI 소식",
       "kind": "news",
-      "published": "2026-08-19T00:00:00+00:00",
-      "summary": "Launching Meta Startup는 Meta AI 소식에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Launching Meta Startup의 세부 기능은 Meta AI 소식의 제목과 출처 범위에서만 다룹니다."
+      "published": "2026-08-19T11:00:22+00:00",
+      "summary": "We are launching Meta Startup School, a three-month programme designed to help early-stage consumer brands accelerate growth. The first cohort will see 200 startups get exclusive access to support and training from venture capital firms and industry experts. The post Launching ‘Meta Startup School’ to Accelerate Growth For Early-Stage Startups appeared first on Meta Newsroom ."
     },
     {
-      "title": "Replit Expands Access 5.6",
+      "title": "Replit expands access to software creation with GPT-5.6 Luna",
       "url": "https://openai.com/index/replit",
       "source": "OpenAI",
       "kind": "news",
-      "published": "2026-08-19T00:00:00+00:00",
-      "summary": "Replit Expands Access 5.6는 OpenAI 소식에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Replit Expands Access 5.6의 세부 기능은 OpenAI 소식의 제목과 출처 범위에서만 다룹니다."
+      "published": "2026-08-19T07:00:00+00:00",
+      "summary": "Replit introduces Free Mode, powered by GPT-5.6 Luna, so anyone can turn ideas into working software without worrying about token costs."
     }
   ],
   "tool_items": [
     {
-      "title": "Slack에서 쓰는 GitHub Copilot 에이전트",
+      "title": "The new GitHub Copilot experience in Slack",
       "url": "https://github.blog/changelog/2026-08-21-the-new-github-copilot-experience-in-slack",
-      "source": "GitHub Copilot",
+      "source": "GitHub Copilot Changelog",
       "kind": "tool",
-      "published": "2026-08-22T00:00:00+00:00",
-      "summary": "Slack에서 @GitHub를 호출해 GitHub Copilot CLI와 Copilot 앱의 에이전트 기능을 쓰는 공개 미리보기입니다. 대화 중 요청을 시작하고, 팀원이 같은 Slack 대화 안에서 진행 상황을 함께 확인하고 지시할 수 있습니다."
+      "published": "2026-08-21T16:07:15+00:00",
+      "summary": "The GitHub integration in Slack now brings the agentic capabilities of GitHub Copilot CLI and the GitHub Copilot app into Slack in public preview. You can work with @GitHub to… The post The new GitHub Copilot experience in Slack appeared first on The GitHub Blog ."
     },
     {
-      "title": "Microsoft Teams의 공동 Copilot 에이전트 작업",
+      "title": "Shared agentic work with GitHub Copilot in Microsoft Teams",
       "url": "https://github.blog/changelog/2026-08-21-shared-agentic-work-with-github-copilot-in-microsoft-teams",
-      "source": "GitHub Copilot",
+      "source": "GitHub Copilot Changelog",
       "kind": "tool",
-      "published": "2026-08-22T00:00:00+00:00",
-      "summary": "Microsoft Teams 대화에서 @GitHub를 호출해 여러 사람이 함께 보는 Copilot 에이전트 세션을 시작하는 기능입니다. 채널, 스레드, DM의 논의를 작업 요청으로 이어가고 팀원이 진행 방향을 함께 정할 수 있습니다."
+      "published": "2026-08-21T16:03:36+00:00",
+      "summary": "Turn a Microsoft Teams discussion into a collaborative agent session everyone can see and help direct. Mention @GitHub in a channel, thread, or direct message to start a GitHub Copilot… The post Shared agentic work with GitHub Copilot in Microsoft Teams appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Introducing Intelligence Age",
+      "url": "https://openai.com/index/introducing-intelligence-age",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-08-20T07:00:00+00:00",
+      "summary": "Introducing Intelligence Age, a new OpenAI blog exploring how transformative AI could reshape power, governance, the economy, and individual freedom."
+    },
+    {
+      "title": "Introducing Intelligence Age",
+      "url": "https://openai.com/index/introducing-ai-futures",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-08-20T07:00:00+00:00",
+      "summary": "Introducing Intelligence Age, a new OpenAI blog exploring how transformative AI could reshape power, governance, the economy, and individual freedom."
+    },
+    {
+      "title": "Stampli cuts launch hours by 68% using ChatGPT Work",
+      "url": "https://openai.com/index/stampli",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-08-20T00:00:00+00:00",
+      "summary": "With a fixed deadline and design resources committed elsewhere, Stampli used Codex and ChatGPT Work to compress weeks of launch production into days."
+    },
+    {
+      "title": "Offering Zero Data Retention for frontier models",
+      "url": "https://openai.com/index/offering-zero-data-retention-for-frontier-models",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-08-19T19:00:00+00:00",
+      "summary": "OpenAI reaffirms Zero Data Retention for eligible API customers and previews Private Safety Processing for advanced AI safety without compromising data privacy."
+    },
+    {
+      "title": "5 new ways to level up your learning with Search",
+      "url": "https://blog.google/products-and-platforms/products/search/back-to-school-study-tools/",
+      "source": "Google AI Blog",
+      "kind": "tool",
+      "published": "2026-08-19T19:00:00+00:00",
+      "summary": "an illustrated image with icons and phrasing like \"Add Notebook\" and \"Ask Google\""
+    },
+    {
+      "title": "Sayscroll",
+      "url": "https://www.producthunt.com/products/sayscroll-ai-teleprompter",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-19T16:49:36+00:00",
+      "summary": "The AI Teleprompter that scrolls as you speak Discussion | Link"
+    },
+    {
+      "title": "Launching ‘Meta Startup School’ to Accelerate Growth For Early-Stage Startups",
+      "url": "https://about.fb.com/news/2026/08/launching-meta-startup-school-to-accelerate-growth-for-early-stage-startups/",
+      "source": "Meta AI News",
+      "kind": "tool",
+      "published": "2026-08-19T11:00:22+00:00",
+      "summary": "We are launching Meta Startup School, a three-month programme designed to help early-stage consumer brands accelerate growth. The first cohort will see 200 startups get exclusive access to support and training from venture capital firms and industry experts. The post Launching ‘Meta Startup School’ to Accelerate Growth For Early-Stage Startups appeared first on Meta Newsroom ."
+    },
+    {
+      "title": "Replit expands access to software creation with GPT-5.6 Luna",
+      "url": "https://openai.com/index/replit",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-08-19T07:00:00+00:00",
+      "summary": "Replit introduces Free Mode, powered by GPT-5.6 Luna, so anyone can turn ideas into working software without worrying about token costs."
     },
     {
       "title": "Managed Settings GitHub Copilot",
@@ -91,40 +219,16 @@
       "url": "https://www.producthunt.com/products/caddi-3",
       "source": "AI 에이전트",
       "kind": "tool",
-      "published": "2026-08-18T00:00:00+00:00",
-      "summary": "Caddi는 Product Hunt launches에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Caddi의 세부 기능은 Product Hunt launches의 제목과 출처 범위에서만 다룹니다."
-    },
-    {
-      "title": "EasySwitch",
-      "url": "https://www.producthunt.com/products/easyswitch",
-      "source": "Product Hunt launches",
-      "kind": "tool",
-      "published": "2026-08-23T00:00:00+00:00",
-      "summary": "Easyswitch는 Product Hunt launches에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Easyswitch의 세부 기능은 Product Hunt launches의 제목과 출처 범위에서만 다룹니다."
-    },
-    {
-      "title": "Traccia",
-      "url": "https://www.producthunt.com/products/traccia",
-      "source": "AI 에이전트",
-      "kind": "tool",
-      "published": "2026-08-23T00:00:00+00:00",
-      "summary": "Traccia는 Product Hunt launches에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Traccia의 세부 기능은 Product Hunt launches의 제목과 출처 범위에서만 다룹니다."
+      "published": "2026-08-17T16:16:01+00:00",
+      "summary": "Agent that builds agents by only showing your work only once Discussion | Link"
     },
     {
       "title": "PageIndex",
       "url": "https://www.producthunt.com/products/pageindexai",
       "source": "Product Hunt launches",
       "kind": "tool",
-      "published": "2026-08-21T00:00:00+00:00",
-      "summary": "Pageindexai는 Product Hunt launches에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Pageindexai의 세부 기능은 Product Hunt launches의 제목과 출처 범위에서만 다룹니다."
-    },
-    {
-      "title": "Enter Pro",
-      "url": "https://www.producthunt.com/products/enter-pro",
-      "source": "Product Hunt launches",
-      "kind": "tool",
-      "published": "2026-08-20T00:00:00+00:00",
-      "summary": "Enter Pro는 Product Hunt launches에서 확인한 자료 항목입니다. 수집된 본문 요약이 부족해 Enter Pro의 세부 기능은 Product Hunt launches의 제목과 출처 범위에서만 다룹니다."
+      "published": "2026-08-21T10:03:58+00:00",
+      "summary": "Accurate, trustworthy answers across professional documents Discussion | Link"
     }
   ]
 }
