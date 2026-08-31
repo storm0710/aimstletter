@@ -144,8 +144,12 @@ def build_site(
     archive_entry = _weekly_archive_entry(now)
 
     week_start, week_end = _weekly_window(now)
-    raw_feed_items = fetch_recent_items(settings.feeds, settings.lookback_days)
-    raw_tool_items = fetch_recent_items(settings.tool_feeds, 21)
+    if os.getenv("AIMSTLETTER_SOURCE_ONLY") == "1":
+        raw_feed_items = []
+        raw_tool_items = []
+    else:
+        raw_feed_items = fetch_recent_items(settings.feeds, settings.lookback_days)
+        raw_tool_items = fetch_recent_items(settings.tool_feeds, 21)
     source_items = _dedupe_items(
         [
             *_items_in_window(raw_feed_items, week_start, week_end),

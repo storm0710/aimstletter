@@ -688,6 +688,16 @@ def test_week_source_items_survive_between_build_retries(tmp_path) -> None:
     assert tool_items == [tool]
 
 
+def test_source_only_build_skips_feed_collection(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("AIMSTLETTER_SOURCE_ONLY", "1")
+    monkeypatch.setattr(
+        "aimstletter.site.fetch_recent_items",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("feed should not be fetched")),
+    )
+    with pytest.raises(RuntimeError, match="no verified cards"):
+        build_site(tmp_path, Settings(openai_api_key=""))
+
+
 def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:
     original = DigestItem(
         title="Purchase API Agentcard",
