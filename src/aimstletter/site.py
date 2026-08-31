@@ -177,12 +177,16 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     )
     ai_urls = {item.url for item in ai_items if item.url}
     tool_items = [item for item in tool_items if not item.url or item.url not in ai_urls]
-    if not ai_items and not tool_items:
-        raise RuntimeError(
-            "Site generation produced no verified cards after source and localization retries. "
-            "The previously deployed site must be preserved instead of publishing an empty page."
-        )
     archive_entry = _weekly_archive_entry(now)
+    if not ai_items and not tool_items:
+        archived_items = _load_current_archive_items(output_dir, archive_entry)
+        ai_items = [item for item in archived_items if _smart_insight_category(item) != "도구"]
+        tool_items = [item for item in archived_items if _smart_insight_category(item) == "도구"]
+        if not ai_items and not tool_items:
+            raise RuntimeError(
+                "Site generation produced no verified cards after source and localization retries, "
+                "and the current archive had no verified cards to preserve."
+            )
     archive_entry["search_text"] = _items_archive_search_text([*ai_items, *tool_items])
     archive_entries = _collect_archive_entries(output_dir, archive_entry)
     html = render_homepage(
@@ -8926,6 +8930,21 @@ def _site_item_from_existing_card_attrs(attrs: dict[str, str]) -> SiteItem:
         key_points=points,
         tags=tags,
     )
+
+
+def _load_current_archive_items(
+    output_dir: Path,
+    archive_entry: dict[str, object],
+) -> list[SiteItem]:
+    archive_path = output_dir / str(archive_entry["href"]) / "index.html"
+    if not archive_path.exists():
+        return []
+    html_text = archive_path.read_text(encoding="utf-8")
+    items = [
+        _site_item_from_existing_card_attrs(_html_attrs(match.group(0)))
+        for match in re.finditer(r'<button class="insight-card"[\s\S]*?</button>', html_text)
+    ]
+    return [item for item in items if item.title and item.summary]
 
 
 def _parse_json_attr(value: str) -> object:
