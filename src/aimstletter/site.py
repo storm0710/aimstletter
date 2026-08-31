@@ -6180,6 +6180,26 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
     if not settings.openai_api_key and not settings.azure_openai_api_key:
         print(f"Skipped {len(items)} {context} items because OpenAI localization is not configured.", file=sys.stderr)
         return []
+    if len(items) > 3:
+        localized_items: list[SiteItem] = []
+        for start in range(0, len(items), 3):
+            chunk = items[start : start + 3]
+            localized_chunk = _localize_items(
+                chunk,
+                settings,
+                f"{context} (items {start + 1}-{start + len(chunk)})",
+            )
+            if len(localized_chunk) != len(chunk):
+                message = (
+                    f"Localization produced {len(localized_chunk)} verified cards for a "
+                    f"{len(chunk)}-item chunk in {context}."
+                )
+                if _require_openai_localization():
+                    raise RuntimeError(message)
+                print(message, file=sys.stderr)
+                return []
+            localized_items.extend(localized_chunk)
+        return localized_items
 
     source_block = "\n\n".join(
         textwrap.dedent(

@@ -500,6 +500,55 @@ def test_localize_items_retries_structurally_invalid_response(monkeypatch) -> No
     assert "지정 검토자의 승인" in localized[0].summary
 
 
+def test_localize_items_splits_large_batches_before_generation(monkeypatch) -> None:
+    items = [
+        DigestItem(
+            title=f"Deployment approval update {index}",
+            url=f"https://example.com/deployment-approval-{index}",
+            source="Example Changelog",
+            kind="tool",
+            published=datetime(2026, 8, 28, tzinfo=UTC),
+            summary=f"Deployment approval update {index} adds a named reviewer requirement.",
+        )
+        for index in range(1, 5)
+    ]
+    batch_sizes: list[int] = []
+
+    def fake_generate(_client, _model, _instructions, input_text):
+        batch_size = input_text.count("title:")
+        batch_sizes.append(batch_size)
+        payload = []
+        for index in range(1, batch_size + 1):
+            payload.append(
+                {
+                    "title": f"배포 승인 업데이트 {index}",
+                    "summary": f"배포 승인 업데이트 {index}은 지정 검토자의 승인을 요구합니다.",
+                    "detail": f"배포 요청 {index}을 지정 검토자가 확인한 뒤 실행합니다.",
+                    "key_points": [
+                        f"1. 한 줄 요약: 배포 요청 {index}에 승인 단계를 추가합니다.",
+                        f"2. 무엇이 바뀌었나: 배포 요청 {index}에 검토자를 지정합니다.",
+                        f"3. 왜 중요한가: 승인되지 않은 배포 {index}을 막습니다.",
+                        f"4. 한계와 주의사항: 검토자 {index}의 권한을 확인해야 합니다.",
+                        f"5. 이번 주 해볼 일: 시험 배포 {index}에 승인 규칙을 적용합니다.",
+                        f"6. 누가 보면 좋은가: 배포 {index} 담당자입니다.",
+                        f"7. 출처와 상태: 변경 이력 {index}에서 공개됐습니다.",
+                    ],
+                    "tags": ["배포", "승인", f"업데이트 {index}"],
+                    "comparisons": [],
+                    "glossary": [],
+                }
+            )
+        return json.dumps(payload, ensure_ascii=False)
+
+    monkeypatch.setattr("aimstletter.site._make_client", lambda **_kwargs: (object(), "test-model"))
+    monkeypatch.setattr("aimstletter.site._generate_openai_text", fake_generate)
+
+    localized = _localize_items(items, Settings(openai_api_key="test-key"), "test")
+
+    assert batch_sizes == [3, 1]
+    assert len(localized) == 4
+
+
 def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:
     original = DigestItem(
         title="Purchase API Agentcard",
