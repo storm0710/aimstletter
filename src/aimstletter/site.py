@@ -404,7 +404,7 @@ def _refresh_homepage_archive_navigation(
     html = index_path.read_text(encoding="utf-8")
     updated = re.sub(
         r'<aside class="archive-nav" aria-label="주간 아카이브">[\s\S]*?</aside>',
-        _render_archive_nav(entries, current_entry=current_entry),
+        lambda _found: _render_archive_nav(entries, current_entry=current_entry),
         html,
         count=1,
     )
@@ -429,7 +429,7 @@ def _refresh_archive_navigation(output_dir: Path, entries: list[dict[str, object
         html = path.read_text(encoding="utf-8")
         updated = re.sub(
             r'<aside class="archive-nav" aria-label="주간 아카이브">[\s\S]*?</aside>',
-            _render_archive_nav(entries, current_entry=current_entry),
+            lambda _found: _render_archive_nav(entries, current_entry=current_entry),
             html,
             count=1,
         )
@@ -460,10 +460,8 @@ def _refresh_archive_navigation(output_dir: Path, entries: list[dict[str, object
             html = path.read_text(encoding="utf-8")
             updated = re.sub(
                 r'<aside class="archive-nav" aria-label="주간 아카이브">[\s\S]*?</aside>',
-                _render_archive_nav(
-                    entries,
-                    link_prefix=link_prefix,
-                    current_knowledge_slug=current_slug,
+                lambda _found: _render_archive_nav(
+                    entries, link_prefix=link_prefix, current_knowledge_slug=current_slug
                 ),
                 html,
                 count=1,
@@ -534,7 +532,10 @@ def _refresh_archive_source_summaries(output_dir: Path, settings: Settings) -> N
         if first_item:
             detail = _default_insight_detail(first_item)
             updated = re.sub(
-                r'<article class="insight-detail"[\s\S]*?</article>', detail, updated, count=1
+                r'<article class="insight-detail"[\s\S]*?</article>',
+                lambda _found: detail,
+                updated,
+                count=1,
             )
         if updated != html:
             path.write_text(updated, encoding="utf-8")
@@ -8911,7 +8912,7 @@ def _sync_initial_detail_with_first_card(html_text: str) -> str:
     site_item = _site_item_from_existing_card_attrs(_html_attrs(first_match.group(0)))
     return re.sub(
         r'<article class="insight-detail"[\s\S]*?</article>',
-        _default_insight_detail(site_item),
+        lambda _found: _default_insight_detail(site_item),
         html_text,
         count=1,
     )
