@@ -209,6 +209,12 @@ def build_site(
                 "and no Korean archive had verified cards to preserve."
             )
         archive_entry = verified_archive_entry
+    display_now = now
+    if archive_entry != _weekly_archive_entry(now):
+        display_now = datetime.fromisoformat(str(archive_entry["period_end"])).replace(
+            hour=8,
+            tzinfo=kst,
+        )
     archive_entry["search_text"] = _items_archive_search_text([*ai_items, *tool_items])
     archive_entries = _collect_archive_entries(output_dir, archive_entry)
     html = render_homepage(
@@ -217,7 +223,7 @@ def build_site(
         analytics_html=_render_analytics(settings),
         archive_entries=archive_entries,
         current_archive_entry=archive_entry,
-        now=now,
+        now=display_now,
     )
 
     path = output_dir / "index.html"
