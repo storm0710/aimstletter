@@ -9,6 +9,7 @@ import requests
 from aimstletter.fetchers import DigestItem
 from aimstletter.config import Settings
 from aimstletter.site import (
+    SiteItem,
     _clean_unpublishable_archive_indexes,
     _clean_unpublishable_intro_copy,
     _filter_publishable_source_items,
@@ -53,6 +54,25 @@ def test_refresh_cleans_unpublishable_intro_copy() -> None:
     assert count == 1
     assert "수집된 본문 요약이 부족" not in refreshed
     assert "원문 근거가 확인된 항목 중심" in refreshed
+
+
+def test_render_smart_insights_skips_unpublishable_fallback_item() -> None:
+    item = SiteItem(
+        title="Traccia",
+        url="https://example.com/traccia",
+        source="Product Hunt launches",
+        kind="도구 업데이트",
+        published=datetime(2026, 8, 24, tzinfo=UTC),
+        summary="수집된 본문 요약이 부족해 Traccia의 세부 기능은 Product Hunt launches의 제목과 출처 범위에서만 다룹니다.",
+        detail="원문 본문을 재수집해 확인하기 전까지 기능, 성능, 적용 효과를 추정하지 않습니다.",
+        key_points=(
+            "1. 한 줄 요약: Traccia와 관련된 변화가 업무 흐름에 미치는 영향을 정리한 항목입니다.",
+            "2. 무엇이 바뀌었나: 수집된 본문 요약이 부족해 제목과 출처 범위에서만 다룹니다.",
+        ),
+        tags=("AI 에이전트",),
+    )
+
+    assert _render_smart_insight_cards([item]) == ""
 
 
 def test_paper_cards_prioritize_quantitative_abstract_results() -> None:

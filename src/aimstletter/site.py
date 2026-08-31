@@ -3749,6 +3749,9 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         body = _clip(smart_summary, 520)
         detail = _smart_insight_card_detail(item, smart_summary)
         points = _smart_insight_points(item)
+        rendered_text = " ".join((title, body, detail, " ".join(points)))
+        if _contains_unpublishable_fallback_copy(rendered_text):
+            continue
         footnotes = item.glossary
         meta = f"{item.source} · {item.kind} · {_format_date(item.published)}"
         tags = item.tags

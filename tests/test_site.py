@@ -309,7 +309,7 @@ def test_smart_insight_uses_specific_summary_for_july_twentieth_items() -> None:
     assert "실수로 위험한 조회나 변경" not in card.group(0)
 
 
-def test_smart_insight_derives_title_from_content_for_unmapped_generic_items() -> None:
+def test_smart_insight_skips_unmapped_generic_items_without_source_summary() -> None:
     item = SiteItem(
         title="Claude와 생성형 AI 도구",
         url="https://example.com/ai/the-enterprise-agent-reliability-gap-for-production-workflows",
@@ -328,9 +328,7 @@ def test_smart_insight_derives_title_from_content_for_unmapped_generic_items() -
         r'<button class="insight-card"[^>]+data-source="https://example.com/ai/the-enterprise-agent-reliability-gap-for-production-workflows"[^>]*>',
         html,
     )
-    assert card
-    assert 'data-title="엔터프라이즈 에이전트 신뢰성 격차"' in card.group(0)
-    assert "Claude와 생성형 AI 도구" not in card.group(0)
+    assert card is None
 
 
 def test_ai_tool_directory_includes_logo_roll_tools() -> None:
