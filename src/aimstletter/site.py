@@ -178,15 +178,17 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
     ai_urls = {item.url for item in ai_items if item.url}
     tool_items = [item for item in tool_items if not item.url or item.url not in ai_urls]
     archive_entry = _weekly_archive_entry(now)
+    generated_current_week = bool(ai_items or tool_items)
     if not ai_items and not tool_items:
-        archived_items = _load_current_archive_items(output_dir, archive_entry)
+        archived_items, verified_archive_entry = _load_latest_verified_korean_archive(output_dir)
         ai_items = [item for item in archived_items if _smart_insight_category(item) != "도구"]
         tool_items = [item for item in archived_items if _smart_insight_category(item) == "도구"]
-        if not ai_items and not tool_items:
+        if (not ai_items and not tool_items) or verified_archive_entry is None:
             raise RuntimeError(
                 "Site generation produced no verified cards after source and localization retries, "
-                "and the current archive had no verified cards to preserve."
+                "and no Korean archive had verified cards to preserve."
             )
+        archive_entry = verified_archive_entry
     archive_entry["search_text"] = _items_archive_search_text([*ai_items, *tool_items])
     archive_entries = _collect_archive_entries(output_dir, archive_entry)
     html = render_homepage(
@@ -200,7 +202,8 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
 
     path = output_dir / "index.html"
     path.write_text(html, encoding="utf-8")
-    _write_weekly_archive(output_dir, archive_entry, html)
+    if generated_current_week:
+        _write_weekly_archive(output_dir, archive_entry, html)
     _refresh_archive_navigation(output_dir, archive_entries)
     _refresh_archive_source_summaries(output_dir, settings)
     _write_secondary_pages(output_dir, ai_items, tool_items, _render_analytics(settings), archive_entries)
@@ -290,6 +293,8 @@ def _collect_archive_entries(
     archive_root = output_dir / "archive"
     if archive_root.exists():
         for path in archive_root.glob("*/*/week-*/index.html"):
+            if not _load_verified_korean_archive_items(path):
+                continue
             try:
                 year = int(path.parts[-4])
                 month = int(path.parts[-3])
@@ -6214,7 +6219,7 @@ def _localize_items(
         return []
     provider_state = provider_state if provider_state is not None else {}
     if provider_state.get("unavailable"):
-        return [_source_snapshot_site_item(item) for item in items]
+        return []
     if not settings.openai_api_key and not settings.azure_openai_api_key:
         print(f"Skipped {len(items)} {context} items because OpenAI localization is not configured.", file=sys.stderr)
         return []
@@ -6229,6 +6234,8 @@ def _localize_items(
                 provider_state,
             )
             if len(localized_chunk) != len(chunk):
+                if provider_state.get("unavailable"):
+                    return []
                 message = (
                     f"Localization produced {len(localized_chunk)} verified cards for a "
                     f"{len(chunk)}-item chunk in {context}."
@@ -6343,10 +6350,10 @@ def _localize_items(
             provider_state["unavailable"] = True
             print(
                 f"Localization providers were unreachable after 5 attempts for {context}; "
-                "publishing verified source snapshots.",
+                "preserving the latest verified Korean archive instead of publishing source text.",
                 file=sys.stderr,
             )
-            return [_source_snapshot_site_item(item) for item in items]
+            return []
         raise RuntimeError(f"Localization failed after 5 attempts for {context}: {last_error}") from last_error
     except Exception as exc:  # noqa: BLE001
         print(f"OpenAI localization failed for {context}: {exc}", file=sys.stderr)
@@ -6403,34 +6410,19 @@ def _is_provider_connection_error(error: Exception) -> bool:
     return False
 
 
-def _source_snapshot_site_item(item: DigestItem) -> SiteItem:
-    summary = _clean_plain_text(item.summary)
-    title = _clean_plain_text(item.title)
-    published = _format_date(item.published)
-    return SiteItem(
-        title=title,
-        url=item.url,
-        source=_korean_source_name(item.source),
-        kind=_korean_kind_name(item.kind),
-        published=item.published,
-        summary=summary,
-        detail=summary,
-        key_points=(
-            f"1. 한 줄 요약: {summary}",
-            f"2. 무엇이 바뀌었나: {summary}",
-            "3. 왜 중요한가: 원문 설명이 명시한 핵심 내용은 위 문장과 같습니다.",
-            "4. 한계와 주의사항: 자동 한국어 요약 연결이 지연되어 원문 설명 범위만 반영했습니다.",
-            "5. 이번 주 해볼 일: 원문 설명에서 업무에 직접 적용할 수 있는 항목 하나를 검증합니다.",
-            f"6. 누가 보면 좋은가: {item.source} 업데이트를 추적하는 실무자입니다.",
-            f"7. 출처와 상태: {item.source} · 원문 설명 확인 · {published}",
-        ),
-        tags=("원문 스냅샷", _korean_kind_name(item.kind), item.source),
-    )
-
-
 def _has_publishable_localized_copy(item: SiteItem) -> bool:
     text = " ".join((item.summary, item.detail, " ".join(item.key_points)))
-    return not _contains_unpublishable_fallback_copy(text)
+    required_korean_fields = (item.summary, item.detail, *item.key_points[:7])
+    return (
+        not _contains_unpublishable_fallback_copy(text)
+        and not _is_source_snapshot(item)
+        and bool(item.summary.strip())
+        and bool(item.detail.strip())
+        and len(item.key_points) >= 7
+        and all(re.search(r"[가-힣]", field) for field in required_korean_fields)
+        and not _looks_untranslated(item.summary)
+        and not _looks_untranslated(item.detail)
+    )
 
 
 def _has_reused_or_generic_localizations(localized: list[dict[str, object]]) -> bool:
@@ -8935,11 +8927,7 @@ def _site_item_from_existing_card_attrs(attrs: dict[str, str]) -> SiteItem:
     )
 
 
-def _load_current_archive_items(
-    output_dir: Path,
-    archive_entry: dict[str, object],
-) -> list[SiteItem]:
-    archive_path = output_dir / str(archive_entry["href"]) / "index.html"
+def _load_verified_korean_archive_items(archive_path: Path) -> list[SiteItem]:
     if not archive_path.exists():
         return []
     html_text = archive_path.read_text(encoding="utf-8")
@@ -8947,7 +8935,44 @@ def _load_current_archive_items(
         _site_item_from_existing_card_attrs(_html_attrs(match.group(0)))
         for match in re.finditer(r'<button class="insight-card"[\s\S]*?</button>', html_text)
     ]
-    return [item for item in items if item.title and item.summary]
+    if not items or not all(_has_publishable_localized_copy(item) for item in items):
+        return []
+    return items
+
+
+def _archive_entry_from_path(path: Path) -> dict[str, object] | None:
+    try:
+        year = int(path.parts[-4])
+        month = int(path.parts[-3])
+        week = int(path.parts[-2].replace("week-", ""))
+    except (ValueError, IndexError):
+        return None
+    start, end = _archive_week_window(year, month, week)
+    return {
+        "year": year,
+        "month": month,
+        "week": week,
+        "href": f"archive/{year}/{month:02d}/week-{week}/",
+        "period_start": start.date().isoformat(),
+        "period_end": end.date().isoformat(),
+        "period_label": _period_label(start, end),
+        "search_text": _archive_page_search_text(path),
+    }
+
+
+def _load_latest_verified_korean_archive(
+    output_dir: Path,
+) -> tuple[list[SiteItem], dict[str, object] | None]:
+    archive_paths = sorted(
+        (output_dir / "archive").glob("*/*/week-*/index.html"),
+        reverse=True,
+    )
+    for archive_path in archive_paths:
+        items = _load_verified_korean_archive_items(archive_path)
+        entry = _archive_entry_from_path(archive_path)
+        if items and entry is not None:
+            return items, entry
+    return [], None
 
 
 def _parse_json_attr(value: str) -> object:

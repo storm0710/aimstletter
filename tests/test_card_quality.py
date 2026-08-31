@@ -16,6 +16,8 @@ from aimstletter.site import (
     _clean_unpublishable_intro_copy,
     _filter_publishable_source_items,
     _localized_site_item,
+    _load_latest_verified_korean_archive,
+    _load_verified_korean_archive_items,
     _localize_items,
     _normalize_search_text,
     _paper_focused_summary,
@@ -459,6 +461,62 @@ def test_build_does_not_overwrite_homepage_when_no_verified_cards(monkeypatch, t
     assert index_path.read_text(encoding="utf-8") == "previous verified homepage"
 
 
+def test_archive_fallback_skips_untranslated_week_and_selects_latest_korean_week(tmp_path) -> None:
+    korean_item = SiteItem(
+        title="GitHub Copilot 배포 승인",
+        url="https://example.com/korean",
+        source="GitHub Copilot 변경 이력",
+        kind="도구 업데이트",
+        published=datetime(2026, 8, 21, tzinfo=UTC),
+        summary="GitHub Copilot이 배포 전에 지정 검토자의 승인을 받는 기능을 추가했습니다.",
+        detail="배포 요청을 지정 검토자가 확인하고 승인한 뒤에만 실행하도록 흐름을 바꿉니다.",
+        key_points=(
+            "1. 한 줄 요약: 배포 전에 지정 검토자의 승인을 받습니다.",
+            "2. 무엇이 바뀌었나: 자동 배포 흐름에 승인 단계를 추가했습니다.",
+            "3. 왜 중요한가: 승인되지 않은 변경의 운영 반영을 막습니다.",
+            "4. 한계와 주의사항: 저장소 권한과 검토자 구성을 확인해야 합니다.",
+            "5. 이번 주 해볼 일: 시험 저장소에 승인 규칙을 설정합니다.",
+            "6. 누가 보면 좋은가: 배포 담당자와 운영 담당자입니다.",
+            "7. 출처와 상태: 공식 변경 이력에서 공개된 기능입니다.",
+        ),
+        tags=("GitHub Copilot", "배포 승인"),
+    )
+    english_item = SiteItem(
+        title="Copilot deployment approvals",
+        url="https://example.com/english",
+        source="GitHub Copilot Changelog",
+        kind="tool",
+        published=datetime(2026, 8, 28, tzinfo=UTC),
+        summary="GitHub Copilot adds repository deployment approvals with named reviewers.",
+        detail="Repository deployments require approval from a named reviewer before execution.",
+        key_points=tuple(f"{index}. English source text only" for index in range(1, 8)),
+        tags=("원문 스냅샷",),
+    )
+    week_four = tmp_path / "archive/2026/08/week-4/index.html"
+    week_five = tmp_path / "archive/2026/08/week-5/index.html"
+    week_four.parent.mkdir(parents=True)
+    week_five.parent.mkdir(parents=True)
+    week_four.write_text(_render_smart_insight_cards([korean_item]), encoding="utf-8")
+    week_five.write_text(_render_smart_insight_cards([english_item]), encoding="utf-8")
+
+    assert len(_load_verified_korean_archive_items(week_four)) == 1
+    assert _load_verified_korean_archive_items(week_five) == []
+    items, entry = _load_latest_verified_korean_archive(tmp_path)
+    assert items[0].title == korean_item.title
+    assert entry is not None
+    assert entry["href"] == "archive/2026/08/week-4/"
+
+    monkeypatch = pytest.MonkeyPatch()
+    monkeypatch.setattr("aimstletter.site.fetch_recent_items", lambda *_args, **_kwargs: [])
+    try:
+        homepage = build_site(tmp_path, Settings(openai_api_key="")).read_text(encoding="utf-8")
+    finally:
+        monkeypatch.undo()
+    assert korean_item.summary in homepage
+    assert english_item.summary not in homepage
+    assert "08월 5째주" not in homepage
+
+
 def test_localize_items_retries_structurally_invalid_response(monkeypatch) -> None:
     item = DigestItem(
         title="Copilot deployment approvals",
@@ -573,7 +631,7 @@ def test_localize_items_splits_large_batches_before_generation(monkeypatch) -> N
     assert len(localized) == 4
 
 
-def test_localize_items_uses_verified_source_snapshot_after_connection_retries(monkeypatch) -> None:
+def test_localize_items_preserves_korean_archive_after_connection_retries(monkeypatch) -> None:
     item = DigestItem(
         title="Copilot deployment approvals",
         url="https://example.com/copilot-deployment-approvals",
@@ -594,13 +652,9 @@ def test_localize_items_uses_verified_source_snapshot_after_connection_retries(m
     monkeypatch.setattr("aimstletter.site.time.sleep", lambda _seconds: None)
 
     localized = _localize_items([item] * 4, Settings(openai_api_key="test-key"), "test")
-    rendered = _render_smart_insight_cards(localized)
 
     assert calls["count"] == 5
-    assert len(localized) == 4
-    assert localized[0].summary == item.summary
-    assert "원문 스냅샷" in localized[0].tags
-    assert item.summary in rendered
+    assert localized == []
 
 
 def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:
