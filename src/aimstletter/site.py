@@ -147,13 +147,20 @@ def build_site(output_dir: Path, settings: Settings) -> Path:
             *_items_in_window(raw_tool_items, week_start, week_end),
         ]
     )
-    source_items = _enrich_items_from_source_pages(source_items)
+    source_items = _filter_publishable_source_items(
+        _enrich_items_from_source_pages(source_items),
+        "weekly source items",
+    )
     skill_items = _rank_work_skill_updates(source_items, 5)
     skill_urls = {item.url for item in skill_items}
     other_source_items = [item for item in source_items if item.url not in skill_urls]
     ai_items = [*skill_items, *_latest_digest_items(rank_items(other_source_items, 12), 5)]
     tool_items = _rank_tool_updates(
-        _enrich_items_from_source_pages(_items_in_window(raw_tool_items, week_start, week_end)), 10
+        _filter_publishable_source_items(
+            _enrich_items_from_source_pages(_items_in_window(raw_tool_items, week_start, week_end)),
+            "weekly tool items",
+        ),
+        10,
     )
     ai_items = _localize_items(ai_items, settings, "DBA, 네트워크, 서버 운영자가 업무에 적용할 AI 스킬 업데이트")
     tool_items = _localize_items(tool_items, settings, "인공지능 도구 업데이트")
@@ -613,6 +620,19 @@ def _enrich_items_from_source_pages(items: list[DigestItem]) -> list[DigestItem]
     return [recovered.get(item.url, item) for item in items]
 
 
+def _filter_publishable_source_items(items: list[DigestItem], context: str) -> list[DigestItem]:
+    publishable = [item for item in items if not _source_text_needs_enrichment(item)]
+    skipped = [item for item in items if _source_text_needs_enrichment(item)]
+    if skipped:
+        names = ", ".join(_clip(item.title, 80) for item in skipped[:8])
+        suffix = f" and {len(skipped) - 8} more" if len(skipped) > 8 else ""
+        print(
+            f"Skipped {len(skipped)} {context} without source-backed summaries after retry: {names}{suffix}",
+            file=sys.stderr,
+        )
+    return publishable
+
+
 def _source_text_needs_enrichment(item: DigestItem) -> bool:
     summary = _clean_plain_text(item.summary)
     return not summary or _needs_specific_insight_copy(summary) or summary.lower() == _clean_plain_text(item.title).lower()
@@ -633,7 +653,7 @@ def _recover_web_source_item(item: DigestItem) -> DigestItem | None:
                 summary=summary,
             )
 
-    response = _fetch_web_response_with_retry(item.url, attempts=3)
+    response = _fetch_web_response_with_retry(item.url, attempts=5)
     if response is None:
         return None
     description = _page_metadata_value(response.text, "og:description") or _page_metadata_value(
@@ -658,7 +678,7 @@ def _recover_web_source_item(item: DigestItem) -> DigestItem | None:
     return recovered
 
 
-def _fetch_web_response_with_retry(url: str, attempts: int = 3) -> requests.Response | None:
+def _fetch_web_response_with_retry(url: str, attempts: int = 5) -> requests.Response | None:
     headers = {"User-Agent": "AI-Master-Times/1.0 (+https://storm0710.github.io/aimstletter/)"}
     for attempt in range(attempts):
         try:
@@ -6116,7 +6136,8 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
     if not items:
         return []
     if not settings.openai_api_key and not settings.azure_openai_api_key:
-        return [_fallback_korean_item(item) for item in items]
+        print(f"Skipped {len(items)} {context} items because OpenAI localization is not configured.", file=sys.stderr)
+        return []
 
     source_block = "\n\n".join(
         textwrap.dedent(
@@ -6196,19 +6217,36 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
         print(f"OpenAI localization failed for {context}: {exc}", file=sys.stderr)
         if _require_openai_localization():
             raise
-        return [_fallback_korean_item(item) for item in items]
+        return []
 
     if len(localized) != len(items):
         if _require_openai_localization():
             raise ValueError(
                 f"OpenAI returned {len(localized)} localized items for {len(items)} source items."
             )
-        return [_fallback_korean_item(item) for item in items]
+        print(
+            f"Skipped {len(items)} {context} items because OpenAI returned {len(localized)} results.",
+            file=sys.stderr,
+        )
+        return []
 
-    return [
+    localized_items = [
         _localized_site_item(item, localized_item)
         for item, localized_item in zip(items, localized, strict=True)
     ]
+    publishable_items = [item for item in localized_items if _has_publishable_localized_copy(item)]
+    skipped_count = len(localized_items) - len(publishable_items)
+    if skipped_count:
+        print(
+            f"Skipped {skipped_count} {context} items because localization still contained fallback or generic copy.",
+            file=sys.stderr,
+        )
+    return publishable_items
+
+
+def _has_publishable_localized_copy(item: SiteItem) -> bool:
+    text = " ".join((item.summary, item.detail, " ".join(item.key_points)))
+    return not _contains_unpublishable_fallback_copy(text)
 
 
 def _has_reused_or_generic_localizations(localized: list[dict[str, object]]) -> bool:
@@ -8561,8 +8599,7 @@ def refresh_existing_paper_cards(output_dir: Path) -> int:
 
 def refresh_existing_cards(output_dir: Path) -> int:
     """Refresh generated HTML card data when source-specific evidence is available."""
-    paths = [output_dir / "index.html"]
-    paths.extend(sorted((output_dir / "archive").glob("*/*/week-*/index.html")))
+    paths = sorted({output_dir / "index.html", *output_dir.glob("**/index.html")})
 
     cache: dict[str, DigestItem | None] = {}
     updated = 0
@@ -8572,10 +8609,13 @@ def refresh_existing_cards(output_dir: Path) -> int:
         html_text = path.read_text(encoding="utf-8")
         refreshed, count = _refresh_paper_cards_in_html(html_text, cache)
         refreshed, known_count = _refresh_known_specific_cards_in_html(refreshed)
+        refreshed, removed_count = _remove_unpublishable_cards_in_html(refreshed)
+        refreshed, archive_index_count = _clean_unpublishable_archive_indexes(refreshed)
+        refreshed, intro_count = _clean_unpublishable_intro_copy(refreshed)
         refreshed, duplicate_count = _dedupe_insight_buttons_in_html(refreshed)
-        if count or known_count or duplicate_count:
+        if count or known_count or removed_count or archive_index_count or intro_count or duplicate_count:
             path.write_text(refreshed, encoding="utf-8", newline="")
-            updated += count + known_count + duplicate_count
+            updated += count + known_count + removed_count + archive_index_count + intro_count + duplicate_count
     return updated
 
 
@@ -8599,6 +8639,132 @@ def _dedupe_insight_buttons_in_html(html_text: str) -> tuple[str, int]:
         return button
 
     return button_pattern.sub(replace_button, html_text), removed
+
+
+def _remove_unpublishable_cards_in_html(html_text: str) -> tuple[str, int]:
+    button_pattern = re.compile(r'<button class="insight-card"[\s\S]*?</button>')
+    removed = 0
+
+    def replace_button(match: re.Match[str]) -> str:
+        nonlocal removed
+        button = match.group(0)
+        attrs = _html_attrs(button)
+        text = " ".join(
+            (
+                unescape(attrs.get("data-body", "")),
+                unescape(attrs.get("data-detail", "")),
+                unescape(attrs.get("data-points", "")),
+                re.sub(r"<[^>]+>", " ", button),
+            )
+        )
+        if _contains_unpublishable_fallback_copy(text):
+            removed += 1
+            return ""
+        return button
+
+    refreshed = button_pattern.sub(replace_button, html_text)
+    if removed:
+        refreshed = _sync_initial_detail_with_first_card(refreshed)
+    return refreshed, removed
+
+
+def _contains_unpublishable_fallback_copy(text: str) -> bool:
+    forbidden_phrases = (
+        "수집된 본문 요약이 부족",
+        "원문 본문을 재수집",
+        "제목과 출처 범위에서만",
+        "원문을 다시 열어",
+        "기능, 성능, 적용 효과를 추정하지 않습니다",
+        "현재 카드는 제목과 출처 메타데이터만 검증",
+    )
+    return any(phrase in text for phrase in forbidden_phrases)
+
+
+def _clean_unpublishable_archive_indexes(html_text: str) -> tuple[str, int]:
+    link_pattern = re.compile(
+        r'(<a\b[^>]*\bdata-archive-link\b[^>]*\bdata-archive-index=")([^"]*)("[^>]*>)([\s\S]*?)(</a>)'
+    )
+    cleaned = 0
+
+    def replace_link(match: re.Match[str]) -> str:
+        nonlocal cleaned
+        prefix, raw_index, suffix, label_html, end = match.groups()
+        index_text = unescape(raw_index)
+        if not _contains_unpublishable_fallback_copy(index_text):
+            return match.group(0)
+        label_text = _normalize_search_text(re.sub(r"<[^>]+>", " ", unescape(label_html)))
+        href_match = re.search(r'href="([^"]*)"', suffix)
+        href_text = _normalize_search_text(unescape(href_match.group(1))) if href_match else ""
+        replacement = _normalize_search_text(" ".join(part for part in (label_text, href_text) if part))
+        cleaned += 1
+        return f'{prefix}{escape(replacement, quote=True)}{suffix}{label_html}{end}'
+
+    return link_pattern.sub(replace_link, html_text), cleaned
+
+
+def _clean_unpublishable_intro_copy(html_text: str) -> tuple[str, int]:
+    intro_pattern = re.compile(r'(<p class="intro-copy">)([\s\S]*?)(</p>)')
+    cleaned = 0
+    replacement_copy = (
+        "AI Master Times는 매주 수집한 논문, 업무 AI 스킬, AI 도구 업데이트를 "
+        "원문 근거가 확인된 항목 중심으로 정리합니다."
+    )
+
+    def replace_intro(match: re.Match[str]) -> str:
+        nonlocal cleaned
+        prefix, body, suffix = match.groups()
+        if not _contains_unpublishable_fallback_copy(unescape(re.sub(r"<[^>]+>", " ", body))):
+            return match.group(0)
+        cleaned += 1
+        return f"{prefix}{escape(replacement_copy)}{suffix}"
+
+    return intro_pattern.sub(replace_intro, html_text), cleaned
+
+
+def _sync_initial_detail_with_first_card(html_text: str) -> str:
+    first_match = re.search(r'<button class="insight-card"[\s\S]*?</button>', html_text)
+    if not first_match:
+        return re.sub(r'<article class="insight-detail"[\s\S]*?</article>', "", html_text, count=1)
+    site_item = _site_item_from_existing_card_attrs(_html_attrs(first_match.group(0)))
+    return re.sub(
+        r'<article class="insight-detail"[\s\S]*?</article>',
+        _default_insight_detail(site_item),
+        html_text,
+        count=1,
+    )
+
+
+def _site_item_from_existing_card_attrs(attrs: dict[str, str]) -> SiteItem:
+    points = tuple(_coerce_string_list(_parse_json_attr(attrs.get("data-points", "[]"))))
+    tags = tuple(_coerce_string_list(_parse_json_attr(attrs.get("data-tags", "[]"))))
+    category = unescape(attrs.get("data-category", ""))
+    return SiteItem(
+        title=unescape(attrs.get("data-title", "")),
+        url=unescape(attrs.get("data-source", "")),
+        source=unescape(attrs.get("data-subcategory", "")) or "Source",
+        kind=category or "자료",
+        published=_parse_existing_card_date(unescape(attrs.get("data-meta", ""))),
+        summary=unescape(attrs.get("data-body", "")),
+        detail=unescape(attrs.get("data-detail", "")),
+        key_points=points,
+        tags=tags,
+    )
+
+
+def _parse_json_attr(value: str) -> object:
+    try:
+        return json.loads(unescape(value or "[]"))
+    except json.JSONDecodeError:
+        return []
+
+
+def _parse_existing_card_date(meta: str) -> datetime:
+    for part in reversed([piece.strip() for piece in meta.split("·")]):
+        try:
+            return datetime.fromisoformat(part).replace(tzinfo=UTC)
+        except ValueError:
+            continue
+    return datetime.now(UTC)
 
 
 def _refresh_paper_cards_in_html(
@@ -8640,15 +8806,7 @@ def _refresh_paper_cards_in_html(
             return refreshed
 
         if "__arxiv_fetch_disabled__" in cache:
-            if not _needs_specific_insight_copy(existing_text):
-                return button
-            site_item = _localized_site_item(existing_digest, {})
-            refreshed = _patch_insight_button(button, site_item)
-            if refreshed != button:
-                updated += 1
-                if is_first_button:
-                    first_button_refreshed = site_item
-            return refreshed
+            return button
 
         digest = cache.get(source_url)
         if source_url not in cache:
@@ -8657,15 +8815,7 @@ def _refresh_paper_cards_in_html(
             if digest is None:
                 cache["__arxiv_fetch_disabled__"] = None
         if not digest:
-            if not _needs_specific_insight_copy(existing_text):
-                return button
-            site_item = _localized_site_item(existing_digest, {})
-            refreshed = _patch_insight_button(button, site_item)
-            if refreshed != button:
-                updated += 1
-                if is_first_button:
-                    first_button_refreshed = site_item
-            return refreshed
+            return button
 
         site_item = _localized_site_item(digest, {})
         refreshed = _patch_insight_button(button, site_item)

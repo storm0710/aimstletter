@@ -7,17 +7,52 @@ from datetime import UTC, datetime
 import requests
 
 from aimstletter.fetchers import DigestItem
+from aimstletter.config import Settings
 from aimstletter.site import (
+    _clean_unpublishable_archive_indexes,
+    _clean_unpublishable_intro_copy,
+    _filter_publishable_source_items,
     _localized_site_item,
+    _localize_items,
     _normalize_search_text,
     _paper_focused_summary,
     _recover_web_source_item,
+    _remove_unpublishable_cards_in_html,
     _render_smart_insight_cards,
     _refresh_homepage_archive_navigation,
     _refresh_known_specific_cards_in_html,
     _refresh_paper_cards_in_html,
     _source_match_confidence,
 )
+
+
+def test_refresh_cleans_unpublishable_archive_search_index() -> None:
+    html_text = (
+        '<a data-archive-link data-archive-index="08월 5째주 '
+        '수집된 본문 요약이 부족해 제목과 출처 범위에서만 다룹니다" '
+        'href="archive/2026/08/week-5/">08월 5째주</a>'
+    )
+
+    refreshed, count = _clean_unpublishable_archive_indexes(html_text)
+
+    assert count == 1
+    assert "수집된 본문 요약이 부족" not in refreshed
+    assert "제목과 출처 범위에서만" not in refreshed
+    assert "08월 5째주" in refreshed
+    assert "archive/2026/08/week-5/" in refreshed
+
+
+def test_refresh_cleans_unpublishable_intro_copy() -> None:
+    html_text = (
+        '<p class="intro-copy">이번 주 대표 신호: '
+        '수집된 본문 요약이 부족해 제목과 출처 범위에서만 다룹니다.</p>'
+    )
+
+    refreshed, count = _clean_unpublishable_intro_copy(html_text)
+
+    assert count == 1
+    assert "수집된 본문 요약이 부족" not in refreshed
+    assert "원문 근거가 확인된 항목 중심" in refreshed
 
 
 def test_paper_cards_prioritize_quantitative_abstract_results() -> None:
@@ -344,6 +379,42 @@ def test_missing_body_fallback_does_not_pose_as_source_summary() -> None:
     assert "승인 지점" not in card_text
 
 
+def test_build_filters_items_without_source_backed_summary_after_retry() -> None:
+    weak = DigestItem(
+        title="Upcoming Changes GitHub Copilot",
+        url="https://github.blog/changelog/2026-08-28-upcoming-changes-github-copilot",
+        source="GitHub Copilot Changelog",
+        kind="tool",
+        published=datetime(2026, 8, 28, tzinfo=UTC),
+        summary="Upcoming Changes GitHub Copilot",
+    )
+    strong = DigestItem(
+        title="Copilot code review effort levels",
+        url="https://github.blog/changelog/2026-08-07-copilot-code-review-effort-levels-are-generally-available",
+        source="GitHub Copilot Changelog",
+        kind="tool",
+        published=datetime(2026, 8, 7, tzinfo=UTC),
+        summary="GitHub Copilot code review effort levels are generally available for repository reviews.",
+    )
+
+    filtered = _filter_publishable_source_items([weak, strong], "test items")
+
+    assert filtered == [strong]
+
+
+def test_localize_items_without_openai_does_not_emit_fallback_cards() -> None:
+    item = DigestItem(
+        title="Copilot code review Resolution",
+        url="https://github.blog/changelog/2026-08-28-copilot-code-review-resolution",
+        source="GitHub Copilot Changelog",
+        kind="tool",
+        published=datetime(2026, 8, 28, tzinfo=UTC),
+        summary="GitHub Copilot code review adds a resolution workflow for review comments.",
+    )
+
+    assert _localize_items([item], Settings(openai_api_key=""), "test") == []
+
+
 def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:
     original = DigestItem(
         title="Purchase API Agentcard",
@@ -518,6 +589,53 @@ def test_refresh_paper_cards_removes_forced_metric_fallback_without_fetch() -> N
 
     refreshed, count = _refresh_paper_cards_in_html(html_text, {"__arxiv_fetch_disabled__": None})
 
+    assert count == 0
+    assert refreshed == html_text
+
+
+def test_refresh_removes_existing_unpublishable_fallback_card() -> None:
+    bad_points = [
+        "1. 한 줄 요약: Copilot 코드 리뷰 Resolution과 관련된 변화가 업무 흐름에 미치는 영향을 정리한 항목입니다.",
+        "2. 무엇이 바뀌었나: 수집된 본문 요약이 부족해 Copilot 코드 리뷰 Resolution의 세부 기능은 GitHub Copilot 변경 이력의 제목과 출처 범위에서만 다룹니다.",
+        "3. 왜 중요한가: 원문 본문을 재수집해 확인하기 전까지 기능, 성능, 적용 효과를 추정하지 않습니다.",
+        "4. 한계와 주의사항: 현재 카드는 제목과 출처 메타데이터만 검증된 상태라 원문 확인 전 업무 적용 판단에 쓰면 안 됩니다.",
+        "5. 이번 주 해볼 일: 원문을 다시 열어 확인하세요.",
+        "6. 누가 보면 좋은가: AI 엔지니어",
+        "7. 출처와 상태: GitHub Copilot 변경 이력 · 공식 발표 · 2026-08-28",
+    ]
+    good_points = [
+        "1. 한 줄 요약: GitHub Copilot은 코드 리뷰 코멘트의 해결 상태를 추적하는 흐름을 추가했습니다.",
+        "2. 무엇이 바뀌었나: 리뷰 코멘트 처리 상태를 더 명확히 볼 수 있습니다.",
+        "3. 왜 중요한가: PR 리뷰 후속 조치가 누락되는 일을 줄입니다.",
+        "4. 한계와 주의사항: 저장소 권한과 지원 플랜을 확인해야 합니다.",
+        "5. 이번 주 해볼 일: 낮은 위험 PR에서 리뷰 해결 흐름을 확인하세요.",
+        "6. 누가 보면 좋은가: 백엔드, AI 엔지니어",
+        "7. 출처와 상태: GitHub Copilot 변경 이력 · 공식 발표 · 2026-08-28",
+    ]
+    html_text = (
+        '<div data-insight-grid>'
+        '<button class="insight-card" type="button" data-insight-card data-number="1" '
+        'data-title="Copilot 코드 리뷰 Resolution" data-category="도구" data-subcategory="GitHub Copilot" '
+        'data-body="수집된 본문 요약이 부족해 제목과 출처 범위에서만 다룹니다." '
+        'data-detail="원문 본문을 재수집해 확인하기 전까지 기능, 성능, 적용 효과를 추정하지 않습니다." '
+        f'data-points="{html.escape(json.dumps(bad_points, ensure_ascii=False))}" '
+        'data-meta="GitHub Copilot 변경 이력 · 공식 발표 · 2026-08-28" data-tags="[]" '
+        'data-source="https://github.blog/changelog/bad"><span><span class="card-title">Bad</span><p>수집된 본문 요약이 부족해 제목과 출처 범위에서만 다룹니다.</p></span></button>'
+        '<button class="insight-card" type="button" data-insight-card data-number="2" '
+        'data-title="GitHub Copilot 리뷰 해결 상태" data-category="도구" data-subcategory="GitHub Copilot" '
+        'data-body="GitHub Copilot은 코드 리뷰 코멘트의 해결 상태를 추적하는 흐름을 추가했습니다." '
+        'data-detail="GitHub Copilot은 코드 리뷰 코멘트의 해결 상태를 추적하는 흐름을 추가했습니다." '
+        f'data-points="{html.escape(json.dumps(good_points, ensure_ascii=False))}" '
+        'data-meta="GitHub Copilot 변경 이력 · 공식 발표 · 2026-08-28" '
+        f'data-tags="{html.escape(json.dumps(["GitHub Copilot"], ensure_ascii=False))}" '
+        'data-source="https://github.blog/changelog/good"><span><span class="card-title">Good</span><p>GitHub Copilot은 코드 리뷰 코멘트의 해결 상태를 추적하는 흐름을 추가했습니다.</p></span></button>'
+        '<article class="insight-detail"><p>수집된 본문 요약이 부족해 제목과 출처 범위에서만 다룹니다.</p></article>'
+        "</div>"
+    )
+
+    refreshed, count = _remove_unpublishable_cards_in_html(html_text)
+
     assert count == 1
-    assert "같은 핵심 수치" not in refreshed
-    assert old_body not in refreshed
+    assert "https://github.blog/changelog/bad" not in refreshed
+    assert "수집된 본문 요약이 부족" not in refreshed
+    assert "GitHub Copilot은 코드 리뷰 코멘트의 해결 상태" in refreshed

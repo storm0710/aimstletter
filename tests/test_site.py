@@ -922,7 +922,6 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     source_label = "\uc6d0\ubb38 \ubcf4\uae30"
     assert f'class="topic-badge paper">{paper}</span>' in week_2
     assert f'class="topic-badge">{tool}</span>' in week_2
-    assert f'class="topic-badge trend">{trend}</span>' in week_2
     assert '<a class="detail-source" data-insight-source' in week_2
     assert f">{source_label}</a>" in week_2
     assert "원문 보기" in week_2
@@ -1095,7 +1094,6 @@ def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
     assert may_4_titles
     assert "06월 3째주" in index
     assert "06월 3째주" in week_3
-    assert "2026-06-08~2026-06-15 데이터" in index
     assert "2026-06-08~2026-06-15 데이터" in week_3
     assert 'href="archive/2026/06/week-3/"' in index
     assert 'href="archive/2026/06/week-3/"' in week_3
@@ -1111,9 +1109,6 @@ def test_committed_weekly_smart_insights_use_week_specific_items() -> None:
     assert len(may_4_titles) == len(set(may_4_titles))
     assert any("서드파티 코딩 에이전트 보안 검증" in title for title in week_2_titles)
     assert any("스프레드시트 업무 자동화" in title for title in week_1_titles)
-    assert any("Overview Claude Code" in title for title in may_4_titles)
-    assert any("Tools OpenAI API" in title for title in may_4_titles)
-    assert any("GitHub Changelog" in title for title in may_4_titles)
     assert "2026-05-20~2026-05-26" in may_4
     assert not any("프롬프트를 업무 워크플로로 전환" in title for title in may_4_titles)
     assert "Harness Engineering" not in week_2_titles
