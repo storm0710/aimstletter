@@ -562,6 +562,36 @@ def test_localize_items_splits_large_batches_before_generation(monkeypatch) -> N
     assert len(localized) == 4
 
 
+def test_localize_items_uses_verified_source_snapshot_after_connection_retries(monkeypatch) -> None:
+    item = DigestItem(
+        title="Copilot deployment approvals",
+        url="https://example.com/copilot-deployment-approvals",
+        source="GitHub Copilot Changelog",
+        kind="tool",
+        published=datetime(2026, 8, 28, tzinfo=UTC),
+        summary="GitHub Copilot adds repository deployment approvals with named reviewers.",
+    )
+    calls = {"count": 0}
+
+    def fail_connection(*_args, **_kwargs):
+        calls["count"] += 1
+        raise ConnectionError("Connection error")
+
+    monkeypatch.setenv("AIMSTLETTER_REQUIRE_OPENAI_LOCALIZATION", "1")
+    monkeypatch.setattr("aimstletter.site._make_client", lambda **_kwargs: (object(), "test-model"))
+    monkeypatch.setattr("aimstletter.site._generate_openai_text", fail_connection)
+    monkeypatch.setattr("aimstletter.site.time.sleep", lambda _seconds: None)
+
+    localized = _localize_items([item], Settings(openai_api_key="test-key"), "test")
+    rendered = _render_smart_insight_cards(localized)
+
+    assert calls["count"] == 5
+    assert len(localized) == 1
+    assert localized[0].summary == item.summary
+    assert "원문 스냅샷" in localized[0].tags
+    assert item.summary in rendered
+
+
 def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:
     original = DigestItem(
         title="Purchase API Agentcard",

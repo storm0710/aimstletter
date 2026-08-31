@@ -3068,10 +3068,14 @@ def _smart_insight_subcategory(item: SiteItem) -> str:
 
 def _smart_insight_title(item: SiteItem) -> str:
     _prefix, title = _split_title_source_prefix(item)
+    if _is_source_snapshot(item):
+        return title
     return _koreanize_display_title(title, f"{item.summary} {item.detail} {item.url}", item.source)
 
 
 def _smart_insight_summary(item: SiteItem) -> str:
+    if _is_source_snapshot(item):
+        return item.summary
     digest = _site_item_to_digest(item)
     fallback = _fallback_specific_summary(digest)
     if fallback and (_needs_specific_insight_copy(item.summary) or _looks_untranslated(item.summary)):
@@ -3081,6 +3085,8 @@ def _smart_insight_summary(item: SiteItem) -> str:
 
 def _smart_insight_card_detail(item: SiteItem, summary: str) -> str:
     detail = item.detail or item.summary
+    if _is_source_snapshot(item):
+        return detail or summary
     digest = _site_item_to_digest(item)
     fallback = _fallback_specific_summary(digest)
     if fallback and (_needs_specific_insight_copy(detail) or _looks_untranslated(detail)):
@@ -3090,6 +3096,8 @@ def _smart_insight_card_detail(item: SiteItem, summary: str) -> str:
 
 def _smart_insight_points(item: SiteItem) -> tuple[str, ...]:
     points = item.key_points or (item.summary,)
+    if _is_source_snapshot(item):
+        return tuple(points[:7])
     digest = _site_item_to_digest(item)
     specific = _latest_week_specific_summary(re.sub(r"[-_]+", " ", _item_text(digest)))
     if specific:
@@ -3117,6 +3125,10 @@ def _has_complete_card_points(points: tuple[str, ...]) -> bool:
         "출처와 상태",
     )
     return all(label in point for label, point in zip(expected, points, strict=False))
+
+
+def _is_source_snapshot(item: SiteItem) -> bool:
+    return "원문 스냅샷" in item.tags
 
 
 def _fallback_card_points(
@@ -6300,6 +6312,13 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
                         file=sys.stderr,
                     )
                     time.sleep(2 + attempt)
+        if last_error and _is_provider_connection_error(last_error):
+            print(
+                f"Localization providers were unreachable after 5 attempts for {context}; "
+                "publishing verified source snapshots.",
+                file=sys.stderr,
+            )
+            return [_source_snapshot_site_item(item) for item in items]
         raise RuntimeError(f"Localization failed after 5 attempts for {context}: {last_error}") from last_error
     except Exception as exc:  # noqa: BLE001
         print(f"OpenAI localization failed for {context}: {exc}", file=sys.stderr)
@@ -6341,6 +6360,44 @@ def _make_localization_clients(settings: Settings) -> list[tuple[object, str]]:
         detail = "; ".join(errors) or "no provider credentials were configured"
         raise ValueError(f"No usable localization provider: {detail}")
     return clients
+
+
+def _is_provider_connection_error(error: Exception) -> bool:
+    current: BaseException | None = error
+    while current is not None:
+        message = str(current).lower()
+        if any(
+            marker in message
+            for marker in ("connection error", "connection failed", "timed out", "timeout")
+        ):
+            return True
+        current = current.__cause__ or current.__context__
+    return False
+
+
+def _source_snapshot_site_item(item: DigestItem) -> SiteItem:
+    summary = _clean_plain_text(item.summary)
+    title = _clean_plain_text(item.title)
+    published = _format_date(item.published)
+    return SiteItem(
+        title=title,
+        url=item.url,
+        source=_korean_source_name(item.source),
+        kind=_korean_kind_name(item.kind),
+        published=item.published,
+        summary=summary,
+        detail=summary,
+        key_points=(
+            f"1. 한 줄 요약: {summary}",
+            f"2. 무엇이 바뀌었나: {summary}",
+            "3. 왜 중요한가: 원문 설명이 명시한 핵심 내용은 위 문장과 같습니다.",
+            "4. 한계와 주의사항: 자동 한국어 요약 연결이 지연되어 원문 설명 범위만 반영했습니다.",
+            "5. 이번 주 해볼 일: 원문 설명에서 업무에 직접 적용할 수 있는 항목 하나를 검증합니다.",
+            f"6. 누가 보면 좋은가: {item.source} 업데이트를 추적하는 실무자입니다.",
+            f"7. 출처와 상태: {item.source} · 원문 설명 확인 · {published}",
+        ),
+        tags=("원문 스냅샷", _korean_kind_name(item.kind), item.source),
+    )
 
 
 def _has_publishable_localized_copy(item: SiteItem) -> bool:
