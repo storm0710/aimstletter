@@ -860,13 +860,15 @@ def _rewrite_archive_card(match: re.Match[str], item: SiteItem) -> str:
         )
     content = re.sub(
         r'(<span class="card-title">)[\s\S]*?(</span>)',
-        rf'\1{escape(item.title)}\2',
+        lambda found: f"{found.group(1)}{escape(item.title)}{found.group(2)}",
         match.group("content"),
         count=1,
     )
     content = re.sub(
         r'(<p>)[\s\S]*?(</p>)',
-        rf'\1{escape(_clip(_smart_insight_summary(item), 520))}\2',
+        lambda found: (
+            f"{found.group(1)}{escape(_clip(_smart_insight_summary(item), 520))}{found.group(2)}"
+        ),
         content,
         count=1,
     )
@@ -9253,18 +9255,28 @@ def _patch_insight_button(button: str, item: SiteItem) -> str:
     button = _replace_html_attr(button, "data-points", json.dumps(points, ensure_ascii=False))
     button = re.sub(
         r'<span class="card-title">[\s\S]*?</span>',
-        f'<span class="card-title">{escape(title)}</span>',
+        lambda _found: f'<span class="card-title">{escape(title)}</span>',
         button,
         count=1,
     )
-    button = re.sub(r"<p>[\s\S]*?</p>", f"<p>{escape(summary)}</p>", button, count=1)
+    button = re.sub(
+        r"<p>[\s\S]*?</p>",
+        lambda _found: f"<p>{escape(summary)}</p>",
+        button,
+        count=1,
+    )
     return button
 
 
 def _replace_html_attr(fragment: str, name: str, value: str) -> str:
     replacement = f'{name}="{escape(value, quote=True)}"'
     if re.search(rf'{re.escape(name)}="[^"]*"', fragment):
-        return re.sub(rf'{re.escape(name)}="[^"]*"', replacement, fragment, count=1)
+        return re.sub(
+            rf'{re.escape(name)}="[^"]*"',
+            lambda _found: replacement,
+            fragment,
+            count=1,
+        )
     return fragment
 
 
@@ -9274,19 +9286,19 @@ def _patch_initial_insight_detail(html_text: str, item: SiteItem) -> str:
     points = _render_detail_point_items(_smart_insight_points(item)[:7])
     html_text = re.sub(
         r"<h3 data-insight-title>[\s\S]*?</h3>",
-        f"<h3 data-insight-title>{escape(title)}</h3>",
+        lambda _found: f"<h3 data-insight-title>{escape(title)}</h3>",
         html_text,
         count=1,
     )
     html_text = re.sub(
         r'<p class="detail-copy" data-insight-detail>[\s\S]*?</p>',
-        f'<p class="detail-copy" data-insight-detail>{escape(detail)}</p>',
+        lambda _found: f'<p class="detail-copy" data-insight-detail>{escape(detail)}</p>',
         html_text,
         count=1,
     )
     html_text = re.sub(
         r'<ul class="detail-points" data-insight-points>[\s\S]*?</ul>',
-        f'<ul class="detail-points" data-insight-points>{points}</ul>',
+        lambda _found: f'<ul class="detail-points" data-insight-points>{points}</ul>',
         html_text,
         count=1,
     )

@@ -21,12 +21,23 @@ from aimstletter.site import (
     _paper_focused_summary,
     _recover_web_source_item,
     _remove_unpublishable_cards_in_html,
+    _replace_html_attr,
     _render_smart_insight_cards,
     _refresh_homepage_archive_navigation,
     _refresh_known_specific_cards_in_html,
     _refresh_paper_cards_in_html,
     _source_match_confidence,
 )
+
+
+def test_html_attribute_replacement_treats_source_backslashes_as_literal_text() -> None:
+    updated = _replace_html_attr(
+        '<button data-body="old"></button>',
+        "data-body",
+        r"The source uses the pattern \s+ without changing its meaning.",
+    )
+
+    assert r"pattern \s+" in updated
 
 
 def test_refresh_cleans_unpublishable_archive_search_index() -> None:
