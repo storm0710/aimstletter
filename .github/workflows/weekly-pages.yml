@@ -60,6 +60,7 @@ jobs:
           timeout 1000s bash -c '
             aimstletter-site --output-dir "$1" --build-date 2026-08-24
             aimstletter-site --output-dir "$1" --build-date 2026-08-31
+            aimstletter-site --output-dir "$1"
           ' _ "$staging_dir" 2>&1 | tee "$build_log"
           build_status=${PIPESTATUS[0]}
           set -e
