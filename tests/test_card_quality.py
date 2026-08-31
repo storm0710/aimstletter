@@ -457,9 +457,7 @@ def test_localize_items_retries_structurally_invalid_response(monkeypatch) -> No
         published=datetime(2026, 8, 28, tzinfo=UTC),
         summary="GitHub Copilot adds repository deployment approvals with named reviewers.",
     )
-    responses = [
-        "[]",
-        json.dumps(
+    valid_response = json.dumps(
             [
                 {
                     "title": "GitHub Copilot 배포 승인 기능",
@@ -480,22 +478,37 @@ def test_localize_items_retries_structurally_invalid_response(monkeypatch) -> No
                 }
             ],
             ensure_ascii=False,
-        ),
-    ]
+        )
     calls = {"count": 0}
+    providers: list[str] = []
 
-    def fake_generate(*_args, **_kwargs):
-        value = responses[calls["count"]]
+    def fake_generate(client, *_args, **_kwargs):
+        providers.append(client)
         calls["count"] += 1
-        return value
+        return "[]" if calls["count"] == 1 else valid_response
 
-    monkeypatch.setattr("aimstletter.site._make_client", lambda **_kwargs: (object(), "test-model"))
+    monkeypatch.setattr(
+        "aimstletter.site._make_client",
+        lambda **kwargs: (
+            "openai" if kwargs["openai_api_key"] else "azure",
+            "test-model",
+        ),
+    )
     monkeypatch.setattr("aimstletter.site._generate_openai_text", fake_generate)
     monkeypatch.setattr("aimstletter.site.time.sleep", lambda _seconds: None)
 
-    localized = _localize_items([item], Settings(openai_api_key="test-key"), "test")
+    localized = _localize_items(
+        [item],
+        Settings(
+            openai_api_key="test-key",
+            azure_openai_endpoint="https://example.openai.azure.com",
+            azure_openai_api_key="azure-key",
+        ),
+        "test",
+    )
 
     assert calls["count"] == 2
+    assert providers == ["openai", "azure"]
     assert len(localized) == 1
     assert "지정 검토자의 승인" in localized[0].summary
 

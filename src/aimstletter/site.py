@@ -6215,13 +6215,7 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
     )
 
     try:
-        client, model = _make_client(
-            openai_api_key=settings.openai_api_key,
-            openai_model=settings.openai_model,
-            azure_openai_endpoint=settings.azure_openai_endpoint,
-            azure_openai_api_key=settings.azure_openai_api_key,
-            azure_openai_deployment=settings.azure_openai_deployment,
-        )
+        clients = _make_localization_clients(settings)
         instructions = (
             "Return only a JSON array. Each item must contain title, summary, detail, key_points, tags, "
             "comparisons, and glossary. "
@@ -6273,6 +6267,7 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
         last_error: Exception | None = None
         for attempt in range(5):
             try:
+                client, model = clients[attempt % len(clients)]
                 retry_note = (
                     "\n\nThis is a retry because the previous response failed structural or content "
                     "validation. Return every source item exactly once and ground every claim in its "
@@ -6311,6 +6306,41 @@ def _localize_items(items: list[DigestItem], settings: Settings, context: str) -
         if _require_openai_localization():
             raise
         return []
+
+
+def _make_localization_clients(settings: Settings) -> list[tuple[object, str]]:
+    clients: list[tuple[object, str]] = []
+    errors: list[str] = []
+    if settings.openai_api_key:
+        try:
+            clients.append(
+                _make_client(
+                    openai_api_key=settings.openai_api_key,
+                    openai_model=settings.openai_model,
+                    azure_openai_endpoint=None,
+                    azure_openai_api_key=None,
+                    azure_openai_deployment=settings.azure_openai_deployment,
+                )
+            )
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"OpenAI: {exc}")
+    if settings.azure_openai_api_key:
+        try:
+            clients.append(
+                _make_client(
+                    openai_api_key=None,
+                    openai_model=settings.openai_model,
+                    azure_openai_endpoint=settings.azure_openai_endpoint,
+                    azure_openai_api_key=settings.azure_openai_api_key,
+                    azure_openai_deployment=settings.azure_openai_deployment,
+                )
+            )
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"Azure OpenAI: {exc}")
+    if not clients:
+        detail = "; ".join(errors) or "no provider credentials were configured"
+        raise ValueError(f"No usable localization provider: {detail}")
+    return clients
 
 
 def _has_publishable_localized_copy(item: SiteItem) -> bool:
