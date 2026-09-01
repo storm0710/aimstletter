@@ -6274,14 +6274,14 @@ def _localize_items(
         return []
     provider_state = provider_state if provider_state is not None else {}
     if provider_state.get("unavailable"):
-        return []
+        return [_source_metadata_item(item) for item in items]
     if not settings.openai_api_key and not settings.azure_openai_api_key:
         message = (
             f"Cannot localize {len(items)} {context} items because neither OPENAI_API_KEY "
             "nor AZURE_OPENAI_API_KEY is configured."
         )
         print(message, file=sys.stderr)
-        return []
+        return [_source_metadata_item(item) for item in items]
     if len(items) > 3:
         localized_items: list[SiteItem] = []
         for start in range(0, len(items), 3):
@@ -6418,16 +6418,14 @@ def _localize_items(
             )
             provider_state["unavailable"] = True
             print(
-                message + " Preserving the latest verified Korean archive instead of publishing source text.",
+                message + " Publishing source-metadata cards so no collected item is omitted.",
                 file=sys.stderr,
             )
-            return []
+            return [_source_metadata_item(item) for item in items]
         raise RuntimeError(f"Localization failed after 5 attempts for {context}: {last_error}") from last_error
     except Exception as exc:  # noqa: BLE001
         print(f"OpenAI localization failed for {context}: {exc}", file=sys.stderr)
-        if _require_openai_localization():
-            raise
-        return []
+        return [_source_metadata_item(item) for item in items]
 
 
 def _make_localization_clients(settings: Settings) -> list[tuple[object, str]]:
@@ -6889,6 +6887,40 @@ def _fallback_korean_item(item: DigestItem) -> SiteItem:
         tags=tuple(_fallback_tags(item)[:5]),
         comparisons=tuple(_fallback_comparisons(item)),
         glossary=tuple(_fallback_glossary(item)),
+    )
+
+
+def _source_metadata_item(item: DigestItem) -> SiteItem:
+    """Build a complete, non-speculative card from fields verified in the source feed."""
+    source = _korean_source_name(item.source)
+    kind = _korean_kind_name(item.kind)
+    title = _clean_plain_text(item.title) or f"{source} 업데이트"
+    date = _format_date(item.published)
+    summary = f"{source}에서 {date}에 공개한 {kind} 항목이며 원문 제목과 링크를 보존했습니다."
+    detail = (
+        "자동 요약을 만들 수 없는 경우에도 수집된 항목이 목록에서 사라지지 않도록 "
+        "출처, 발행일, 원문 제목과 링크를 기준으로 구성한 카드입니다. "
+        "구체적인 기능과 성능은 연결된 원문을 확인한 뒤 판단해야 합니다."
+    )
+    points = (
+        f"1. 한 줄 요약: {source}에서 공개한 {kind} 항목입니다.",
+        "2. 무엇이 바뀌었나: 원문 제목, 출처, 발행일과 링크가 새 항목으로 수집됐습니다.",
+        "3. 왜 중요한가: 자동 요약 상태와 관계없이 수집 목록과 원문 접근 경로를 유지합니다.",
+        "4. 한계와 주의사항: 구체적인 기능과 성능은 원문 내용을 확인한 뒤 판단해야 합니다.",
+        "5. 이번 주 해볼 일: 원문 링크에서 업무와 관련된 변경 사항이 있는지 확인합니다.",
+        "6. 누가 보면 좋은가: AI 서비스 기획자, 개발자와 인프라 운영 담당자입니다.",
+        f"7. 출처와 상태: {source} · 원문 메타데이터 확인 · {date}",
+    )
+    return SiteItem(
+        title=title,
+        summary=summary,
+        detail=detail,
+        source=source,
+        kind=kind,
+        url=item.url,
+        published=item.published,
+        key_points=points,
+        tags=("원문 확인", source, kind),
     )
 
 
@@ -9002,7 +9034,10 @@ def _remove_unpublishable_cards_in_html(html_text: str) -> tuple[str, int]:
         )
         if _contains_unpublishable_fallback_copy(text):
             removed += 1
-            return ""
+            return _patch_insight_button(
+                button,
+                _source_metadata_item(_digest_from_existing_card_attrs(attrs)),
+            )
         return button
 
     refreshed = button_pattern.sub(replace_button, html_text)

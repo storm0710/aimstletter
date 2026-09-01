@@ -456,7 +456,7 @@ def test_build_filters_items_without_source_backed_summary_after_retry() -> None
     assert filtered == [strong]
 
 
-def test_localize_items_without_openai_does_not_emit_fallback_cards() -> None:
+def test_localize_items_without_openai_emits_source_metadata_card() -> None:
     item = DigestItem(
         title="Copilot code review Resolution",
         url="https://github.blog/changelog/2026-08-28-copilot-code-review-resolution",
@@ -466,10 +466,15 @@ def test_localize_items_without_openai_does_not_emit_fallback_cards() -> None:
         summary="GitHub Copilot code review adds a resolution workflow for review comments.",
     )
 
-    assert _localize_items([item], Settings(openai_api_key=""), "test") == []
+    localized = _localize_items([item], Settings(openai_api_key=""), "test")
+
+    assert len(localized) == 1
+    assert localized[0].url == item.url
+    assert "원문 제목과 링크를 보존" in localized[0].summary
+    assert len(localized[0].key_points) == 7
 
 
-def test_required_localization_does_not_emit_source_language_cards_without_credentials(monkeypatch) -> None:
+def test_required_localization_preserves_source_metadata_without_credentials(monkeypatch) -> None:
     item = DigestItem(
         title="Copilot code review Resolution",
         url="https://example.com/copilot-code-review-resolution",
@@ -480,9 +485,13 @@ def test_required_localization_does_not_emit_source_language_cards_without_crede
     )
     monkeypatch.setenv("AIMSTLETTER_REQUIRE_OPENAI_LOCALIZATION", "1")
 
-    assert _localize_items(
+    localized = _localize_items(
         [item], Settings(openai_api_key="", azure_openai_api_key=""), "test"
-    ) == []
+    )
+
+    assert len(localized) == 1
+    assert localized[0].url == item.url
+    assert "구체적인 기능과 성능은" in localized[0].detail
 
 
 def test_weekly_archive_entry_uses_data_window_end_for_cross_month_retry() -> None:
@@ -703,7 +712,7 @@ def test_localize_items_splits_large_batches_before_generation(monkeypatch) -> N
     assert len(localized) == 4
 
 
-def test_localization_preserves_verified_archive_after_connection_retries(monkeypatch) -> None:
+def test_localization_preserves_every_card_after_connection_retries(monkeypatch) -> None:
     item = DigestItem(
         title="Copilot deployment approvals",
         url="https://example.com/copilot-deployment-approvals",
@@ -727,7 +736,9 @@ def test_localization_preserves_verified_archive_after_connection_retries(monkey
     localized = _localize_items([item] * 4, Settings(openai_api_key="test-key"), "test")
 
     assert calls["count"] == 10
-    assert localized == []
+    assert len(localized) == 4
+    assert all(card.url == item.url for card in localized)
+    assert all("원문 제목과 링크를 보존" in card.summary for card in localized)
 
 
 def test_week_source_items_survive_between_build_retries(tmp_path) -> None:
@@ -765,6 +776,44 @@ def test_source_only_build_skips_feed_collection(monkeypatch, tmp_path) -> None:
     )
     with pytest.raises(RuntimeError, match="no verified cards"):
         build_site(tmp_path, Settings(openai_api_key=""))
+
+
+def test_source_only_build_publishes_all_cached_cards_without_openai(monkeypatch, tmp_path) -> None:
+    build_at = datetime(2026, 9, 1, tzinfo=UTC)
+    archive_entry = _weekly_archive_entry(build_at)
+    trend = DigestItem(
+        title="Agent operations update",
+        url="https://example.com/agent-operations",
+        source="Example AI News",
+        kind="trend",
+        published=datetime(2026, 8, 29, tzinfo=UTC),
+        summary="Agent operations now expose task state and approval checkpoints to administrators.",
+    )
+    tool = DigestItem(
+        title="Deployment approvals",
+        url="https://example.com/deployment-approvals",
+        source="Example Tool News",
+        kind="tool",
+        published=datetime(2026, 8, 28, tzinfo=UTC),
+        summary="Named reviewers approve deployments before execution begins.",
+    )
+    _write_week_source_items(tmp_path, archive_entry, [trend], [tool], build_at)
+    monkeypatch.setenv("AIMSTLETTER_SOURCE_ONLY", "1")
+    monkeypatch.setenv("AIMSTLETTER_REQUIRE_OPENAI_LOCALIZATION", "1")
+    monkeypatch.setattr(
+        "aimstletter.site.fetch_recent_items",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("feed should not be fetched")),
+    )
+    monkeypatch.setattr("aimstletter.site._enrich_items_from_source_pages", lambda items: items)
+
+    index_path = build_site(tmp_path, Settings(openai_api_key=""), build_at=build_at)
+    html_text = index_path.read_text(encoding="utf-8")
+    archive_text = (tmp_path / "archive/2026/08/week-5/index.html").read_text(encoding="utf-8")
+
+    assert html_text.count('<button class="insight-card"') == 2
+    assert archive_text.count('<button class="insight-card"') == 2
+    assert "수집된 본문 요약이 부족" not in archive_text
+    assert "원문 제목과 링크를 보존" in archive_text
 
 
 def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:
@@ -987,7 +1036,7 @@ def test_refresh_paper_cards_removes_forced_metric_fallback_without_fetch() -> N
     assert refreshed == html_text
 
 
-def test_refresh_removes_existing_unpublishable_fallback_card() -> None:
+def test_refresh_rewrites_existing_unpublishable_fallback_card() -> None:
     bad_points = [
         "1. 한 줄 요약: Copilot 코드 리뷰 Resolution과 관련된 변화가 업무 흐름에 미치는 영향을 정리한 항목입니다.",
         "2. 무엇이 바뀌었나: 수집된 본문 요약이 부족해 Copilot 코드 리뷰 Resolution의 세부 기능은 GitHub Copilot 변경 이력의 제목과 출처 범위에서만 다룹니다.",
@@ -1030,6 +1079,8 @@ def test_refresh_removes_existing_unpublishable_fallback_card() -> None:
     refreshed, count = _remove_unpublishable_cards_in_html(html_text)
 
     assert count == 1
-    assert "https://github.blog/changelog/bad" not in refreshed
+    assert refreshed.count('<button class="insight-card"') == 2
+    assert "https://github.blog/changelog/bad" in refreshed
     assert "수집된 본문 요약이 부족" not in refreshed
+    assert "원문 제목과 링크를 보존" in refreshed
     assert "GitHub Copilot은 코드 리뷰 코멘트의 해결 상태" in refreshed
