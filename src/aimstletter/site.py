@@ -899,8 +899,8 @@ def _rewrite_archive_card(match: re.Match[str], item: SiteItem) -> str:
     attributes = match.group("attributes")
     values = {
         "data-title": item.title,
-        "data-body": _clip(_smart_insight_summary(item), 520),
-        "data-detail": _clip(_smart_insight_card_detail(item, item.summary), 1600),
+        "data-body": _smart_insight_summary(item),
+        "data-detail": _smart_insight_card_detail(item, item.summary),
         "data-points": json.dumps(list(_smart_insight_points(item)), ensure_ascii=False),
         "data-tags": json.dumps(list(item.tags[:6]), ensure_ascii=False),
         "data-footnotes": json.dumps(list(item.glossary[:5]), ensure_ascii=False),
@@ -921,7 +921,7 @@ def _rewrite_archive_card(match: re.Match[str], item: SiteItem) -> str:
     content = re.sub(
         r'(<p>)[\s\S]*?(</p>)',
         lambda found: (
-            f"{found.group(1)}{escape(_clip(_smart_insight_summary(item), 520))}{found.group(2)}"
+            f"{found.group(1)}{escape(_smart_insight_summary(item))}{found.group(2)}"
         ),
         content,
         count=1,
@@ -3296,7 +3296,7 @@ def _first_meaningful_text(candidates: list[str], title: str) -> str:
             continue
         if clean.strip().lower() == title.strip().lower():
             continue
-        return _clip(clean, 170)
+        return clean
     return f"{title}와 관련된 변화가 업무 흐름에 미치는 영향을 정리한 항목입니다."
 
 
@@ -3397,7 +3397,7 @@ def _abstract_sentences(text: str) -> list[str]:
     if not cleaned:
         return []
     pieces = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9])", cleaned)
-    return [_clip(piece.strip(), 260) for piece in pieces if len(piece.strip()) >= 24]
+    return [piece.strip() for piece in pieces if len(piece.strip()) >= 24]
 
 
 def _pick_evidence_sentences(
@@ -3547,7 +3547,7 @@ def _paper_focused_summary(item: DigestItem, evidence: PaperCardEvidence | None 
         parts.append(contrast)
     elif evaluation:
         parts.append(evaluation)
-    return _clip(" ".join(parts), 520)
+    return " ".join(parts)
 
 
 def _paper_focused_card_points(
@@ -3598,7 +3598,7 @@ def _first_evidence_text(candidates: list[str], title: str = "", role: str = "ev
         if clean:
             converted = _korean_paper_evidence_text(clean, title, role)
             if converted:
-                return _clip(converted, 360)
+                return converted
     return ""
 
 
@@ -3868,7 +3868,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     for index, item in enumerate(unique_items):
         title = _clip(_smart_insight_title(item), 78)
         smart_summary = _smart_insight_summary(item)
-        body = _clip(smart_summary, 520)
+        body = smart_summary
         detail = _smart_insight_card_detail(item, smart_summary)
         points = _smart_insight_points(item)
         if not _is_renderable_smart_insight(item):
@@ -3895,7 +3895,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
             f'data-category="{escape(category, quote=True)}" '
             f'data-subcategory="{escape(subcategory, quote=True)}" '
             f'data-body="{escape(body, quote=True)}" '
-            f'data-detail="{escape(_clip(detail, 1600), quote=True)}" '
+            f'data-detail="{escape(detail, quote=True)}" '
             f'data-meta="{escape(meta, quote=True)}" '
             f'data-points="{escape(json.dumps(list(points[:7]), ensure_ascii=False), quote=True)}" '
             f'data-tags="{escape(json.dumps(list(tags[:6]), ensure_ascii=False), quote=True)}" '
@@ -3926,7 +3926,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         + f'<span class="topic-badge{first_badge_class}" data-insight-category>{escape(first_category)}</span>'
         + f'<span class="topic-badge sub" data-insight-subcategory>{escape(first_subcategory)}</span>'
         + '</div>'
-        + f'<p class="detail-copy" data-insight-detail>{escape(_clip(first_detail, 1600))}</p>'
+        + f'<p class="detail-copy" data-insight-detail>{escape(first_detail)}</p>'
         + '<ul class="detail-points" data-insight-points>'
         + "".join(_render_point_item(point) for point in first_points[:7])
         + "</ul>"
@@ -4055,7 +4055,7 @@ def _is_renderable_smart_insight(item: SiteItem) -> bool:
     """Return whether an item survives the final smart-card copy checks."""
     title = _clip(_smart_insight_title(item), 78)
     summary = _smart_insight_summary(item)
-    body = _clip(summary, 520)
+    body = summary
     detail = _smart_insight_card_detail(item, summary)
     points = _smart_insight_points(item)
     rendered_text = " ".join((title, body, detail, " ".join(points)))
@@ -6927,10 +6927,37 @@ def _source_content_item(item: DigestItem) -> SiteItem:
     if _source_evidence_summary(item) or _fallback_specific_summary(item):
         return fallback
 
-    source_excerpt = _clip(_clean_plain_text(item.summary), 260)
+    source_excerpt = _clean_plain_text(item.summary)
     if _contains_unpublishable_fallback_copy(source_excerpt):
         source_excerpt = ""
     if source_excerpt:
+        if _looks_untranslated(source_excerpt):
+            summary = f"{source}에서 공개한 {kind} ‘{title}’의 핵심 변경과 적용 범위를 다룹니다."
+            detail = (
+                f"{title}의 대상 기능과 적용 범위를 설명하는 자료입니다. "
+                "번역 서비스가 일시적으로 동작하지 않아도 영어 원문이나 잘린 문장을 표시하지 않고, "
+                "확인된 제목·출처·발행일을 기준으로 한국어 안내를 제공합니다."
+            )
+            points = (
+                f"1. 한 줄 요약: {summary}",
+                f"2. 무엇이 바뀌었나: {title} 관련 항목이 새로 공개됐습니다.",
+                "3. 왜 중요한가: 관련 기능을 사용하는 팀은 적용 범위와 운영 영향을 미리 확인할 수 있습니다.",
+                "4. 한계와 주의사항: 세부 기능과 지원 범위는 원문 발표의 최신 내용을 기준으로 판단해야 합니다.",
+                "5. 이번 주 해볼 일: 현재 업무에서 관련 기능을 사용하는 지점과 변경 영향을 확인합니다.",
+                f"6. 누가 보면 좋은가: {_recommended_reader_roles(item)}",
+                f"7. 출처와 상태: {source} · 원문 확인 · {date}",
+            )
+            return SiteItem(
+                title=title,
+                summary=summary,
+                detail=detail,
+                source=source,
+                kind=kind,
+                url=item.url,
+                published=item.published,
+                key_points=points,
+                tags=(source, kind),
+            )
         summary = f"{title}의 원문 요약: {source_excerpt}"
         detail = (
             f"{source}가 제공한 원문 요약을 축약해 보존한 카드입니다. "
@@ -6988,6 +7015,24 @@ def _latest_week_specific_summary(text: str) -> tuple[str, tuple[str, str, str]]
     source_content_rules: tuple[
         tuple[tuple[str, ...], str, tuple[str, str, str]], ...
     ] = (
+        (
+            ("limit remote control", "managed devices"),
+            "기업과 조직 관리자가 원격 제어형 Copilot 세션을 호스팅할 수 있는 기기를 관리 대상 기기로 제한해 허용된 환경에서만 원격 제어가 이뤄지도록 설정할 수 있습니다.",
+            (
+                "1. 무엇을 다루나요? Copilot 원격 제어 세션을 실행할 수 있는 기기를 조직이 승인한 관리 기기로 제한하는 기능입니다.",
+                "2. 핵심 구성 요소: 관리 기기 판별, 원격 제어 허용 범위와 기업·조직 단위 관리자 정책입니다.",
+                "3. 업무 적용 포인트: 관리되지 않은 개인 기기에서 원격 제어 세션이 실행되는 위험을 줄일 수 있습니다.",
+            ),
+        ),
+        (
+            ("2608.00914",),
+            "MABP는 검색·계획·생성·검증·도구 사용 요청을 처리하는 에이전트 네트워크에서 작업 대기열과 컨텍스트 메모리를 함께 고려해 라우팅과 실행을 제어하는 연구입니다.",
+            (
+                "1. 무엇을 다루나요? 대기열과 KV 캐시·검색 맥락·도구 결과 같은 메모리 상태를 함께 관리하는 Memory-Augmented Backpressure입니다.",
+                "2. 핵심 구성 요소: 메모리 의존 작업량·패널티·후속 상태 추정, 라우팅·전송·활성화·서비스 선택과 메모리 예산 관리입니다.",
+                "3. 업무 적용 포인트: 에이전트 서비스의 처리량을 높이려면 요청 수뿐 아니라 재사용 가능한 컨텍스트 상태까지 스케줄링해야 합니다.",
+            ),
+        ),
         (
             ("2608.27790",),
             "Credo는 코딩 에이전트가 탐색해 만든 불투명한 하네스에서 재사용 가능한 선언형 실행 단계를 추출하고, 출처 메타데이터와 함께 카탈로그화해 새 작업에 다시 조합하는 연구입니다.",
@@ -8169,11 +8214,13 @@ def _meaningful_item_summary(item: DigestItem, title: str) -> str:
         return ""
     if _needs_specific_insight_copy(summary):
         return ""
+    if "..." in summary or "…" in summary:
+        return ""
     if summary.strip().lower() == title.strip().lower():
         return ""
     if summary in title or title in summary:
         return ""
-    return _clip(summary, 520)
+    return summary
 
 
 def _fallback_display_title(item: DigestItem) -> str:
@@ -8417,6 +8464,8 @@ GENERIC_DISPLAY_TITLES = {
         "보안과 리스크 관리",
         "AI 업데이트",
         "OpenAI 도구와 AI 에이전트",
+        "Univ 개발 AI",
+        "Offering Zero 데이터 모델",
         "Claude와 생성형 AI 도구",
         "네트워크 운영 AI 활용",
         "네트워크 운영을 돕는 AI",
@@ -8466,6 +8515,7 @@ def _fallback_specific_title(text: str) -> str:
     text = re.sub(r"[-_]+", " ", text.lower())
     title_rules = (
         (("2608.27790",), "Credo: 재사용 가능한 선언형 에이전트 워크플로"),
+        (("2608.00914",), "MABP: 메모리 인식형 에이전트 네트워크 제어"),
         (("enterprise ai's real risk", "complexity between"), "기업 AI의 진짜 위험: 에이전트 간 복잡성"),
         (("2608.27021",), "FaulT-Bench: 네트워크 장애 진단 에이전트 평가"),
         (("governance has to live in the data layer",), "자율 에이전트 거버넌스를 데이터 계층에 두는 이유"),
@@ -8670,6 +8720,19 @@ def _fallback_specific_title(text: str) -> str:
         (("auto model selection",), "엔터프라이즈 자동 모델 선택"),
         (("github models", "retired"), "GitHub Models 종료 일정"),
         (("enterprise managed-settings",), "엔터프라이즈 managed-settings 정식 제공"),
+        (("copilot code review resolution",), "Copilot 코드 리뷰 의견 해결 워크플로"),
+        (("limit remote control",), "관리 기기로 원격 제어 제한"),
+        (("ten advances in mathematics",), "OpenAI가 공개한 수학 연구 성과 10가지"),
+        (("building abundant intelligence",), "더 널리 쓰이는 고성능 AI를 위한 풀스택 전략"),
+        (("openai.com/index/unive",), "Univé의 전사 AI 역량 구축 사례"),
+        (("disrupting malicious uses", "criminal scam operation"), "ChatGPT 악용 사기 조직 차단 사례"),
+        (("builders guide to gpt 5 6",), "GPT-5.6 기반 AI 에이전트 개발 가이드"),
+        (("previewing ultrafast",), "GPT-5.6 Sol용 Ultrafast API 미리보기"),
+        (("dali rajic chief revenue officer",), "OpenAI 최고매출책임자 Dali Rajic 선임"),
+        (("introducing ai futures",), "OpenAI AI Futures 프로젝트 소개"),
+        (("introducing intelligence age",), "OpenAI Intelligence Age 블로그 소개"),
+        (("offering zero data retention",), "OpenAI API의 데이터 미보존 정책 확대"),
+        (("supporting next generation ai startups thailand",), "태국 차세대 AI 스타트업 지원 프로그램"),
         (("anomaly detection", "agents"), "네트워크 이상 징후를 찾는 AI 에이전트"),
     )
     for keywords, label in title_rules:
@@ -8702,11 +8765,13 @@ def _source_evidence_summary(item: DigestItem) -> str:
         or summary.lower() in title.lower()
         or title.lower() in summary.lower()
         or _needs_specific_insight_copy(summary)
+        or "..." in summary
+        or "…" in summary
     ):
         return ""
     if _looks_untranslated(summary):
         return ""
-    return _clip(summary, 520)
+    return summary
 
 
 def _strip_point_prefix(text: str) -> str:
@@ -8721,6 +8786,51 @@ def _fallback_specific_summary(item: DigestItem) -> str:
     paper_summary = _paper_focused_summary(item)
     if paper_summary:
         return paper_summary
+    source_rules: tuple[tuple[tuple[str, ...], str], ...] = (
+        (("limit remote control", "managed devices"), "기업과 조직 관리자가 원격 제어형 Copilot 세션을 호스팅할 수 있는 기기를 관리 대상 기기로 제한해 허용된 환경에서만 원격 제어가 이뤄지도록 설정할 수 있습니다."),
+        (("copilot code review resolution",), "GitHub Copilot 코드 리뷰에 검토 의견을 해결 상태로 표시하고 후속 조치를 추적하는 Resolution 워크플로가 추가됐습니다."),
+        (("github agentic workflows", "public preview"), "GitHub Agentic Workflows가 공개 미리보기로 전환돼 코딩 에이전트로 이슈 분류, CI 실패 분석, 문서 갱신처럼 판단이 필요한 저장소 작업을 자동화할 수 있습니다."),
+        (("copilot cli", "configure everything", "settings"), "GitHub Copilot CLI가 흩어져 있던 테마·스트리머 모드·실험 기능 설정을 스키마 기반 `/settings` 명령 하나에서 관리하도록 통합했습니다."),
+        (("deprecation of opus 4 6 fast",), "GitHub Copilot의 채팅, 인라인 편집, 질문·에이전트 모드와 코드 완성에서 Opus 4.6 Fast 모델 지원이 2026년 6월 29일 종료됩니다."),
+        (("mai code 1 flash", "more copilot surfaces"), "Microsoft의 경량 코딩 모델 MAI-Code-1-Flash를 Copilot CLI, 클라우드 에이전트, GitHub Copilot 앱과 Copilot Chat 등 더 많은 화면에서 사용할 수 있게 됐습니다."),
+        (("copilot code review", "agents md support"), "Copilot 코드 리뷰가 저장소 단위 AGENTS.md 지침을 반영하며, 초안 PR에서도 Request 버튼으로 Copilot 리뷰를 더 쉽게 요청할 수 있습니다."),
+        (("duplicate detection", "issue fields", "github issues"), "GitHub Issues가 중복 이슈 후보를 찾아 원본과 연결하는 기능과 MCP 기반 이슈 필드 지원을 추가해 반복 분류 작업을 줄였습니다."),
+        (("copilot authored pull requests", "author searches"), "Copilot 클라우드 에이전트가 사용자 대신 만든 PR도 `author:` 검색 결과와 개인 PR 목록에 포함되도록 GitHub 검색 동작이 바뀌었습니다."),
+        (("repository switcher", "global navigation"), "GitHub 전역 탐색 메뉴의 저장소 전환기가 정식 제공돼 현재 페이지를 떠나지 않고 다른 저장소로 빠르게 이동할 수 있습니다."),
+        (("actions build custom images",), "GitHub-hosted runner용 커스텀 이미지 생성 파이프라인에서 기존 커스텀 이미지를 기반으로 새 이미지를 빌드할 수 있게 됐습니다."),
+        (("more control over your github hosted runners",), "조직 관리자가 GitHub Actions의 표준 hosted runner 라벨 사용을 끄고 자체 라벨을 추가해 어떤 러너를 사용할지 더 세밀하게 통제할 수 있습니다."),
+        (("actions steps can now be run in parallel",), "GitHub Actions가 `background` 설정으로 워크플로 단계들을 동시에 실행할 수 있게 해 순차 실행 때문에 생기던 대기 시간을 줄였습니다."),
+        (("previewing gpt 5 6 sol",), "OpenAI가 차세대 추론 모델 GPT-5.6 Sol을 미리 공개하고 성능, 안전성 평가와 제공 계획을 안내했습니다."),
+        (("upcoming august 2026 model deprecations",), "GitHub Copilot에서 일부 모델 지원이 2026년 9월 1일 종료될 예정이므로 조직은 기본 모델과 자동화 설정을 대체 모델로 전환해야 합니다."),
+        (("gemini 2 5 pro", "gemini 3 flash", "deprecated"), "GitHub Copilot 전반에서 Gemini 2.5 Pro와 Gemini 3 Flash 모델 지원이 종료돼 기존 모델 선택과 조직 정책을 다른 지원 모델로 바꿔야 합니다."),
+        (("ten advances in mathematics",), "OpenAI가 기하학, 암호학, 계산 복잡도 등 수학과 이론 컴퓨터과학의 장기 미해결 문제에서 얻은 새로운 연구 결과 열 가지를 공개했습니다."),
+        (("enterprise teams model policy targeting",), "GitHub Enterprise 관리자가 Copilot Business·Enterprise 사용자를 대상으로 사용자별 모델 정책 기준을 지정할 수 있는 기능이 공개 미리보기로 제공됩니다."),
+        (("building abundant intelligence",), "OpenAI가 고성능 AI를 더 유능하고 저렴하며 폭넓게 활용할 수 있게 만드는 모델·컴퓨팅·제품 전반의 풀스택 접근을 설명했습니다."),
+        (("openai.com/index/unive",), "Univé가 리더십, 책임 있는 거버넌스와 직원 주도 혁신을 결합해 ChatGPT Enterprise를 조직 전체에 확산하고 AI 활용 역량을 만든 사례입니다."),
+        (("disrupting malicious uses", "criminal scam operation"), "OpenAI가 ChatGPT를 투자·연애·도박·사칭 사기에 악용한 캄보디아 기반 범죄 조직의 활동을 탐지하고 차단한 사례를 공개했습니다."),
+        (("copilot weekly releases august 3",), "GitHub Copilot의 데스크톱 앱, CLI와 VS Code 업데이트가 작업 재개·정리·변경 검토·질문 흐름에서 맥락을 유지하도록 개선됐습니다."),
+        (("copilot impact dashboard", "return on investment"), "Copilot 영향 대시보드에 라이선스 비용과 PR 산출량을 연결해 잠재 투자수익을 보여주는 항목이 추가됐습니다."),
+        (("copilot code review effort levels",), "GitHub Copilot 코드 리뷰의 Lite와 Balanced 검토 강도가 정식 제공돼 변경 복잡도와 위험에 맞춰 리뷰 깊이를 선택할 수 있습니다."),
+        (("connecting issues", "multi select field"), "GitHub Issues와 Projects에서 관련 이슈를 `Relates to` 관계로 연결하고 여러 필드 값을 함께 관리할 수 있게 됐습니다."),
+        (("secret scanning coverage updates",), "GitHub secret scanning이 push protection 차단 대상, 탐지 파트너와 경고 메타데이터를 확대해 비밀값 노출 탐지 범위를 넓혔습니다."),
+        (("github code quality no longer adds copilot",), "GitHub Code Quality를 켜도 Copilot을 PR 리뷰어로 자동 추가하는 규칙이 더 이상 생성되지 않아 코드 품질 분석과 Copilot 리뷰 설정을 분리해 관리할 수 있습니다."),
+        (("copilot cloud agent for linear",), "Linear 이슈를 Copilot 클라우드 에이전트에 할당해 내용을 분석하고 비동기 백그라운드 작업으로 처리하는 연동 기능이 정식 제공됩니다."),
+        (("github mcp server", "next mcp specification"), "GitHub MCP Server가 2026년 7월 28일 적용되는 상태 비저장형 MCP 사양을 공식 출시 전에 지원하도록 업데이트됐습니다."),
+        (("agent automation controls", "github issues"), "GitHub Issues가 에이전트가 라벨·유형·담당자·종료 상태를 바꾸는 이유를 보여주고 적용 전에 검토할 수 있는 자동화 통제를 공개 미리보기로 제공합니다."),
+        (("builders guide to gpt 5 6",), "OpenAI가 스타트업이 GPT-5.6의 모델 선택과 Responses API 기능을 활용해 더 빠르고 비용 효율적인 AI 에이전트를 만드는 방법을 정리했습니다."),
+        (("previewing ultrafast",), "OpenAI가 Cerebras 기반으로 GPT-5.6 Sol을 최대 14배 빠르게, 초당 최대 750개 출력 토큰으로 제공하는 Ultrafast API 서비스 등급을 미리 공개했습니다."),
+        (("dali rajic chief revenue officer",), "OpenAI가 Dali Rajic을 최고매출책임자로 선임해 글로벌 매출 조직을 이끌고 기업의 AI 도입 가치를 확대하도록 했습니다."),
+        (("introducing ai futures",), "OpenAI가 AI의 장기적 발전이 사회와 제도에 미칠 영향을 연구하고 논의하는 AI Futures 프로젝트를 소개했습니다."),
+        (("introducing intelligence age",), "OpenAI가 AI가 권력, 거버넌스, 경제와 개인의 자유를 어떻게 바꿀지 탐구하는 Intelligence Age 블로그를 시작했습니다."),
+        (("offering zero data retention",), "OpenAI가 요건을 충족한 API 고객에게 Zero Data Retention을 계속 제공하고, 데이터 프라이버시를 유지하는 Private Safety Processing을 예고했습니다."),
+        (("supporting next generation ai startups thailand",), "OpenAI와 태국 고등교육과학연구혁신부가 헬스·웰니스·교육 분야 스타트업 10곳의 AI 시제품을 신뢰 가능한 제품으로 발전시키는 8주 프로그램을 시작했습니다."),
+        (("technologyreview.com/topic/artificial intelligence",), "기업이 AI를 도입할 때 필요한 사용 정책, 책임 주체, 검수 절차와 위험 관리 체계를 설명하는 엔터프라이즈 AI 거버넌스 동향입니다."),
+        (("endava frontiers",), "Endava가 AI 에이전트를 중심으로 소프트웨어 개발·검증·협업 방식을 재설계하고 조직의 전달 체계를 바꾼 사례입니다."),
+        (("chatgpt enterprise spend controls",), "ChatGPT Enterprise 관리자가 팀별 사용 현황과 비용을 분석하고 지출 한도를 설정해 AI 도입 예산을 통제할 수 있게 한 업데이트입니다."),
+    )
+    for keywords, summary in source_rules:
+        if all(keyword in text for keyword in keywords):
+            return summary
     if "new github copilot experience in slack" in text:
         return (
             "Slack에서 @GitHub를 호출해 GitHub Copilot CLI와 Copilot 앱의 에이전트 기능을 쓰는 공개 미리보기입니다. "
@@ -9622,14 +9732,32 @@ def _refresh_known_specific_cards_in_html(html_text: str) -> tuple[str, int]:
         attrs = _html_attrs(button)
         source_url = unescape(attrs.get("data-source", ""))
         category = unescape(attrs.get("data-category", ""))
-        if category == "논문" or "arxiv.org" in source_url:
-            return button
-
         digest = _digest_from_existing_card_attrs(attrs)
-        if not _latest_week_specific_summary(re.sub(r"[-_]+", " ", _item_text(digest))):
+        item_text = re.sub(r"[-_]+", " ", _item_text(digest))
+        latest_specific = _latest_week_specific_summary(item_text)
+        if (category == "논문" or "arxiv.org" in source_url) and not latest_specific:
+            return button
+        previous_title = unescape(attrs.get("data-title", ""))
+        previous_body = unescape(attrs.get("data-body", ""))
+        previous_points = unescape(attrs.get("data-points", ""))
+        needs_copy_refresh = (
+            _looks_untranslated(previous_body)
+            or "원문 요약:" in previous_body
+            or "..." in previous_body + previous_points
+            or "…" in previous_body + previous_points
+            or (
+                bool(re.search(r"[A-Za-z]", previous_title))
+                and not bool(re.search(r"[가-힣]", previous_title))
+            )
+        )
+        if not (
+            latest_specific
+            or _fallback_specific_summary(digest)
+            or needs_copy_refresh
+        ):
             return button
 
-        site_item = _localized_site_item(digest, {})
+        site_item = _source_content_item(digest)
         refreshed = _patch_insight_button(button, site_item)
         if refreshed != button:
             updated += 1
@@ -9836,7 +9964,7 @@ def _patch_insight_button(button: str, item: SiteItem) -> str:
     title = _clip(_smart_insight_title(item), 78)
     if previous_title and _is_generic_display_title(title):
         title = previous_title
-    summary = _clip(_smart_insight_summary(item), 520)
+    summary = _smart_insight_summary(item)
     detail = _smart_insight_card_detail(item, item.summary)
     points = list(_smart_insight_points(item)[:7])
 

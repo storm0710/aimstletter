@@ -369,6 +369,49 @@ def test_smart_insight_card_keeps_long_detail_without_700_char_truncation() -> N
     assert "..." not in html_text.split('data-detail="', 1)[1].split('"', 1)[0]
 
 
+def test_smart_insight_card_does_not_clip_long_summary_or_detail() -> None:
+    summary_tail = "요약의 마지막 문장도 빠짐없이 표시됩니다."
+    detail_tail = "상세 설명의 마지막 근거도 빠짐없이 표시됩니다."
+    summary = ("한국어 한 줄 설명을 충분히 제공합니다. " * 30) + summary_tail
+    detail = ("원문에서 확인한 상세 근거를 순서대로 설명합니다. " * 60) + detail_tail
+    item = SiteItem(
+        title="긴 설명 표시 확인",
+        url="https://example.com/full-copy",
+        source="Example",
+        kind="도구",
+        published=datetime(2026, 8, 24, tzinfo=UTC),
+        summary=summary,
+        detail=detail,
+        key_points=tuple(f"{index}. 확인 항목: 전체 내용을 표시합니다." for index in range(1, 8)),
+        tags=("표시 검증",),
+    )
+
+    html_text = _render_smart_insight_cards([item])
+
+    assert summary_tail in html_text
+    assert detail_tail in html_text
+
+
+def test_source_fallback_never_exposes_untranslated_or_clipped_copy() -> None:
+    english = "An English-only explanation that must not leak into a Korean card. " * 12
+    item = DigestItem(
+        title="Unknown workflow update",
+        url="https://example.com/unknown-workflow-update",
+        source="Example",
+        kind="tool",
+        published=datetime(2026, 8, 24, tzinfo=UTC),
+        summary=english,
+    )
+
+    localized = _localize_items([item], Settings(openai_api_key=""), "test")[0]
+    rendered_copy = " ".join((localized.summary, localized.detail, *localized.key_points))
+
+    assert english.strip() not in rendered_copy
+    assert "..." not in rendered_copy
+    assert "…" not in rendered_copy
+    assert any("가" <= char <= "힣" for char in rendered_copy)
+
+
 def test_quantitative_paper_logic_does_not_rewrite_tool_cards() -> None:
     item = DigestItem(
         title="Tool usage grows",
@@ -456,7 +499,7 @@ def test_build_filters_items_without_source_backed_summary_after_retry() -> None
     assert filtered == [strong]
 
 
-def test_localize_items_without_openai_preserves_source_summary() -> None:
+def test_localize_items_without_openai_publishes_korean_source_summary() -> None:
     item = DigestItem(
         title="Copilot code review Resolution",
         url="https://github.blog/changelog/2026-08-28-copilot-code-review-resolution",
@@ -470,7 +513,8 @@ def test_localize_items_without_openai_preserves_source_summary() -> None:
 
     assert len(localized) == 1
     assert localized[0].url == item.url
-    assert "resolution workflow for review comments" in localized[0].summary
+    assert "검토 의견을 해결 상태로 표시" in localized[0].summary
+    assert "resolution workflow for review comments" not in localized[0].summary.lower()
     assert len(localized[0].key_points) == 7
 
 
@@ -559,7 +603,7 @@ def test_required_localization_preserves_source_content_without_credentials(monk
 
     assert len(localized) == 1
     assert localized[0].url == item.url
-    assert "원문 요약을 축약해 보존" in localized[0].detail
+    assert "검토 의견을 해결 상태로 표시" in localized[0].detail
 
 
 def test_weekly_archive_entry_uses_data_window_end_for_cross_month_retry() -> None:
@@ -808,7 +852,8 @@ def test_localization_preserves_every_card_after_connection_retries(monkeypatch)
     assert calls["count"] == 10
     assert len(localized) == 4
     assert all(card.url == item.url for card in localized)
-    assert all("repository deployment approvals" in card.summary for card in localized)
+    assert all(any("가" <= char <= "힣" for char in card.summary) for card in localized)
+    assert all("repository deployment approvals" not in card.summary.lower() for card in localized)
 
 
 def test_week_source_items_survive_between_build_retries(tmp_path) -> None:
@@ -883,8 +928,9 @@ def test_source_only_build_publishes_all_cached_cards_without_openai(monkeypatch
     assert html_text.count('<button class="insight-card"') == 2
     assert archive_text.count('<button class="insight-card"') == 2
     assert "수집된 본문 요약이 부족" not in archive_text
-    assert "approval checkpoints" in archive_text
-    assert "Named reviewers approve deployments" in archive_text
+    assert "approval checkpoints" not in archive_text
+    assert "Named reviewers approve deployments" not in archive_text
+    assert "핵심 변경과 적용 범위" in archive_text
 
 
 def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:
