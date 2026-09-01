@@ -338,7 +338,10 @@ def _collect_archive_entries(
     archive_root = output_dir / "archive"
     if archive_root.exists():
         for path in archive_root.glob("*/*/week-*/index.html"):
-            if not _load_verified_korean_archive_items(path):
+            # Navigation represents which weekly archives exist. Copy-quality
+            # validation is intentionally kept out of this decision: one stale
+            # card must never make an otherwise intact weekly archive disappear.
+            if not _load_archive_items(path):
                 continue
             try:
                 year = int(path.parts[-4])
@@ -9401,14 +9404,21 @@ def _site_item_from_existing_card_attrs(attrs: dict[str, str]) -> SiteItem:
     )
 
 
-def _load_verified_korean_archive_items(archive_path: Path) -> list[SiteItem]:
+def _load_archive_items(archive_path: Path) -> list[SiteItem]:
     if not archive_path.exists():
         return []
-    html_text = archive_path.read_text(encoding="utf-8")
-    items = [
+    try:
+        html_text = archive_path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    return [
         _site_item_from_existing_card_attrs(_html_attrs(match.group(0)))
         for match in re.finditer(r'<button class="insight-card"[\s\S]*?</button>', html_text)
     ]
+
+
+def _load_verified_korean_archive_items(archive_path: Path) -> list[SiteItem]:
+    items = _load_archive_items(archive_path)
     if not items or not all(_has_publishable_localized_copy(item) for item in items):
         return []
     return items

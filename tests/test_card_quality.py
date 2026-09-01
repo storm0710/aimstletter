@@ -634,7 +634,9 @@ def test_archive_fallback_skips_untranslated_week_and_selects_latest_korean_week
         monkeypatch.undo()
     assert korean_item.summary in homepage
     assert english_item.summary not in homepage
-    assert "08월 5째주" not in homepage
+    # The unlocalized archive must not replace verified homepage content, but
+    # its existing weekly page must remain reachable from archive navigation.
+    assert "08월 5째주" in homepage
 
 
 def test_required_build_rejects_a_stale_verified_archive(monkeypatch, tmp_path) -> None:

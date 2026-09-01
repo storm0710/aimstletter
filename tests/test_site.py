@@ -15,6 +15,7 @@ from aimstletter.knowledge_content import (
 from aimstletter.site import (
     KNOWLEDGE_TOPICS,
     SiteItem,
+    _collect_archive_entries,
     _fallback_display_summary,
     _fallback_korean_item,
     _fallback_three_line_summary,
@@ -30,6 +31,7 @@ from aimstletter.site import (
     _render_knowledge_topic_page,
     _safe_korean_field,
     _safe_tags,
+    _weekly_archive_entry,
     _weekly_window,
     render_homepage,
 )
@@ -453,6 +455,34 @@ def test_render_homepage_includes_archive_entries() -> None:
     assert html.index("06월 1째주") < html.index("06월 2째주")
     assert 'class="is-current" data-archive-link' in html
     assert 'href="archive/2026/06/week-2/"' in html
+
+
+def test_archive_navigation_keeps_week_when_one_card_fails_copy_quality(tmp_path: Path) -> None:
+    archive_path = tmp_path / "archive" / "2026" / "06" / "week-3" / "index.html"
+    archive_path.parent.mkdir(parents=True)
+    archive_path.write_text(
+        """
+        <button class="insight-card" data-insight-card
+          data-title="개발 도구와 코딩 자동화"
+          data-source="https://example.com/update"
+          data-subcategory="Example"
+          data-category="도구"
+          data-body="원문 제목과 링크를 보존했습니다."
+          data-detail="원문을 확인해야 합니다."
+          data-meta="Example · 도구 · 2026-06-17"
+          data-points="[]"
+          data-tags="[]"></button>
+        """,
+        encoding="utf-8",
+    )
+
+    current_entry = _weekly_archive_entry(datetime(2026, 9, 1, tzinfo=UTC))
+    entries = _collect_archive_entries(tmp_path, current_entry)
+
+    assert any(
+        entry["year"] == 2026 and entry["month"] == 6 and entry["week"] == 3
+        for entry in entries
+    )
 
 
 def test_weekly_window_uses_previous_monday_7am_to_current_monday_7am_range() -> None:
