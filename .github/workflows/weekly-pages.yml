@@ -58,8 +58,6 @@ jobs:
           build_log="$RUNNER_TEMP/aimstletter-site.log"
           set +e
           timeout 1000s bash -c '
-            AIMSTLETTER_SOURCE_ONLY=1 aimstletter-site --output-dir "$1" --build-date 2026-08-24
-            AIMSTLETTER_SOURCE_ONLY=1 aimstletter-site --output-dir "$1" --build-date 2026-08-31
             aimstletter-site --output-dir "$1"
           ' _ "$staging_dir" 2>&1 | tee "$build_log"
           build_status=${PIPESTATUS[0]}

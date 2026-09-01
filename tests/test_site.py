@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -70,6 +71,35 @@ def test_render_homepage_contains_ai_and_tool_columns() -> None:
     assert '<a href="work-skills/">Archive</a>' not in html
     assert "lead-image" not in html
     assert "watch-links" not in html
+
+
+def test_render_homepage_backfills_card_limit_after_copy_quality_filter() -> None:
+    valid = SiteItem(
+        title="운영 자동화 업데이트",
+        url="https://example.com/valid-0",
+        source="Example",
+        kind="동향",
+        published=datetime(2026, 8, 31, tzinfo=UTC),
+        summary="운영 담당자가 자동화 절차의 실행 상태와 승인 지점을 확인할 수 있습니다.",
+        detail="자동화 작업을 단계별로 추적하고 문제가 생긴 구간을 빠르게 찾는 방법을 설명합니다.",
+        key_points=("1. 한 줄 요약: 자동화 실행 상태를 단계별로 확인합니다.",),
+        tags=("운영 자동화",),
+    )
+    invalid = replace(
+        valid,
+        title="본문이 부족한 항목",
+        url="https://example.com/invalid",
+        summary="수집된 본문 요약이 부족해 제목과 출처 범위에서만 다룹니다.",
+    )
+    valid_items = [
+        replace(valid, title=f"운영 자동화 업데이트 {index}", url=f"https://example.com/valid-{index}")
+        for index in range(1, 12)
+    ]
+
+    html = render_homepage([invalid, *valid_items], [])
+
+    assert html.count('<button class="insight-card"') == 10
+    assert "본문이 부족한 항목" not in html
 
 
 def test_smart_insight_moves_source_prefix_to_badge_and_koreanizes_title() -> None:

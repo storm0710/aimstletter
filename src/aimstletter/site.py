@@ -142,6 +142,7 @@ def build_site(
     kst = timezone(timedelta(hours=9), name="KST")
     now = build_at.astimezone(kst) if build_at else datetime.now(UTC).astimezone(kst)
     archive_entry = _weekly_archive_entry(now)
+    requested_archive_href = str(archive_entry["href"])
 
     week_start, week_end = _weekly_window(now)
     if os.getenv("AIMSTLETTER_SOURCE_ONLY") == "1":
@@ -209,6 +210,14 @@ def build_site(
                 "and no Korean archive had verified cards to preserve."
             )
         archive_entry = verified_archive_entry
+    if (
+        _require_openai_localization()
+        and str(archive_entry["href"]) != requested_archive_href
+    ):
+        raise RuntimeError(
+            "Required current-week localization was unavailable: expected "
+            f"{requested_archive_href}, but the latest verified archive is {archive_entry['href']}."
+        )
     display_now = now
     if archive_entry != _weekly_archive_entry(now):
         display_now = datetime.fromisoformat(str(archive_entry["period_end"])).replace(
@@ -251,9 +260,14 @@ def render_homepage(
     kst = timezone(timedelta(hours=9), name="KST")
     today_dt = now.astimezone(kst) if now else datetime.now(UTC).astimezone(kst)
     today = today_dt.strftime("%Y년 %m월 %d일")
-    infra_items = _latest_first(ai_items[:5])
-    other_items = _latest_first(ai_items[5:10])
-    latest_tool_items = _latest_first(tool_items[:10])
+    # Filter before applying section limits. Filtering inside the card renderer used
+    # to leave holes whenever one of the first selected items failed the final copy
+    # quality check, even though later publishable items were available.
+    publishable_ai_items = [item for item in ai_items if _is_renderable_smart_insight(item)]
+    publishable_tool_items = [item for item in tool_items if _is_renderable_smart_insight(item)]
+    infra_items = _latest_first(publishable_ai_items[:5])
+    other_items = _latest_first(publishable_ai_items[5:10])
+    latest_tool_items = _latest_first(publishable_tool_items[:10])
     return _render_dashboard_homepage(
         today=today,
         infra_items=infra_items,
@@ -298,13 +312,18 @@ def _archive_week_window(year: int, month: int, week: int) -> tuple[datetime, da
 
 
 def _weekly_archive_entry(day: datetime) -> dict[str, object]:
-    week = ((day.day - 1) // 7) + 1
     start, end = _weekly_window(day)
+    # A weekly build represents the window ending on the latest Monday at 07:00
+    # KST. Use that period boundary for the archive label instead of the wall-clock
+    # build date, otherwise a retry on September 1 incorrectly creates September
+    # week 1 for the August 24-31 data window and August week 5 is never produced.
+    archive_day = end
+    week = ((archive_day.day - 1) // 7) + 1
     return {
-        "year": day.year,
-        "month": day.month,
+        "year": archive_day.year,
+        "month": archive_day.month,
         "week": week,
-        "href": f"archive/{day.year}/{day.month:02d}/week-{week}/",
+        "href": f"archive/{archive_day.year}/{archive_day.month:02d}/week-{week}/",
         "period_start": start.date().isoformat(),
         "period_end": end.date().isoformat(),
         "period_label": _period_label(start, end),
@@ -3849,8 +3868,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         body = _clip(smart_summary, 520)
         detail = _smart_insight_card_detail(item, smart_summary)
         points = _smart_insight_points(item)
-        rendered_text = " ".join((title, body, detail, " ".join(points)))
-        if _contains_unpublishable_fallback_copy(rendered_text):
+        if not _is_renderable_smart_insight(item):
             continue
         footnotes = item.glossary
         meta = f"{item.source} · {item.kind} · {_format_date(item.published)}"
@@ -4028,6 +4046,17 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
 </script>
 """
     )
+
+
+def _is_renderable_smart_insight(item: SiteItem) -> bool:
+    """Return whether an item survives the final smart-card copy checks."""
+    title = _clip(_smart_insight_title(item), 78)
+    summary = _smart_insight_summary(item)
+    body = _clip(summary, 520)
+    detail = _smart_insight_card_detail(item, summary)
+    points = _smart_insight_points(item)
+    rendered_text = " ".join((title, body, detail, " ".join(points)))
+    return not _contains_unpublishable_fallback_copy(rendered_text)
 
 def _smart_insight_blueprint() -> tuple[tuple[str, str], ...]:
     return (
@@ -6247,7 +6276,11 @@ def _localize_items(
     if provider_state.get("unavailable"):
         return []
     if not settings.openai_api_key and not settings.azure_openai_api_key:
-        print(f"Skipped {len(items)} {context} items because OpenAI localization is not configured.", file=sys.stderr)
+        message = (
+            f"Cannot localize {len(items)} {context} items because neither OPENAI_API_KEY "
+            "nor AZURE_OPENAI_API_KEY is configured."
+        )
+        print(message, file=sys.stderr)
         return []
     if len(items) > 3:
         localized_items: list[SiteItem] = []
@@ -6380,10 +6413,12 @@ def _localize_items(
                             file=sys.stderr,
                         )
                         time.sleep(2 + attempt)
+            message = (
+                f"Localization providers were unreachable after SDK and HTTP retries for {context}."
+            )
             provider_state["unavailable"] = True
             print(
-                f"Localization providers were unreachable after SDK and HTTP retries for {context}; "
-                "preserving the latest verified Korean archive instead of publishing source text.",
+                message + " Preserving the latest verified Korean archive instead of publishing source text.",
                 file=sys.stderr,
             )
             return []

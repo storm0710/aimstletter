@@ -469,6 +469,30 @@ def test_localize_items_without_openai_does_not_emit_fallback_cards() -> None:
     assert _localize_items([item], Settings(openai_api_key=""), "test") == []
 
 
+def test_required_localization_does_not_emit_source_language_cards_without_credentials(monkeypatch) -> None:
+    item = DigestItem(
+        title="Copilot code review Resolution",
+        url="https://example.com/copilot-code-review-resolution",
+        source="GitHub Copilot Changelog",
+        kind="tool",
+        published=datetime(2026, 8, 28, tzinfo=UTC),
+        summary="GitHub Copilot adds a resolution workflow for review comments.",
+    )
+    monkeypatch.setenv("AIMSTLETTER_REQUIRE_OPENAI_LOCALIZATION", "1")
+
+    assert _localize_items(
+        [item], Settings(openai_api_key="", azure_openai_api_key=""), "test"
+    ) == []
+
+
+def test_weekly_archive_entry_uses_data_window_end_for_cross_month_retry() -> None:
+    entry = _weekly_archive_entry(datetime(2026, 9, 1, tzinfo=UTC))
+
+    assert entry["href"] == "archive/2026/08/week-5/"
+    assert entry["period_start"] == "2026-08-24"
+    assert entry["period_end"] == "2026-08-31"
+
+
 def test_build_does_not_overwrite_homepage_when_no_verified_cards(monkeypatch, tmp_path) -> None:
     index_path = tmp_path / "index.html"
     index_path.write_text("previous verified homepage", encoding="utf-8")
@@ -534,6 +558,35 @@ def test_archive_fallback_skips_untranslated_week_and_selects_latest_korean_week
     assert korean_item.summary in homepage
     assert english_item.summary not in homepage
     assert "08월 5째주" not in homepage
+
+
+def test_required_build_rejects_a_stale_verified_archive(monkeypatch, tmp_path) -> None:
+    item = SiteItem(
+        title="GitHub Copilot 배포 승인",
+        url="https://example.com/korean",
+        source="GitHub Copilot 변경 이력",
+        kind="도구 업데이트",
+        published=datetime(2026, 8, 21, tzinfo=UTC),
+        summary="GitHub Copilot이 배포 전에 지정 검토자의 승인을 받는 기능을 추가했습니다.",
+        detail="배포 요청을 지정 검토자가 확인한 뒤에만 실행하도록 흐름을 바꿉니다.",
+        key_points=tuple(
+            f"{index}. 확인 항목: 배포 승인 기능을 운영 절차에 맞게 검토합니다."
+            for index in range(1, 8)
+        ),
+        tags=("GitHub Copilot", "배포 승인"),
+    )
+    week_four = tmp_path / "archive/2026/08/week-4/index.html"
+    week_four.parent.mkdir(parents=True)
+    week_four.write_text(_render_smart_insight_cards([item]), encoding="utf-8")
+    monkeypatch.setattr("aimstletter.site.fetch_recent_items", lambda *_args, **_kwargs: [])
+    monkeypatch.setenv("AIMSTLETTER_REQUIRE_OPENAI_LOCALIZATION", "1")
+
+    with pytest.raises(RuntimeError, match="expected archive/2026/08/week-5"):
+        build_site(
+            tmp_path,
+            Settings(openai_api_key=""),
+            build_at=datetime(2026, 9, 1, tzinfo=UTC),
+        )
 
 
 def test_localize_items_retries_structurally_invalid_response(monkeypatch) -> None:
@@ -650,7 +703,7 @@ def test_localize_items_splits_large_batches_before_generation(monkeypatch) -> N
     assert len(localized) == 4
 
 
-def test_localize_items_preserves_korean_archive_after_connection_retries(monkeypatch) -> None:
+def test_localization_preserves_verified_archive_after_connection_retries(monkeypatch) -> None:
     item = DigestItem(
         title="Copilot deployment approvals",
         url="https://example.com/copilot-deployment-approvals",
