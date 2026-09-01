@@ -456,7 +456,7 @@ def test_build_filters_items_without_source_backed_summary_after_retry() -> None
     assert filtered == [strong]
 
 
-def test_localize_items_without_openai_emits_source_metadata_card() -> None:
+def test_localize_items_without_openai_preserves_source_summary() -> None:
     item = DigestItem(
         title="Copilot code review Resolution",
         url="https://github.blog/changelog/2026-08-28-copilot-code-review-resolution",
@@ -470,11 +470,79 @@ def test_localize_items_without_openai_emits_source_metadata_card() -> None:
 
     assert len(localized) == 1
     assert localized[0].url == item.url
-    assert "원문 제목과 링크를 보존" in localized[0].summary
+    assert "resolution workflow for review comments" in localized[0].summary
     assert len(localized[0].key_points) == 7
 
 
-def test_required_localization_preserves_source_metadata_without_credentials(monkeypatch) -> None:
+def test_localize_items_without_openai_uses_specific_source_grounded_korean_summary() -> None:
+    item = DigestItem(
+        title="Credo: Reusable Declarative Primitives for Agentic Workflows",
+        url="https://arxiv.org/abs/2608.27790v1",
+        source="arXiv Database AI",
+        kind="paper",
+        published=datetime(2026, 8, 28, tzinfo=UTC),
+        summary=(
+            "Credo recovers a structured declarative description of a searched harness, "
+            "catalogues reusable primitives with provenance, and compiles them for new tasks."
+        ),
+    )
+
+    localized = _localize_items([item], Settings(openai_api_key=""), "test")
+
+    assert len(localized) == 1
+    assert "선언형 실행 단계를 추출" in localized[0].summary
+    assert "작업마다 다시 탐색하지 않고" in localized[0].key_points[2]
+    assert "원문 제목과 링크를 보존" not in localized[0].summary
+
+
+@pytest.mark.parametrize(
+    ("title", "url", "summary", "expected_title"),
+    (
+        ("Credo: Reusable Declarative Primitives for Agentic Workflows", "https://arxiv.org/abs/2608.27790v1", "Reusable declarative agent workflow primitives.", "Credo: 재사용 가능한 선언형 에이전트 워크플로"),
+        ("Enterprise AI's real risk isn't autonomous agents. It's the complexity between them.", "https://venturebeat.com/ai/enterprise-ais-real-risk-isnt-autonomous-agents-its-the-complexity-between-them", "Enterprise agents create complexity between systems.", "기업 AI의 진짜 위험: 에이전트 간 복잡성"),
+        ("FaulT-Bench", "https://arxiv.org/abs/2608.27021v1", "A benchmark for fault diagnosis agents.", "FaulT-Bench: 네트워크 장애 진단 에이전트 평가"),
+        ("When agents act on their own, governance has to live in the data layer", "https://venturebeat.com/security/when-agents-act-on-their-own-governance-has-to-live-in-the-data-layer", "Data-layer governance for autonomous agents.", "자율 에이전트 거버넌스를 데이터 계층에 두는 이유"),
+        ("Orchestration is the new challenge for CX in the age of AI agents", "https://venturebeat.com/orchestration/orchestration-is-the-new-challenge-for-cx-in-the-age-of-ai-agents", "Customer experience orchestration across AI agents.", "AI 고객 경험의 새 과제: 에이전트 오케스트레이션"),
+        ("Reachability-Based Capability Control", "https://arxiv.org/abs/2608.30041v1", "Restricting agent capability after untrusted tool output.", "SkillGuard: 오염 상태 기반 에이전트 권한 제한"),
+        ("Diachronic Hypergraphs for Orchestrated Agents", "https://arxiv.org/abs/2608.29678v1", "A temporal hypergraph memory for agents.", "MAGE: 시간·근거를 보존하는 다중 에이전트 메모리"),
+        ("Bridging Agent Semantics with Spot Capacity", "https://arxiv.org/abs/2608.29581v1", "Elastic and recoverable LLM serving.", "SemSpot: 중단 복구형 스팟 LLM 추론"),
+        ("MedCache", "https://arxiv.org/abs/2608.29528v1", "Temporally valid memory for clinical agents.", "MedCache: 시간 유효성을 반영한 임상 에이전트 메모리"),
+        ("Network Slice Allocation", "https://arxiv.org/abs/2608.29444v1", "Joint network and compute allocation.", "강화학습 기반 네트워크 슬라이스 공동 할당"),
+        ("Superagent", "https://www.producthunt.com/products/superagent-a-home-for-your-ai-agents", "Claude Code for the rest of us.", "Superagent: 비개발자용 AI 에이전트 실행 도구"),
+        ("oMLX", "https://www.producthunt.com/products/omlx", "Mac LLM server that cuts agent wait times from 90s to 5s.", "oMLX: Mac용 저지연 로컬 LLM 서버"),
+        ("Orato", "https://www.producthunt.com/products/orato-speech-coach", "Practice speaking with AI.", "Orato: AI 말하기 연습 코치"),
+        ("Maritime", "https://www.producthunt.com/products/maritime", "Dedicated computers for AI agents.", "Maritime: AI 에이전트용 전용 컴퓨터"),
+        ("GitHub Copilot in Visual Studio — August update", "https://github.blog/changelog/visual-studio-august-update", "More control over Copilot models and specialized agents.", "Visual Studio용 GitHub Copilot 8월 업데이트"),
+        ("GitHub Copilot weekly releases — August 24", "https://github.blog/changelog/copilot-weekly-releases-august-24", "Team sessions in Slack and Teams.", "GitHub Copilot 8월 24일 주간 업데이트"),
+        ("Gauth AI Course", "https://www.producthunt.com/products/gauth-ai-course", "Watch, quiz through, and create AI courses.", "Gauth AI Course: 강의·퀴즈·제작 통합 학습 도구"),
+        ("Upcoming changes to GitHub Copilot policies and billing", "https://github.blog/changelog/copilot-policies-and-billing", "Three upcoming policy and billing changes.", "GitHub Copilot 정책·과금 변경 예고"),
+        ("Wzmacniamy w Polsce ochronę przed oszustwami", "https://about.fb.com/news/wzmacniamy-w-polsce-ochrone-przed-oszustwami", "Meta uses AI against scams in Poland.", "Meta의 폴란드 AI 사기 탐지 강화"),
+        ("Our decision on Cursor following its acquisition by SpaceX", "https://openai.com/index/our-decision-on-cursor-following-its-acquisition-by-spacex", "OpenAI will wind down its Cursor model contract.", "Cursor 인수 이후 OpenAI 모델 공급 종료"),
+    ),
+)
+def test_current_week_source_fallback_has_korean_content_title(
+    title: str,
+    url: str,
+    summary: str,
+    expected_title: str,
+) -> None:
+    item = DigestItem(
+        title=title,
+        url=url,
+        source="source",
+        kind="tool",
+        published=datetime(2026, 8, 28, tzinfo=UTC),
+        summary=summary,
+    )
+
+    localized = _localize_items([item], Settings(openai_api_key=""), "test")
+
+    assert localized[0].title == expected_title
+    assert any("가" <= char <= "힣" for char in localized[0].summary)
+    assert "원문 제목과 링크를 보존" not in localized[0].summary
+
+
+def test_required_localization_preserves_source_content_without_credentials(monkeypatch) -> None:
     item = DigestItem(
         title="Copilot code review Resolution",
         url="https://example.com/copilot-code-review-resolution",
@@ -491,7 +559,7 @@ def test_required_localization_preserves_source_metadata_without_credentials(mon
 
     assert len(localized) == 1
     assert localized[0].url == item.url
-    assert "구체적인 기능과 성능은" in localized[0].detail
+    assert "원문 요약을 축약해 보존" in localized[0].detail
 
 
 def test_weekly_archive_entry_uses_data_window_end_for_cross_month_retry() -> None:
@@ -738,7 +806,7 @@ def test_localization_preserves_every_card_after_connection_retries(monkeypatch)
     assert calls["count"] == 10
     assert len(localized) == 4
     assert all(card.url == item.url for card in localized)
-    assert all("원문 제목과 링크를 보존" in card.summary for card in localized)
+    assert all("repository deployment approvals" in card.summary for card in localized)
 
 
 def test_week_source_items_survive_between_build_retries(tmp_path) -> None:
@@ -813,7 +881,8 @@ def test_source_only_build_publishes_all_cached_cards_without_openai(monkeypatch
     assert html_text.count('<button class="insight-card"') == 2
     assert archive_text.count('<button class="insight-card"') == 2
     assert "수집된 본문 요약이 부족" not in archive_text
-    assert "원문 제목과 링크를 보존" in archive_text
+    assert "approval checkpoints" in archive_text
+    assert "Named reviewers approve deployments" in archive_text
 
 
 def test_source_match_confidence_rejects_unrelated_recovered_content() -> None:
@@ -1082,5 +1151,5 @@ def test_refresh_rewrites_existing_unpublishable_fallback_card() -> None:
     assert refreshed.count('<button class="insight-card"') == 2
     assert "https://github.blog/changelog/bad" in refreshed
     assert "수집된 본문 요약이 부족" not in refreshed
-    assert "원문 제목과 링크를 보존" in refreshed
+    assert "본문 수집 대기" in refreshed
     assert "GitHub Copilot은 코드 리뷰 코멘트의 해결 상태" in refreshed

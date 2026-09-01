@@ -6274,14 +6274,14 @@ def _localize_items(
         return []
     provider_state = provider_state if provider_state is not None else {}
     if provider_state.get("unavailable"):
-        return [_source_metadata_item(item) for item in items]
+        return [_source_content_item(item) for item in items]
     if not settings.openai_api_key and not settings.azure_openai_api_key:
         message = (
             f"Cannot localize {len(items)} {context} items because neither OPENAI_API_KEY "
             "nor AZURE_OPENAI_API_KEY is configured."
         )
         print(message, file=sys.stderr)
-        return [_source_metadata_item(item) for item in items]
+        return [_source_content_item(item) for item in items]
     if len(items) > 3:
         localized_items: list[SiteItem] = []
         for start in range(0, len(items), 3):
@@ -6418,14 +6418,14 @@ def _localize_items(
             )
             provider_state["unavailable"] = True
             print(
-                message + " Publishing source-metadata cards so no collected item is omitted.",
+                message + " Publishing source-content fallback cards so no collected item is omitted.",
                 file=sys.stderr,
             )
-            return [_source_metadata_item(item) for item in items]
+            return [_source_content_item(item) for item in items]
         raise RuntimeError(f"Localization failed after 5 attempts for {context}: {last_error}") from last_error
     except Exception as exc:  # noqa: BLE001
         print(f"OpenAI localization failed for {context}: {exc}", file=sys.stderr)
-        return [_source_metadata_item(item) for item in items]
+        return [_source_content_item(item) for item in items]
 
 
 def _make_localization_clients(settings: Settings) -> list[tuple[object, str]]:
@@ -6890,26 +6890,83 @@ def _fallback_korean_item(item: DigestItem) -> SiteItem:
     )
 
 
-def _source_metadata_item(item: DigestItem) -> SiteItem:
-    """Build a complete, non-speculative card from fields verified in the source feed."""
+def _source_content_item(item: DigestItem) -> SiteItem:
+    """Build a source-grounded card without dropping the collected item.
+
+    Prefer a Korean, item-specific fallback derived from the collected source
+    text.  If no deterministic Korean rule exists yet, keep a short excerpt of
+    the source synopsis instead of replacing the content with a metadata-only
+    sentence.
+    """
     source = _korean_source_name(item.source)
     kind = _korean_kind_name(item.kind)
-    title = _clean_plain_text(item.title) or f"{source} 업데이트"
+    title = _fallback_display_title(item)
     date = _format_date(item.published)
-    summary = f"{source}에서 {date}에 공개한 {kind} 항목이며 원문 제목과 링크를 보존했습니다."
+
+    specific = _latest_week_specific_summary(re.sub(r"[-_]+", " ", _item_text(item)))
+    if specific:
+        summary, seed_points = specific
+        return SiteItem(
+            title=title,
+            summary=summary,
+            detail=summary,
+            source=source,
+            kind=kind,
+            url=item.url,
+            published=item.published,
+            key_points=_fallback_card_points(item, seed_points),
+            tags=tuple(_fallback_tags(item)[:5]),
+            comparisons=tuple(_fallback_comparisons(item)),
+            glossary=tuple(_fallback_glossary(item)),
+        )
+
+    fallback = _fallback_korean_item(item)
+    if _source_evidence_summary(item) or _fallback_specific_summary(item):
+        return fallback
+
+    source_excerpt = _clip(_clean_plain_text(item.summary), 260)
+    if _contains_unpublishable_fallback_copy(source_excerpt):
+        source_excerpt = ""
+    if source_excerpt:
+        summary = f"{title}의 원문 요약: {source_excerpt}"
+        detail = (
+            f"{source}가 제공한 원문 요약을 축약해 보존한 카드입니다. "
+            "한국어 자동 요약을 사용할 수 없을 때에도 실제 내용이 메타데이터 문구로 대체되지 않습니다."
+        )
+        points = (
+            f"1. 한 줄 요약: {summary}",
+            f"2. 무엇이 바뀌었나: {source_excerpt}",
+            "3. 왜 중요한가: 수집된 원문 설명을 바탕으로 해당 항목의 실제 주제를 확인할 수 있습니다.",
+            "4. 한계와 주의사항: 이 문장은 원문 제공 요약을 축약한 것으로 한국어 번역이 완료되지 않았을 수 있습니다.",
+            "5. 이번 주 해볼 일: 업무와 관련된 핵심 표현을 기준으로 적용 가능성을 검토합니다.",
+            f"6. 누가 보면 좋은가: {_recommended_reader_roles(item)}",
+            f"7. 출처와 상태: {source} · 원문 요약 보존 · {date}",
+        )
+        return SiteItem(
+            title=title,
+            summary=summary,
+            detail=detail,
+            source=source,
+            kind=kind,
+            url=item.url,
+            published=item.published,
+            key_points=points,
+            tags=("원문 요약", source, kind),
+        )
+
+    summary = f"{source}에서 {date}에 공개한 {kind} 항목입니다."
     detail = (
-        "자동 요약을 만들 수 없는 경우에도 수집된 항목이 목록에서 사라지지 않도록 "
-        "출처, 발행일, 원문 제목과 링크를 기준으로 구성한 카드입니다. "
-        "구체적인 기능과 성능은 연결된 원문을 확인한 뒤 판단해야 합니다."
+        "수집 피드에 본문 요약이 없는 항목으로, 제목과 출처에서 확인되는 범위만 표시합니다. "
+        "본문이 수집되면 내용 기반 요약으로 자동 교체됩니다."
     )
     points = (
-        f"1. 한 줄 요약: {source}에서 공개한 {kind} 항목입니다.",
-        "2. 무엇이 바뀌었나: 원문 제목, 출처, 발행일과 링크가 새 항목으로 수집됐습니다.",
-        "3. 왜 중요한가: 자동 요약 상태와 관계없이 수집 목록과 원문 접근 경로를 유지합니다.",
-        "4. 한계와 주의사항: 구체적인 기능과 성능은 원문 내용을 확인한 뒤 판단해야 합니다.",
-        "5. 이번 주 해볼 일: 원문 링크에서 업무와 관련된 변경 사항이 있는지 확인합니다.",
-        "6. 누가 보면 좋은가: AI 서비스 기획자, 개발자와 인프라 운영 담당자입니다.",
-        f"7. 출처와 상태: {source} · 원문 메타데이터 확인 · {date}",
+        f"1. 한 줄 요약: {summary}",
+        f"2. 무엇이 바뀌었나: {title} 항목이 새로 수집됐습니다.",
+        "3. 왜 중요한가: 본문 수집이 완료되면 실제 내용에 맞춘 요약으로 갱신됩니다.",
+        "4. 한계와 주의사항: 현재 수집 피드에는 본문 요약이 포함되지 않았습니다.",
+        "5. 이번 주 해볼 일: 다음 생성 시 본문 수집 상태를 확인합니다.",
+        f"6. 누가 보면 좋은가: {_recommended_reader_roles(item)}",
+        f"7. 출처와 상태: {source} · 본문 수집 대기 · {date}",
     )
     return SiteItem(
         title=title,
@@ -6920,11 +6977,199 @@ def _source_metadata_item(item: DigestItem) -> SiteItem:
         url=item.url,
         published=item.published,
         key_points=points,
-        tags=("원문 확인", source, kind),
+        tags=("본문 수집 대기", source, kind),
     )
 
 
 def _latest_week_specific_summary(text: str) -> tuple[str, tuple[str, str, str]] | None:
+    source_content_rules: tuple[
+        tuple[tuple[str, ...], str, tuple[str, str, str]], ...
+    ] = (
+        (
+            ("2608.27790",),
+            "Credo는 코딩 에이전트가 탐색해 만든 불투명한 하네스에서 재사용 가능한 선언형 실행 단계를 추출하고, 출처 메타데이터와 함께 카탈로그화해 새 작업에 다시 조합하는 연구입니다.",
+            (
+                "1. 무엇을 다루나요? 검색으로 발견한 에이전트 하네스를 재사용 가능한 선언형 프리미티브로 바꾸는 Credo입니다.",
+                "2. 핵심 구성 요소: 실행 단계·런타임 신호·프롬프트 전략 추출, 출처 기록, 카탈로그와 컴파일러입니다.",
+                "3. 업무 적용 포인트: 검증된 에이전트 절차를 작업마다 다시 탐색하지 않고 조직 자산으로 재사용할 수 있습니다.",
+            ),
+        ),
+        (
+            ("enterprise ai's real risk", "complexity between"),
+            "기업 AI의 핵심 위험은 개별 자율 에이전트보다 여러 에이전트·API·기존 시스템이 얽히면서 실행 경로와 책임 관계를 파악하기 어려워지는 운영 복잡성입니다.",
+            (
+                "1. 무엇을 다루나요? 다수의 AI 에이전트가 서로와 API를 호출할 때 급증하는 연결 복잡성과 통제 문제입니다.",
+                "2. 핵심 구성 요소: 에이전트·API 목록, 호출 경로 가시성, 중앙 정책, 관측과 감사 체계입니다.",
+                "3. 업무 적용 포인트: 에이전트 수보다 상호 호출 관계와 권한 흐름을 먼저 지도화해야 합니다.",
+            ),
+        ),
+        (
+            ("2608.27021",),
+            "FaulT-Bench는 실제 운영처럼 잘못된 사용자 티켓과 존재하지 않는 장애까지 포함한 200개 네트워크 문제로 LLM 장애 진단 에이전트의 신뢰성을 평가하는 벤치마크입니다.",
+            (
+                "1. 무엇을 다루나요? 부정확한 장애 티켓에서도 네트워크 진단 에이전트가 올바르게 판단하는지 평가합니다.",
+                "2. 핵심 구성 요소: 8개 토폴로지, 200개 시나리오, 허위 장애·잘못된 장비 지정·오류 원인 주장입니다.",
+                "3. 업무 적용 포인트: 장애가 항상 존재하고 티켓이 정확하다는 가정을 버린 평가셋이 필요합니다.",
+            ),
+        ),
+        (
+            ("governance has to live in the data layer",),
+            "자율 에이전트의 거버넌스는 모델 지침에만 맡기지 말고 데이터 계층에서 에이전트 신원·목적·접근 권한·마스킹·감사 로그를 실행 시점에 강제해야 한다는 제안입니다.",
+            (
+                "1. 무엇을 다루나요? 에이전트의 데이터 접근을 데이터베이스가 직접 통제하는 실행 가능한 거버넌스입니다.",
+                "2. 핵심 구성 요소: 에이전트 신원과 목적, 역할·속성 기반 접근, 행·열 보안, 감사와 계보입니다.",
+                "3. 업무 적용 포인트: 모델이 정책을 따르길 기대하기보다 권한 경계를 시스템에서 넘지 못하게 해야 합니다.",
+            ),
+        ),
+        (
+            ("orchestration is the new challenge", "cx"),
+            "AI 에이전트를 기존 고객 시스템에 개별적으로 덧붙이는 방식은 맥락 단절을 키우므로, 고객·업무·채널 데이터를 공유하는 컨텍스트 계층으로 AI와 사람의 작업을 끝까지 오케스트레이션해야 한다는 내용입니다.",
+            (
+                "1. 무엇을 다루나요? 고객 경험에서 AI·사람·채널을 공통 맥락으로 연결하는 오케스트레이션입니다.",
+                "2. 핵심 구성 요소: 공유 온톨로지, 컨텍스트 그래프, 실시간 채널 연결과 사람에게 넘기는 절차입니다.",
+                "3. 업무 적용 포인트: 챗봇을 따로 붙이기보다 고객 상태가 채널 사이에서 끊기지 않는 구조를 먼저 설계해야 합니다.",
+            ),
+        ),
+        (
+            ("2608.30041",),
+            "SkillGuard는 외부 도구의 신뢰할 수 없는 출력이 에이전트 상태에 들어오면 오염으로 표시하고, 이후 사용할 수 있는 권한을 제한해 간접 프롬프트 인젝션이 특권 작업으로 이어지지 않게 하는 실행 계층입니다.",
+            (
+                "1. 무엇을 다루나요? 간접 프롬프트 인젝션 이후 에이전트의 미래 권한을 줄이는 SkillGuard입니다.",
+                "2. 핵심 구성 요소: 오염 상태 추적, 금지 상태 정의, 도달 가능성 기반 권한 제한, 하네스 강제입니다.",
+                "3. 업무 적용 포인트: 외부 문서를 읽은 뒤에는 결제·배포 같은 고권한 도구를 자동으로 제한할 수 있습니다.",
+            ),
+        ),
+        (
+            ("2608.29678",),
+            "MAGE는 에이전트·도구·문서·오류·증거가 함께 얽힌 사건을 시간 정보가 있는 멀티모달 하이퍼그래프로 저장해, 여러 에이전트가 근거와 역할 맥락을 잃지 않고 기억을 공유하도록 합니다.",
+            (
+                "1. 무엇을 다루나요? 다중 에이전트의 복합 사건과 근거를 보존하는 하이퍼그래프 메모리 MAGE입니다.",
+                "2. 핵심 구성 요소: 시간 변화, 멀티모달 증거, 역할별 맥락, 절차·결정·오류의 연결입니다.",
+                "3. 업무 적용 포인트: 벡터 검색만으로 사라지는 사건 관계와 변경 이력을 감사 가능한 형태로 남길 수 있습니다.",
+            ),
+        ),
+        (
+            ("2608.29581",),
+            "SemSpot은 긴 에이전트 작업의 긴급도·재실행 비용·완료 조건을 반영해 저렴한 스팟 LLM 추론 용량을 쓰고, 중단 시 의미 단위로 복구하도록 설계한 탄력형 서비스 모델입니다.",
+            (
+                "1. 무엇을 다루나요? 에이전트 작업 의미에 맞춰 스팟 추론 용량을 안전하게 활용하는 SemSpot입니다.",
+                "2. 핵심 구성 요소: 요청 긴급도, 재생 비용, 체크포인트, 중단 복구와 용량 전환입니다.",
+                "3. 업무 적용 포인트: 재실행 가능한 단계는 저비용 용량에 배치하고 중요한 단계만 안정 용량을 쓸 수 있습니다.",
+            ),
+        ),
+        (
+            ("2608.29528",),
+            "MedCache는 여러 진료 시점과 전문과에 흩어진 환자 기록을 다루는 임상 에이전트에서, 많은 이력을 저장하는 것보다 시간적으로 유효한 정보와 관련 전문과 근거를 선별하는 메모리 설계가 중요함을 보여줍니다.",
+            (
+                "1. 무엇을 다루나요? 장기 환자 기록을 정확하게 유지하는 임상 에이전트 메모리 MedCache입니다.",
+                "2. 핵심 구성 요소: 다회 방문 벤치마크, 시간 유효성, 전문과 필터링, 검색과 메모리 기반 추론입니다.",
+                "3. 업무 적용 포인트: 의료 기록은 오래된 정보를 무조건 누적하기보다 현재 유효성과 진료 맥락을 우선해야 합니다.",
+            ),
+        ),
+        (
+            ("2608.29444",),
+            "이 연구는 광 네트워크 슬라이스를 배치할 때 경로·주파수·공간 코어·컴퓨팅 자원을 따로 결정해 생기는 실패를 줄이기 위해, 경로 제약을 포함한 강화학습으로 자원을 공동 할당합니다.",
+            (
+                "1. 무엇을 다루나요? SDM-EON 환경의 네트워크 슬라이스 자원을 공동 최적화하는 강화학습 방식입니다.",
+                "2. 핵심 구성 요소: 경로 제약, 스펙트럼, 공간 코어, 컴퓨팅 위치와 수용 실패 최소화입니다.",
+                "3. 업무 적용 포인트: 네트워크와 컴퓨팅 자원을 분리 배치하지 말고 경로 가용성과 함께 판단해야 합니다.",
+            ),
+        ),
+        (
+            ("superagent", "claude code for the rest of us"),
+            "Superagent는 개발자가 아니어도 Claude Code처럼 AI 에이전트를 만들고 실행할 수 있도록 사용 장벽을 낮춘 도구입니다.",
+            (
+                "1. 무엇을 다루나요? 비개발자를 위한 Claude Code형 AI 에이전트 실행 환경입니다.",
+                "2. 핵심 구성 요소: 에이전트 생성, 작업 실행, 사용자 친화적 인터페이스입니다.",
+                "3. 업무 적용 포인트: 코딩 도구 사용이 어려운 구성원의 반복 업무 자동화 실험에 적합합니다.",
+            ),
+        ),
+        (
+            ("omlx", "90s to 5s"),
+            "oMLX는 Mac에서 로컬 LLM을 서버로 운영해 AI 에이전트의 모델 응답 대기 시간을 90초에서 5초 수준으로 줄이는 도구입니다.",
+            (
+                "1. 무엇을 다루나요? Mac 기반 로컬 LLM 서버와 에이전트 추론 지연 단축입니다.",
+                "2. 핵심 구성 요소: 로컬 모델 서빙, Mac 하드웨어 활용, 반복 호출 지연 최적화입니다.",
+                "3. 업무 적용 포인트: 로컬 에이전트의 응답 속도와 외부 API 의존도를 함께 줄일 수 있습니다.",
+            ),
+        ),
+        (
+            ("orato", "practice speaking"),
+            "Orato는 사용자가 말하기를 연습하고 AI 피드백을 받을 수 있게 만든 스피치 코칭 도구입니다.",
+            (
+                "1. 무엇을 다루나요? AI와 함께 발표·대화 말하기를 연습하는 스피치 코치입니다.",
+                "2. 핵심 구성 요소: 말하기 연습, AI 피드백, 반복 훈련입니다.",
+                "3. 업무 적용 포인트: 발표나 면접 전 짧은 반복 연습과 전달 방식 점검에 활용할 수 있습니다.",
+            ),
+        ),
+        (
+            ("maritime", "dedicated computers for ai agents"),
+            "Maritime은 월 1달러부터 AI 에이전트가 지속적으로 작업할 수 있는 전용 컴퓨터 환경을 제공하는 서비스입니다.",
+            (
+                "1. 무엇을 다루나요? AI 에이전트용 상시 실행 컴퓨터를 저비용으로 제공하는 서비스입니다.",
+                "2. 핵심 구성 요소: 전용 실행 환경, 장기 작업, 에이전트별 격리와 월 단위 과금입니다.",
+                "3. 업무 적용 포인트: 개인 PC를 켜두지 않고 장시간 에이전트 작업을 분리해 시험할 수 있습니다.",
+            ),
+        ),
+        (
+            ("github copilot in visual studio", "august update"),
+            "Visual Studio용 GitHub Copilot 8월 업데이트는 추론 방식과 모델 선택, 팀 공유 에이전트, 코드 리뷰 요청 시점을 더 세밀하게 제어할 수 있게 합니다.",
+            (
+                "1. 무엇을 다루나요? Visual Studio에서 Copilot 모델·추론·공유 에이전트·리뷰 흐름을 제어하는 업데이트입니다.",
+                "2. 핵심 구성 요소: 모델 선택, 추론 설정, 전문 에이전트 공유, 코드 리뷰 호출입니다.",
+                "3. 업무 적용 포인트: 팀별 코딩 규칙과 리뷰 절차를 Copilot 사용 흐름에 맞춰 표준화할 수 있습니다.",
+            ),
+        ),
+        (
+            ("copilot weekly releases", "august 24"),
+            "GitHub Copilot 주간 업데이트는 Slack·Teams의 팀 에이전트 세션과 앱·CLI·IDE 전반의 맞춤 설정을 추가해 Copilot 실행 방식을 더 폭넓게 제어하게 합니다.",
+            (
+                "1. 무엇을 다루나요? 협업 채널부터 CLI와 IDE까지 이어지는 Copilot 실행·맞춤 설정 업데이트입니다.",
+                "2. 핵심 구성 요소: Slack·Teams 팀 세션, 앱·CLI·IDE 설정과 에이전트 협업입니다.",
+                "3. 업무 적용 포인트: 대화에서 시작한 작업을 개발 환경까지 연결하는 팀 운영 방식을 시험할 수 있습니다.",
+            ),
+        ),
+        (
+            ("gauth ai course",),
+            "Gauth AI Course는 AI 강의를 시청하고 퀴즈로 이해도를 확인하며 사용자가 직접 강좌까지 만들 수 있는 학습 도구입니다.",
+            (
+                "1. 무엇을 다루나요? AI 강의 시청·퀴즈·강좌 제작을 한곳에서 제공하는 학습 도구입니다.",
+                "2. 핵심 구성 요소: 영상 학습, 이해도 퀴즈, 사용자 강좌 생성입니다.",
+                "3. 업무 적용 포인트: 사내 AI 교육 콘텐츠를 짧게 제작하고 학습 확인까지 연결할 수 있습니다.",
+            ),
+        ),
+        (
+            ("upcoming changes", "copilot policies and billing"),
+            "GitHub는 Copilot의 일관된 사용 경험을 위해 정책과 과금에 관한 세 가지 변경을 예고했으며, 조직 관리자는 적용 일정과 사용자·예산 영향을 사전에 점검해야 합니다.",
+            (
+                "1. 무엇을 다루나요? GitHub Copilot 정책과 과금 체계에 예정된 세 가지 변경입니다.",
+                "2. 핵심 구성 요소: 정책 변경, 청구 영향, 적용 일정과 조직별 사전 검토입니다.",
+                "3. 업무 적용 포인트: 라이선스·예산 정책과 사용자 안내가 필요한지 변경 전 확인해야 합니다.",
+            ),
+        ),
+        (
+            ("wzmacniamy", "polsce", "oszustwami"),
+            "Meta는 폴란드에서 사칭 계정을 더 잘 탐지하는 AI를 도입하고 금융 서비스 광고주의 신원 확인을 100%로 확대해 온라인 사기 대응을 강화합니다.",
+            (
+                "1. 무엇을 다루나요? 폴란드 사용자를 대상으로 한 Meta의 AI 사기 탐지와 금융 광고주 검증 강화입니다.",
+                "2. 핵심 구성 요소: 사칭 탐지 AI, 금융 광고주 전원 신원 확인, 자동 차단과 파트너십입니다.",
+                "3. 업무 적용 포인트: 광고·플랫폼 운영은 탐지 모델과 광고주 신원 검증을 함께 적용해야 합니다.",
+            ),
+        ),
+        (
+            ("our decision on cursor", "spacex"),
+            "OpenAI는 Cursor가 SpaceX에 인수된 뒤 Cursor에 OpenAI 모델을 제공하던 계약을 단계적으로 종료하기로 결정했습니다.",
+            (
+                "1. 무엇을 다루나요? SpaceX의 Cursor 인수 이후 OpenAI가 모델 공급 계약을 종료하는 결정입니다.",
+                "2. 핵심 구성 요소: Cursor 인수, OpenAI 모델 공급 계약, 단계적 종료입니다.",
+                "3. 업무 적용 포인트: 외부 AI 모델에 의존하는 개발 도구는 공급 계약 변경에 대비한 대체 모델 계획이 필요합니다.",
+            ),
+        ),
+    )
+    for keywords, summary, points in source_content_rules:
+        if all(keyword in text for keyword in keywords):
+            return summary, points
+
     rules: tuple[tuple[tuple[str, ...], str, tuple[str, str, str]], ...] = (
         (
             ("2608.21942",),
@@ -7940,14 +8185,21 @@ def _koreanize_display_title(title: str, summary: str = "", source: str = "") ->
     text = f"{title} {summary} {source}".lower()
     specific = _fallback_specific_title(text)
     derived = _derive_content_display_title(title, text)
+    needs_korean_title = bool(re.search(r"[A-Za-z]", title)) and not bool(
+        re.search(r"[가-힣]", title)
+    )
     if _has_broken_placeholder(title):
         return specific or derived or _fallback_korean_topic(text)
     if specific and _is_generic_display_title(title):
         return specific
     if specific and (_looks_untranslated(title) or _has_source_title_prefix(title, source)):
         return specific
-    if _looks_untranslated(title):
-        return specific or derived or _fallback_korean_topic(text)
+    if _looks_untranslated(title) or needs_korean_title:
+        if specific:
+            return specific
+        if derived and re.search(r"[가-힣]", derived):
+            return derived
+        return _fallback_korean_topic(text)
     if _is_generic_display_title(title):
         return specific or derived or _fallback_korean_topic(text)
     return title
@@ -8210,6 +8462,26 @@ def _has_source_title_prefix(title: str, source: str) -> bool:
 def _fallback_specific_title(text: str) -> str:
     text = re.sub(r"[-_]+", " ", text.lower())
     title_rules = (
+        (("2608.27790",), "Credo: 재사용 가능한 선언형 에이전트 워크플로"),
+        (("enterprise ai's real risk", "complexity between"), "기업 AI의 진짜 위험: 에이전트 간 복잡성"),
+        (("2608.27021",), "FaulT-Bench: 네트워크 장애 진단 에이전트 평가"),
+        (("governance has to live in the data layer",), "자율 에이전트 거버넌스를 데이터 계층에 두는 이유"),
+        (("orchestration is the new challenge", "cx"), "AI 고객 경험의 새 과제: 에이전트 오케스트레이션"),
+        (("2608.30041",), "SkillGuard: 오염 상태 기반 에이전트 권한 제한"),
+        (("2608.29678",), "MAGE: 시간·근거를 보존하는 다중 에이전트 메모리"),
+        (("2608.29581",), "SemSpot: 중단 복구형 스팟 LLM 추론"),
+        (("2608.29528",), "MedCache: 시간 유효성을 반영한 임상 에이전트 메모리"),
+        (("2608.29444",), "강화학습 기반 네트워크 슬라이스 공동 할당"),
+        (("superagent", "claude code for the rest of us"), "Superagent: 비개발자용 AI 에이전트 실행 도구"),
+        (("omlx", "90s to 5s"), "oMLX: Mac용 저지연 로컬 LLM 서버"),
+        (("orato", "practice speaking"), "Orato: AI 말하기 연습 코치"),
+        (("maritime", "dedicated computers for ai agents"), "Maritime: AI 에이전트용 전용 컴퓨터"),
+        (("github copilot in visual studio", "august update"), "Visual Studio용 GitHub Copilot 8월 업데이트"),
+        (("copilot weekly releases", "august 24"), "GitHub Copilot 8월 24일 주간 업데이트"),
+        (("gauth ai course",), "Gauth AI Course: 강의·퀴즈·제작 통합 학습 도구"),
+        (("upcoming changes", "copilot policies and billing"), "GitHub Copilot 정책·과금 변경 예고"),
+        (("wzmacniamy", "polsce", "oszustwami"), "Meta의 폴란드 AI 사기 탐지 강화"),
+        (("our decision on cursor", "spacex"), "Cursor 인수 이후 OpenAI 모델 공급 종료"),
         (("2608.21942",), "TessIndex: 에이전트 능력 검증 신원 시스템"),
         (("new github copilot experience in slack",), "Slack에서 쓰는 GitHub Copilot 에이전트"),
         (("shared agentic work", "microsoft teams"), "Microsoft Teams의 공동 Copilot 에이전트 작업"),
@@ -9036,7 +9308,7 @@ def _remove_unpublishable_cards_in_html(html_text: str) -> tuple[str, int]:
             removed += 1
             return _patch_insight_button(
                 button,
-                _source_metadata_item(_digest_from_existing_card_attrs(attrs)),
+                _source_content_item(_digest_from_existing_card_attrs(attrs)),
             )
         return button
 
