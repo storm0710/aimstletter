@@ -25,6 +25,7 @@ from aimstletter.site import (
     _items_in_window,
     _localized_site_item,
     _rank_work_skill_updates,
+    _repair_archive_card_interaction_script,
     _render_analytics,
     _render_ai_tool_directory,
     _render_detail_page,
@@ -932,6 +933,7 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "�" not in week_2
     assert '<a class="brand" href="./">AI MASTER TIMES</a>' in week_2
     assert "button.insertAdjacentElement('afterend', detailPanel)" in week_2
+    assert "detailPanel.hidden = false;" in week_2
     assert ".insight-grid.has-selection .insight-detail { display: flex; }" in week_2
     assert 'class="detail-summary"' not in week_2
     assert "data-insight-body" not in week_2
@@ -939,6 +941,8 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "data-insight-footnotes-title" in week_2
     assert "단어 설명" in week_2
     assert "const clearInsightSelection" in week_2
+    assert 'insightGrid.classList.remove("has-selection")' in week_2
+    assert "insightDetail.hidden = true" not in week_2
     assert "clearInsightSelection();" in week_2
     assert "selectFirstVisibleCard();" in week_2
     assert "window.sessionStorage.setItem(\"aimstletter.archiveInsightsOnly\", \"1\")" in week_2
@@ -986,6 +990,24 @@ def test_committed_archive_navigation_and_mobile_detail_rules() -> None:
     assert "margin: 14px 0 22px" in week_2
     assert "width: 100%" in week_2
     assert "box-sizing: border-box" in week_2
+
+
+def test_repair_archive_card_interaction_script_removes_stale_body_dependency() -> None:
+    legacy = """
+    const body = document.querySelector('[data-insight-body]');
+    if (!buttons.length || !body || !detail || !grid) return;
+    grid.classList.add('has-selection');
+    body.textContent = button.dataset.body || '';
+    if (insightDetail) insightDetail.hidden = true;
+    """
+
+    repaired = _repair_archive_card_interaction_script(legacy)
+
+    assert "data-insight-body" not in repaired
+    assert "!body" not in repaired
+    assert "body.textContent" not in repaired
+    assert "detailPanel.hidden = false;" in repaired
+    assert "insightDetail.hidden = true" not in repaired
 
 
 def test_committed_knowledge_page_exists() -> None:

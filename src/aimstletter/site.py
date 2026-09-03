@@ -461,8 +461,41 @@ def _refresh_homepage_archive_navigation(
         html,
         count=1,
     )
+    updated = _repair_archive_card_interaction_script(updated)
     if updated != html:
         index_path.write_text(updated, encoding="utf-8")
+
+
+def _repair_archive_card_interaction_script(html: str) -> str:
+    """Upgrade archived pages that still reference removed detail elements."""
+    updated = re.sub(
+        r"\n\s*const body = document\.querySelector\('\[data-insight-body\]'\);\r?\n",
+        "\n",
+        html,
+    )
+    updated = updated.replace(" || !body || !detail", " || !detail")
+    updated = re.sub(
+        r"\n\s*body\.textContent = button\.dataset\.body \|\| '';\r?\n",
+        "\n",
+        updated,
+    )
+    if "detailPanel.hidden = false;" not in updated:
+        updated = updated.replace(
+            "grid.classList.add('has-selection');",
+            "grid.classList.add('has-selection');\n      detailPanel.hidden = false;",
+        )
+    if 'const insightGrid = document.querySelector("[data-insight-grid]");' not in updated:
+        updated = updated.replace(
+            'const insightDetail = document.querySelector(".insight-detail");',
+            'const insightDetail = document.querySelector(".insight-detail");\n'
+            '      const insightGrid = document.querySelector("[data-insight-grid]");',
+        )
+    updated = updated.replace(
+        "if (insightDetail) insightDetail.hidden = true;",
+        'if (insightGrid) insightGrid.classList.remove("has-selection");\n'
+        "        if (insightDetail) insightDetail.hidden = false;",
+    )
+    return updated
 
 
 def _refresh_archive_navigation(output_dir: Path, entries: list[dict[str, object]]) -> None:
@@ -486,6 +519,7 @@ def _refresh_archive_navigation(output_dir: Path, entries: list[dict[str, object
             html,
             count=1,
         )
+        updated = _repair_archive_card_interaction_script(updated)
         previous_archive = _previous_archive_entry(entries, current_entry)
         previous_week_button = (
             f'<a class="week-button" href="{escape(str(previous_archive["href"]))}">Previous Week</a>'
@@ -2157,6 +2191,7 @@ def _render_editorial_homepage(
       const smartInsightLinks = Array.from(document.querySelectorAll('a[href="#insights"]'));
       const insightCards = Array.from(document.querySelectorAll("[data-insight-card]"));
       const insightDetail = document.querySelector(".insight-detail");
+      const insightGrid = document.querySelector("[data-insight-grid]");
       const insights = document.querySelector("#insights");
       const normalize = (value) => (value || "").toLowerCase().replace(/\\s+/g, " ").trim();
 
@@ -2191,7 +2226,8 @@ def _render_editorial_homepage(
 
       const clearInsightSelection = () => {{
         insightCards.forEach((card) => card.classList.remove("is-active"));
-        if (insightDetail) insightDetail.hidden = true;
+        if (insightGrid) insightGrid.classList.remove("has-selection");
+        if (insightDetail) insightDetail.hidden = false;
       }};
 
       archiveLinks.forEach((link) => {{
@@ -3996,6 +4032,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
   buttons.forEach((button) => {
     button.addEventListener('click', () => {
       grid.classList.add('has-selection');
+      detailPanel.hidden = false;
       buttons.forEach((item) => item.classList.remove('is-active'));
       button.classList.add('is-active');
       placeDetailPanel(button);
