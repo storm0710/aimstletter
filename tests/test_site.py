@@ -105,6 +105,27 @@ def test_render_homepage_backfills_card_limit_after_copy_quality_filter() -> Non
     assert "본문이 부족한 항목" not in html
 
 
+def test_render_homepage_deduplicates_identical_visible_cards_with_different_urls() -> None:
+    item = SiteItem(
+        title="OpenAI 도구와 AI 에이전트",
+        url="https://example.com/update-a",
+        source="OpenAI 소식",
+        kind="도구",
+        published=datetime(2026, 8, 31, tzinfo=UTC),
+        summary="OpenAI 소식에서 공개한 자료의 핵심 변경과 적용 범위를 다룹니다.",
+        detail="업무에 적용할 수 있는 기능과 범위를 설명합니다.",
+        key_points=("1. 한 줄 요약: 핵심 변경과 적용 범위를 설명합니다.",),
+        tags=("OpenAI",),
+    )
+    duplicate = replace(item, url="https://example.com/update-b")
+
+    html = render_homepage([item, duplicate], [])
+
+    assert html.count('<button class="insight-card"') == 1
+    assert 'data-source="https://example.com/update-a"' in html
+    assert 'data-source="https://example.com/update-b"' not in html
+
+
 def test_smart_insight_moves_source_prefix_to_badge_and_koreanizes_title() -> None:
     item = SiteItem(
         title=(
@@ -1154,6 +1175,40 @@ def test_dedupe_insight_buttons_removes_repeated_source_urls() -> None:
     assert 'data-title="A"' in refreshed
     assert 'data-title="B"' in refreshed
     assert 'data-title="A2"' not in refreshed
+
+
+def test_dedupe_insight_buttons_removes_repeated_visible_content() -> None:
+    html = (
+        '<button class="insight-card" data-title="동일한 업데이트" data-body="같은 핵심 내용입니다." '
+        'data-source="https://example.com/a">A</button>'
+        '<button class="insight-card" data-title="동일한 업데이트" data-body="같은 핵심 내용입니다." '
+        'data-source="https://example.com/b">B</button>'
+        '<button class="insight-card" data-title="다른 업데이트" data-body="다른 핵심 내용입니다." '
+        'data-source="https://example.com/c">C</button>'
+    )
+
+    refreshed, count = _dedupe_insight_buttons_in_html(html)
+
+    assert count == 1
+    assert 'data-source="https://example.com/a"' in refreshed
+    assert 'data-source="https://example.com/b"' not in refreshed
+    assert 'data-source="https://example.com/c"' in refreshed
+
+
+def test_committed_archive_cards_have_unique_visible_content() -> None:
+    paths = [Path("public/index.html"), *Path("public/archive").glob("**/index.html")]
+
+    for path in paths:
+        html = path.read_text(encoding="utf-8")
+        cards = re.findall(r'<button class="insight-card"[^>]*>', html)
+        visible_content = [
+            (
+                re.search(r'data-title="([^"]*)"', card).group(1),
+                re.search(r'data-body="([^"]*)"', card).group(1),
+            )
+            for card in cards
+        ]
+        assert len(visible_content) == len(set(visible_content)), path
 
 
 def test_committed_weekly_smart_insights_use_week_specific_items() -> None:

@@ -3892,23 +3892,24 @@ def _split_title_source_prefix(item: SiteItem) -> tuple[str, str]:
 
 def _render_smart_insight_cards(items: list[SiteItem]) -> str:
     entries = []
-    unique_items = []
-    seen_urls = set()
+    seen_sources: set[str] = set()
+    seen_content: set[tuple[str, str]] = set()
     for item in items:
-        dedupe_key = item.url or f"{item.source}:{item.title}"
-        if dedupe_key in seen_urls:
+        if not _is_renderable_smart_insight(item):
             continue
-        seen_urls.add(dedupe_key)
-        unique_items.append(item)
-
-    for index, item in enumerate(unique_items):
         title = _clip(_smart_insight_title(item), 78)
         smart_summary = _smart_insight_summary(item)
         body = smart_summary
+        source_key = item.url.strip().lower()
+        content_key = (_normalize_search_text(title), _normalize_search_text(body))
+        if (source_key and source_key in seen_sources) or content_key in seen_content:
+            continue
+        if source_key:
+            seen_sources.add(source_key)
+        seen_content.add(content_key)
+
         detail = _smart_insight_card_detail(item, smart_summary)
         points = _smart_insight_points(item)
-        if not _is_renderable_smart_insight(item):
-            continue
         footnotes = item.glossary
         meta = f"{item.source} · {item.kind} · {_format_date(item.published)}"
         tags = item.tags
@@ -3916,7 +3917,7 @@ def _render_smart_insight_cards(items: list[SiteItem]) -> str:
         source_url = item.url
         category = _smart_insight_category(item)
         subcategory = _smart_insight_subcategory(item)
-        entries.append((index + 1, title, body, detail, meta, points, tags, criteria, source_url, category, subcategory, footnotes))
+        entries.append((len(entries) + 1, title, body, detail, meta, points, tags, criteria, source_url, category, subcategory, footnotes))
 
     if not entries:
         return ""
@@ -9394,6 +9395,7 @@ def refresh_existing_cards(output_dir: Path) -> int:
 def _dedupe_insight_buttons_in_html(html_text: str) -> tuple[str, int]:
     button_pattern = re.compile(r'<button class="insight-card"[\s\S]*?</button>')
     seen_sources: set[str] = set()
+    seen_content: set[tuple[str, str]] = set()
     removed = 0
 
     def replace_button(match: re.Match[str]) -> str:
@@ -9401,13 +9403,21 @@ def _dedupe_insight_buttons_in_html(html_text: str) -> tuple[str, int]:
         button = match.group(0)
         attrs = _html_attrs(button)
         source = unescape(attrs.get("data-source", "")).strip()
-        if not source:
-            return button
-        key = source.lower()
-        if key in seen_sources:
+        source_key = source.lower()
+        content_key = (
+            _normalize_search_text(attrs.get("data-title", "")),
+            _normalize_search_text(attrs.get("data-body", "")),
+        )
+        has_content_key = bool(content_key[0] and content_key[1])
+        if (source_key and source_key in seen_sources) or (
+            has_content_key and content_key in seen_content
+        ):
             removed += 1
             return ""
-        seen_sources.add(key)
+        if source_key:
+            seen_sources.add(source_key)
+        if has_content_key:
+            seen_content.add(content_key)
         return button
 
     return button_pattern.sub(replace_button, html_text), removed
