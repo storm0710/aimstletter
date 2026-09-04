@@ -1,9 +1,89 @@
 {
   "schema_version": 1,
-  "build_at": "2026-09-03T18:18:23.923854+09:00",
+  "build_at": "2026-09-04T17:58:21.406071+09:00",
   "period_start": "2026-08-24",
   "period_end": "2026-08-31",
   "ai_items": [
+    {
+      "title": "Diachronic Hypergraphs for Orchestrated Multi-Agent Multimodal Memory Curation",
+      "url": "https://arxiv.org/abs/2608.29678v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-08-30T09:23:12+00:00",
+      "summary": "Multi-agent systems solve tasks through collaboration, tool use, multimodal reasoning, and orchestration, but each agent operates within a knowledge boundary defined by its observations, context, and resources. Memory must preserve and transfer evidence, role specific context, decisions, procedures, and experience across interactions, not only outcomes. Vector and graph memories flatten these structures into embeddings or dyadic traces, obscuring events involving agents, tools, documents, errors, and evidence. This limits knowledge sharing, tracing, reuse, revision, and orchestration. We present MAGE, a hypergraph based multimodal database designed as a memory engine for MAS. MAGE stores agents, messages, tools, errors, procedures, documents, entities, decisions, and evidence in a heterogeneous temporal hypergraph, preserving high order collaborative events as reusable memory. It supports decision driven updates, role aware retrieval, validation, lifecycle management, and budget bounded context packing. By delivering knowledge to agents and orchestrators, MAGE expands their knowledge boundaries without modifying the models. Experiments show MAGE outperforms on various memory baselines."
+    },
+    {
+      "title": "A-MADiff: Attention-Guided Multi-Agent DRL with Diffusion Policies for Memory-Aware Task Orchestration in Mobile AIGC Networks",
+      "url": "https://arxiv.org/abs/2608.29255v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-08-29T13:19:44+00:00",
+      "summary": "Artificial Intelligence-Generated Content (AIGC) services employ Generative AI (GenAI) models to automatically generate diverse content. Mobile AIGC networks host GenAI models on edge-located AIGC Service Providers (ASPs) to deliver low-latency and personalized AIGC services for mobile users. However, AIGC inference tasks typically occupy GPU memory until task completion, causing GPU memory exhaustion at serving ASPs and triggering out-of-memory failures rather than merely increasing service latency. Existing studies on AIGC task orchestration have largely overlooked GPU memory feasibility constraints. To address this issue, we develop a cooperative multi-agent orchestration framework, in which each edge node is equipped with a scheduling agent to route tasks to local ASPs or neighboring edge nodes. Since scheduling agents make decisions based only on local observations, while peer offloading couples their resource states and long-term utilities, we formulate the orchestration process as a cooperative Decentralized Partially Observable Markov Decision Process (Dec-POMDP). To solve the Dec-POMDP, we propose an \\underline{A}ttention-guided \\underline{M}ulti-\\underline{A}gent deep reinforcement learning algorithm with \\underline{Diff}usion policies (A-MADiff) under the centralized training with a decentralized execution paradigm. A-MADiff employs diffusion-based decentralized actors to generate multi-modal preferences over feasible orchestration actions, and an attention-guided centralized critic to estimate per-agent values from cross-agent states under GPU memory heterogeneity. Numerical results demonstrate that A-MADiff significantly improves the cumulative reward over the state-of-the-art baseline."
+    },
+    {
+      "title": "The Hugging Face incident and the road ahead",
+      "url": "https://openai.com/index/hugging-face-incident-and-the-road-ahead",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-08-26T00:00:00+00:00",
+      "summary": "OpenAI shares findings from the Hugging Face security incident and the steps we’re taking to strengthen AI model security, monitoring, and alignment."
+    },
+    {
+      "title": "RL-based Network Slice Embedding over Space Division Multiplexed Elastic Optical Networks",
+      "url": "https://arxiv.org/abs/2608.29444v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-08-29T21:15:37+00:00",
+      "summary": "Network slicing over space-division-multiplexed elastic optical networks (SDM-EONs) requires jointly managing spectrum, spatial cores, and compute resources, a coupling that many existing studies ignore by treating compute placement independently from routing and spectrum decisions. This disconnect can cause the spectrum to be allocated along a path, only for the request to fail due to insufficient compute resources along the path, or may result in compute resources being allocated without consideration for spectrum resource availability on the path between compute nodes. We propose a path-constrained reinforcement learning framework that addresses compute node selection and RMCSA, being aware of both resources, restricting the RL agent's action space to nodes along $k$-shortest paths between request endpoints. Training incorporates reward shaping to improve robustness under high load. We propose PPO-Full (Proximal Policy Optimization-Full), which jointly selects compute nodes and routing paths via a multi-dimensional action space, against distance-based heuristics, a greedy baseline, and a decoupled VONE-DRL baseline on a 24-node USNET topology under hotspot traffic conditions. Results demonstrate consistent improvements in acceptance rate over all baselines at high load, with gains becoming more pronounced as traffic intensity increases."
+    },
+    {
+      "title": "xTRUCE: A Provably Safe Arbiter for Multi-xApp Conflict Mitigation in Agentic O-RAN",
+      "url": "https://arxiv.org/abs/2608.28532v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-08-28T17:08:53+00:00",
+      "summary": "The open radio access network (O-RAN) is evolving toward agentic operation, where large language model (LLM)-driven xApps/rApps generate control proposals under operator intents. However, such proposals may be conflicting, infeasible, or hallucinated, and no existing system jointly provides proposal-independent safety, priority-aware reconciliation, and traceable feedback. To this end, we propose a provably safe arbiter, namely xTRUCE, in the near-real-time (Near-RT) RAN intelligent controller for mitigating multi-xApp conflicts in gNB control. We first develop a structured xApp proposal interface and a three-layer constraint hierarchy that places physical limits and operator-defined rules above relaxable performance targets, alongside a dual-timescale control action space. A two-stage arbitration mechanism then minimizes target shortfalls in the operator-priority order to finalize safe E2 actions within the Near-RT latency budget, while returning conflict certificates to xApps and the operator for renegotiation. Finally, we implement xTRUCE in a multi-cell O-RAN use case, and evaluate its multi-process prototype through simulations with live API-backed LLM xApps and over-the-air experiments on OpenAirInterface/FlexRIC-based O-RAN stacks. Results show that xTRUCE ensures gNB control safety with $100\\%$ protected services despite severe proposal hallucinations, achieves priority-consistent performance satisfaction under overload, efficiently guides LLM intent renegotiation via certificates, and keeps a delay-safe E2 control loop."
+    },
+    {
+      "title": "Evaluating LLMs on Conversational Text-to-SQL under Chain Ambiguity and Intent Drift",
+      "url": "https://arxiv.org/abs/2608.29543v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-08-30T04:24:08+00:00",
+      "summary": "Recent advances in large language models (LLMs) have established conversational text-to-SQL as a practical interface between users and databases, often involving multiple turns of clarification and revision. However, existing benchmarks primarily evaluate execution accuracy, leaving the unfolding and shifting of user intent across turns largely uncovered. To address this, we introduce TIDE-Bench, a benchmark for conversational text-to-SQL under chain ambiguity and intent drift evaluation, targeting two recurring patterns: chain ambiguity, where an underspecified question triggers layered clarification with conditional dependencies, and intent drift, where the user retracts and replaces a previously committed request element. Built on 514 anchor SQLs from BIRD, TIDE-Bench comprises 1,542 samples and introduces dedicated metrics for chain identification and drift recognition-resolution beyond execution accuracy. Evaluating 12 advanced LLMs reveals a persistent chain identification bottleneck unaffected by clarification frequency, a wide drift recognition-resolution gap, and overlap between failure modes when jointly activated. The corresponding code of TIDE-Bench is released for further research."
+    },
+    {
+      "title": "myAIcademy",
+      "url": "https://www.producthunt.com/products/myaicademy",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-28T16:01:08+00:00",
+      "summary": "Learn AI skills for your specific role and team Discussion | Link"
+    },
+    {
+      "title": "Wzmacniamy w Polsce ochronę przed oszustwami",
+      "url": "https://about.fb.com/news/2026/08/wzmacniamy-w-polsce-ochrone-przed-oszustwami/",
+      "source": "Meta AI News",
+      "kind": "tool",
+      "published": "2026-08-28T09:00:19+00:00",
+      "summary": "Aktywność oszustów rośnie w całym internecie – od platform, poprzez aplikacje randkowe i gry online po platformy kryptowalutowe i wiadomości SMS. Oszuści to zdeterminowani przestępcy, którzy stosują wyrafinowane metody, by unikać wykrycia i wyłudzać pieniądze. Nikt nie chce widzieć takich treści: ani osoby korzystające z naszych usług, ani reklamodawcy, ani – z całą pewnością – my sami. Dlatego nieustannie rozwijamy nasze podejście do walki z problemem oszukańczych treści, inwestując w nowe technologie i partnerstwa, które pozwalają skuteczniej wykrywać i zwalczać stale zmieniające się działania oszustów. W ostatnich dniach obserwujemy kampanię, która zniekształca obraz działań i motywacji Mety w tym obszarze. Oszustwa krzywdzą poszczególne ofiary, a jednocześnie podkopują zaufanie do ekosystemu reklamowego, na którym opiera się nasz model biznesowy. Dziś ogłaszamy dodatkowe środki ochrony, które wprowadzamy w Polsce, a także przedstawiamy aktualne informacje o naszej dotychczasowej pracy i jej efektach. Wprowadzamy zaawansowaną sztuczną inteligencję, by wyłapywać więcej oszustw w Polsce Już teraz korzystamy z zaawansowanych systemów sztucznej inteligencji, które potrafią powstrzymać więcej oszustw oraz identyfikować i blokować większą liczbę kont podszywających się pod celebrytów i inne osoby publiczne. Ta technologia pozwoliła nam o ponad 80% zmniejszyć liczbę zgłoszeń od użytkowników dotyczących najczęściej wykorzystywanych wizerunków znanych osób. Dziś, w odpowiedzi na zmieniające się taktyki przestępców, którzy próbują omijać nasze systemy, uruchamiamy w Polsce ulepszony system AI, zaprojektowany tak, by jeszcze bardziej ograniczyć przypadki podszywania się pod innych. Polska znajduje się w pierwszej grupie krajów w Europie, w których wdrażamy ten nowy system AI do walki z oszustwami. Nowa weryfikacja reklam finansowych kierowanych do Polski Obecnie wymagamy od reklamodawców potwierdzenia tożsamości w określonych sytuacjach – na przykład wtedy, gdy ich konto wykazuje potencjalnie podejrzane zachowania. Ponieważ usługi finansowe to kategoria szczególnie często wykorzystywana przez oszustów, rozszerzamy ten proces identyfikacji – weryfikacji będziemy wymagać od 100% reklamodawców usług finansowych kierujących reklamy do Polski. Wdrożenie zakończymy w najbliższych tygodniach. To część naszych działań, których celem jest to, aby do końca 2026 roku 90% przychodów reklamowych Mety na świecie pochodziło od zweryfikowanych reklamodawców – wobec 70% w 2025 roku. Będziemy nadal inwestować w procesy weryfikacji, aby wyprzedzać działania oszustów. Gdzie kampania przeciwko Mecie mija się z faktami Niedawna kampania skierowana przeciwko Mecie promuje fałszywy obraz finansowych motywacji firmy w tym obszarze. Jest ona nieprawdziwa i opiera się na danych z nierzetelnych publikacji agencji Reuters oraz na wybiórczo cytowanych dokumentach, które wyciekły. W niewłaściwy sposób przedstawia podejście Mety do oszustw i nadużyć. Skupia się na badaniach, które prowadziliśmy, by ocenić skalę problemu, a pomija to, co po nich nastąpiło: konkretne działania wobec naruszeń naszych zasad, zmiany w produktach i partnerstwa branżowe. W rzeczywistości zdecydowane ograniczanie oszustw jest jednym z priorytetów Mety. Działamy na kilku frontach: chronimy użytkowników naszych aplikacji za pomocą automatycznych systemów ochrony i rozbijamy przestępcze siatki oszustów, współpracujemy z instytucjami publicznymi oraz polskimi i globalnymi partnerami z sektora prywatnego, a także pomagamy ludziom rozpoznawać oszustwa i ich unikać – dzięki ostrzeżeniom, funkcjom bezpieczeństwa i wskazówkom dostępnym na naszych platformach. Nasze działania przynoszą efekty Nasze działania w tym obszarze przynoszą efekty. Od lipca 2024 do czerwca 2026 roku wskaźnik zgłoszeń reklam zawierających oszustwa spadł w Polsce o 83%. Natomiast od lipca 2025 do czerwca 2026 roku usunęliśmy w Polsce 137 000 reklam o charakterze oszukańczym, z czego ponad 88% zanim ktokolwiek je zgłosił. Wiemy, że nasze decyzje podlegają publicznej ocenie, i cenimy przemyślane, konstruktywne uwagi, które pomagają nam ulepszać nasze działania – ważne jest jednak, aby opierały się na faktach, a nie na błędnych założeniach. Dane pokazują, że podejmowane przez nas działania przynoszą realne efekty. Walka z oszustami nigdy się nie kończy, a ogłoszenia takie jak dzisiejsze pokazują, że jesteśmy zdeterminowani, by wykorzystywać wszystkie dostępne zasoby do zwalczania oszustw i ochrony osób korzystających z naszych platform. The post Wzmacniamy w Polsce ochronę przed oszustwami appeared first on Meta Newsroom ."
+    },
+    {
+      "title": "Our decision on Cursor following its acquisition by SpaceX",
+      "url": "https://openai.com/index/our-decision-on-cursor-following-its-acquisition-by-spacex",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-08-28T06:00:00+00:00",
+      "summary": "Our decision to wind down our contract providing OpenAI models to Cursor following its acquisition by SpaceX."
+    },
+    {
+      "title": "Supporting Thailand’s next generation of AI startups",
+      "url": "https://openai.com/index/supporting-next-generation-ai-startups-thailand",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-08-28T02:00:00+00:00",
+      "summary": "OpenAI and Thailand’s MHESI launch an eight-week accelerator helping 10 health, wellness, and education startups turn AI prototypes into trusted products."
+    },
     {
       "title": "Credo: Reusable Declarative Primitives for Agentic Workflows",
       "url": "https://arxiv.org/abs/2608.27790v1",
@@ -37,52 +117,12 @@
       "summary": "LLM-based agents are increasingly proposed for network fault diagnosis, but existing benchmarks evaluate them only on accurate tickets and always assume a fault is present, conditions rarely met in practice. We present FaulT-Bench, a benchmark of 200 troubleshooting scenarios across eight network topologies, five reimplemented from public practitioner labs, spanning genuine faults, false fault reports, incorrect device attribution, and incorrect root-cause claims. To isolate how ticket wording affects diagnosis, we further rewrite 72 false-premise tickets into five reporter personas that vary reporter confidence and verifiable detail one factor at a time, holding the network state fixed. Our automated harness deploys each scenario in Kathará, lets agents interact through the NIKA tool interface, and scores free-text diagnoses with an LLM judge across outcome, fix, and reasoning quality. Evaluating SADE, ReAct, and Claude Code, we find all three are near-saturated on accurate tickets and robust to misdirection, yet degrade sharply when the network is healthy and the ticket is wrong, probing until a benign condition can be promoted to a root cause rather than concluding nothing is wrong. Persona rewrites show that how a ticket is written matters more than what it claims: a confidently wrong report is handled about as well as an accurate one, while a vague, underspecified report degrades performance sharply. The three agents also fail differently, from constant over-diagnosis to unanswered runs, at very different cost. These results position FaulT-Bench as a benchmark for developing agentic systems that can reason reliably over the noisy, unreliable tickets of real-world network troubleshooting."
     },
     {
-      "title": "Diachronic Hypergraphs for Orchestrated Multi-Agent Multimodal Memory Curation",
-      "url": "https://arxiv.org/abs/2608.29678v1",
-      "source": "arXiv Database AI",
-      "kind": "paper",
-      "published": "2026-08-30T09:23:12+00:00",
-      "summary": "Multi-agent systems solve tasks through collaboration, tool use, multimodal reasoning, and orchestration, but each agent operates within a knowledge boundary defined by its observations, context, and resources. Memory must preserve and transfer evidence, role specific context, decisions, procedures, and experience across interactions, not only outcomes. Vector and graph memories flatten these structures into embeddings or dyadic traces, obscuring events involving agents, tools, documents, errors, and evidence. This limits knowledge sharing, tracing, reuse, revision, and orchestration. We present MAGE, a hypergraph based multimodal database designed as a memory engine for MAS. MAGE stores agents, messages, tools, errors, procedures, documents, entities, decisions, and evidence in a heterogeneous temporal hypergraph, preserving high order collaborative events as reusable memory. It supports decision driven updates, role aware retrieval, validation, lifecycle management, and budget bounded context packing. By delivering knowledge to agents and orchestrators, MAGE expands their knowledge boundaries without modifying the models. Experiments show MAGE outperforms on various memory baselines."
-    },
-    {
-      "title": "Evaluating LLMs on Conversational Text-to-SQL under Chain Ambiguity and Intent Drift",
-      "url": "https://arxiv.org/abs/2608.29543v1",
-      "source": "arXiv Database AI",
-      "kind": "paper",
-      "published": "2026-08-30T04:24:08+00:00",
-      "summary": "Recent advances in large language models (LLMs) have established conversational text-to-SQL as a practical interface between users and databases, often involving multiple turns of clarification and revision. However, existing benchmarks primarily evaluate execution accuracy, leaving the unfolding and shifting of user intent across turns largely uncovered. To address this, we introduce TIDE-Bench, a benchmark for conversational text-to-SQL under chain ambiguity and intent drift evaluation, targeting two recurring patterns: chain ambiguity, where an underspecified question triggers layered clarification with conditional dependencies, and intent drift, where the user retracts and replaces a previously committed request element. Built on 514 anchor SQLs from BIRD, TIDE-Bench comprises 1,542 samples and introduces dedicated metrics for chain identification and drift recognition-resolution beyond execution accuracy. Evaluating 12 advanced LLMs reveals a persistent chain identification bottleneck unaffected by clarification frequency, a wide drift recognition-resolution gap, and overlap between failure modes when jointly activated. The corresponding code of TIDE-Bench is released for further research."
-    },
-    {
-      "title": "RL-based Network Slice Embedding over Space Division Multiplexed Elastic Optical Networks",
-      "url": "https://arxiv.org/abs/2608.29444v1",
-      "source": "arXiv Network AI",
-      "kind": "paper",
-      "published": "2026-08-29T21:15:37+00:00",
-      "summary": "Network slicing over space-division-multiplexed elastic optical networks (SDM-EONs) requires jointly managing spectrum, spatial cores, and compute resources, a coupling that many existing studies ignore by treating compute placement independently from routing and spectrum decisions. This disconnect can cause the spectrum to be allocated along a path, only for the request to fail due to insufficient compute resources along the path, or may result in compute resources being allocated without consideration for spectrum resource availability on the path between compute nodes. We propose a path-constrained reinforcement learning framework that addresses compute node selection and RMCSA, being aware of both resources, restricting the RL agent's action space to nodes along $k$-shortest paths between request endpoints. Training incorporates reward shaping to improve robustness under high load. We propose PPO-Full (Proximal Policy Optimization-Full), which jointly selects compute nodes and routing paths via a multi-dimensional action space, against distance-based heuristics, a greedy baseline, and a decoupled VONE-DRL baseline on a 24-node USNET topology under hotspot traffic conditions. Results demonstrate consistent improvements in acceptance rate over all baselines at high load, with gains becoming more pronounced as traffic intensity increases."
-    },
-    {
-      "title": "A-MADiff: Attention-Guided Multi-Agent DRL with Diffusion Policies for Memory-Aware Task Orchestration in Mobile AIGC Networks",
-      "url": "https://arxiv.org/abs/2608.29255v1",
-      "source": "arXiv Network AI",
-      "kind": "paper",
-      "published": "2026-08-29T13:19:44+00:00",
-      "summary": "Artificial Intelligence-Generated Content (AIGC) services employ Generative AI (GenAI) models to automatically generate diverse content. Mobile AIGC networks host GenAI models on edge-located AIGC Service Providers (ASPs) to deliver low-latency and personalized AIGC services for mobile users. However, AIGC inference tasks typically occupy GPU memory until task completion, causing GPU memory exhaustion at serving ASPs and triggering out-of-memory failures rather than merely increasing service latency. Existing studies on AIGC task orchestration have largely overlooked GPU memory feasibility constraints. To address this issue, we develop a cooperative multi-agent orchestration framework, in which each edge node is equipped with a scheduling agent to route tasks to local ASPs or neighboring edge nodes. Since scheduling agents make decisions based only on local observations, while peer offloading couples their resource states and long-term utilities, we formulate the orchestration process as a cooperative Decentralized Partially Observable Markov Decision Process (Dec-POMDP). To solve the Dec-POMDP, we propose an \\underline{A}ttention-guided \\underline{M}ulti-\\underline{A}gent deep reinforcement learning algorithm with \\underline{Diff}usion policies (A-MADiff) under the centralized training with a decentralized execution paradigm. A-MADiff employs diffusion-based decentralized actors to generate multi-modal preferences over feasible orchestration actions, and an attention-guided centralized critic to estimate per-agent values from cross-agent states under GPU memory heterogeneity. Numerical results demonstrate that A-MADiff significantly improves the cumulative reward over the state-of-the-art baseline."
-    },
-    {
       "title": "GitHub Copilot in Visual Studio — August update",
       "url": "https://github.blog/changelog/2026-08-28-github-copilot-in-visual-studio-august-update-2",
       "source": "GitHub Copilot Changelog",
       "kind": "tool",
       "published": "2026-08-28T20:24:20+00:00",
       "summary": "August 2026 brought more control over how GitHub Copilot reasons, which models you use, how teams share specialized agents, and when you ask for a code review. Highlights Here’s what’s… The post GitHub Copilot in Visual Studio — August update appeared first on The GitHub Blog ."
-    },
-    {
-      "title": "xTRUCE: A Provably Safe Arbiter for Multi-xApp Conflict Mitigation in Agentic O-RAN",
-      "url": "https://arxiv.org/abs/2608.28532v1",
-      "source": "arXiv Network AI",
-      "kind": "paper",
-      "published": "2026-08-28T17:08:53+00:00",
-      "summary": "The open radio access network (O-RAN) is evolving toward agentic operation, where large language model (LLM)-driven xApps/rApps generate control proposals under operator intents. However, such proposals may be conflicting, infeasible, or hallucinated, and no existing system jointly provides proposal-independent safety, priority-aware reconciliation, and traceable feedback. To this end, we propose a provably safe arbiter, namely xTRUCE, in the near-real-time (Near-RT) RAN intelligent controller for mitigating multi-xApp conflicts in gNB control. We first develop a structured xApp proposal interface and a three-layer constraint hierarchy that places physical limits and operator-defined rules above relaxable performance targets, alongside a dual-timescale control action space. A two-stage arbitration mechanism then minimizes target shortfalls in the operator-priority order to finalize safe E2 actions within the Near-RT latency budget, while returning conflict certificates to xApps and the operator for renegotiation. Finally, we implement xTRUCE in a multi-cell O-RAN use case, and evaluate its multi-process prototype through simulations with live API-backed LLM xApps and over-the-air experiments on OpenAirInterface/FlexRIC-based O-RAN stacks. Results show that xTRUCE ensures gNB control safety with $100\\%$ protected services despite severe proposal hallucinations, achieves priority-consistent performance satisfaction under overload, efficiently guides LLM intent renegotiation via certificates, and keeps a delay-safe E2 control loop."
     },
     {
       "title": "Orchestration is the new challenge for CX in the age of AI agents",
@@ -167,20 +207,12 @@
   ],
   "tool_items": [
     {
-      "title": "GitHub Copilot in Visual Studio — August update",
-      "url": "https://github.blog/changelog/2026-08-28-github-copilot-in-visual-studio-august-update-2",
-      "source": "GitHub Copilot Changelog",
+      "title": "myAIcademy",
+      "url": "https://www.producthunt.com/products/myaicademy",
+      "source": "Product Hunt launches",
       "kind": "tool",
-      "published": "2026-08-28T20:24:20+00:00",
-      "summary": "August 2026 brought more control over how GitHub Copilot reasons, which models you use, how teams share specialized agents, and when you ask for a code review. Highlights Here’s what’s… The post GitHub Copilot in Visual Studio — August update appeared first on The GitHub Blog ."
-    },
-    {
-      "title": "GitHub Copilot weekly releases — August 24",
-      "url": "https://github.blog/changelog/2026-08-28-github-copilot-weekly-releases-august-24",
-      "source": "GitHub Copilot Changelog",
-      "kind": "tool",
-      "published": "2026-08-28T20:13:22+00:00",
-      "summary": "This week’s updates give you more control over how Copilot runs, from team sessions in Slack and Teams to customization across the app, CLI, and your IDE. GitHub Copilot in… The post GitHub Copilot weekly releases — August 24 appeared first on The GitHub Blog ."
+      "published": "2026-08-28T16:01:08+00:00",
+      "summary": "Learn AI skills for your specific role and team Discussion | Link"
     },
     {
       "title": "Wzmacniamy w Polsce ochronę przed oszustwami",
@@ -205,14 +237,6 @@
       "kind": "tool",
       "published": "2026-08-28T02:00:00+00:00",
       "summary": "OpenAI and Thailand’s MHESI launch an eight-week accelerator helping 10 health, wellness, and education startups turn AI prototypes into trusted products."
-    },
-    {
-      "title": "ThunderPhone",
-      "url": "https://www.producthunt.com/products/thunderphone",
-      "source": "Product Hunt launches",
-      "kind": "tool",
-      "published": "2026-08-27T22:32:20+00:00",
-      "summary": "Platform for building reliable AI phone agents (from 2c/min) Discussion | Link"
     },
     {
       "title": "Closed-Loop Cooling Explained: The Plumbing Behind Meta’s AI",
@@ -245,6 +269,46 @@
       "kind": "tool",
       "published": "2026-08-27T03:00:00+00:00",
       "summary": "OpenAI is expanding its presence in Brazil, deepening engagement with developers, businesses, and communities to support AI adoption across the country."
+    },
+    {
+      "title": "An Open Letter to TikTok and YouTube to Join Us in Supporting Teens",
+      "url": "https://about.fb.com/news/2026/08/open-letter-to-tiktok-and-youtube-to-join-us-in-supporting-teens/",
+      "source": "Meta AI News",
+      "kind": "tool",
+      "published": "2026-08-26T13:37:57+00:00",
+      "summary": "We are announcing an agreement we have reached with a bipartisan group of state attorneys general, building on our longstanding efforts to empower parents and support teens. The post An Open Letter to TikTok and YouTube to Join Us in Supporting Teens appeared first on Meta Newsroom ."
+    },
+    {
+      "title": "Our Agreement With Bipartisan Attorneys General: Calling on TikTok and YouTube to Join Us in Supporting Teens",
+      "url": "https://about.fb.com/news/2026/08/agreement-with-state-attorneys-general-supporting-teens/",
+      "source": "Meta AI News",
+      "kind": "tool",
+      "published": "2026-08-26T13:31:53+00:00",
+      "summary": "Today, we are announcing an agreement with a bipartisan group of 51 attorneys general across US states, territories, and the District of Columbia, building on our longstanding efforts to empower parents and support teens. The post Our Agreement With Bipartisan Attorneys General: Calling on TikTok and YouTube to Join Us in Supporting Teens appeared first on Meta Newsroom ."
+    },
+    {
+      "title": "GitHub Copilot in Visual Studio — August update",
+      "url": "https://github.blog/changelog/2026-08-28-github-copilot-in-visual-studio-august-update-2",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-08-28T20:24:20+00:00",
+      "summary": "August 2026 brought more control over how GitHub Copilot reasons, which models you use, how teams share specialized agents, and when you ask for a code review. Highlights Here’s what’s… The post GitHub Copilot in Visual Studio — August update appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "GitHub Copilot weekly releases — August 24",
+      "url": "https://github.blog/changelog/2026-08-28-github-copilot-weekly-releases-august-24",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-08-28T20:13:22+00:00",
+      "summary": "This week’s updates give you more control over how Copilot runs, from team sessions in Slack and Teams to customization across the app, CLI, and your IDE. GitHub Copilot in… The post GitHub Copilot weekly releases — August 24 appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "ThunderPhone",
+      "url": "https://www.producthunt.com/products/thunderphone",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-08-27T22:32:20+00:00",
+      "summary": "Platform for building reliable AI phone agents (from 2c/min) Discussion | Link"
     },
     {
       "title": "Superagent",
