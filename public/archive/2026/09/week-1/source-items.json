@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "build_at": "2026-09-07T08:24:31.336703+09:00",
+  "period_start": "2026-08-31",
+  "period_end": "2026-09-07",
+  "ai_items": [
+    {
+      "title": "WiP: Characterizing and Defending Against Mobile-Agent-Driven MFA Automation",
+      "url": "https://arxiv.org/abs/2609.02154v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-09-02T06:06:43+00:00",
+      "summary": "Mobile agents automate smartphone tasks by interpreting interfaces, interacting with apps, and coordinating cross-app workflows. This capability challenges the human-mediated separation assumed by passcode-based MFA, creating factor collapse: valid authentication factors are combined within one autonomous environment. Our modular pipeline com- pletes all 10 authorized MFA workflows, compared with 3/10 and 6/10 for two single-agent baselines. We also de- velop a motion-based Android risk signal that distinguishes human- from agent-driven logins with 98.4% table-top and 92.6% hand-held accuracy across 116 pilot sessions. These results demonstrate factor collapse and motivate physical- interaction sensing as complementary evidence of user pres- ence."
+    },
+    {
+      "title": "Git4Data: Database-Native Version Control for AI Agents",
+      "url": "https://arxiv.org/abs/2609.02106v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-09-02T04:50:09+00:00",
+      "summary": "Large Language Model (LLM) agents increasingly explore many candidate states of relational data in parallel, each of which should remain isolated, reproducible, and auditable, preferably through the same SQL interface used for ordinary data work. Existing tools support this requirement only partially: source-code version control does not scale to large datasets, whereas relational databases manage large data efficiently but rarely expose native branching, comparison, and merging. We present Git4Data, a database-native version-control layer for agentic workflows. Git4Data treats a database as a repository and a table as a versioned object, exposing Git-style operations (snapshot/tag, branch, diff, and merge with explicit conflict-resolution policies) through SQL extensions. Implemented in MatrixOne, a cloud-native relational database, Git4Data leverages immutable object storage and MVCC to make the cost of these operations proportional to the size of the change rather than the size of the data. On the BranchBench agentic branching workloads, Git4Data outperforms DoltDB by up to an order of magnitude. Overall, we believe this work sheds light on how relational databases can better support AI agents through efficient versioning."
+    },
+    {
+      "title": "Skywing: A Platform for Decentralized Mathematical Computing in Unreliable Environments",
+      "url": "https://arxiv.org/abs/2609.03145v1",
+      "source": "arXiv Distributed Systems AI",
+      "kind": "paper",
+      "published": "2026-09-02T20:28:08+00:00",
+      "summary": "Emerging edge, autonomous, and cyber-physical systems increasingly require mathematical computation across heterogeneous devices connected by unreliable communication networks. Traditional high-performance computing and distributed data-processing frameworks provide powerful abstractions for managed environments but are less suited to decentralized settings where centralized coordination, reliable communication, and global synchronization cannot be assumed. This paper presents Skywing, an open-source platform for decentralized mathematical computing in unreliable environments. Its programming model consists of three abstractions: agents represent participants in a decentralized computation, processors encapsulate algorithm-specific update rules, and iterations manage distributed execution. Skywing supports asynchronous operation, publish-subscribe communication, managed message handling, and the composition of independent algorithms into complex decentralized workflows. We demonstrate Skywing using representative algorithms from consensus, optimization, and numerical linear algebra. Experiments on the native Skywing runtime include Push Sum and Max Consensus, a composed monitoring and control workflow, resilient Push Sum under delayed communication, and resilient asynchronous Jacobi under malevolent data corruption. These demonstrations show that Skywing supports diverse decentralized algorithms while separating mathematical logic from communication and execution infrastructure. Skywing serves as both a deployment framework for decentralized applications and a research platform for developing resilient mathematical algorithms."
+    },
+    {
+      "title": "A Black Box for Agentic Processes: Blockchain-Anchored Evidence for AI Agent Communication, Human Oversight, and GRC Audits",
+      "url": "https://arxiv.org/abs/2609.04017v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-09-03T15:55:39+00:00",
+      "summary": "Autonomous AI agents increasingly communicate with other agents, invoke tools, exchange intermediate results, and request human approvals. These workflows create a new auditability problem: organizations must reconstruct what happened, when it happened, which agent or human was involved, which control or policy applied, and whether records were modified afterwards. Motivated by the 2026 OpenAI/Hugging Face incident, this position and architecture paper proposes a product- and vendor-neutral black-box architecture for agentic processes. The architecture creates blockchain-anchored cryptographic commitments for selected agent communications, human-in-the-loop approvals, tool calls, and process artifacts without placing sensitive content on-chain. We define an evidence model that distinguishes temporal anchoring and artifact integrity from event ordering, capture authenticity, authorized anchoring, and causal traceability. The latter properties require additional architectural controls. We then discuss practical use for Governance, Risk, and Compliance (GRC), including compliance testing, risk-based evidence selection, monitoring evidence streams, incident reconstruction, and regulatory reporting readiness under the EU AI Act, NIS2, and the Cyber Resilience Act (CRA). This position and architecture paper does not present an empirical performance or security evaluation. The approach does not prevent agent misbehavior or prove semantic truth. Rather, it strengthens the evidentiary basis for later verification of critical process traces."
+    },
+    {
+      "title": "PatchBench: Evaluating AI Agents for Vulnerability Patching",
+      "url": "https://arxiv.org/abs/2609.04075v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-09-03T16:44:22+00:00",
+      "summary": "AI agents have recently demonstrated strong performance in automated vulnerability patching. However, existing evaluations often validate a patch only by testing whether the provided Proof-of-Concept (PoC) input still triggers a crash. This leaves two key threats to validity: agents may reproduce memorized historical developer patches, or they may generate surface-level fixes that only suppress the reported crash. We study these concerns for C/C++ vulnerability patching. We introduce a patch similarity metric to detect memorized patches. On average, 25% of the agent patches exhibit substantial similarity to historical developer patches, indicating that patch memorization is a real threat to the validity of vulnerability patching evaluations. Meanwhile, agents also frequently exploit benchmark structures to pass patch validation by patching on the crash stack trace to suppress the crash, rather than localizing and fixing the root cause of the vulnerabilities. To handle these issues, we propose PatchBench, a new benchmark for evaluating AI agents on realistic vulnerability patching tasks. PatchBench selects vulnerabilities whose ground-truth fixes lie outside the crash stack and uses vulnerability transplant and code mutations to migrate historical vulnerabilities into new repository contexts, reducing the risks of surface-level fixes and patch memorization. We develop new patch validation methods that thoroughly evaluate both security and semantic correctness of agent patches. Across 11 state-of-the-art agents, including the top three AIxCC agents, the original PoC-only validation inflates the patching task solve rate of agents by 1.83$\\times$ on average. Our results reveal key limitations of current patching agents and point to future research directions for more reliable vulnerability repair."
+    },
+    {
+      "title": "Para-Pipe: Exploiting Hierarchical Operator Parallelism of ML Computational Graphs on SoCs",
+      "url": "https://arxiv.org/abs/2609.04168v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-09-03T17:53:44+00:00",
+      "summary": "As edge-based deep learning applications become more complex, optimizing performance on heterogeneous System-on-Chips (SoCs) presents unique challenges. Traditional pipelining techniques distributing the computation across different on-chip processing units, while effective for throughput, do not address the latency demands posed by modern neural networks with complex interdependencies and extensive operator parallelism. There is a potential in leveraging operator parallelism to enable concurrent execution across multiple processing units, thereby reducing inference latency. However, prioritizing pipelining or parallel execution often necessitates a compromise, where optimizing one performance metric adversely impacts the other. This paper introduces Para-Pipe, a hierarchical mapping framework that integrates intra- and inter-stage operator parallelism within a pipelined architecture. Para-Pipe navigates the trade-off between throughput and latency by selectively fine-tuning parallelism levels within and across pipeline stages. This strategy can significantly reduce inter-processor communication overhead, significantly improving energy efficiency. Our evaluation demonstrates that Para-Pipe generates multiple Pareto-optimal configurations, achieving a balance between throughput and latency on an Amlogic SoC equipped with ARM big.LITTLE CPUs and GPU, as well as the Black Sesame Technology SoC featuring a deep learning accelerator and two DSPs. More importantly, throughput-optimized configurations under Para-Pipe on Amlogic SoC show an average energy efficiency improvement of 11.0% over purely pipelined strategies and 23.3% relative to non-pipelined parallel execution."
+    },
+    {
+      "title": "SWE-Gate: Passing Functional Tests Is Not Enough for Software Engineering Agents",
+      "url": "https://arxiv.org/abs/2609.04167v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-09-03T17:53:34+00:00",
+      "summary": "Repository-level software engineering benchmarks have significantly advanced the evaluation of coding agents, but existing benchmarks primarily measure whether generated patches pass functional tests and overlook review-derived acceptance constraints (review constraints) that often influence whether a patch is acceptable in real-world software development. We introduce SWE-Gate, a repository-level benchmark for software engineering agents that explicitly evaluates review constraint compliance alongside functional correctness. SWE-Gate derives review constraints from real pull request review comments and synthesizes repository-level repair instances around these constraints. Each instance provides separate functional and constraint tests, together with non-compliant and gold patches, enabling explicit separation between issue resolution capability and review constraint compliance. We construct SWE-Gate with 303 repository-level repair instances spanning 75 open-source Python repositories across diverse software domains. Experiments with four LLM backends spanning different capability levels under a common coding-agent scaffold reveal a substantial gap between functional success and success under the complete repair specification: among 644 repairs that pass the functional tests, 221 fail to satisfy the provided review constraints. These findings show that functional-only evaluation overestimates agents' ability to satisfy the full requirements of repository-level repair tasks. The replication package including code, data, and experimental results is available at https://github.com/DeepSoftwareAnalytics/SWE-Gate."
+    },
+    {
+      "title": "SENTINEL-RL: Offloading Topological Reasoning from LLM Agents in the Security Operations Center",
+      "url": "https://arxiv.org/abs/2609.04159v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-09-03T17:49:12+00:00",
+      "summary": "Large language model (LLM) agents are increasingly proposed as autonomous SOC analysts, but two limitations make them unreliable at enterprise scale: a finite context window cannot hold a multi-thousand-host authentication graph, and free-form generation offers no guarantee that a recommended containment action is consistent with the topology it operates on. We present Sentinel-RL, an agentic-SOC architecture that decouples topological reasoning from semantic reasoning: a heterogeneous graph attention encoder summarizes the live authentication subgraph into a fixed-dimensional state, a Proximal Policy Optimization (PPO) policy maps this state to a constrained set of investigative actions, and an LLM agent loop is restricted to consuming the policy's recommendations and producing analyst-readable narratives gated by a critic. We instantiate the system on the LANL Comprehensive, Multi-Source Cyber-Security Events dataset and the Indiana University Quartz HPC cluster, reporting four results: (i) a two-phase CREATE ingestion pattern loads a 24M-edge authentication subgraph into Neo4j in 14.2 minutes on a single 32-core node, roughly 24x faster than the canonical MERGE-based pipeline; (ii) a sliding-window alert engine reliably trips a 25-event/10-second threshold in <=2.5 s across 50 trials; (iii) PPO training over 200 iterations converges to a mean episodic return of 8.74+/-0.31, with held-out precision of 0.91 and recall of 0.87 on labeled red-team events; and (iv) the integrated containment loop completes a full detect-investigate-recommend-human-approve cycle in a median of 6.3 s. We contribute a reusable engineering pattern (the hot-node deadlock workaround), a portable HPC deployment pattern (anchor-node co-location), and an enterprise-readiness analysis covering false-positive economics, reversibility guarantees, audit compliance, and the human-approval boundary."
+    },
+    {
+      "title": "The Natural Language Interaction Protocol and Standard for AI Agents",
+      "url": "https://arxiv.org/abs/2609.04135v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-09-03T17:30:17+00:00",
+      "summary": "AI agents are increasingly being developed and deployed across organizations using heterogeneous agent-development frameworks, AI models, tool interfaces, protocols, and execution environments. To realize their potential social and business impact, these agents must be able to interoperate through a common communication protocol. The Natural Language Interaction Protocol (NLIP), developed by researchers and practitioners across companies and universities and standardized by Ecma International, addresses this need by defining a standards-based application-layer protocol for AI-agent interaction. NLIP provides a lightweight semantic message envelope that can be carried over existing transports such as HTTP/HTTPS, WebSocket, and AMQP, while allowing NLIP-aware agents and gateways to adapt between clients, agents, local context stores, ontologies, tools, enterprise services, and heterogeneous underlying protocols. This paper presents the motivation and design rationale of NLIP, its message model and transport bindings, security-by-design considerations, reference implementation, representative applications, adoption signals, and relationship to emerging agent protocols such as MCP and A2A."
+    },
+    {
+      "title": "NACRE: Rethinking Confidential Containers through Native Architectural Support",
+      "url": "https://arxiv.org/abs/2609.03849v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-09-03T13:42:11+00:00",
+      "summary": "Linux containers achieve high density and fast lifecycle operations by sharing the host kernel, but this design also lets a compromised host inspect or modify container state. Existing confidential-computing systems protect an enclave address space or an entire guest operating system, while recent container-granularity systems still add a separate protection context. These abstractions do not make a dynamic group of host-managed Linux processes the architectural protection unit. This paper presents NACRE, a RISC-V hardware-software co-design for native confidential containers. Its key insight is to separate the host's authority to manage resources from its authority to access or commit protected state. Hardware-recognized container identities direct protected traps to an isolated S-mode agent, while an M-mode monitor commits security- sensitive identity, mapping, and page transitions. The agent delegates services to host Linux without changing satp; services that neither access private bytes nor modify protected state also avoid M-mode. We prototype NACRE by extending QEMU, OpenSBI, Linux, a trusted agent, and runc. The prototype implements the single-container private-memory substrate and covered launch, fault, fork/COW, user-access, and teardown paths. Across five lmbench syscall and pipe metrics, the three-run means remain within 3.5% of the runc-origin baseline. With the eight nginx object-size means weighted equally, aggregate throughput is 1.9% lower."
+    }
+  ],
+  "tool_items": [
+    {
+      "title": "An Alien Mind",
+      "url": "https://openai.com/index/an-alien-mind",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-09-06T09:00:00+00:00",
+      "summary": "Jakub Pachocki reflects on increasingly capable AI and the challenge of keeping it aligned. He calls for stronger safeguards and international coordination."
+    },
+    {
+      "title": "Research acceleration: The view inside OpenAI",
+      "url": "https://openai.com/index/research-acceleration-view-inside-openai",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-09-06T08:00:00+00:00",
+      "summary": "Inside OpenAI, coding agents are reshaping AI research. Explore early data on agent usage, experiment velocity, task complexity, and research acceleration."
+    },
+    {
+      "title": "DocsAlot Visual Editor",
+      "url": "https://www.producthunt.com/products/docsalot-2",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-09-04T21:26:52+00:00",
+      "summary": "Create beautiful docs, by typing. No AI required. Discussion | Link"
+    },
+    {
+      "title": "GitHub Copilot weekly releases — August 31",
+      "url": "https://github.blog/changelog/2026-09-04-github-copilot-weekly-releases-august-31",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-04T21:05:01+00:00",
+      "summary": "This week, GitHub Copilot expands model choice and content protections, while VS Code adds new ways to manage agent sessions and get pull requests merge-ready. GitHub Copilot, general Claude Fable… The post GitHub Copilot weekly releases — August 31 appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "GPT-6 Astra is generally available in GitHub Copilot",
+      "url": "https://github.blog/changelog/2026-09-04-gpt-6-astra-is-generally-available-in-github-copilot",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-04T18:59:51+00:00",
+      "summary": "GPT-6 Astra from OpenAI is now available in GitHub Copilot. OpenAI’s latest general-purpose model, GPT-6 Astra, is designed for long-horizon, autonomous coding and agentic tasks. In our internal testing, GPT-6… The post GPT-6 Astra is generally available in GitHub Copilot appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "New API endpoint provides privacy-safe star history data",
+      "url": "https://github.blog/changelog/2026-09-04-new-api-endpoint-provides-privacy-safe-star-history-data",
+      "source": "GitHub Changelog",
+      "kind": "tool",
+      "published": "2026-09-04T16:43:56+00:00",
+      "summary": "Track repository star growth over time with the new star history REST API endpoint without exposing stargazer identities. Earlier this year, stargazer listing endpoints were restricted to admins and collaborators… The post New API endpoint provides privacy-safe star history data appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "GitWarren",
+      "url": "https://www.producthunt.com/products/gitwarren",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-09-04T05:02:54+00:00",
+      "summary": "Review code with your coding agents before committing Discussion | Link"
+    },
+    {
+      "title": "Experiential Labs",
+      "url": "https://www.producthunt.com/products/experiential-labs",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-09-04T03:10:57+00:00",
+      "summary": "Open source AI gateway turning traffic into a better model Discussion | Link"
+    },
+    {
+      "title": "Multiple trusted publishing configurations for npm",
+      "url": "https://github.blog/changelog/2026-09-03-multiple-trusted-publishing-configurations-for-npm",
+      "source": "GitHub Changelog",
+      "kind": "tool",
+      "published": "2026-09-03T20:34:34+00:00",
+      "summary": "We’re continuing to make trusted publishing smoother for npm publishers, guided by maintainers feedback. Three updates to npm publishing are now generally available: Multiple trusted publishing configurations per package Staged… The post Multiple trusted publishing configurations for npm appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "GitHub Actions: Early September 2026 updates",
+      "url": "https://github.blog/changelog/2026-09-03-github-actions-early-september-2026-updates",
+      "source": "GitHub Changelog",
+      "kind": "tool",
+      "published": "2026-09-03T20:30:53+00:00",
+      "summary": "GitHub Actions now includes three updates that give you clearer visibility and finer-grained control over your workflows. New REST API for runner version deprecations A new REST API returns when… The post GitHub Actions: Early September 2026 updates appeared first on The GitHub Blog ."
+    }
+  ]
+}
