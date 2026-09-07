@@ -366,6 +366,7 @@ def test_smart_insight_card_keeps_long_detail_without_700_char_truncation() -> N
     html_text = _render_smart_insight_cards([item])
 
     assert 'data-detail="' in html_text
+    assert 'data-title="Long Detail Tool 업데이트"' in html_text
     assert "..." not in html_text.split('data-detail="', 1)[1].split('"', 1)[0]
 
 
@@ -1075,6 +1076,24 @@ def test_refresh_known_specific_cards_updates_existing_agnost_html() -> None:
     assert count == 1
     assert "silent failure" in refreshed
     assert old_body not in refreshed
+
+
+def test_refresh_known_specific_cards_repairs_generic_archive_title() -> None:
+    old_title = "개발 도구와 코딩 자동화"
+    html_text = (
+        '<button class="insight-card" type="button" data-insight-card data-number="13" '
+        f'data-title="{old_title}" data-category="도구" data-subcategory="GitHub" '
+        'data-body="기존 한국어 설명" data-detail="기존 한국어 설명" '
+        'data-points="[]" data-meta="GitHub · 도구 · 2026-09-04" data-tags="[]" '
+        'data-source="https://github.blog/changelog/2026-09-04-gpt-6-astra-is-generally-available-in-github-copilot">'
+        f'<span class="card-title">{old_title}</span><p>기존 한국어 설명</p></button>'
+    )
+
+    refreshed, count = _refresh_known_specific_cards_in_html(html_text)
+
+    assert count == 1
+    assert "GitHub Copilot의 GPT-6 Astra 정식 제공" in refreshed
+    assert old_title not in refreshed
 
 
 def test_refresh_paper_cards_in_html_updates_existing_card_data() -> None:

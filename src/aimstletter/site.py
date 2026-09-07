@@ -4097,10 +4097,8 @@ def _is_renderable_smart_insight(item: SiteItem) -> bool:
     detail = _smart_insight_card_detail(item, summary)
     points = _smart_insight_points(item)
     rendered_text = " ".join((title, body, detail, " ".join(points)))
-    has_generic_paper_title = _smart_insight_category(item) == "논문" and _is_generic_display_title(
-        title
-    )
-    return not has_generic_paper_title and not _contains_unpublishable_fallback_copy(rendered_text)
+    has_generic_title = _is_generic_display_title(title)
+    return not has_generic_title and not _contains_unpublishable_fallback_copy(rendered_text)
 
 def _smart_insight_blueprint() -> tuple[tuple[str, str], ...]:
     return (
@@ -8304,8 +8302,11 @@ def _koreanize_display_title(title: str, summary: str = "", source: str = "") ->
     if _looks_untranslated(title) or needs_korean_title:
         if specific:
             return specific
-        if derived and re.search(r"[가-힣]", derived):
-            return derived
+        if derived:
+            if re.search(r"[가-힣]", derived):
+                return derived
+            suffix = "관련 연구" if source.lower().startswith("arxiv") else "업데이트"
+            return _clip(f"{derived} {suffix}", 42)
         return _fallback_korean_topic(text)
     if _is_generic_display_title(title):
         return specific or derived or _fallback_korean_topic(text)
@@ -8576,6 +8577,21 @@ def _has_source_title_prefix(title: str, source: str) -> bool:
 def _fallback_specific_title(text: str) -> str:
     text = re.sub(r"[-_]+", " ", text.lower())
     title_rules = (
+        (("mai code 1 flash available on more copilot surfaces",), "MAI-Code-1-Flash의 Copilot 지원 확대"),
+        (("copilot authored pull requests now included in author searches",), "Copilot 작성 PR의 작성자 검색 반영"),
+        (("more control over your github hosted runners",), "GitHub 호스티드 러너 제어 기능 확대"),
+        (("actions steps can now be run in parallel",), "GitHub Actions 단계 병렬 실행"),
+        (("github mcp server supports the next mcp specification",), "GitHub MCP 서버의 신규 MCP 규격 지원"),
+        (("gemini 2 5 pro and gemini 3 flash deprecated",), "GitHub Copilot의 Gemini 2.5 Pro·3 Flash 지원 중단"),
+        (("github copilot weekly releases august 3",), "GitHub Copilot 8월 3일 주간 업데이트"),
+        (("copilot impact dashboard adds a return on investment section",), "Copilot 영향 대시보드의 투자수익률 분석"),
+        (("secret scanning coverage updates",), "GitHub 비밀 스캔 탐지 범위 확대"),
+        (("github code quality no longer adds copilot as a reviewer",), "GitHub Code Quality의 Copilot 리뷰어 자동 추가 종료"),
+        (("hugging face incident and the road ahead",), "Hugging Face 보안 사고와 OpenAI의 대응"),
+        (("agreement with state attorneys general supporting teens",), "청소년 보호를 위한 Meta와 미국 주정부의 합의"),
+        (("gpt 6 astra is generally available in github copilot",), "GitHub Copilot의 GPT-6 Astra 정식 제공"),
+        (("new api endpoint provides privacy safe star history data",), "개인정보 보호형 Star 이력 API"),
+        (("multiple trusted publishing configurations for npm",), "npm 신뢰할 수 있는 게시 설정 다중 지원"),
         (("2609.04168",), "Para-Pipe: SoC 추론의 계층형 연산자 병렬화"),
         (("2609.04075",), "PatchBench: AI 에이전트 취약점 패치 평가"),
         (("2609.04017",), "블록체인 증거 기반 AI 에이전트 감사"),
@@ -9822,7 +9838,8 @@ def _refresh_known_specific_cards_in_html(html_text: str) -> tuple[str, int]:
         previous_body = unescape(attrs.get("data-body", ""))
         previous_points = unescape(attrs.get("data-points", ""))
         needs_copy_refresh = (
-            _looks_untranslated(previous_body)
+            _is_generic_display_title(previous_title)
+            or _looks_untranslated(previous_body)
             or "원문 요약:" in previous_body
             or "..." in previous_body + previous_points
             or "…" in previous_body + previous_points
@@ -10164,7 +10181,6 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
 
 
 
