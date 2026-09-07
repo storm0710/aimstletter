@@ -16,6 +16,7 @@ from aimstletter.site import (
     KNOWLEDGE_TOPICS,
     SiteItem,
     _collect_archive_entries,
+    _fallback_display_title,
     _fallback_display_summary,
     _fallback_korean_item,
     _fallback_three_line_summary,
@@ -185,6 +186,93 @@ def test_smart_insight_rewrites_generic_localized_titles_from_url_context() -> N
 
     assert '<span class="card-title">Copilot 에이전트 세션 스트리밍</span>' in html
     assert '<span class="card-title">개발 도구와 코딩 자동화</span>' not in html
+
+
+def test_september_paper_generic_title_is_repaired_from_original_source() -> None:
+    item = DigestItem(
+        title="PatchBench: Evaluating AI Agents for Vulnerability Patching",
+        url="https://arxiv.org/abs/2609.04075v1",
+        source="arXiv Security AI",
+        kind="paper",
+        published=datetime(2026, 9, 4, tzinfo=UTC),
+        summary="PatchBench evaluates whether AI agents can repair real software vulnerabilities.",
+    )
+    localized_item = {
+        "title": "AI 업데이트",
+        "summary": "PatchBench는 AI 에이전트의 실제 취약점 패치 능력을 평가합니다.",
+        "detail": "실제 취약점 수정 과제를 사용해 패치 정확성과 기능 유지 여부를 함께 확인합니다.",
+        "key_points": [
+            "1. 한 줄 요약: PatchBench는 취약점 패치 능력을 평가합니다.",
+            "2. 무엇이 바뀌었나: 실제 취약점 수정 과제를 평가합니다.",
+            "3. 왜 중요한가: 보안 패치 자동화의 신뢰성을 확인할 수 있습니다.",
+            "4. 한계와 주의사항: 논문 평가 조건을 확인해야 합니다.",
+            "5. 이번 주 해볼 일: 패치 검증 절차를 점검합니다.",
+            "6. 누가 보면 좋은가: 보안 및 AI 엔지니어",
+            "7. 출처와 상태: arXiv 보안 AI · 논문 · 2026-09-04",
+        ],
+        "tags": ["AI 에이전트", "보안"],
+    }
+
+    site_item = _localized_site_item(item, localized_item)
+
+    assert site_item.title == "PatchBench: AI 에이전트 취약점 패치 평가"
+    assert site_item.title != "AI 업데이트"
+
+
+def test_unknown_future_paper_never_keeps_generic_localized_title() -> None:
+    item = DigestItem(
+        title="FutureBench: Evaluating AI Agents for Operational Recovery",
+        url="https://arxiv.org/abs/2610.00001v1",
+        source="arXiv AI",
+        kind="paper",
+        published=datetime(2026, 10, 1, tzinfo=UTC),
+        summary="FutureBench evaluates AI agents on operational recovery tasks.",
+    )
+    localized_item = {
+        "title": "AI 업데이트",
+        "summary": "FutureBench는 운영 복구 작업에서 AI 에이전트를 평가합니다.",
+        "detail": "장애 이후 복구 작업을 완료하는 능력과 검증 절차를 함께 평가합니다.",
+        "key_points": [
+            "1. 한 줄 요약: FutureBench는 운영 복구 능력을 평가합니다.",
+            "2. 무엇이 바뀌었나: 실제 복구 과제를 평가합니다.",
+            "3. 왜 중요한가: 복구 자동화의 신뢰성을 확인할 수 있습니다.",
+            "4. 한계와 주의사항: 논문 평가 조건을 확인해야 합니다.",
+            "5. 이번 주 해볼 일: 복구 검증 절차를 점검합니다.",
+            "6. 누가 보면 좋은가: 운영 및 AI 엔지니어",
+            "7. 출처와 상태: arXiv AI · 논문 · 2026-10-01",
+        ],
+        "tags": ["AI 에이전트", "운영"],
+    }
+
+    site_item = _localized_site_item(item, localized_item)
+
+    assert site_item.title != "AI 업데이트"
+    assert "FutureBench" in site_item.title
+
+
+def test_september_paper_titles_are_grounded_in_each_original_title() -> None:
+    cases = (
+        ("2609.04075", "PatchBench: AI 에이전트 취약점 패치 평가"),
+        ("2609.04017", "블록체인 증거 기반 AI 에이전트 감사"),
+        ("2609.03145", "Skywing: 불안정 환경용 분산 수학 연산 플랫폼"),
+        ("2609.02154", "모바일 에이전트 기반 MFA 자동화 분석·방어"),
+        ("2609.02106", "Git4Data: AI 에이전트용 데이터베이스 버전 관리"),
+        ("2609.04167", "SWE-Gate: 소프트웨어 에이전트 기능 테스트 한계 평가"),
+        ("2609.04159", "SENTINEL-RL: 보안 운영 에이전트의 위상 추론 오프로딩"),
+        ("2609.04135", "AI 에이전트 자연어 상호작용 프로토콜 표준"),
+        ("2609.03849", "NACRE: 네이티브 기밀 컨테이너 아키텍처"),
+    )
+
+    for arxiv_id, expected_title in cases:
+        item = DigestItem(
+            title="Original paper title",
+            url=f"https://arxiv.org/abs/{arxiv_id}v1",
+            source="arXiv AI",
+            kind="paper",
+            published=datetime(2026, 9, 4, tzinfo=UTC),
+            summary="Original abstract",
+        )
+        assert _fallback_display_title(item) == expected_title
 
 
 def test_smart_insight_rewrites_generic_summary_from_url_context() -> None:
@@ -678,8 +766,16 @@ def test_localization_repair_detects_reused_or_generic_summaries() -> None:
         {"summary": "코드 변경 전에 비밀값 접근 권한을 검사하는 업데이트입니다.", "detail": "저장소 권한과 감사 기록을 분리해 관리합니다."},
         {"summary": "쿼리 계획을 비교해 데이터베이스 질의를 개선하는 논문입니다.", "detail": "실행 전 검증으로 잘못된 질의를 줄이는 방법을 평가합니다."},
     ]
+    generic_title = [
+        {
+            "title": "AI 업데이트",
+            "summary": "PatchBench가 취약점 패치 능력을 평가합니다.",
+            "detail": "실제 취약점 수정 결과와 기능 유지 여부를 확인합니다.",
+        }
+    ]
 
     assert _has_reused_or_generic_localizations(repeated)
+    assert _has_reused_or_generic_localizations(generic_title)
     assert not _has_reused_or_generic_localizations(distinct)
 
 

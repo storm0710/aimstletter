@@ -6598,6 +6598,7 @@ def _has_publishable_localized_copy(item: SiteItem) -> bool:
         and not _is_source_snapshot(item)
         and bool(item.summary.strip())
         and bool(item.detail.strip())
+        and not _is_generic_display_title(_smart_insight_title(item))
         and len(item.key_points) >= 7
         and all(re.search(r"[가-힣]", field) for field in required_korean_fields)
         and not _looks_untranslated(item.summary)
@@ -6608,9 +6609,14 @@ def _has_publishable_localized_copy(item: SiteItem) -> bool:
 def _has_reused_or_generic_localizations(localized: list[dict[str, object]]) -> bool:
     seen_summaries: set[str] = set()
     for item in localized:
+        title = _clean_plain_text(str(item.get("title", "")))
         summary = _normalize_search_text(str(item.get("summary", "")))
         detail = _normalize_search_text(str(item.get("detail", "")))
-        if _needs_specific_insight_copy(summary) or _needs_specific_insight_copy(detail):
+        if (
+            _is_generic_display_title(title)
+            or _needs_specific_insight_copy(summary)
+            or _needs_specific_insight_copy(detail)
+        ):
             return True
         if summary and summary in seen_summaries:
             return True
@@ -6640,11 +6646,15 @@ def _localized_site_item(item: DigestItem, localized_item: dict[str, object]) ->
         )
         return _finalize_paper_site_item(item, site_item)
 
+    localized_title = _safe_korean_field(
+        localized_item.get("title"),
+        fallback=f"{_korean_source_name(item.source)}에서 확인한 최신 업데이트",
+    )
+    if _is_generic_display_title(localized_title):
+        localized_title = _fallback_display_title(item)
+
     site_item = SiteItem(
-        title=_safe_korean_field(
-            localized_item.get("title"),
-            fallback=f"{_korean_source_name(item.source)}에서 확인한 최신 업데이트",
-        ),
+        title=localized_title,
         url=item.url,
         summary=_safe_korean_field(
             localized_item.get("summary"),
@@ -6672,8 +6682,14 @@ def _localized_payload_needs_repair(localized_item: dict[str, object]) -> bool:
         str(localized_item.get("detail", "")),
     )
     points = localized_item.get("key_points", [])
-    return any(_needs_specific_insight_copy(field) or _looks_untranslated(field) for field in fields) or any(
-        _needs_specific_insight_copy(str(point)) for point in points if isinstance(points, list)
+    return (
+        _is_generic_display_title(_clean_plain_text(fields[0]))
+        or any(_needs_specific_insight_copy(field) or _looks_untranslated(field) for field in fields)
+        or any(
+            _needs_specific_insight_copy(str(point))
+            for point in points
+            if isinstance(points, list)
+        )
     )
 
 
@@ -8314,6 +8330,9 @@ def _derive_content_display_title(title: str, text: str) -> str:
 def _derive_title_from_english_phrase(phrase: str) -> str:
     phrase = unescape(_clean_plain_text(phrase))
     phrase = re.sub(r"\.(?:html?|md)$", "", phrase, flags=re.IGNORECASE)
+    method_match = re.match(r"^([A-Za-z][A-Za-z0-9.+-]{1,39})\s*:\s*(.+)$", phrase)
+    method_name = method_match.group(1) if method_match else ""
+    method_subject = method_match.group(2) if method_match else phrase
     phrase = re.sub(r"[-_/]+", " ", phrase)
     phrase = re.sub(r"\b20\d{2}\s+\d{2}\s+\d{2}\b", " ", phrase)
     phrase = re.sub(r"\b\d{4,}\b", " ", phrase)
@@ -8321,7 +8340,7 @@ def _derive_title_from_english_phrase(phrase: str) -> str:
     if not phrase or len(phrase) < 8:
         return ""
 
-    lower = phrase.lower()
+    lower = re.sub(r"[-_/]+", " ", method_subject).lower()
     if "scales conversations" in lower and "builds faster" in lower:
         subject = _title_case_token(lower.split("scales conversations", 1)[0].strip())
         subject = subject or "고객 서비스"
@@ -8347,6 +8366,8 @@ def _derive_title_from_english_phrase(phrase: str) -> str:
 
     translated = _translate_title_tokens(lower, max_tokens=8)
     if translated:
+        if method_name:
+            return f"{method_name}: {translated}"
         return translated
     return ""
 
@@ -8552,6 +8573,15 @@ def _has_source_title_prefix(title: str, source: str) -> bool:
 def _fallback_specific_title(text: str) -> str:
     text = re.sub(r"[-_]+", " ", text.lower())
     title_rules = (
+        (("2609.04075",), "PatchBench: AI 에이전트 취약점 패치 평가"),
+        (("2609.04017",), "블록체인 증거 기반 AI 에이전트 감사"),
+        (("2609.03145",), "Skywing: 불안정 환경용 분산 수학 연산 플랫폼"),
+        (("2609.02154",), "모바일 에이전트 기반 MFA 자동화 분석·방어"),
+        (("2609.02106",), "Git4Data: AI 에이전트용 데이터베이스 버전 관리"),
+        (("2609.04167",), "SWE-Gate: 소프트웨어 에이전트 기능 테스트 한계 평가"),
+        (("2609.04159",), "SENTINEL-RL: 보안 운영 에이전트의 위상 추론 오프로딩"),
+        (("2609.04135",), "AI 에이전트 자연어 상호작용 프로토콜 표준"),
+        (("2609.03849",), "NACRE: 네이티브 기밀 컨테이너 아키텍처"),
         (("2608.27790",), "Credo: 재사용 가능한 선언형 에이전트 워크플로"),
         (("2608.00914",), "MABP: 메모리 인식형 에이전트 네트워크 제어"),
         (("enterprise ai's real risk", "complexity between"), "기업 AI의 진짜 위험: 에이전트 간 복잡성"),
