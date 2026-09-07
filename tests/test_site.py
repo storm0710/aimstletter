@@ -252,6 +252,7 @@ def test_unknown_future_paper_never_keeps_generic_localized_title() -> None:
 
 def test_september_paper_titles_are_grounded_in_each_original_title() -> None:
     cases = (
+        ("2609.04168", "Para-Pipe: SoC 추론의 계층형 연산자 병렬화"),
         ("2609.04075", "PatchBench: AI 에이전트 취약점 패치 평가"),
         ("2609.04017", "블록체인 증거 기반 AI 에이전트 감사"),
         ("2609.03145", "Skywing: 불안정 환경용 분산 수학 연산 플랫폼"),

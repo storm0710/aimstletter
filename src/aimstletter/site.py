@@ -4097,7 +4097,10 @@ def _is_renderable_smart_insight(item: SiteItem) -> bool:
     detail = _smart_insight_card_detail(item, summary)
     points = _smart_insight_points(item)
     rendered_text = " ".join((title, body, detail, " ".join(points)))
-    return not _contains_unpublishable_fallback_copy(rendered_text)
+    has_generic_paper_title = _smart_insight_category(item) == "논문" and _is_generic_display_title(
+        title
+    )
+    return not has_generic_paper_title and not _contains_unpublishable_fallback_copy(rendered_text)
 
 def _smart_insight_blueprint() -> tuple[tuple[str, str], ...]:
     return (
@@ -8573,6 +8576,7 @@ def _has_source_title_prefix(title: str, source: str) -> bool:
 def _fallback_specific_title(text: str) -> str:
     text = re.sub(r"[-_]+", " ", text.lower())
     title_rules = (
+        (("2609.04168",), "Para-Pipe: SoC 추론의 계층형 연산자 병렬화"),
         (("2609.04075",), "PatchBench: AI 에이전트 취약점 패치 평가"),
         (("2609.04017",), "블록체인 증거 기반 AI 에이전트 감사"),
         (("2609.03145",), "Skywing: 불안정 환경용 분산 수학 연산 플랫폼"),
