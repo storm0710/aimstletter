@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "build_at": "2026-09-14T08:50:51.905681+09:00",
+  "period_start": "2026-09-07",
+  "period_end": "2026-09-14",
+  "ai_items": [
+    {
+      "title": "Introducing the Agents API",
+      "url": "https://openai.com/index/introducing-the-agents-api",
+      "source": "OpenAI News",
+      "kind": "trend",
+      "published": "2026-09-10T00:00:00+00:00",
+      "summary": "Build and launch cloud agents with the Agents API, a managed service powered by the Codex harness for orchestration, long-running sessions, and tool use."
+    },
+    {
+      "title": "GitHub Copilot weekly releases — September 7",
+      "url": "https://github.blog/changelog/2026-09-10-github-copilot-weekly-releases-september-7",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-10T22:55:07+00:00",
+      "summary": "This week, GitHub Copilot introduces Jira integration in Copilot app and adaptive model orchestration with Project HydraFusion in Copilot CLI. We also introduced new agent automation in Visual Studio Code… The post GitHub Copilot weekly releases — September 7 appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Add VS Code Agents to Copilot usage metrics",
+      "url": "https://github.blog/changelog/2026-09-11-add-vs-code-agents-to-copilot-usage-metrics",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-11T21:30:30+00:00",
+      "summary": "GitHub Copilot usage metrics reports now include generally available metrics for activity in the dedicated VS Code Agents window, helping you measure adoption and engagement across enterprises and organizations. What’s… The post Add VS Code Agents to Copilot usage metrics appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Enterprise managed permissions for GitHub Copilot agent operations",
+      "url": "https://github.blog/changelog/2026-09-09-enterprise-managed-permissions-for-github-copilot-agent-operations",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-09T20:08:14+00:00",
+      "summary": "If you administer GitHub Copilot Business or GitHub Copilot Enterprise, you can now centrally control which agent operations are blocked, require human approval, or can proceed without a prompt. Managed… The post Enterprise managed permissions for GitHub Copilot agent operations appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "1Password increases engineering productivity 21% with Codex",
+      "url": "https://openai.com/index/1password",
+      "source": "OpenAI News",
+      "kind": "trend",
+      "published": "2026-09-08T00:00:00+00:00",
+      "summary": "Engineers at 1Password use Codex to rapidly build new features and internal tools, reaching production-readiness while maintaining rigorous security policies."
+    },
+    {
+      "title": "Kirokune",
+      "url": "https://www.producthunt.com/products/kirokune",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-09-10T23:40:50+00:00",
+      "summary": "Keep work incident notes on your iPhone, without an account Discussion | Link"
+    },
+    {
+      "title": "Cadenya",
+      "url": "https://www.producthunt.com/products/cadenya-the-agent-runtime",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-09-10T23:21:08+00:00",
+      "summary": "A hosted agentic loop to bring agentic possibilities to life Discussion | Link"
+    },
+    {
+      "title": "sizeless",
+      "url": "https://www.producthunt.com/products/sizeless",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-09-10T17:55:17+00:00",
+      "summary": "Spatial AI for underground infrastructure Discussion | Link"
+    },
+    {
+      "title": "MAI-Code-1-Flash deprecated",
+      "url": "https://github.blog/changelog/2026-09-10-mai-code-1-flash-deprecated",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-10T16:54:01+00:00",
+      "summary": "We have deprecated MAI-Code-1-Flash across all GitHub Copilot experiences (including Copilot Chat, inline edits, ask and agent modes, and code completions) today, September 10, 2026. Model Deprecation date Suggested alternative… The post MAI-Code-1-Flash deprecated appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Now everyone can put data to work",
+      "url": "https://openai.com/index/put-data-to-work",
+      "source": "OpenAI News",
+      "kind": "trend",
+      "published": "2026-09-10T15:00:00+00:00",
+      "summary": "Meet the Data agent in ChatGPT Work. Connect company data, uncover insights, and build interactive dashboards with AI using natural language."
+    }
+  ],
+  "tool_items": [
+    {
+      "title": "Add VS Code Agents to Copilot usage metrics",
+      "url": "https://github.blog/changelog/2026-09-11-add-vs-code-agents-to-copilot-usage-metrics",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-11T21:30:30+00:00",
+      "summary": "GitHub Copilot usage metrics reports now include generally available metrics for activity in the dedicated VS Code Agents window, helping you measure adoption and engagement across enterprises and organizations. What’s… The post Add VS Code Agents to Copilot usage metrics appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Auto-resolution and analysis updates in Copilot code review",
+      "url": "https://github.blog/changelog/2026-09-11-auto-resolution-and-analysis-updates-in-copilot-code-review",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-11T20:00:07+00:00",
+      "summary": "Copilot code review now resolves its own comments once you address them and writes smart commit messages for you when you apply its code suggestions. Behind the scenes, Copilot now… The post Auto-resolution and analysis updates in Copilot code review appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Cognition helps Devin test its own work with GPT‑6 Astra",
+      "url": "https://openai.com/index/cognition-devin-testing-with-astra",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-09-11T16:00:00+00:00",
+      "summary": "GPT‑6 Astra improves Devin’s ability to test software and show that it works, with the goal of helping engineers review less code and ship more."
+    },
+    {
+      "title": "Rapidly scaling online storage to serve over 1 billion ChatGPT users",
+      "url": "https://openai.com/index/scaling-storage-one-billion-users-part-one",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-09-11T10:00:00+00:00",
+      "summary": "Learn how OpenAI evolved Habitat from a Python library into a globally distributed storage platform serving 1 billion ChatGPT users and 22M requests per second."
+    },
+    {
+      "title": "Cadenya",
+      "url": "https://www.producthunt.com/products/cadenya-the-agent-runtime",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-09-10T23:21:08+00:00",
+      "summary": "A hosted agentic loop to bring agentic possibilities to life Discussion | Link"
+    },
+    {
+      "title": "GitHub Copilot weekly releases — September 7",
+      "url": "https://github.blog/changelog/2026-09-10-github-copilot-weekly-releases-september-7",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-10T22:55:07+00:00",
+      "summary": "This week, GitHub Copilot introduces Jira integration in Copilot app and adaptive model orchestration with Project HydraFusion in Copilot CLI. We also introduced new agent automation in Visual Studio Code… The post GitHub Copilot weekly releases — September 7 appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Refreshed repository pull requests page in public preview",
+      "url": "https://github.blog/changelog/2026-09-10-refreshed-repository-pull-requests-page-in-public-preview",
+      "source": "GitHub Changelog",
+      "kind": "tool",
+      "published": "2026-09-10T21:27:17+00:00",
+      "summary": "A refreshed repository-level pull request listing page is now in public preview for all GitHub users. It brings powerful filtering, compact presentation mode, and more. Highlights The new page makes… The post Refreshed repository pull requests page in public preview appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "AI Scan for pull request APIs in public preview",
+      "url": "https://github.blog/changelog/2026-09-10-ai-scan-for-pull-request-apis-in-public-preview",
+      "source": "GitHub Changelog",
+      "kind": "tool",
+      "published": "2026-09-10T20:20:58+00:00",
+      "summary": "You can now manage GitHub code scanning’s AI Scan for pull request enablement with REST API endpoints at the organization and repository levels. This public preview gives teams a programmatic… The post AI Scan for pull request APIs in public preview appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "ABrush",
+      "url": "https://www.producthunt.com/products/abrush-ai-2",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-09-10T20:18:42+00:00",
+      "summary": "AI Studio for Digital Artists Discussion | Link"
+    },
+    {
+      "title": "sizeless",
+      "url": "https://www.producthunt.com/products/sizeless",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-09-10T17:55:17+00:00",
+      "summary": "Spatial AI for underground infrastructure Discussion | Link"
+    }
+  ]
+}
