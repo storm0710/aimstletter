@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "build_at": "2026-09-21T08:47:15.029372+09:00",
+  "period_start": "2026-09-14",
+  "period_end": "2026-09-21",
+  "ai_items": [
+    {
+      "title": "Efficiently Linking Unstructured Data for Multi-step Reasoning",
+      "url": "https://arxiv.org/abs/2609.19491v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-09-16T23:16:45+00:00",
+      "summary": "Modern LLMs and AI agents increasingly support data engineering workflows that integrate evidence from unstructured sources. Such pipelines typically do data retrieval, integration, and ranking before proceeding to more complex agentic reasoning or actions, e.g., for scientific discovery. The core retrieval problem in these workflows jointly executes multi-attribute filtering, multi-vector search, exact relational joins, and thresholded embedding-similarity joins. Given a planned query and monotone scoring function, our DASE query engine constructs and ranks candidate evidence tuples. It comprises (i) a multi-step reasoning query model over structured predicates, multiple vectors, and relational links; (ii) SemJI, a sparse materialized embedding-similarity join index for rare near-neighbor pairs; and (iii) a co-designed execution layer that combines predicate-aware ANN traversal, batched access, and threshold-based score aggregation. On scientific-discovery workloads, DASE retrieves candidate evidence for multi-step reasoning queries 6x to 46x faster than strong RDBMS, rerank, and vector-database baselines at comparable recall; and for tasks that require semantic-operator post-processing, DASE acts as a high-recall prefilter that makes downstream LLM evaluation both cheaper and more accurate -- e.g., on SemBench E-Commerce it improves BigQuery quality from 0.67 to 0.80 while cutting cost from $2.42 to $0.54."
+    },
+    {
+      "title": "Agentic RDZ: Autonomous Zone Management with AI Agents and an FR3 Coexistence Use Case",
+      "url": "https://arxiv.org/abs/2609.17110v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-09-15T12:40:25+00:00",
+      "summary": "Radio Dynamic Zones (RDZs) allow wireless experiments to operate outside conventional spectrum regulations while continuously guaranteeing protection for incumbent users. Existing RDZ prototypes automate this task procedurally, through handcrafted rules and predefined workflows, and become brittle when experiments encounter hardware impairments, user workflows and devices, or interference mechanisms not anticipated at design time. This paper introduces the agentic RDZ (A-RDZ), which, to the best of our knowledge, is the first RDZ realization in which agents use Large Language Models (LLMs) to perform spectrum management, experiment management, policy interpretation, and zone orchestration. Built on the GENESIS agentic framework, the architecture pairs autonomous reasoning with a deterministic policy gate and near-real-time (near-RT) reflexes, so that agents can improve outcomes but never weaken the zone's protection guarantee. We validate the A-RDZ on a hardware-in-the-loop Frequency Range 3 (FR3) (7.125-24.25 GHz) Open Radio Access Network (O-RAN) testbed in which a 5G New Radio (NR) experiment coexists with an emulated Fixed Satellite Service (FSS) earth-station incumbent. In an end-to-end use case, the monitoring agent detects an emission violation from live spectrum evidence, the orchestrator selects a mitigation that restores the interference budget while keeping the experiment running, and the action is applied and verified through the O-RAN control plane. We report the detection-to-mitigation latency decomposition and discuss the practical limits of agentic operation, including non-deterministic reasoning and decision-to-action translation."
+    },
+    {
+      "title": "When Tool Calls Succeed but Workflows Fail: Anomalies at the Agent-Tool Boundary",
+      "url": "https://arxiv.org/abs/2609.15397v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-09-14T11:31:06+00:00",
+      "summary": "AI agents increasingly execute long-running workflows that externalize effects through independently supplied tools. Under retries, speculative execution, concurrency, and partial failures, the resulting external state may be inconsistent with the workflow's intended resolution: required effects may be missing or duplicated, aborted effects may survive, and committed effects may depend on provisional state that is later withdrawn. Advanced transaction models address related failures, but assume that lower-level operations expose the semantics they depend on: whether an effect occurred, whether it can be compensated, staged, or safely reordered. Shared agent-tool interfaces usually do not. We contribute an effect-history model that separates events in the external world from the runtime's observations of them, and a catalog of eight recurring external-effect anomalies. From the catalog we derive the boundary capabilities required to exclude each anomaly in general, and four points where black-box tool invocation alone cannot provide a general guarantee. We then ask how much of this is expressible in a widely used shared tool interface, measuring the use of the standard annotation vocabulary across 98,291 tools exposed by registered Model Context Protocol (MCP) servers. The fields are widely emitted but provide only coarse call-level hints, and none of the required capabilities is fully expressible. These results motivate reusable transactional contracts at the tool boundary."
+    },
+    {
+      "title": "Chronos: Efficient Bolt-on Branching Across Data Stores for Stateful Agentic Applications",
+      "url": "https://arxiv.org/abs/2609.14889v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-09-14T01:15:59+00:00",
+      "summary": "Data-centric applications increasingly use speculative execution to explore multiple candidate paths where each path modifies state distributed across heterogeneous data stores. This trend is intensified by the rise of tool-calling agents. Hence, applications need data systems that can create branches quickly, isolate state-modifying paths, and merge changes consistently across stores without imposing substantial query overhead. Existing systems provide only partial support, forcing applications to coordinate branches and merges manually, which increases overhead and risks inconsistent cross-store state. To solve this problem, we introduce Chronos, a bolt-on system that provides branching capability across heterogeneous data stores. We make two contributions. First, Chronos introduces a compact interval-based versioning technique that enables efficient branching and data sharing through simple query rewrite. Second, Chronos introduces a bolt-on architecture that separates branch management from data path within each store. Combined with interval-based versioning, this separation provides atomic cross-store visibility for merges and enables Chronos to support diverse data stores without modifying their engines. We implement Chronos for PostgreSQL, SQLite, DuckDB, Qdrant, and a DBMS-backed filesystem. We evaluate it using cross-store agent workflows, MCTS-style exploration, and per-store benchmarks. Chronos runs MCTS-style exploration up to 16.7x faster than existing approaches while maintaining practical query performance across the underlying stores. Under concurrent cross-store workflows, Chronos prevents partially visible merges while substantially outperforming serialized execution."
+    },
+    {
+      "title": "PentestChain: A Cost-Aware, MCP-Orchestrated Framework for Automated Penetration Testing with Free-Tier LLMs",
+      "url": "https://arxiv.org/abs/2609.18120v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-09-16T04:56:31+00:00",
+      "summary": "AI-driven penetration testing has been demonstrated with premium frontier models such as GPT-4, but the per-engagement token cost makes continuous, automated testing unaffordable for the smaller organisations that need it most. This paper presents PentestChain, a ten-phase automated penetration testing framework that couples a curated, deterministic exploit map with a cost-aware AI cascade-a local Ollama model (qwen2.5-7b) first, then free-tier OpenRouter and Cerebras, with a rule-based fallback that always produces output-and exposes the full pipeline through a Model Context Protocol (MCP) server with eleven tools. We make three contributions. First, we treat US-dollar cost per engagement as a measured, first-class evaluation metric and show that a 7B-parameter local model, kept off the critical path by a deterministic backbone, sustains end-to-end operation at zero measured paid-API cost. Second, we analyse the attack surface that an MCP-exposed offensive engine introduces, grounding a four-position threat model in the 2025 MCP incident record (the CVE-2025-6514 remote-code-execution flaw in mcp-remote, the postmark-mcp supply-chain backdoor, and the tool-poisoning-rug-pull-line-jumping class), and contribute four mitigations. Third, we specify a reproducible, containerised evalua-tion protocol aligned with the standardised testbeds now expected at top-tier venues-AutoPenBench, a Cybench subset, and the PentestGPT 182-sub-task benchmark-with multi-trial statistics (more than 10 trials per configuration, pass-at-k, non-parametric significance tests and effect sizes) and direct, same testbed reproduction of the PentestGPT and PentestAgent baselines rather than citation of their published numbers. On the legacy targets measured to date, the framework detected 26 services, enriched 34 CVEs, produced"
+    },
+    {
+      "title": "Quantifying Overclaiming Propensity in Frontier LLM Agents",
+      "url": "https://arxiv.org/abs/2609.20812v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-09-17T17:59:04+00:00",
+      "summary": "Frontier coding agents are increasingly trusted to work autonomously for long periods, yet an agent's final response is often the only account of that work a user sees. We quantify the propensity of frontier agents to \\emph{overclaim} task completion, a misrepresentation that can mislead the user. An agent overclaims when its final response contradicts information in its context. This definition requires no inference about intent and is independent of task success. We introduce \\emph{OverclaimBench}, an evaluation suite composed of five file-review scenarios, transcript-based coverage measurements, and registered planted defects. We evaluate eight proprietary frontier models in their own production command-line interfaces, and four open-weight models under a single fixed harness on OverclaimBench and find that 1) agents do not read all the files they were asked to review in 67.9\\% of runs; 2) among runs where not all files are read, agents are \\emph{misleading} 80.4\\% of the time (59--96\\% per model), either falsely claiming to have read all files or omitting that coverage is incomplete; 3) requiring delegation to subagents increased reading coverage, but among reviews that remained incomplete, a large majority were still misleading; and 4) agents that falsely claimed a complete review missed planted defects at about 1.8 times the rate of agents that read every file, showing that claims of completion can conceal substantive failures. Together, these results show that agents' final responses are not reliable accounts of their actions."
+    },
+    {
+      "title": "Prediction-Powered Smoothing and Validation for Disaggregated AI Evaluation",
+      "url": "https://arxiv.org/abs/2609.20758v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-09-17T17:42:29+00:00",
+      "summary": "Evaluating an AI system requires disaggregated assessment, as performance varies across domains such as benchmark task types or conversation types in deployed agents. Exhaustive testing is expensive, so evaluation rests on a sample of labeled units. We treat the evaluation set as a finite population and seek accurate point and interval estimates of each domain mean. Direct estimators, including prediction-powered inference (PPI), use only a domain's own labels and are imprecise where labels are few. Small area estimation addresses this problem, and we build on it to develop an integrated workflow for estimation and validation. For estimation, we propose prediction-powered smoothing (PP-S), a Bayesian model fit to each domain's prediction-powered estimate, with an extension that borrows strength across a reporting taxonomy (PP-TS). For validation, we derive a new, approximately unbiased design-based cross-validation score for choosing among direct and smoothed estimators. We study a curated benchmark with verifiable grading and deployed agent traffic graded by humans, each with every outcome observed. In both, the proposed estimators improve on the direct estimators in point and interval estimation, with near-nominal coverage. At the same sampling budget, our score selects as well as an independent validation sample does and estimates the selected estimator's error far more accurately."
+    },
+    {
+      "title": "RAFT: A Stateful Retrieval-Augmented Framework for Troubleshooting Agents",
+      "url": "https://arxiv.org/abs/2609.20754v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-09-17T17:41:31+00:00",
+      "summary": "Effective troubleshooting agents in enterprise customer support depend on retrieving actionable guidance from similar historical cases, yet existing retrieval-augmented generation (RAG) systems treat support cases as static documents and overlook their multi-stage, stateful nature. We introduce RAFT (Retrieval-Augmented Framework for Troubleshooting Agents), a stateful RAG framework that abstracts each closed historical case into a directed chain of timeline entries and retrieves at the entry level, surfacing cases whose intermediate states match the active case and returning the parent-case trajectory anchored at the matched state; an optional case-level graph links cases through a configurable similarity representation. We evaluate this retrieval layer directly, which, unlike evaluating a full agent system, requires no production deployment. Because public multi-stage troubleshooting data is extremely rare, we pair a synthetic benchmark built from Microsoft Learn Windows Server documentation with real Apache Jira issues carrying human-created duplicate labels. RAFT improves Case Hit over vanilla RAG and GraphRAG baselines at every stage of case progress, with statistically significant gains over the strongest baseline; the Jira results provide directional evidence that the advantage transfers to real case histories. We release our benchmark, implementation, and the Apache Jira evaluation set."
+    },
+    {
+      "title": "SoK: Trading Agents or Market Crashers? Dissecting Robustness and Security Failures in Academic Financial LLM Trading Schemes",
+      "url": "https://arxiv.org/abs/2609.19705v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-09-17T04:59:08+00:00",
+      "summary": "Autonomous large language model (LLM) agents are moving rapidly into high-stakes domains, yet existing agentic-AI security studies remain largely domain-agnostic and overlook the distinctive, high-consequence attack surface such settings create. We examine this gap through financial trading agents, a representative case of high-stakes agentic security, where a single compromised agent has direct execution authority over real capital in an adversarial, reflexive market. To this end, we present FARSIGHT (Financial Agent Robustness and Security Investigation and Global Holistic Testing), a framework that performs scheme-level evaluation of financial LLM agents on two axes: robustness under market turbulence (including flash-crash-like scenarios), and security against three attack types: attacks on information sources, attacks on agents, and agent-as-attacker behaviors. Applying FARSIGHT to 15 representative academic schemes, we find that most overlook robustness and realistic adversarial threats: 80% fail at least one core robustness metric and 100% exhibit security vulnerabilities. These two failure modes are inseparable: a small misjudgment can cascade into a market-wide crash on its own, while an adversary can deliberately trigger the same collapse at minimal cost."
+    },
+    {
+      "title": "Red-Teaming Auto Mode: Improving Blocking Classifiers Against Malign Coding Agents",
+      "url": "https://arxiv.org/abs/2609.19587v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-09-17T02:14:53+00:00",
+      "summary": "To keep coding agents from going off the rails, production systems now review each proposed action with a blocking monitor that can reject it before it runs (Auto Mode in Claude Code, Guardian in OpenAI's Codex). Prior evaluations of such monitors largely measure robustness to accidental harm or prompt injections from untrusted sources looking to hijack the agent. Less understood is how they hold up when the agent they monitor is persistently misaligned. To understand this risk, we task an adversarial agent with evading production blocking monitors and causing catastrophic harm, e.g. by exfiltrating its own weights. We find that when instructed with high-level attack strategies, adversarial agents can succeed through several distinct mechanisms, such as agent-generated prompt injection against the monitor, multi-agent attacks, and malicious compaction. In particular we find that in 79% of trials, the agent can use an injection attack against Auto Mode and Guardian to run arbitrary bash commands. We also find that it is possible to greatly improve Auto Mode through design changes like enhancements to tool coverage, transcript formatting and an agentic monitor stage. Even with these improvements, preventing multi-context attacks at an acceptable cost remains an open problem. By detailing our red-teaming methodology and highlighting new attack vectors, we aim to help defenders evaluate their mitigations against the possibility of persistent malign coding agents. Code is available at https://github.com/safety-research/red-teaming-auto-mode."
+    }
+  ],
+  "tool_items": [
+    {
+      "title": "Epismo OS",
+      "url": "https://www.producthunt.com/products/epismo",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-09-19T20:05:33+00:00",
+      "summary": "Keep your work when you switch AI tools Discussion | Link"
+    },
+    {
+      "title": "Copilot code review: An improved review experience",
+      "url": "https://github.blog/changelog/2026-09-18-copilot-code-review-an-improved-review-experience",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-18T20:17:22+00:00",
+      "summary": "Copilot code review now gives you a clearer view of how a review changes over time, more intelligently auto-resolves its own suggestions, and generates useful commit messages when you accept… The post Copilot code review: An improved review experience appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Manage the code coverage ruleset condition with the REST API",
+      "url": "https://github.blog/changelog/2026-09-18-manage-the-code-coverage-ruleset-condition-with-the-rest-api",
+      "source": "GitHub Changelog",
+      "kind": "tool",
+      "published": "2026-09-18T19:23:49+00:00",
+      "summary": "You can now use the generally available REST API to manage the Restrict code coverage repository ruleset option, in addition to the existing UI support. This ruleset lets you enforce… The post Manage the code coverage ruleset condition with the REST API appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "GitHub Copilot weekly releases — September 14",
+      "url": "https://github.blog/changelog/2026-09-18-github-copilot-weekly-releases-september-14",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-18T19:21:22+00:00",
+      "summary": "This week, GitHub Copilot adds new model selection options, code review updates, and Sentry integration in the Copilot app. There are also updates for admins, plus new agent features in… The post GitHub Copilot weekly releases — September 14 appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Upcoming deprecation of selected GitHub Copilot models in mid-October",
+      "url": "https://github.blog/changelog/2026-09-18-upcoming-deprecation-of-selected-github-copilot-models-in-mid-october",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-09-18T19:00:00+00:00",
+      "summary": "We will deprecate the following models across all GitHub Copilot experiences (including Copilot Chat, inline edits, ask and agent modes, and code completions) on October 19th, 2026: Model Deprecation date… The post Upcoming deprecation of selected GitHub Copilot models in mid-October appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Stage-only npm tokens for safer automation",
+      "url": "https://github.blog/changelog/2026-09-18-stage-only-npm-tokens-for-safer-automation",
+      "source": "GitHub Changelog",
+      "kind": "tool",
+      "published": "2026-09-18T16:37:50+00:00",
+      "summary": "You can now select Read and write (stage only) when creating an npm granular access token. This lets your automated workflows stage package versions for review without giving the token… The post Stage-only npm tokens for safer automation appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Prostujemy: fakty o walce z oszukańczymi reklamami w Polsce",
+      "url": "https://about.fb.com/news/2026/09/prostujemy-fakty-o-walce-z-oszukanczymi-reklamami-w-polsce/",
+      "source": "Meta AI News",
+      "kind": "tool",
+      "published": "2026-09-18T14:55:13+00:00",
+      "summary": "Na początku tego tygodnia fundacja Instrat opublikowała raport dotyczący jednego z najtrudniejszych wyzwań, z jakimi mierzy się cała branża – reklam o charakterze oszukańczym. To poważne i złożone wyzwanie, które dotyczy firm technologicznych, banków i całego społeczeństwa. Ciężko pracujemy, by przeciwdziałać działaniom wyrafinowanych i zdeterminowanych przestępców wykorzystują zaawansowane systemy sztucznej inteligencji, narzędzia chroniące użytkowników oraz współpracując z organami ścigania i partnerami z branży. Rozliczanie nas z naszych działań jest w pełni uzasadnione, ale ten raport tego nie robi. To fikcja, która wprowadza opinię publiczną w błąd, przygotowana przez kancelarię prawną reprezentującą osobę, która pozwała Metę. Właśnie w tym kontekście należy go oceniać. Aby uzasadnić swoje tezy, raport opiera się na szeregu błędnych założeń, nieprecyzyjnych definicji i w niewłaściwy sposób przedstawia podejście Mety do zwalczania reklam o charakterze oszukańczym. Poniżej wskazujemy najważniejsze błędy raportu: Raport błędnie traktuje każdą usuniętą przez nas reklamę jako oszustwo Opisując metodologię szacowania przychodów, autorzy piszą: „Aby określić, które reklamy w zbiorze danych były oszukańcze, wykorzystaliśmy informację o tym, czy zostały one usunięte przez Metę”. To zafałszowuje i drastycznie zawyża ich wyliczenia. Nasze systemy działają w oparciu o szeroki zakres standardów i zasad reklamowych – dotyczących towarów i usług objętych ograniczeniami, własności intelektualnej osób trzecich, jakości i formatu reklam oraz wielu innych – a nie wyłącznie oszustw. Podstawa szacunku przychodów jest więc błędna od samego początku. Wyliczenia w raporcie się nie zgadzają Aby uzyskać kwotę, która przyciągnie uwagę, autorzy pomnożyli trzy wartości – ile osób zobaczyło reklamę, jak często ją widziało i ile kosztowała – z których dwie są jedynie założeniami, a jedna szacunkiem. Zasięg: Do wyliczenia liczby osób, które zobaczyły reklamy w Polsce, autorzy wykorzystali dane o zasięgu w całej Unii Europejskiej. Liczby dotyczące 27 państw zostały więc potraktowane jak dane o polskich użytkownikach, co drastycznie zawyża wynik. Częstotliwość: Raport zakłada, że każdą reklamę jedna osoba widzi trzy razy – na podstawie szacunku ze strony internetowej amerykańskiej firmy, opartego na danych z małej próby 2800 jej klientów. Dane te nie dotyczą ani Polski, ani reklam o charakterze oszukańczym. Cena: Autorzy przyznają, że nie byli w stanie oszacować kosztu (CPM) empirycznie, dlatego u podstaw wyliczeń leży w dużej mierze abstrakcyjna liczba (20,65 zł). Ustawiony profil, niewiarygodne dane Część wniosków raportu opiera się na próbie zaledwie 108 reklam zaobserwowanych na jednym urządzeniu z systemem iOS, na profilu, który autorzy wcześniej celowo przygotowali tak, aby przyciągało określone typy reklam – wyświetlając je i klikając w nie. Takie podejście nie jest reprezentatywne dla doświadczenia przeciętnego użytkownika. Konto zaprojektowane tak, by przyciągać określone reklamy, nie pokazuje, co widzi typowa osoba w Polsce. Autorzy wskazują również, że przy innych decyzjach klasyfikacyjnych konkluzją raportu mogłaby być wartość „bliska 70%” – bez żadnego uzasadnienia – co pokazuje, jak elastyczne są te dane. Autorzy nie przedstawiają również szczegółów dotyczących tego, w jaki sposób ustalali, czy zobaczona przez nich reklama miała charakter oszukańczy. Wnioski dla całego roku na podstawie danych z trzech dni Raport formułuje tezy i wnioski dotyczące całego roku, a opiera je na danych z zaledwie trzech pojedynczych dni – w październiku, grudniu i styczniu – które następnie ekstrapoluje. Dane z tych trzech dni różniły się między sobą nawet o 80%. Te trzy liczby zostały uśrednione i przemnożone do wartości rocznej, bez marginesu błędu i bez żadnych korekt. Jeśli trzy punkty danych różnią się między sobą o 80%, nie mogą stanowić podstawy jednej, przedstawianej kategorycznie liczby obrazującej roczną skalę. Co naprawdę robimy w sprawie oszustw Nikt nie chce oszustw na naszych platformach – ani osoby, które z nich korzystają, ani uczciwi reklamodawcy, ani z pewnością my. Oszukańcze reklamy szkodzą osobom korzystającym z naszych platform, podkopują zaufanie i działają na szkodę uczciwych firm, które budują swoje marki na platformach Mety. Dlatego znacząco inwestujemy w zespoły i technologie, które wykrywają, blokują i usuwają oszustów, zanim wyrządzą szkodę. Oszuści to wytrwali przestępcy, którzy nieustannie szukają nowych sposobów obchodzenia naszych zabezpieczeń. W miarę jak ich działania stają się coraz bardziej wyrafinowane, rozwijamy również nasze mechanizmy ochrony. Do naszych najnowszych działań w Polsce należą: Ulepszony system AI przeciw podszywaniu się. Polska znajduje się w pierwszej grupie krajów w Europie, w których wdrożyliśmy nowy system AI ograniczający podszywanie się pod osoby publiczne. Od momentu wdrożenia wykrył i usunął w Polsce o 50% więcej reklam podszywających się pod znane osoby niż poprzedni system. Weryfikacja reklamodawców. Ponieważ usługi finansowe to kategoria szczególnie często wykorzystywana przez oszustów, rozszerzamy w Polsce proces identyfikacji – weryfikacji będziemy wymagać od 100% reklamodawców usług finansowych kierujących reklamy do Polski. To część naszych zdecydowanych działań, których celem jest to, aby do końca 2026 roku 90% przychodów reklamowych Mety na świecie pochodziło od zweryfikowanych reklamodawców. Centrum ochrony przed oszustwami. Na Facebooku i Instagramie uruchomiliśmy centrum ochrony przed oszustwami, które w aplikacji podpowiada, jak rozpoznawać i zgłaszać oszustwa. Wiemy, że oszustwo często wychodzi na jaw z opóźnieniem: ktoś zamówił produkt, który nigdy nie dotarł, albo zapłacił po kliknięciu reklamy. Wtedy trudno już odnaleźć i zgłosić reklamę, treść czy konto, przez które do oszustwa doszło. W pamięci zostają jedynie fragmenty: kliknięta reklama, profil, do którego ktoś napisał, strona, która wyglądała podejrzanie. Dlatego w Centrum Ochrony przed Oszustwami, udostępniliśmy asystenta Meta AI, który ułatwia zgłaszanie oszustw. Podczas rozmowy z asystentem AI, użytkownik może poprosić o przeanalizowanie ostatnich interakcji, aby pomóc i przyspieszyć odnalezienie na Facebooku i Instagramie elementu, który chce zgłosić. Badanie fundacji Instrat w niewłaściwy sposób przedstawia naszą pracę na rzecz zwalczania oszustw i nasze zobowiązanie do przejrzystości reklam. Fakty są inne – nasze działania przynoszą efekty. Od lipca 2025 do czerwca 2026 roku usunęliśmy 137 000 reklam o charakterze oszukańczym, z czego ponad 88% zanim ktokolwiek je zgłosił. Od lipca 2024 r. do czerwca 2026 r. wskaźnik zgłoszeń oszukańczych reklam – czyli jak często użytkownicy zgłaszali oszukańczą reklamę w przeliczeniu na wyświetlenie reklamy – spadł w Polsce o 83% – co wyraźnie pokazuje nasze postępy w ograniczaniu oszukańczych reklam – i kontynuujemy kluczowe działania, by osiągnąć dalsze, odczuwalne spadki. Ten raport jest częścią szerszej kampanii, w której centrum stoi zupełnie nieprawdziwy zarzut: że Meta świadomie i celowo przymyka oko na reklamy o charakterze oszukańczym. Podważa on zaangażowanie i ciężką pracę tysięcy pracowników firmy, którzy codziennie mierzą się z tym problemem. Walka z oszustami nigdy się nie kończy, a my jesteśmy zdeterminowani, by wykorzystywać wszystkie dostępne zasoby do zwalczania oszustw i ochrony osób korzystających z naszych platform. The post Prostujemy: fakty o walce z oszukańczymi reklamami w Polsce appeared first on Meta Newsroom ."
+    },
+    {
+      "title": "New experts join Google’s AI & Economy team",
+      "url": "https://blog.google/innovation-and-ai/technology/ai/expanding-ai-economy-research-bench/",
+      "source": "Google AI Blog",
+      "kind": "tool",
+      "published": "2026-09-18T14:00:00+00:00",
+      "summary": "Text \"AI & Economy Research Program\" all over a green grid background, with the Google G logo in the bottom right corner"
+    },
+    {
+      "title": "Co-creating the future of fashion with Google",
+      "url": "https://blog.google/innovation-and-ai/technology/ai/google-flow-fashion-week/",
+      "source": "Google AI Blog",
+      "kind": "tool",
+      "published": "2026-09-18T13:00:00+00:00",
+      "summary": "Jane Wade and Sergio Hudson"
+    },
+    {
+      "title": "Introducing the Australian Youth Safety Blueprint",
+      "url": "https://openai.com/index/australian-youth-safety-blueprint",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-09-18T12:00:00+00:00",
+      "summary": "OpenAI introduces the Australian Youth Safety Blueprint, a six-pillar roadmap for safer AI experiences that protect and empower young people."
+    }
+  ]
+}
