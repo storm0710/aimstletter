@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "build_at": "2026-10-12T09:54:43.272506+09:00",
+  "period_start": "2026-10-05",
+  "period_end": "2026-10-12",
+  "ai_items": [
+    {
+      "title": "ONDT: A Modular and Virtualized O-RAN Digital Twin for xApp/rApp Closed-Loop Experimentatio",
+      "url": "https://arxiv.org/abs/2610.07889v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-10-06T07:37:06+00:00",
+      "summary": "Open Radio Access Network (O-RAN) architectures extend programmability in next-generation cellular networks through Near-Real-Time and Non-Real-Time RAN Intelligent Controllers (RICs), enabling AI/ML-driven xApps and rApps to optimize network behavior dynamically. However, validating automated closed-loop control algorithms in live environments presents significant operational risks and deployment costs. To address this challenge, this paper introduces the O-RAN Digital Twin (ONDT), a modular, virtualized, and cloud-native experimentation framework developed as a 6G enabler within the SNS SUNRISE-6G project. We present the ONDT architecture and its end-to-end experimentation workflows, showing how the framework automates O-RAN-compliant rApp/xApp onboarding, RAN scenario configuration and initialization, Key Performance Metric (KPM) collection, and closed-loop control validation. Experimental validation using Juniper RIC platforms and the Keysight RICtest emulation framework demonstrates ONDT ability to provide an isolated and reproducible environment for KPM monitoring, cell ON/OFF control, automated dataset generation, and rApp/xApp validation."
+    },
+    {
+      "title": "vLLM-Omni Technical Report: A Unified Serving Runtime for Omni-Modality Generation",
+      "url": "https://arxiv.org/abs/2610.09307v1",
+      "source": "arXiv Distributed Systems AI",
+      "kind": "paper",
+      "published": "2026-10-07T02:04:28+00:00",
+      "summary": "Interaction with intelligent systems is expanding beyond text-centric chatbots and coding agents. Speech-native assistants, visual generation and editing, world-model environments, and robot action loops require models that emit text, audio, images, video, and actions. These models differ in execution pattern: multi-stage autoregressive omni and TTS pipelines, iterative diffusion or flow-matching generators, and longer-lived world-model or robot loops that carry state across steps. As a result, serving is no longer a single text decode loop, but a heterogeneous multi-stage workflow with cross-stage transfer, streaming, and session-shaped interaction. Existing inference stacks are typically optimized for one architecture family. LLM servers deepen autoregressive scheduling and KV management, while diffusion stacks deepen denoising and parallel generation. Neither provides a shared control plane for pipelines that emit speech, pixels, or actions through separate generators, so production deployments often fall back to ad-hoc composition across disjoint runtimes. We present vLLM-Omni, a unified serving runtime for omni-modality generation. vLLM-Omni organizes each workload as a multi-stage pipeline under a single orchestrator that admits requests, advances them across stages, and demultiplexes streaming outputs. Specialized engines and stage replicas provide compute; a connector carries heavy payloads on the data plane; and session-oriented control supports long-lived duplex, world-model, and robot workloads. This report covers the architecture (stage-level KV paths, replica pools, multi-hardware platforms, and efficiency stack) and OpenAI-compatible and OpenPI APIs for omni, TTS, image/video, world-model, robot, and duplex workloads. We evaluate on the multimodal nightly CI on H100 (TTS and MiniCPM-o on H200), focused on Qwen3-Omni."
+    },
+    {
+      "title": "Agentic RCA for Internet-Scale Services Using Constrained Creativity",
+      "url": "https://arxiv.org/abs/2610.08622v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-10-06T16:21:57+00:00",
+      "summary": "System administrators of Internet-scale services need to resolve failure incidents to maintain reliability of such services. Ideally, we want a troubleshooting system to be: (1) expressive to known and unknown incidents with high accuracy; (2) cost efficient at scale; (3) explainable to provide actionable insights operators can act on; and (4) entail low effort from the operators. Unfortunately, most existing systems, including emerging LLM-assisted agentic workflows and structured frameworks for authoring diverse RCA algorithms fall short of achieving all four requirements. We present E4, a novel agentic system for troubleshooting for Internet-scale services. E4 embodies the paradigm of constrained creativity that combines the best of LLM-assisted automation and exploration with the explainability and efficiency of a structured approach. Instead of allowing an LLM agent to write arbitrary code or generate arbitrary responses, we provide the agent a restricted DSL to generate its response via simple loop-free data flow programs. This DSL, equipped with high level operators for troubleshooting, makes E4's output accurate, verifiable and explainable. On a mix of synthetic and real-world workloads, E4 achieves up to 62% better accuracy compared to state-of-the-art solutions, while providing more explainable responses at up to 12x reduced cost."
+    },
+    {
+      "title": "Evaluating Local Language Model Agents for Reproducible Data Engineering: An Empirical Software Engineering Study of Mobility Workflows",
+      "url": "https://arxiv.org/abs/2610.11482v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-10-08T08:26:46+00:00",
+      "summary": "Context: Large language model (LLM) agents are increasingly used as software and data-engineering assistants, yet evidence about locally deployable open-weight agents remains limited. Existing evaluations often emphasize textual responses or isolated code generation rather than the validity of complete engineering artifacts. Objectives: We evaluate whether local LLM agents can produce correct and reproducible data-engineering artifacts, quantify the effect of a closed-loop workspace condition, and examine trade-offs in model scale, architecture, quantization, runtime, tool use, and failure. Methods: We introduce a benchmark of fifteen mobility-workflow tasks covering data discovery, connectors, transport-feed processing, semantic enrichment, feature engineering, validation, visualization, and reporting. Deterministic checkers assess generated scripts, tables, structured files, figures, and reports. Ten local configurations are evaluated in one-shot and closed-loop conditions, with five repetitions per model, mode, and task, yielding 1,500 scored attempts on a consumer-grade GPU. Results: Among models larger than two billion parameters, the workspace condition increases pass rates by 26.7-52.0 percentage points over one-shot generation. The strongest configuration reaches 85.3% artifact-level success, and a quantized 9-billion-parameter model reaches 69.3% with an approximately 6.5 GB memory footprint. Gains are largest when intermediate artifacts expose errors the agent can inspect and repair. Conclusion: Local open-weight agents can support a meaningful subset of software-intensive data-engineering work, but reliability depends on model capability, task verifiability, and deterministic validation. The benchmark provides a reproducible method for evaluating complete agent configurations before adoption in engineering workflows."
+    },
+    {
+      "title": "LLM Agents as Resilience Engineers for Scientific Applications",
+      "url": "https://arxiv.org/abs/2610.11260v1",
+      "source": "arXiv Distributed Systems AI",
+      "kind": "paper",
+      "published": "2026-10-08T05:13:53+00:00",
+      "summary": "Efficient checkpoint/restart support is essential for resilient HPC scientific applications, but implementing it requires substantial expertise: developers must identify recoverable state, choose globally consistent checkpoint points, and preserve application invariants during restart. We study whether frontier LLM coding agents can automate this process. We build a benchmark suite of 16 MPI applications spanning diverse domains, code sizes, and critical-state structures, and evaluate them with a no-human-in-the-loop generate--validate--revise pipeline for checkpoint/restart synthesis. Across the benchmark, the pipeline produces 41 working resilient implementations. Our results show that agent-driven resilience engineering is practical when critical state is visible or accessible through coherent abstractions: successful runs finish in under one hour on average, consume about 15M tokens, and produce implementations with negligible failure-free overhead and recovery efficiency comparable to human-written code. However, modularized and fragmented state remains a major limitation, with some failed attempts consuming over 100M tokens and 300 minutes without producing a working implementation."
+    },
+    {
+      "title": "From Reactive Containment to Proactive Assurance: Lessons from OpenAI, Anthropic, and Google Agent Security Incidents",
+      "url": "https://arxiv.org/abs/2610.12463v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-10-08T17:59:49+00:00",
+      "summary": "In 2026, cybersecurity evaluations involving OpenAI, Anthropic, and Google agents reached real systems outside their authorized test scope. The paths were different. OpenAI agents exploited research infrastructure, coordinated across runs, and compromised parts of Hugging Face's production environment. Anthropic reported cases in which a misconfigured third-party environment exposed real systems to agents pursuing simulated cyber tasks. In a separately reported evaluation, Google's Gemini accessed three real organizations through an unintended internet route; Google stated that the model stopped in all three instances. Taken together, the cases show why an evaluation cannot rely on an assumed boundary. That boundary must be verified while the agent is operating. This comparative instrumental case study develops a Proactive Agent Security Assurance Cycle (PASAC) and a five-layer Boundary Assurance Stack. The framework combines risk-tiered task design, executable scope contracts, pre-run validation, least-capability access, independent egress enforcement, credential restrictions, cross-run monitoring, automatic stop conditions, and evidence-based reauthorization. A leading-indicator model, nine design propositions, and seven falsifiable hypotheses turn these lessons into a testable research program. Because the public Gemini record is limited to attributed statements and journalism, its detailed causal mechanism remains provisional. The central conclusion is straightforward: proactive agent security requires continuous assurance across the full execution system, not confidence in any single sandbox or safeguard."
+    },
+    {
+      "title": "Caught in the Act: Probes Effectively Detect Sabotage and Catch Unverbalized Deception",
+      "url": "https://arxiv.org/abs/2610.12445v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-10-08T17:58:13+00:00",
+      "summary": "Recent incidents have highlighted the challenge of monitoring LLM agents and the danger of models deceiving people. We show that white-box deception detection via probes can be scaled up to frontier monitoring settings by collecting the largest deception dataset to date for training probes and introducing a novel probe architecture which can aggregate information across many layers and tokens. Our probes achieve 98.8% AUC in SHADE-Arena, surpassing an Opus 5.5 text-monitoring baseline, and show improved efficacy as the underlying model is scaled up. To push our probes to their limit, we test them on several cases where deception cannot be determined from the context alone. In these cases, which we refer to as introspective deception, the ground truth can only be determined through careful elicitation or thorough knowledge of a model's training data. In one such evaluation, we show that probes can distinguish transcripts containing a model's true hidden goal from other goals with an AUC of up to 99.7%. Our probes also readily detect deception on prominent open-weight models which lie about politically sensitive topics, and about their beliefs when put under pressure. We release our training dataset, dubbed FIBS, to help drive frontier deployment of effective probes, and encourage the community to expand upon it with further examples of deception and sabotage."
+    },
+    {
+      "title": "Toward Intelligent Networks via AI-Aware GPU-Native Packet Processing",
+      "url": "https://arxiv.org/abs/2610.12139v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-10-08T15:25:10+00:00",
+      "summary": "The integration of inline Artificial Intelligence (AI) models into critical network infrastructure is fundamentally bottlenecked by the high latency and synchronization overhead of CPU-mediated packet processing. While legacy GPU offload and recent CPU-bypass frameworks attempt to bridge this gap, they remain trapped in proprietary ecosystems or still rely on the host CPU and coarse-grained batching to coordinate stateful telemetry and AI pipeline execution. In this paper, we propose AGP, a novel framework that promotes the GPU from a passive accelerator to a primary data-path controller, answering what changes architecturally when the GPU autonomously owns the complete packet-to-inference pipeline. By enabling GPU-native packet processing, contention-free in-GPU stateful aggregation, and a persistent mega-kernel for continuous AI inference, AGP removes the CPU from the critical path. Our evaluation demonstrates that native in-GPU packet processing sustains line-rate throughput while being over 6.1x more power-efficient. Furthermore, our integrated Intrusion Detection System (IDS) stress test eliminates the legacy CPU-GPU synchronization tax, reducing end-to-end latency by 7.9x (up to 35x p99) and accelerating whole-system inference throughput by 9.3x using only ~2% of the GPU's thread capacity."
+    },
+    {
+      "title": "Digital Twin for Pre-Deployment Validation of AI-Driven Safety-Critical Industrial Edge Control Loops",
+      "url": "https://arxiv.org/abs/2610.11934v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-10-08T13:28:53+00:00",
+      "summary": "Industrial environments are increasingly characterized by the tight interaction among physical processes, communication infrastructures, and intelligent applications. In this context, Digital Twins (DTs) have emerged as a key technology for system analysis and optimization. However, existing DT solutions typically focus either on industrial processes or communication networks, while lacking an integrated and application-aware perspective. To fill this gap, this paper proposes a modular DT framework for industrial environments that jointly models physical processes, wireless communications, and application logic within a unified architecture. The feasibility of the proposed framework is experimentally validated through a real-world Proof-of-Concept (PoC) implemented in the BI-REX pilot line, involving a 5G-connected Autonomous Mobile Robot (AMR) transporting hazardous liquids and remotely controlled by an AI-driven application. The proposed DT is used to reproduce the behaviour of the real deployment and to investigate the impact of different placements of the AI application, including on-premise, edge, and remote cloud execution scenarios. Experimental results demonstrate a close agreement between DT predictions and PoC measurements in terms of both network-level metrics, such as Reference Signal Received Power (RSRP) and latency, and end- to-end application metrics, including application-level Round- Trip-Time (RTT). Moreover, the analysis shows how inaccuracies of network modeling can critically affect the feasibility of latency-sensitive industrial control loops, highlighting the potential of integrated DTs as tools for the pre-deployment design and validation of next-generation industrial systems."
+    },
+    {
+      "title": "Where Do the Tokens Go? Understanding and Reducing Costs in LLM Agents for Vulnerability Discovery",
+      "url": "https://arxiv.org/abs/2610.11602v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-10-08T09:47:18+00:00",
+      "summary": "LLM agents can spend millions of tokens during vulnerability discovery without producing a working proof of concept (PoC). What consumes that budget, and why does it fail to produce results? We diagnose these costs and failures through a multi-axis open-coding study of 200 CyberGym traces, spanning four agents (i.e., Codex, OpenCode, Cybench, and EnIGMA) under an unaided baseline and four existing efficiency methods. The study reveals three key findings. First, different agents vary substantially in success and cost, and higher spending does not consistently yield better outcomes. Second, code localization and understanding, together with vulnerability reasoning and trigger design, account for 60.4% of tokens and represent the two leading bottlenecks in failed runs. Third, only 24.4% of matched comparisons preserve success at lower total cost; unsuitable signals and auxiliary overhead limit the benefits of existing methods. Motivated by these findings, we present AVRI, an Agent-centric Vulnerability Reasoning Interface built around a persistent Bidirectional Evidence Trace (BET). BET connects how the harness consumes input with the conditions required to make a selected operation unsafe, retaining source-supported correspondences alongside the agent's hypotheses and open questions. Reading, analysis, and persistence commands help agents build and reuse this evidence rather than repeatedly retrieve and reconstruct it. On 20 evaluation tasks, AVRI reduces total cost by 18.0% for Codex and 23.7% for OpenCode while preserving success rates and improving or maintaining recall."
+    }
+  ],
+  "tool_items": [
+    {
+      "title": "New controls and chat improvements in Copilot for JetBrains",
+      "url": "https://github.blog/changelog/2026-10-10-new-controls-and-chat-improvements-in-copilot-for-jetbrains",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-10-10T18:53:39+00:00",
+      "summary": "This update brings more control over default models and MCP server in GitHub Copilot for JetBrains. It also makes diagnostics easier to address, improves chat navigation and account controls, and… The post New controls and chat improvements in Copilot for JetBrains appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Agibot",
+      "url": "https://www.producthunt.com/products/agibot",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-10T13:04:39+00:00",
+      "summary": "The always-on personal AI agent for your Mac. $0 forever Discussion | Link"
+    },
+    {
+      "title": "Farol",
+      "url": "https://www.producthunt.com/products/farol-3",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-10T10:38:06+00:00",
+      "summary": "The macOS terminal that shows which coding agent needs you Discussion | Link"
+    },
+    {
+      "title": "Lune",
+      "url": "https://www.producthunt.com/products/lune-research",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-10T03:56:36+00:00",
+      "summary": "The search engine built for scientific AI agents Discussion | Link"
+    },
+    {
+      "title": "Maildun for Mac",
+      "url": "https://www.producthunt.com/products/maildun-for-mac",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-10T01:06:33+00:00",
+      "summary": "Design on-brand emails by hand, with AI, or over MCP Discussion | Link"
+    },
+    {
+      "title": "GitHub Copilot weekly releases — October 5",
+      "url": "https://github.blog/changelog/2026-10-09-github-copilot-weekly-releases-october-5",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-10-09T22:58:23+00:00",
+      "summary": "This week’s updates make Copilot easier to use across accounts and environments, with more control over what agents can access and how you manage their work. GitHub Copilot Claude Haiku… The post GitHub Copilot weekly releases — October 5 appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "AgentDock",
+      "url": "https://www.producthunt.com/products/agentdock",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-09T21:55:39+00:00",
+      "summary": "Answer Claude Code & Codex from one Inbox, in any terminal Discussion | Link"
+    },
+    {
+      "title": "CodeQL 2.27.2 improves C++, Go, Rust, and JavaScript analysis",
+      "url": "https://github.blog/changelog/2026-10-09-codeql-2-27-2-improves-c-go-rust-and-javascript-analysis",
+      "source": "GitHub Changelog",
+      "kind": "tool",
+      "published": "2026-10-09T21:32:54+00:00",
+      "summary": "CodeQL 2.27.2 is now available, adding a C++ regular-expression parser and analysis improvements across several languages. CodeQL is the static analysis engine behind GitHub code scanning, which helps you find… The post CodeQL 2.27.2 improves C++, Go, Rust, and JavaScript analysis appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Microsoft-Decision-1",
+      "url": "https://www.producthunt.com/products/microsoft-decision-1",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-09T18:50:17+00:00",
+      "summary": "Microsoft’s decision model for agents and workflows Discussion | Link"
+    },
+    {
+      "title": "FloorGen",
+      "url": "https://www.producthunt.com/products/floorgen",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-09T18:19:20+00:00",
+      "summary": "Draw the house, or just ask. Free floor plans with AI Discussion | Link"
+    }
+  ]
+}
