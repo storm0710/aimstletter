@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "build_at": "2026-11-02T10:11:16.520690+09:00",
+  "period_start": "2026-10-26",
+  "period_end": "2026-11-02",
+  "ai_items": [
+    {
+      "title": "OpenAI and ServiceNow expand partnership across enterprise workflows",
+      "url": "https://openai.com/index/openai-servicenow-partnership-expansion",
+      "source": "OpenAI News",
+      "kind": "trend",
+      "published": "2026-10-28T13:15:00+00:00",
+      "summary": "OpenAI and ServiceNow expand their partnership to bring OpenAI models and agents into ServiceNow and ServiceNow workflows into ChatGPT and Codex."
+    },
+    {
+      "title": "How Ultrafast cut incident investigation from hours to minutes at OpenAI",
+      "url": "https://openai.com/index/openai-cut-incident-investigation",
+      "source": "OpenAI News",
+      "kind": "trend",
+      "published": "2026-10-26T07:00:00+00:00",
+      "summary": "See how OpenAI engineers use Codex Ultrafast to investigate incidents in minutes. Explore faster security analysis, code refactoring, and daily workflows."
+    },
+    {
+      "title": "ExploreRepair: Evidence-Specialized Agents for Vulnerability Repair under Information Constraints",
+      "url": "https://arxiv.org/abs/2610.39899v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-10-29T12:09:12+00:00",
+      "summary": "Automated vulnerability repair must often operate with incomplete vulnerability information: developers may lack an accurate vulnerability classification or a provided proof-of-vulnerability (PoV) test, yet still need to produce a repair. Without detailed information, a key challenge is to explore multiple plausible interpretations of the vulnerability before committing to a repair. To address this challenge, we propose ExploreRepair, a vulnerability repair framework that reconciles the vulnerability observations and repair implementations from a team of exploration agents. We first collect these observations and repair implementations from three agents, each tasked with exploring a specific dimension of the vulnerability. Then, a Lesson Aggregator and a Patch Aggregator independently synthesize repairs from these observations and concrete implementations before a final Aggregator reconciles their proposals without benchmark feedback. On PatchEval, ExploreRepair achieves repair success rates of 39.6% and 71.6% with GPT-5.6-Luna and DeepSeek-V4.1-Flash, respectively, exceeding EvoRepair, a state-of-the-art vulnerability repair approach, by 16.0 and 25.4 percentage points. On VulnLoc+, it achieves success rates of 51.4% and 62.9%, respectively, exceeding LoopRepair's variant without PoV tests by 20.0 and 17.1 percentage points."
+    },
+    {
+      "title": "Build shared workflows for your team with Copilot Automations",
+      "url": "https://github.blog/changelog/2026-10-28-build-shared-workflows-for-your-team-with-copilot-automations",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-10-28T15:35:00+00:00",
+      "summary": "Shared Copilot Automations are rolling out, enabling teams to build and maintain AI-powered workflows together. With Copilot Automations, you can combine prompts, triggers, and tools to design workflows around the… The post Build shared workflows for your team with Copilot Automations appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "LASSO: An LLM-Agent Synthesized System for SQL Validation",
+      "url": "https://arxiv.org/abs/2610.38294v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-10-28T05:24:22+00:00",
+      "summary": "The rise of Large Language Models (LLMs) has significantly advanced text-to-SQL capabilities, but generated queries may have errors. Test datasets are important for catching errors, but having only one or a few test datasets leaves many bugs undetected. Effective testing requires multiple test datasets that can expose subtle semantic bugs and edge cases. Recent work on test data generation and equivalence checking has focused on using constraint solvers. However, constraint-based approaches are slow and not scalable. In this paper, we introduce LASSO, a framework inspired by XData, but designed to minimize the use of constraint solvers, instead prioritizing use of data generation strategies based on fast heuristics. LASSO deploys a number of \"attack strategies\", each targeting a specific class of semantic errors. LASSO code was built using LLM-based agentic coding. We used carefully designed workflows and rules to support effective code generation and to avoid common code generation issues. A large number of internal test cases are included in LASSO to catch errors in generated code, and more are added when we extend LASSO, to avoid subsequent regressions. Our empirical evaluation across multiple benchmarks demonstrates that LASSO outperforms the state of the art, including XData, SpotIT, ParSEval, and Polygon."
+    },
+    {
+      "title": "When Imputation Changes the Nearest Neighbor: Exact Certification of Similarity Retrieval for Incomplete Sensor Time Series",
+      "url": "https://arxiv.org/abs/2610.40579v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-10-29T17:45:34+00:00",
+      "summary": "Sensor time series routinely reach similarity search with missing values, and the retrieved neighbours then depend on how the gaps were filled. We ask which retrieval conclusions hold for every admissible completion of an incomplete query. For a family of window-minimum distances that contains the $L_1$ distance as its separable end we give a pairwise certificate that one candidate is strictly closer than another, a guaranteed candidate set that contains every possible nearest neighbour, and a certificate that a nearest-neighbour label cannot change. The guarantees hold uniformly over the specified box and apply to the true query whenever it lies inside. At the separable end a closed form is known, but beyond it the worst-case gap need not be attained at a corner of the box. We prove a finite reduction to critical values, give an exact interval dynamic programme for the worst-case ranking gap, and a quadratic-time fast layer of valid bounds and feasible witnesses, supported by an exact criterion for when the feature-box relaxation is tight. On three traffic-sensor collections with real gap patterns, linear interpolation changes the nearest neighbour in 15 to 33 percent of the queries. At the full band the feature-box relaxation misses up to 14 percent of the exactly stable boundary pairs, whereas fixed-completion and Monte Carlo checks issue false certificates. The fast layer resolves about 90 percent of all tested boundary pairs without dynamic programming, and on paired network-scale queries the exact method is 82 to 110 times faster than the programme alone. Label certificates transfer to three public benchmarks, and the band width trades forecasting accuracy and certification coverage for lower imputation sensitivity, with dataset-dependent crossovers."
+    },
+    {
+      "title": "InferD: A Honeypot Framework for AI Inference Infrastructure",
+      "url": "https://arxiv.org/abs/2610.39807v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-10-29T10:50:51+00:00",
+      "summary": "Large language model serving stacks, commercial inference APIs, vector databases, and agent orchestration gateways are now ex- posed on the public internet and indexed by commodity scanners within hours of deployment. The threat characteristics of this sur- face are only beginning to be measured, and the honeypot frame- works that could measure it were designed for conventional net- work services rather than for AI infrastructure. In fact, emulating an AI service is a distinct deception problem: the observable behavior of the service, including model inventories, token formats, tool-call protocols, and authorization flows, must be reproduced faithfully, while the underlying computation, model inference and tool ex- ecution, must never occur. We present InferD, a low-interaction honeypot framework organized around a single principle we call deception without inference: every request an adversary can observe is answered from static response pools, and nothing an adversary submits is ever executed. InferD decomposes the emulation into four deception planes, transport, service protocol, vulnerability surface, and agentic session, adds a provenance plane that links a planted credential to evidence of downstream model-mediated processing."
+    },
+    {
+      "title": "Rebuilding a Field's Open-Problem Catalog from the Literature: A Two-Layer Knowledge Graph, and Why Status Must Stay Proposed",
+      "url": "https://arxiv.org/abs/2610.39641v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-10-29T09:01:47+00:00",
+      "summary": "A research field records its open problems in surveys, keynotes and community reports. Those are prose, written every few years, and nobody can ask them who works on a problem now or whether it was settled last year. We argue the problems should be data, and we build the system that makes them so: a hand-curated problem layer carried in unchanged, under an evidence layer rebuilt from a bibliographic index, joined by typed, provenance-carrying links in one graph database and queryable from one language. A language model does four jobs -- per-paper extraction, catalog grounding, per-paper status verdict, and idea generation -- each constrained to a candidate set so out-of-set answers are refused rather than stored. We report a study on two curated catalogs, database research (1,053 problems) and AI research (1,000 problems), each with a prior catalog-only graph. The rebuilt graph answers every question the catalog-only graph answered -- 47 of 47 on databases, 34 of 35 on AI -- plus questions the catalog-only graph refused: recent workers, untouched problems, methods tried, and outside papers bearing on a problem (336 problems, 770 works on databases). The capability we most wanted does not survive its own audit. Of 41 solves and refutes verdicts hand-checked against the papers, 9 are correct, 30 partly correct and 2 wrong; no refutes verdict (0 of 34) disproves an open problem, and only 1 of 7 solves closes the central question. We report that failure in full and draw the design conclusion: a status change must be proposed with its evidence and never applied, making the human reviewer part of the architecture. We close with the data-engineering problems this raises: entity resolution across curated and harvested layers, verifying model status claims, freshness under source quotas, and evaluation without ground truth."
+    },
+    {
+      "title": "Judging Before Propagation: Task-Graph Contextual Integrity for Multi-Agent Privacy",
+      "url": "https://arxiv.org/abs/2610.39532v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-10-29T07:31:50+00:00",
+      "summary": "Multi-agent LLM systems increasingly rely on persistent memory and inter-agent communication. These capabilities create privacy risks that extend beyond individual interactions: a release appropriate in isolation may become inappropriate when combined with information previously disclosed to a recipient or propagated to downstream agents along the planned workflow. Existing Contextual Integrity (CI) mechanisms for agentic systems typically rely on local judgments that assess each disclosure in isolation, with or without regard to the recipient's history, but do not account for how information propagates downstream. However, compliance at the current boundary does not guarantee appropriateness across the workflow. We introduce Task-Graph Contextual Integrity (TG-CI), to our knowledge the first task-graph-native formalization of Contextual Integrity for multi-agent systems. TG-CI represents a workflow as a Multi-Agent Task Graph (MATG) and extends CI from atomic transfers to stateful, graph-level information flows by jointly considering an item's intended propagation scope and recipients' evolving disclosure states. We operationalize TG-CI through propagation-scoped authorization under two complementary policies: Full-Scope, which requires admissibility across the complete downstream scope, and Auto-Region, which confines each item to its maximal admissible region using lightweight frontier gates. We further introduce MAPLE-Bench, a benchmark of 144 cases across four scenarios that jointly vary MATG topology, disclosure history, compromised-agent placement, and item-level privacy policies. In our primary experimental configuration, TG-CI reduces the mean unauthorized disclosure count by 85.8-94.1% relative to the Local-History CI baseline, while retaining 93.6-96.1% of the baseline's task accuracy, with the two enforcement policies providing complementary privacy--cost--utility trade-offs."
+    },
+    {
+      "title": "AgentHeal: Evaluating Goal-Preserving Resource Recovery of Web Agents under Access Barriers",
+      "url": "https://arxiv.org/abs/2610.39234v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-10-29T02:51:58+00:00",
+      "summary": "Large language model (LLM) agents have demonstrated strong capabilities in automating complex information-seeking and transactional tasks across the open web. However, their real-world reliability remains limited by access barriers, such as dead links, authentication walls, rate limits, and anti-scraping defenses. These barriers block the primary execution path, causing agents to abort prematurely, loop indefinitely, or quietly compromise the user's original constraints. Existing evaluations either implicitly assume that target resources are freely accessible or focus on transient perturbations that simple retries can resolve, failing to capture scenarios where agents must actively reroute around impassable bottlenecks. To bridge this gap, this paper introduces AgentHeal, a comprehensive benchmark evaluating goal-preserving resource recovery, defined as the ability of web agents to detect non-transient access barriers, pivot to legitimate alternative sources, and fulfill the user's exact original objective. Spanning nine barrier families across a counterfactual sandbox and real-website replay, our experiments on leading LLM backbones show that average task success drops sharply from 89.4% to 43.7% under access barriers. Further analysis reveals that agents frequently fall for deceptive look-alikes, fail to escalate to users when necessary, violate access policies, or waste computation on futile retries, providing actionable diagnostics for developing resilient web agents."
+    }
+  ],
+  "tool_items": [
+    {
+      "title": "agentmash",
+      "url": "https://www.producthunt.com/products/agentmash",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-31T18:08:19+00:00",
+      "summary": "open-source multiplayer AI for teams' coding agents Discussion | Link"
+    },
+    {
+      "title": "ernd",
+      "url": "https://www.producthunt.com/products/ernd",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-31T08:07:30+00:00",
+      "summary": "The credit card for the AI stack Discussion | Link"
+    },
+    {
+      "title": "Godwit",
+      "url": "https://www.producthunt.com/products/godwit",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-31T03:45:26+00:00",
+      "summary": "An open-source, AI-native email client Discussion | Link"
+    },
+    {
+      "title": "Pluto Door",
+      "url": "https://www.producthunt.com/products/pluto-door",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-30T22:10:44+00:00",
+      "summary": "SSH client with an AI agent and a desktop for every server Discussion | Link"
+    },
+    {
+      "title": "Agnos",
+      "url": "https://www.producthunt.com/products/agnos",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-30T20:02:49+00:00",
+      "summary": "Clean documents for AI, and see what was removed Discussion | Link"
+    },
+    {
+      "title": "Making it easier for websites to express AI training preferences",
+      "url": "https://openai.com/index/helping-websites-express-ai-training-preferences",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-10-30T09:30:00+00:00",
+      "summary": "OpenAI will honor a shared robots.txt signal to help website operators communicate their AI training preferences to participating providers."
+    },
+    {
+      "title": "Community safety report and new protections for teens",
+      "url": "https://openai.com/index/community-safety-report-and-new-protections-for-teens",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-10-30T09:00:00+00:00",
+      "summary": "OpenAI is strengthening violence prevention in ChatGPT with expanded safeguards, earlier interventions, and a new commitment to public safety reporting."
+    },
+    {
+      "title": "Embage",
+      "url": "https://www.producthunt.com/products/embage",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-30T07:01:40+00:00",
+      "summary": "Build agent for your customers, run workflows, analyzed. Discussion | Link"
+    },
+    {
+      "title": "Termy",
+      "url": "https://www.producthunt.com/products/termy-6ded6eb5-533c-4df5-a4f6-94b97ed8ca62",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-10-30T06:24:13+00:00",
+      "summary": "Your coding agent, in the notch Discussion | Link"
+    },
+    {
+      "title": "Fair use benefits everyone",
+      "url": "https://openai.com/index/fair-use-benefits-everyone",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-10-30T00:00:00+00:00",
+      "summary": "OpenAI shares excerpts from court briefs by creators, academics, accessibility advocates, and legal experts, among others, on how fair use supports AI training and innovation."
+    }
+  ]
+}
