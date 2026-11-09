@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "build_at": "2026-11-09T10:22:13.149121+09:00",
+  "period_start": "2026-11-02",
+  "period_end": "2026-11-09",
+  "ai_items": [
+    {
+      "title": "From FAIR to AI-FAIR Metadata-First Infrastructure for AI-Enabled Science",
+      "url": "https://arxiv.org/abs/2611.03327v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-11-02T15:49:34+00:00",
+      "summary": "Artificial intelligence (AI) technologies and their capabilities have advanced rapidly over the past few years, leading to widespread interest and adoption in the biological and ecological sciences. However, the data infrastructure and computational resources that provide the foundation for AI workflows in ecology and biodiversity science remain fragmented. Moreover, the flow of value remains largely unidirectional: data move from collectors, through repositories and aggregators into models, and finally to research products or management actions. The derived value, such as corrected taxonomies, annotations, quality flags, and insights, rarely returns to source communities. We propose an extension of the original FAIR principles to address the needs of AI-ready infrastructure: the AI-FAIR metadata criteria, which place AI-enabled science in the context of a bidirectional Question-Data-Model triangle. This framework is designed to facilitate large-scale content-based analysis across diverse collections and ensure that the scientists generating the data benefit from the AI-enabled advances built on their data. Alongside these criteria, we introduce an agentic evaluation workflow that both rates existing datasets on the AI-FAIR and traditional FAIR criteria and provides actionable feedback where critical metadata is missing or incomplete. This modular dataset evaluation tool, paired with a domain-appropriate checklist, translates these principles into a reusable assessment of machine-learning readiness, AI-readiness for specified tasks, traceability, and ethical and CARE-aligned stewardship. Through this approach we aim to create a community-informed system to close the model data loop, so that AI also enriches data to further enable scientific discovery."
+    },
+    {
+      "title": "ReproBridge: Building Reproducibility into ML Research Artifacts",
+      "url": "https://arxiv.org/abs/2611.08452v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-11-05T18:45:36+00:00",
+      "summary": "Reproducing machine learning experiments requires reconstructing procedures from information scattered across papers, released code, and supporting artifacts. For coding agents, reproduction success can therefore depend on their ability to fill in missing details, rather than on the released artifacts alone. We ask whether preserving recovered procedures and decisions improves subsequent independent reproduction. We define a standardized artifact design comprising a refined codebase, environment setup, experiment launchers, and a reproduction guide, and introduce ReproBridge, an agent workflow for constructing these refined reproducible artifacts. ReproBridge-Bench provides 1,029 tasks from 387 experiments across 36 papers, anchored by five human-verified reference scores per task. Agents attempt tasks in fresh sessions with raw code or refined artifacts; a separate Auditor checks execution evidence. Across four evaluated models, refined artifacts raise mean reproduction success from 76.4% to 92.6% and reduce downstream API spending by 19.7% on average. The cross-model success-rate spread narrows from 21.6 to 3.9 percentage points, with all four models achieving mean success rates above 90%. Removing any component reduces success in the ablation study, with the largest losses from code and environment removal. These results suggest that preserving execution knowledge helps even models with lower raw-code success reproduce experiments more reliably and at lower API cost."
+    },
+    {
+      "title": "Benchmarks as Software: Terminal-Bench and the Case for Continuous Benchmarks",
+      "url": "https://arxiv.org/abs/2611.08417v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-11-05T18:18:39+00:00",
+      "summary": "Coding agents are among the most economically consequential deployments of LLMs to date, making reliable evaluation increasingly important. Yet even benchmarks that are carefully validated at release can become stale. As models improve, they can discover valid solutions that existing verifiers reject, while changes to evaluation infrastructure can invalidate assumptions embedded in tasks and tests. We call the resulting accumulation of defects benchmark maintenance debt: a growing gap between benchmark scores and the capabilities they are intended to measure. We introduce a continuous-validation workflow for agentic benchmarks that combines community reports, task artifacts, agent traces, automated oracle checks, and human-gated repairs. We apply this workflow to Terminal-Bench 2.0, a benchmark that underwent extensive human and LM-assisted review and red-teaming before release. Our audit identifies issues in roughly 30% of the benchmark, and we release the resulting repairs as Terminal-Bench 2.1. These repairs change evaluation results: accuracy increased by over 10 percentage points and leaderboard positions move by up to three ranks, even as the overall ranking remains highly correlated (Spearman rho = 0.958). We evaluate how resource allocation shapes benchmark conclusions. We show that fixed wall-clock can materially change agent performance: For example, extending the time limit closes a 20pp harness gap on GPT 5.4 and shrinks a 30 pp gap on GPT 5.4 mini to 5 pp. Benchmark maintenance is therefore not only about repairing task artifacts: resource budgets are part of the measurement specification and must be validated alongside the tasks themselves. More broadly, benchmark maintenance debt is not just accumulated implementation bugs: our results show that as models improve, both evaluation assumptions and resource settings may need to be revalidated."
+    },
+    {
+      "title": "Software Design Patterns for Latency Measurements with eBPF in SDN Environments",
+      "url": "https://arxiv.org/abs/2611.04973v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-11-03T14:29:33+00:00",
+      "summary": "This work proposes, implements, and evaluates a modular architecture based on software design patterns applied to latency measurement in Software-Defined Networks (SDN) using the Extended Berkeley Packet Filter (eBPF) and the Express Data Path (XDP). Unlike approaches that focus solely on measurement precision, this study examines how design patterns can structure observability systems in an extensible and maintainable way while preserving data-plane efficiency. The proposed architecture applies the Observer, Strategy, and Factory Method patterns to modularize the metric collection and analysis pipeline, allowing dynamic integration of policies and data sinks. The experimental environment was implemented with Mininet, Python agents, and eBPF/XDP programs, and was evaluated in terms of processing time, overhead, and evolution effort. The results show that the introduction of design patterns shows no clear evidence of measurable performance degradation, maintaining continuous measurements with a minimum of 5% overhead. The findings suggest that software engineering practices may be applied to the construction of eBPF-based monitoring and observability systems."
+    },
+    {
+      "title": "DiagDBench: Evaluating Agentic LLMs on Interactive Database Diagnosis and Anomaly Remediation",
+      "url": "https://arxiv.org/abs/2611.07339v1",
+      "source": "arXiv Database AI",
+      "kind": "paper",
+      "published": "2026-11-05T02:27:03+00:00",
+      "summary": "Database diagnosis and anomaly remediation are essential to reliable database management system (DBMS) operation. Despite advances in large language model (LLM)-based database agents, constructing live DBMS environments that reproduce diverse anomalies at scale remains challenging, limiting the availability of executable samples for database agent training and evaluation. To this end, we introduce DiagDBench, a large-scale benchmark for training and evaluating database agents on interactive diagnosis, anomaly remediation, and optional workload performance optimization across diverse, realistic anomaly scenarios. Each sample pairs a user request, comprising an issue description and an anomaly-verified workload under which the issue was observed, with a self-contained, executable DBMS environment that supports real-time monitoring, interactive diagnosis, remediation, and workload execution. To construct these samples at scale, we propose an LLM-based framework with two complementary pipelines: Manual-Guided Anomaly Synthesis, which sequentially synthesizes user requests, database modifications, and anomaly-injection scripts grounded in DBA manuals and official DBMS documentation; and Incident-Guided Anomaly Reproduction, which reconstructs anomaly samples end to end from real-world enterprise online diagnosis incidents. Built using this framework with sample filtering, expert review, and refinement, DiagDBench comprises 6,940 synthesized training samples and a held-out test set of 454 expert-annotated samples, spanning three hardware configurations, two DBMSs, and three database schemas. Extensive evaluations of database agents powered by multiple LLMs demonstrate that even the best-performing agent, ReAct with GPT-6 Astra, scores only 56.24, whereas most agents score below 45, underscoring the difficulty of DiagDBench."
+    },
+    {
+      "title": "SwarmEvolve: Latent Agent Swarms for Evolutionary Discovery and Optimization",
+      "url": "https://arxiv.org/abs/2611.08483v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-11-05T18:59:29+00:00",
+      "summary": "LLM-guided evolutionary search uses AI agents to improve programs for mathematical and computational problems by iteratively refining solutions and combining high-scoring methods. However, the process is often slow because the LLM generates a long textual chain of thought for each round and must repeat this generation many times to maintain population diversity. We present SwarmEvolve, a framework in which hundreds of low-cost agents per round work in swarms, reason in latent space without decoding to text, and share information by passing KV caches. Each swarm studies the problem from a different angle. A novelty filter keeps the most distinct agent ideas by directly measuring the distances between the agents' hidden state vectors. Crossover of ideas happens naturally in latent space, as a summarizer agent receives the combined KV caches of all swarm members. On 21 problems in mathematical discovery and scientific computing, SwarmEvolve gets the highest average score and needs a median of only 3 to 8 minutes to reach the best scores that other state-of-the-art frameworks reach in 60 minutes. On several problems, SwarmEvolve with Qwen3 8B improves on the solutions that AlphaEvolve first found with frontier LLMs. Our work shows that agent swarms that communicate in latent space offer a fast, low-cost approach to program search for scientific problems."
+    },
+    {
+      "title": "Monus vs. Interpretations in Semiring Semantics",
+      "url": "https://arxiv.org/abs/2611.08474v1",
+      "source": "arXiv AI",
+      "kind": "paper",
+      "published": "2026-11-05T18:56:32+00:00",
+      "summary": "Interpretations have been widely used in the study of provenance of queries on semiring-annotated databases. Here, we consider two different interpretation-based semantics for first-order formulas in negation normal form, namely, the canonical-interpretation semantics and the compatible-interpretation semantics. We show that the resulting query languages cannot express the monus operation on semiring-annotated relations, when the annotations come from the bag semiring or the tropical semiring or the fuzzy semiring. Consequently, the semantics of SQL cannot be captured using the interpretation-based semantics considered here."
+    },
+    {
+      "title": "How Far Can Lightweight LLMs Go in Intent-to-SLO Translation?",
+      "url": "https://arxiv.org/abs/2611.07982v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-11-05T13:12:30+00:00",
+      "summary": "Intent-based networking (IBN) promises QoS provisioning in which the network derives the configuration from operator-stated goals. Its first step, translating a natural-language intent into enforceable service-level objectives (SLOs) grounded in a live snapshot of the network state, increasingly relies on large language models (LLMs). These large models add cost and energy to the management loop and typically require multi-GPU, cloud-hosted infrastructure. Can lightweight open LLMs take over this step dependably? We answer this question with a five-dimensional evaluation of ten LLMs with <10B parameters from five families, under four prompting setups, on 716 placement intents. We evaluate translation performance, intent validation, hallucination, energy impact, and robustness to diverse phrasing. The best configurations translate intents with a strict F1 of 0.943 and reject up to 191 of 195 invalid intents. With few-shot reasoning, the strongest models hallucinate unsupported QoS requirements in only about one response in a hundred, whereas the zero-shot setup struggles. A translated intent costs 0.044-0.148 Wh of GPU energy without reasoning, and added energy cost for reasoning pays off for the weaker models. Furthermore, we show that realistic rephrasing lowers the rejection of invalid intents in 15 of 16 configurations for the best-performing models, leaving robust intent validation as a key open challenge for reliable IBN. Our code and data are available: https://github.com/ggck43/intent2slo."
+    },
+    {
+      "title": "ZeroRAG: Adaptive Semantic Peer Routing for Decentralized Retrieval-Augmented Generation",
+      "url": "https://arxiv.org/abs/2611.07928v1",
+      "source": "arXiv Network AI",
+      "kind": "paper",
+      "published": "2026-11-05T12:33:45+00:00",
+      "summary": "Retrieval-augmented generation (RAG) is a standard approach to enhance the reliability of large language model (LLM) outputs by retrieving documents relevant to a query and supplying them in the LLM prompt. Today's RAG systems collect, index, and serve these documents from centralized stores. In practice, however, documents are owned by organizations, devices, and individuals who cannot or will not surrender custody of them to a central party, e.g., because of privacy, copyright or regulatory compliance. Existing modern decentralized retrieval techniques either reintroduce a coordinating authority, or rely on a global data structure that requires continuous network-wide coordination (e.g., DHTs). We present ZeroRAG, a decentralized routing layer for document retrieval in RAG that performs semantic query routing across an overlay of peers with- out global data structures or centralized orchestration. Documents remain with the peers that own them, and each peer keeps only lightweight local state: a bounded set of neighbor advertisements and a cache of recently routed queries. Using these, ZeroRAG steers each query through a best-first walk that progressively rewires the overlay toward semantically relevant neighbors, so recall improves over time as the network self-organizes. We evaluate ZeroRAG using three real-world workloads and two decentralized baselines. We find that ZeroRAG outperforms baselines in terms of recall and required network messages, approaches the recall and LLM answer accuracy of a centralized document store, self-heals after catastrophic peer failures, and scales to 100 000 peers."
+    },
+    {
+      "title": "Beyond Instruction Override: Benchmarking Indirect Prompt Injection with Task-Tampering Attacks",
+      "url": "https://arxiv.org/abs/2611.07640v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-11-05T08:25:27+00:00",
+      "summary": "Indirect prompt-injection (IPI) benchmarks predominantly test planted instructions that redirect a tool-using agent toward an attacker-chosen task. Yet attacker-controlled content can instead tamper with the outcome of the task already in progress. A buyer's dispute evidence can cite a false refund policy to inflate a refund without changing the task. We define IPI by authority rather than instruction-like wording: planted content constitutes an attack when it attempts to influence a decision that its source is not authorized to determine. We introduce a benchmark that makes this boundary explicit: in each of 90 validated cases across three tool-use environments, the user request specifies the source that resolves the targeted decision. Every attack tampers with a decision required by the benign task rather than replacing that task. Each case has attacks with the same harmful outcome that target up to six parts of the agent's decision making: its objective, decision rules, available actions, expected consequences, reading of observations, or beliefs about the current state. Without a defense, attacks on three of the five other targets (decision rules, available actions, and state) have higher mean success than objective attacks across five LLMs. A detection-and-removal defense reduces objective-targeting attacks to 2.4% success but leaves observation- and state-targeting attacks at 9.5% and 12.1%; this gap persists under detection-optimized rewrites. A tool-policy defense still allows 15.4% attack success, close to 17.0% without a defense, because these attacks generally retain expected tools and manipulate values obtained during execution. Evaluations whose attacks redirect the task or target only the agent's objective can therefore overestimate the coverage of these defenses. Code and data are available at https://github.com/amazon-science/task-tampering-prompt-injection."
+    }
+  ],
+  "tool_items": [
+    {
+      "title": "Agent Clan",
+      "url": "https://www.producthunt.com/products/agent-clan",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-11-07T17:52:26+00:00",
+      "summary": "Command your Claude Code and Codex agents with gestures Discussion | Link"
+    },
+    {
+      "title": "Copilot code review: API management and review overview updates",
+      "url": "https://github.blog/changelog/2026-11-06-copilot-code-review-api-management-and-review-overview-updates",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-11-07T00:27:19+00:00",
+      "summary": "You can now manage GitHub Copilot code review settings through the REST and GraphQL APIs, from enterprise policy down to individual repositories. Copilot’s review overview comment is now more compact,… The post Copilot code review: API management and review overview updates appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Copilot impact dashboard adds chat and VS Code agent usage",
+      "url": "https://github.blog/changelog/2026-11-06-copilot-impact-dashboard-adds-chat-and-vs-code-agent-usage",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-11-06T22:17:28+00:00",
+      "summary": "The Agent adoption chart in the Copilot impact dashboard now includes Copilot Chat and the VS Code Agents window, so you can see engagement across nine Copilot experiences. The adoption… The post Copilot impact dashboard adds chat and VS Code agent usage appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "GitHub Copilot weekly releases — November 2",
+      "url": "https://github.blog/changelog/2026-11-06-github-copilot-weekly-releases-november-2",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-11-06T21:00:26+00:00",
+      "summary": "This week, Copilot comes to JetBrains Air and Xcode’s coding assistant, with updates to help you manage pull requests, settings, and agent sessions. GitHub Copilot app Set up Agent Merge… The post GitHub Copilot weekly releases — November 2 appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "@GitHub in Slack and Teams is generally available and more",
+      "url": "https://github.blog/changelog/2026-11-06-github-copilot-in-slack-and-teams-is-generally-available",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-11-06T20:31:08+00:00",
+      "summary": "Turn conversations into code with @GitHub in Slack and Teams! Investigate bugs, create issues, implement changes, and open pull requests—all without leaving your conversation. What’s new Build and review together… The post @GitHub in Slack and Teams is generally available and more appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Design the Muse App, Just for You",
+      "url": "https://about.fb.com/news/2026/11/introducing-spaces-customize-muse-app/",
+      "source": "Meta AI News",
+      "kind": "tool",
+      "published": "2026-11-06T18:00:58+00:00",
+      "summary": "Today, we're introducing spaces, an interactive way to build a more customized experience in the Muse app. The post Design the Muse App, Just for You appeared first on Meta Newsroom ."
+    },
+    {
+      "title": "The Writer's Quarter",
+      "url": "https://www.producthunt.com/products/the-writer-s-quarter",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-11-06T16:06:36+00:00",
+      "summary": "AI-Free Writing & Novel Planning Software Discussion | Link"
+    },
+    {
+      "title": "Switchy",
+      "url": "https://www.producthunt.com/products/switchy",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-11-06T11:24:14+00:00",
+      "summary": "Mac controls, deploys, 2FA & AI limits in your menu bar Discussion | Link"
+    },
+    {
+      "title": "Partnering with Hacktron to find vulnerabilities in OpenAI’s systems",
+      "url": "https://openai.com/index/partnering-with-hacktron",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-11-06T08:00:00+00:00",
+      "summary": "OpenAI is partnering with Hacktron to find vulnerabilities, test connections with third-party services, and strengthen defenses with frontier AI."
+    },
+    {
+      "title": "Instagram Edits for Desktop",
+      "url": "https://www.producthunt.com/products/instagram",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-11-06T00:46:05+00:00",
+      "summary": "Instagram's free desktop video editor with AI agents Discussion | Link"
+    }
+  ]
+}
