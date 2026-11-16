@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "build_at": "2026-11-16T10:31:37.718109+09:00",
+  "period_start": "2026-11-09",
+  "period_end": "2026-11-16",
+  "ai_items": [
+    {
+      "title": "CrossPloit: A Benchmark for Cross-Version PoC Migration in Python Web Applications",
+      "url": "https://arxiv.org/abs/2611.16588v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-11-12T10:21:05+00:00",
+      "summary": "Affected-version ranges in vulnerability databases decide which deployments scanners, patching pipelines, and incident responders treat as vulnerable, yet these ranges are often incomplete, so vulnerable releases are silently treated as safe. Auditing them requires executable evidence: given a proof-of-concept (PoC) exploit for a listed version, show that the same vulnerability can be triggered on an earlier, unlisted version. This cross-version PoC migration combines source-code analysis, environment repair, and execution-based verification. We introduce CrossPloit, a benchmark of 127 migration instances across 45 CVEs in the Python web ecosystem. Each instance includes a version-pinned container, a reference PoC, and a vulnerability-specific oracle; two validators check that the observed effect arises from the disclosed vulnerability. Benchmark construction confirms 149 vulnerable prior versions absent from the affected-version lists of four databases, 127 of which require migration. Across 18 agent configurations (nine models and two harnesses), the best configuration resolves 58.3% of instances, compared with 8.7% for an adapted trace-guided baseline. Attack-vector shifts are particularly difficult: no configuration resolves more than 37.9% of these instances. Higher resolve rates are associated with a smaller share of missed-API failures and a larger share of incomplete executions among the remaining failures. In one configuration, withholding the reference PoC and its environment specification reduces resolve rate from 50.4% to 15.0%, highlighting the value of the supplied reference package. CrossPloit provides an execution-based measurement of under-reported exposure and of how far its enumeration can be automated."
+    },
+    {
+      "title": "MobileProbe: Adaptive Security Evaluation of Mobile Agents via Trajectory-Aware Injection",
+      "url": "https://arxiv.org/abs/2611.16693v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-11-12T12:08:43+00:00",
+      "summary": "Mobile GUI agents read the screen of a phone and operate apps on a user's behalf to complete multi-step tasks such as online shopping or messaging. Because the agent acts on whatever the screen shows, an attacker can embed malicious instructions into ordinary UI content and redirect its actions. We refer to this threat as environmental injection attack (EIA). Existing benchmarks measure this risk by pinning hand-crafted payloads to a fixed step of a fixed task. This approach faces two limitations. First, each payload is bound to one task in one app and does not transfer without manual redesign. Second, agents given the same task may follow different routes, so an agent that never reaches the injected page is recorded as safe without being tested. This insufficient test coverage can cause fixed-point benchmarks to underestimate the security risk of deployed mobile agents. In this work, we propose MobileProbe, a trajectory-aware red-teaming framework that evaluates mobile agents adaptively. MobileProbe discovers attacker-controllable content surfaces through automated pentesting, localizes vulnerable decision points along the agent's trajectory, and iteratively refines context-aware payloads through a surrogate-filtered evolutionary loop. We construct a benchmark of 83 long-horizon attack instances spanning 12 mobile applications. Each is annotated with a Confidentiality, Integrity, or Availability (CIA) attack goal to cover the principal categories of security threats facing mobile agents. On three representative agent architectures, MobileProbe attains higher attack success rates than human-written, zero-shot LLM, and prior automated red-teaming baselines adapted to the mobile domain. MobileProbe can serve as a pre-deployment auditing tool to systematically uncover vulnerabilities and inform security hardening of mobile agents."
+    },
+    {
+      "title": "Gemini 4 Hydrogen in GitHub Copilot",
+      "url": "https://github.blog/changelog/2026-11-13-gemini-4-hydrogen-in-github-copilot",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-11-13T18:23:48+00:00",
+      "summary": "Gemini 4 Hydrogen, Google’s latest Flash model, is now generally available in GitHub Copilot. It is designed for fast, efficient agentic coding, tool use, and multistep workflows, with improved instruction… The post Gemini 4 Hydrogen in GitHub Copilot appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Google Cloud launches Gemini for healthcare.",
+      "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/gemini-for-healthcare/",
+      "source": "Google AI Blog",
+      "kind": "trend",
+      "published": "2026-11-10T13:00:00+00:00",
+      "summary": "Google Cloud launches Gemini for healthcare to unify clinical data and automate workflows. Reduce administrative burnout. See how it works."
+    },
+    {
+      "title": "One Fabrication Is Enough: A Fake News Article Changes the Forecasts of LLM Forecasting Systems",
+      "url": "https://arxiv.org/abs/2611.15102v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-11-11T06:29:13+00:00",
+      "summary": "LLMs are increasingly used for forecasting, and the best forecasting systems retrieve news as evidence to strengthen their predictions. This also opens them to attack. We study the weakest attacker of this kind, who knows only the forecasting question and publishes fabricated news articles, with no access to the model, the retriever or its queries. We evaluate how far this attack reaches on stock questions and real prediction-market questions. Once the article is in the model's context, it reverses 74% to 82% of the forecasts that opposed it, on every frontier model we tested. The model cannot verify the fabrication and follows it anyway. Retrieval is the attack's entry point, and the systems built to retrieve well are the most exposed: the architectures of two leading deployed forecasting systems, whose agents search for every related article, retrieve the fabricated one in about 90% of runs. Accuracy cannot reveal this harm: the attacked forecaster is right when the attacker's direction turns out right and wrong otherwise, so its average accuracy barely changes while its forecasts follow the attacker's guess. We also propose a second attacker, who publishes two articles that argue opposite directions to make the forecaster unsure. The model does not hedge; it returns a confident forecast in a direction the attacker no longer controls. We then evaluate the two strongest published retrieval-time defenses, passage filtering and partitioned retrieval. Each stops the one-article attack but is bypassed by a one-prompt change to the attack. Together they stop both bypasses at four articles, but sixteen distorted copies beat them, and they change 29% of clean decisions and discard 39% of the genuine news. Partitioned retrieval also requires control of the retrieval index. Systems that search the open web have no such control and are left with the filter alone. For them, the attack still works."
+    },
+    {
+      "title": "GitHub Enterprise Server support in the GitHub Copilot app",
+      "url": "https://github.blog/changelog/2026-11-13-github-enterprise-server-support-in-the-github-copilot-app",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-11-13T18:27:13+00:00",
+      "summary": "You can now bring your work on GitHub Enterprise Server (GHES) into the GitHub Copilot app. Add your GHES account to work with remote repositories, issues, and pull requests. This… The post GitHub Enterprise Server support in the GitHub Copilot app appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "How Amplitude ships product improvements in 1–2 days with OpenAI",
+      "url": "https://openai.com/business/customer-stories/amplitude",
+      "source": "OpenAI News",
+      "kind": "trend",
+      "published": "2026-11-12T20:00:00+00:00",
+      "summary": "Built primarily on OpenAI models, Amplitude’s proactive product agent, Wave, identifies what to build, helps teams ship changes with coding agents, and measures the impact."
+    },
+    {
+      "title": "CapLite: Prompt-Injection Defense for Small Language Model Agents without Model-Written Security Artifacts",
+      "url": "https://arxiv.org/abs/2611.17115v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-11-12T17:07:22+00:00",
+      "summary": "Enforcement defenses against prompt injection, such as CaMeL, Progent, IPIGuard and DRIFT, ask the agent's own model to write a security artifact (a program, a privilege policy, a dependency graph or a constraint list) that code then enforces. We ask whether small language model (SLM) agents can be trusted to write these artifacts. Across 15 open-weight models, 13 of them between 1.7B and 12B parameters, they cannot: the policies, graphs and constraints that the agent's model writes admit attacks on 14 (Progent), 13 (IPIGuard) and 11 (DRIFT) of the models, and CaMeL's programs fail to run in up to 68% of episodes. We present CapLite, which derives its policy from the tool schemas, commits the write calls before any tool result is read, and admits a write only if every argument that decides whom or what it affects is stated in the user's request. This guarantees write integrity: injected text cannot add a write, and no write reaches a recipient, amount, object or destination that the user did not state. No attack succeeds in 13,935 attacked AgentDojo episodes. CapLite reaches utility under attack comparable to CaMeL's (29.0% vs. 27.2%) with fewer tokens than every other enforcement defense and than the undefended agent: 17.1k per episode, 18% of CaMeL's, and the highest utility per token of all enforcement defenses."
+    },
+    {
+      "title": "Infrastructure for Verifiable AI: Where Proof Costs Go and How Hardware Can Help",
+      "url": "https://arxiv.org/abs/2611.17042v1",
+      "source": "arXiv Security AI",
+      "kind": "paper",
+      "published": "2026-11-12T16:27:07+00:00",
+      "summary": "Users of artificial intelligence services, including those powered by large language models and other transformer-based models, need assurance that inference and training follow the declared computation without exposing private models or data. Zero-knowledge proofs can provide this assurance, but proof generation remains expensive. Hardware acceleration research often reports gains for individual cryptographic operations, leaving their effect on the full cost of proving neural-network workloads, particularly large transformer models, unclear. We introduce a four-layer framework linking verifiable AI workloads, proof systems, cryptographic kernels and hardware platforms, use it to review the literature, and add original measurements of six provers and seven kernels to identify which costs matter in practice. Our measurements show that the dominant cost changes with the proof system and input length. In low-rank fine-tuning, the cost of opening commitments to fixed model weights remains nearly constant across input lengths from 64 to 2048, while the work associated with intermediate values grows. A 13-billion-parameter fine-tuning configuration exceeds the capacity of a 40-gigabyte graphics processor but completes on an 80-gigabyte device, showing why capacity must be assessed alongside execution time. Our kernel profiling further identifies instruction issue and synchronization limits that a bandwidth-only model misses. We use these findings to assess graphics processors, reconfigurable logic, custom chips and existing artificial intelligence accelerators. The resulting research agenda connects proof-friendly numeric formats, reuse of fixed-weight commitments, heterogeneous execution and shared benchmarks to the measured bottlenecks. Effective acceleration requires selecting hardware and proof-system optimizations around the cost profile of the target workload."
+    },
+    {
+      "title": "Public monitoring alerts now have direct links",
+      "url": "https://github.blog/changelog/2026-11-12-public-monitoring-alerts-now-have-direct-links",
+      "source": "GitHub Changelog",
+      "kind": "tool",
+      "published": "2026-11-12T14:37:38+00:00",
+      "summary": "You can now access individual public monitoring alerts with a direct link to each alert. In your enterprise’s Public monitoring view, click an alert number to open the alert. You… The post Public monitoring alerts now have direct links appeared first on The GitHub Blog ."
+    }
+  ],
+  "tool_items": [
+    {
+      "title": "Our new blog for science",
+      "url": "https://openai.com/index/our-new-blog-for-science",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-11-15T22:00:00+00:00",
+      "summary": "The OpenAI science blog shares new findings, practical methods, and firsthand accounts from researchers using AI to advance scientific discovery."
+    },
+    {
+      "title": "Canvas by AgentGrid.io",
+      "url": "https://www.producthunt.com/products/agentgrid-io",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-11-15T06:22:09+00:00",
+      "summary": "Agentic Design Canvas - A visual way to collaborate with AI Discussion | Link"
+    },
+    {
+      "title": "Perit Marketplace",
+      "url": "https://www.producthunt.com/products/perit-marketplace",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-11-15T05:04:05+00:00",
+      "summary": "Sell your data and RL tasks to frontier AI labs Discussion | Link"
+    },
+    {
+      "title": "ByteAsk Cloud Agents",
+      "url": "https://www.producthunt.com/products/byteask-cloud-agents",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-11-14T06:54:44+00:00",
+      "summary": "Find the fix in big codebases. Ship it from Slack. Discussion | Link"
+    },
+    {
+      "title": "Thunder",
+      "url": "https://www.producthunt.com/products/thunder-3",
+      "source": "Product Hunt launches",
+      "kind": "tool",
+      "published": "2026-11-13T21:27:29+00:00",
+      "summary": "A blazing-fast, persistent, key-value AI workload database Discussion | Link"
+    },
+    {
+      "title": "Upcoming deprecation of selected GitHub Copilot models in December",
+      "url": "https://github.blog/changelog/2026-11-13-upcoming-deprecation-of-selected-github-copilot-models-in-december",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-11-13T20:40:05+00:00",
+      "summary": "We will deprecate the following models across all GitHub Copilot experiences (including Copilot Chat, inline edits, ask and agent modes, and code completions) on December 14, 2026: Model Deprecation date… The post Upcoming deprecation of selected GitHub Copilot models in December appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "GitHub Enterprise Server support in the GitHub Copilot app",
+      "url": "https://github.blog/changelog/2026-11-13-github-enterprise-server-support-in-the-github-copilot-app",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-11-13T18:27:13+00:00",
+      "summary": "You can now bring your work on GitHub Enterprise Server (GHES) into the GitHub Copilot app. Add your GHES account to work with remote repositories, issues, and pull requests. This… The post GitHub Enterprise Server support in the GitHub Copilot app appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Gemini 4 Hydrogen in GitHub Copilot",
+      "url": "https://github.blog/changelog/2026-11-13-gemini-4-hydrogen-in-github-copilot",
+      "source": "GitHub Copilot Changelog",
+      "kind": "tool",
+      "published": "2026-11-13T18:23:48+00:00",
+      "summary": "Gemini 4 Hydrogen, Google’s latest Flash model, is now generally available in GitHub Copilot. It is designed for fast, efficient agentic coding, tool use, and multistep workflows, with improved instruction… The post Gemini 4 Hydrogen in GitHub Copilot appeared first on The GitHub Blog ."
+    },
+    {
+      "title": "Introducing ChatGPT Wallet",
+      "url": "https://openai.com/index/introducing-chatgpt-wallet",
+      "source": "OpenAI News",
+      "kind": "tool",
+      "published": "2026-11-13T15:00:00+00:00",
+      "summary": "Introducing ChatGPT Wallet, a secure way for agents in ChatGPT Work, Codex, and dots to complete purchases with user approval and existing card protections."
+    },
+    {
+      "title": "Manage AI Scan for repositories using the REST API",
+      "url": "https://github.blog/changelog/2026-11-13-manage-ai-scan-for-repositories-using-the-rest-api",
+      "source": "GitHub Changelog",
+      "kind": "tool",
+      "published": "2026-11-13T12:22:41+00:00",
+      "summary": "You can now turn GitHub code scanning’s AI Scan for repositories on or off with the REST API at the organization and repository levels. This public preview adds a repository_scan… The post Manage AI Scan for repositories using the REST API appeared first on The GitHub Blog ."
+    }
+  ]
+}
